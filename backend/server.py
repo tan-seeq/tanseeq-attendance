@@ -743,33 +743,38 @@ async def get_activity_logs(current_user: User = Depends(get_super_admin_user)):
     logs = await db.activity_logs.find().sort("timestamp", -1).to_list(1000)
     return logs
 
-# ============ REPORTS ENDPOINTS ============
+# ============ PAYROLL ENDPOINTS ============
 
-@api_router.get("/reports/attendance")
-async def get_attendance_report(current_user: User = Depends(get_admin_user)):
-    """Get attendance report (Admin only)"""
-    attendance = await db.attendance.find().to_list(1000)
-    return attendance
-
-@api_router.get("/reports/leaves")
-async def get_leaves_report(current_user: User = Depends(get_admin_user)):
-    """Get leaves report (Admin only)"""
-    leaves = await db.leaves.find().to_list(1000)
-    return leaves
-
-@api_router.get("/reports/payroll")
-async def get_payroll_report(current_user: User = Depends(get_admin_user)):
-    """Get payroll report (Admin only)"""
+@api_router.get("/payroll/calculate/{month}")
+async def calculate_payroll(month: str, current_user: User = Depends(get_admin_user)):
+    """Calculate payroll for a specific month (Admin only)"""
+    try:
+        # Validate month format (YYYY-MM)
+        datetime.strptime(month, "%Y-%m")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid month format. Use YYYY-MM")
+    
+    # Get all active users
     users = await db.users.find({"is_active": True}).to_list(1000)
     payroll_data = []
     
     for user in users:
-        # Get attendance for current month
-        current_month = get_uae_time().strftime("%Y-%m")
-        attendance = await db.attendance.find({"user_id": user["id"], "date": {"$regex": f"^{current_month}"}}).to_list(1000)
+        # Get attendance for the specified month
+        attendance_records = await db.attendance.find({
+            "user_id": user["id"], 
+            "date": {"$regex": f"^{month}"}
+        }).to_list(1000)
         
-        total_days = len(attendance)
-        total_hours = sum([a.get("working_hours", 0) for a in attendance if a.get("working_hours")])
+        # Calculate working days and hours
+        working_days = len([a for a in attendance_records if a.get("check_in")])
+        total_hours = sum([a.get("working_hours", 0) for a in attendance_records if a.get("working_hours")])
+        late_days = len([a for a in attendance_records if a.get("is_late")])
+        
+        # Calculate salary based on daily rate
+        calculated_salary = working_days * user["daily_rate"]
+        
+        # Apply monthly salary cap
+        final_salary = min(calculated_salary, user["monthly_salary"])
         
         payroll_data.append({
             "user_id": user["id"],
@@ -777,12 +782,60 @@ async def get_payroll_report(current_user: User = Depends(get_admin_user)):
             "position": user["position"],
             "monthly_salary": user["monthly_salary"],
             "daily_rate": user["daily_rate"],
-            "total_days": total_days,
-            "total_hours": total_hours,
-            "calculated_salary": min(user["monthly_salary"], total_days * user["daily_rate"])
+            "working_days": working_days,
+            "total_hours": round(total_hours, 2),
+            "late_days": late_days,
+            "calculated_salary": round(calculated_salary, 2),
+            "final_salary": round(final_salary, 2),
+            "month": month
         })
     
     return payroll_data
+
+@api_router.get("/payroll/export/{month}")
+async def export_payroll(month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
+    """Export payroll data (Admin only)"""
+    payroll_data = await calculate_payroll(month, current_user)
+    
+    if format == "excel":
+        # For now, return JSON data with instruction
+        return {
+            "message": "Excel export functionality will be implemented",
+            "data": payroll_data,
+            "format": "excel"
+        }
+    elif format == "pdf":
+        # For now, return JSON data with instruction
+        return {
+            "message": "PDF export functionality will be implemented",
+            "data": payroll_data,
+            "format": "pdf"
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format. Use 'excel' or 'pdf'")
+
+@api_router.put("/payroll/{user_id}/{month}")
+async def update_payroll(user_id: str, month: str, payroll_data: dict, current_user: User = Depends(get_admin_user)):
+    """Update payroll manually (Admin only)"""
+    if current_user.name != "Hatem Mohamed Ahmed":
+        raise HTTPException(status_code=403, detail="Only Hatem can manually override payroll")
+    
+    # Store manual payroll override
+    override_data = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "month": month,
+        "override_salary": payroll_data.get("override_salary"),
+        "reason": payroll_data.get("reason", "Manual override"),
+        "created_by": current_user.id,
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.payroll_overrides.insert_one(override_data)
+    
+    await log_activity(current_user.id, "payroll_override", f"Manual payroll override for {user_id} - {month}")
+    
+    return {"message": "Payroll override saved successfully"}
 
 # Include the router in the main app
 app.include_router(api_router)
