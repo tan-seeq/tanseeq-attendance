@@ -339,7 +339,12 @@ class TanseeqAPITester:
             # Role-specific endpoints
             self.test_users_endpoint(role)
             self.test_activity_logs(role)
-            self.test_reports_endpoints(role)
+            self.test_payroll_calculation(role)
+            self.test_password_change(role)
+            
+            # Feature-specific tests
+            self.test_field_exit_creation(role)
+            self.test_weekend_blocking(role)
             
             # Logout
             self.test_logout(role)
