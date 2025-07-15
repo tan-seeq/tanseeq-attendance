@@ -586,10 +586,10 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
             pending_field_exits = await db.field_exits.count_documents({"status": "pending"})
             
             stats = {
-                "total_users": total_users,
-                "present_today": present_today,
-                "pending_leaves": pending_leaves,
-                "pending_field_exits": pending_field_exits
+                "total_users": int(total_users),
+                "present_today": int(present_today),
+                "pending_leaves": int(pending_leaves),
+                "pending_field_exits": int(pending_field_exits)
             }
         else:
             # User stats
@@ -598,10 +598,21 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
             pending_leaves = await db.leaves.count_documents({"user_id": current_user.id, "status": "pending"})
             pending_field_exits = await db.field_exits.count_documents({"user_id": current_user.id, "status": "pending"})
             
+            # Convert attendance_today to a simple boolean or basic dict
+            attendance_status = None
+            if attendance_today:
+                attendance_status = {
+                    "date": attendance_today.get("date"),
+                    "check_in": attendance_today.get("check_in"),
+                    "check_out": attendance_today.get("check_out"),
+                    "status": attendance_today.get("status"),
+                    "is_late": attendance_today.get("is_late", False)
+                }
+            
             stats = {
-                "attendance_today": attendance_today,
-                "pending_leaves": pending_leaves,
-                "pending_field_exits": pending_field_exits
+                "attendance_today": attendance_status,
+                "pending_leaves": int(pending_leaves),
+                "pending_field_exits": int(pending_field_exits)
             }
         
         return stats
