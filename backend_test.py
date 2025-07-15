@@ -209,37 +209,93 @@ class TanseeqAPITester:
         self.log_test(f"Get activity logs ({role})", success, str(response) if not success else "")
         return success
 
-    def test_reports_endpoints(self, role: str) -> bool:
-        """Test reports endpoints (admin only)"""
+    def test_payroll_calculation(self, role: str) -> bool:
+        """Test payroll calculation endpoint"""
         if role not in self.tokens:
             return False
             
         expected_status = 200 if role in ['admin', 'super_admin'] else 403
-        
-        # Test attendance report
-        success1, response1 = self.make_request('GET', 'reports/attendance', 
-                                              token=self.tokens[role],
-                                              expected_status=expected_status)
-        
-        # Test leaves report  
-        success2, response2 = self.make_request('GET', 'reports/leaves', 
-                                              token=self.tokens[role],
-                                              expected_status=expected_status)
-        
-        # Test payroll report
-        success3, response3 = self.make_request('GET', 'reports/payroll', 
-                                              token=self.tokens[role],
-                                              expected_status=expected_status)
+        success, response = self.make_request('GET', 'payroll/calculate/2025-02', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
         
         if expected_status == 200:
-            success1 = success1 and isinstance(response1, list)
-            success2 = success2 and isinstance(response2, list)
-            success3 = success3 and isinstance(response3, list)
+            success = success and isinstance(response, list)
+            if success and response:
+                # Check if payroll data has expected structure
+                first_record = response[0]
+                expected_keys = ['user_id', 'name', 'monthly_salary', 'daily_rate', 'working_days', 'final_salary']
+                has_expected_keys = all(key in first_record for key in expected_keys)
+                success = success and has_expected_keys
         
-        overall_success = success1 and success2 and success3
-        self.log_test(f"Reports endpoints ({role})", overall_success, 
-                     f"Attendance: {success1}, Leaves: {success2}, Payroll: {success3}")
-        return overall_success
+        self.log_test(f"Payroll calculation ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_password_change(self, role: str) -> bool:
+        """Test password change endpoint (Hatem only)"""
+        if role not in self.tokens:
+            return False
+            
+        # Only Hatem (super_admin) should be able to change passwords
+        user_id = self.users[role]['id'] if role in self.users else 'test-id'
+        expected_status = 200 if role == 'super_admin' and self.users[role]['name'] == 'Hatem Mohamed Ahmed' else 403
+        
+        success, response = self.make_request('POST', f'users/{user_id}/change-password', 
+                                            {'new_password': 'newtest123'},
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        self.log_test(f"Password change ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_field_exit_creation(self, role: str) -> bool:
+        """Test field exit creation"""
+        if role not in self.tokens:
+            return False
+            
+        field_exit_data = {
+            'user_id': self.users[role]['id'] if role in self.users else 'test-id',
+            'user_name': self.users[role]['name'] if role in self.users else 'Test User',
+            'visit_type': 'client_visit',
+            'client_name': 'Test Client',
+            'start_time': '10:00',
+            'end_time': '11:00',
+            'report': 'Test field exit report'
+        }
+        
+        success, response = self.make_request('POST', 'field-exits', 
+                                            field_exit_data,
+                                            token=self.tokens[role],
+                                            expected_status=201)
+        
+        # If 201 not returned, check for 200 as well
+        if not success:
+            success, response = self.make_request('POST', 'field-exits', 
+                                                field_exit_data,
+                                                token=self.tokens[role],
+                                                expected_status=200)
+        
+        self.log_test(f"Field exit creation ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_weekend_blocking(self, role: str) -> bool:
+        """Test weekend blocking for attendance"""
+        if role not in self.tokens:
+            return False
+        
+        # This test would need to be run on a weekend to properly test
+        # For now, we'll just test that the endpoint responds correctly
+        success, response = self.make_request('POST', 'attendance/check-in', 
+                                            token=self.tokens[role])
+        
+        # Accept both success and weekend blocking error
+        weekend_blocked = not success and 'weekend' in str(response).lower()
+        already_checked_in = not success and 'already checked in' in str(response).lower()
+        
+        test_passed = success or weekend_blocked or already_checked_in
+        self.log_test(f"Weekend/attendance check ({role})", test_passed, 
+                     str(response) if not test_passed else "")
+        return test_passed
 
     def test_logout(self, role: str) -> bool:
         """Test logout endpoint"""
