@@ -151,9 +151,16 @@ class LeaveBase(BaseModel):
     reason: str
     status: str = "pending"  # pending, approved, rejected
     days_count: int
+    attachment_url: Optional[str] = None
 
-class LeaveCreate(LeaveBase):
-    pass
+class LeaveCreate(BaseModel):
+    user_id: str
+    user_name: str
+    start_date: str
+    end_date: str
+    reason: str
+    days_count: int
+    attachment_url: Optional[str] = None
 
 class LeaveUpdate(BaseModel):
     status: Optional[str] = None
