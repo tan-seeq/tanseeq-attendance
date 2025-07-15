@@ -721,6 +721,10 @@ const Attendance = () => {
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const { user } = useAuth();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -738,6 +742,28 @@ const Employees = () => {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (!selectedEmployee || !newPassword) return;
+    
+    try {
+      await axios.post(`${API}/users/${selectedEmployee.id}/change-password`, {
+        new_password: newPassword
+      });
+      setShowPasswordModal(false);
+      setNewPassword('');
+      setSelectedEmployee(null);
+      alert('Password changed successfully');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert('Error changing password');
+    }
+  };
+
+  const openPasswordModal = (employee) => {
+    setSelectedEmployee(employee);
+    setShowPasswordModal(true);
+  };
+
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
   }
@@ -746,11 +772,10 @@ const Employees = () => {
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">{t('employees')}</h2>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            <PlusIcon className="h-4 w-4 inline mr-2" />
-            إضافة موظف
-          </button>
+          <h2 className="text-lg font-semibold text-gray-800">TANSEEQ Tax Consultancy - {t('employees')}</h2>
+          <div className="text-sm text-gray-600">
+            Total: {employees.length} employees
+          </div>
         </div>
         
         <div className="overflow-x-auto">
@@ -773,42 +798,114 @@ const Employees = () => {
                   الراتب الشهري
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('actions')}
+                  المعدل اليومي
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ساعات العمل
+                </th>
+                {user?.name === "Hatem Mohamed Ahmed" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('actions')}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {employees.map((employee) => (
-                <tr key={employee.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {employee.name}
+                <tr key={employee.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <UserIcon className="h-8 w-8 text-gray-400 mr-3" />
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                        <div className="text-sm text-gray-500">{employee.phone}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {employee.email}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {t(employee.role)}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      employee.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
+                      employee.role === 'admin' ? 'bg-blue-100 text-blue-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {t(employee.role)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {employee.position}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {employee.monthly_salary} درهم
+                    <div className="font-medium">AED {employee.monthly_salary.toLocaleString()}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-2">
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>AED {employee.daily_rate.toFixed(2)}</div>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>{employee.working_hours_start} - {employee.working_hours_end}</div>
+                    {employee.has_custom_schedule && (
+                      <div className="text-xs text-blue-600">Custom Schedule</div>
+                    )}
+                  </td>
+                  {user?.name === "Hatem Mohamed Ahmed" && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => openPasswordModal(employee)}
+                        className="text-blue-600 hover:text-blue-900 mr-2"
+                        title="Change Password"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                Change Password - {selectedEmployee?.name}
+              </h3>
+              <div className="mt-2 px-7 py-3">
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  onClick={handleChangePassword}
+                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  Change Password
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setNewPassword('');
+                    setSelectedEmployee(null);
+                  }}
+                  className="mt-3 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
