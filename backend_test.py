@@ -183,7 +183,7 @@ class TanseeqAPITester:
         if role not in self.tokens:
             return False
             
-        success, response = self.make_request('GET', 'field-exit', 
+        success, response = self.make_request('GET', 'field-exits', 
                                             token=self.tokens[role])
         
         if success and isinstance(response, list):
