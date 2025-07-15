@@ -535,7 +535,7 @@ async def reject_leave(leave_id: str, current_user: User = Depends(get_admin_use
 
 # ============ FIELD EXIT ENDPOINTS ============
 
-@api_router.get("/field-exit")
+@api_router.get("/field-exits")
 async def get_field_exits(current_user: User = Depends(get_current_user)):
     """Get field exit requests"""
     query = {}
@@ -545,17 +545,71 @@ async def get_field_exits(current_user: User = Depends(get_current_user)):
     field_exits = await db.field_exits.find(query).to_list(1000)
     return field_exits
 
-@api_router.post("/field-exit", response_model=FieldExit)
+@api_router.post("/field-exits", response_model=FieldExit)
 async def create_field_exit_request(field_exit_data: FieldExitCreate, current_user: User = Depends(get_current_user)):
     """Create field exit request"""
     field_exit = FieldExit(**field_exit_data.dict())
     await db.field_exits.insert_one(field_exit.dict())
     
-    await log_activity(current_user.id, "field_exit_requested", f"Requested field exit for {field_exit_data.reason}")
+    # Log the field exit in attendance history
+    uae_time = get_uae_time()
+    date_str = uae_time.strftime("%Y-%m-%d")
+    
+    # Check if there's attendance record for today
+    attendance_record = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
+    
+    if attendance_record:
+        # Add field exit info to attendance record
+        field_exit_info = {
+            "field_exit_id": field_exit.id,
+            "visit_type": field_exit_data.visit_type,
+            "client_name": field_exit_data.client_name,
+            "start_time": field_exit_data.start_time,
+            "end_time": field_exit_data.end_time,
+            "report": field_exit_data.report
+        }
+        
+        await db.attendance.update_one(
+            {"user_id": current_user.id, "date": date_str},
+            {"$set": {"field_exit": field_exit_info}}
+        )
+    
+    visit_type_ar = {
+        "client_visit": "زيارة عميل",
+        "collection": "تحصيل",
+        "bank_visit": "زيارة بنك",
+        "personal": "شخصي",
+        "admin_errand": "مهمة إدارية"
+    }
+    
+    await log_activity(current_user.id, "field_exit_requested", 
+                      f"Requested field exit: {visit_type_ar.get(field_exit_data.visit_type, field_exit_data.visit_type)}")
     
     return field_exit
 
-@api_router.post("/field-exit/{field_exit_id}/approve")
+@api_router.put("/field-exits/{field_exit_id}", response_model=FieldExit)
+async def update_field_exit_request(field_exit_id: str, field_exit_data: FieldExitUpdate, current_user: User = Depends(get_current_user)):
+    """Update field exit request"""
+    field_exit = await db.field_exits.find_one({"id": field_exit_id})
+    if not field_exit:
+        raise HTTPException(status_code=404, detail="Field exit request not found")
+    
+    # Check permissions
+    if current_user.role == "user" and field_exit["user_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this request")
+    
+    # Get update data
+    update_data = {k: v for k, v in field_exit_data.dict().items() if v is not None}
+    
+    if update_data:
+        await db.field_exits.update_one({"id": field_exit_id}, {"$set": update_data})
+        await log_activity(current_user.id, "field_exit_updated", f"Updated field exit request {field_exit_id}")
+    
+    # Return updated field exit
+    updated_field_exit = await db.field_exits.find_one({"id": field_exit_id})
+    return FieldExit(**updated_field_exit)
+
+@api_router.post("/field-exits/{field_exit_id}/approve")
 async def approve_field_exit(field_exit_id: str, current_user: User = Depends(get_admin_user)):
     """Approve field exit request (Admin only)"""
     field_exit = await db.field_exits.find_one({"id": field_exit_id})
@@ -571,7 +625,7 @@ async def approve_field_exit(field_exit_id: str, current_user: User = Depends(ge
     
     return {"message": "Field exit approved successfully"}
 
-@api_router.post("/field-exit/{field_exit_id}/reject")
+@api_router.post("/field-exits/{field_exit_id}/reject")
 async def reject_field_exit(field_exit_id: str, current_user: User = Depends(get_admin_user)):
     """Reject field exit request (Admin only)"""
     field_exit = await db.field_exits.find_one({"id": field_exit_id})
