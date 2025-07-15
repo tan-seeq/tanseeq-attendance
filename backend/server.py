@@ -580,12 +580,47 @@ async def get_leaves(current_user: User = Depends(get_current_user)):
     return leaves_list
 
 @api_router.post("/leaves", response_model=Leave)
-async def create_leave_request(leave_data: LeaveCreate, current_user: User = Depends(get_current_user)):
-    """Create leave request"""
-    leave = Leave(**leave_data.dict())
+async def create_leave_request(
+    user_id: str = None,
+    user_name: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    reason: str = None,
+    days_count: int = None,
+    file: UploadFile = File(None),
+    current_user: User = Depends(get_current_user)
+):
+    """Create leave request with optional file attachment"""
+    
+    # Handle file upload
+    attachment_url = None
+    if file:
+        # Generate unique filename
+        file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+        filename = f"{uuid.uuid4()}.{file_extension}"
+        file_path = uploads_dir / filename
+        
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        attachment_url = f"/uploads/{filename}"
+    
+    leave_dict = {
+        "user_id": user_id or current_user.id,
+        "user_name": user_name or current_user.name,
+        "start_date": start_date,
+        "end_date": end_date,
+        "reason": reason,
+        "days_count": days_count,
+        "attachment_url": attachment_url
+    }
+    
+    leave = Leave(**leave_dict)
     await db.leaves.insert_one(leave.dict())
     
-    await log_activity(current_user.id, "leave_requested", f"Requested leave from {leave_data.start_date} to {leave_data.end_date}")
+    await log_activity(current_user.id, "leave_requested", 
+                      f"Requested leave from {start_date} to {end_date}")
     
     return leave
 
