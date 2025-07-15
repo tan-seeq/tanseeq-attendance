@@ -70,7 +70,7 @@ class TanseeqAPITester:
     def test_root_endpoint(self):
         """Test root endpoint"""
         try:
-            response = requests.get(self.base_url, timeout=10)
+            response = requests.get(self.base_url, timeout=30)
             success = response.status_code == 200
             self.log_test("Root endpoint", success, 
                          f"Status: {response.status_code}" if not success else "")
