@@ -951,6 +951,28 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/employees" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <Employees />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/field-exits" element={
+              <ProtectedRoute>
+                <Layout>
+                  <FieldExits />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Router>
+      </LanguageProvider>
+    </AuthProvider>
+  );
+}
+
 // Field Exit Component
 const FieldExits = () => {
   const [fieldExits, setFieldExits] = useState([]);
