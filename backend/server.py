@@ -158,25 +158,27 @@ class Leave(LeaveBase):
 class FieldExitBase(BaseModel):
     user_id: str
     user_name: str
-    reason: str  # visit_client, bank, government
+    visit_type: str  # client_visit, collection, bank_visit, personal, admin_errand
     client_name: str = ""
-    exit_time: str
-    expected_return_time: str
+    start_time: str
+    end_time: str
+    report: str = ""
     status: str = "pending"  # pending, approved, rejected
 
 class FieldExitCreate(FieldExitBase):
     pass
 
 class FieldExitUpdate(BaseModel):
-    actual_return_time: Optional[str] = None
-    visit_report: Optional[str] = None
+    visit_type: Optional[str] = None
+    client_name: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    report: Optional[str] = None
     status: Optional[str] = None
     approved_by: Optional[str] = None
 
 class FieldExit(FieldExitBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    actual_return_time: Optional[str] = None
-    visit_report: Optional[str] = None
     approved_by: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
