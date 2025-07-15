@@ -1268,6 +1268,15 @@ const FieldExits = () => {
   const { t } = useLanguage();
 
   useEffect(() => {
+    fetchFieldExits();
+  }, []);
+
+  const fetchFieldExits = async () => {
+    try {
+      const response = await axios.get(`${API}/field-exits`);
+      setFieldExits(response.data);
+    } catch (error) {
+      console.error('Error fetching field exits:', error);
     } finally {
       setLoading(false);
     }
