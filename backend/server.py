@@ -549,8 +549,26 @@ async def get_leaves(current_user: User = Depends(get_current_user)):
     if current_user.role == "user":
         query["user_id"] = current_user.id
     
-    leaves = await db.leaves.find(query).to_list(1000)
-    return leaves
+    leave_records = await db.leaves.find(query).to_list(1000)
+    
+    # Convert to clean format without ObjectId
+    leaves_list = []
+    for record in leave_records:
+        leaves_list.append({
+            "id": record.get("id", str(record.get("_id", ""))),
+            "user_id": record.get("user_id", ""),
+            "user_name": record.get("user_name", ""),
+            "start_date": record.get("start_date", ""),
+            "end_date": record.get("end_date", ""),
+            "reason": record.get("reason", ""),
+            "status": record.get("status", "pending"),
+            "days_count": record.get("days_count", 0),
+            "approved_by": record.get("approved_by"),
+            "attachment_url": record.get("attachment_url"),
+            "created_at": record.get("created_at")
+        })
+    
+    return leaves_list
 
 @api_router.post("/leaves", response_model=Leave)
 async def create_leave_request(leave_data: LeaveCreate, current_user: User = Depends(get_current_user)):
