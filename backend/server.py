@@ -370,17 +370,29 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: User = 
     updated_user = await db.users.find_one({"id": user_id})
     return UserResponse(**updated_user)
 
-@api_router.delete("/users/{user_id}")
-async def delete_user(user_id: str, current_user: User = Depends(get_admin_user)):
-    """Delete user (Admin only)"""
+@api_router.post("/users/{user_id}/change-password")
+async def change_user_password(user_id: str, password_data: dict, current_user: User = Depends(get_current_user)):
+    """Change user password (Hatem only)"""
+    if current_user.name != "Hatem Mohamed Ahmed":
+        raise HTTPException(status_code=403, detail="Only Hatem can change user passwords")
+    
     user = await db.users.find_one({"id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    await db.users.delete_one({"id": user_id})
-    await log_activity(current_user.id, "user_deleted", f"Deleted user {user['email']}")
+    new_password = password_data.get("new_password")
+    if not new_password:
+        raise HTTPException(status_code=400, detail="New password is required")
     
-    return {"message": "User deleted successfully"}
+    hashed_password = hash_password(new_password)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password": hashed_password}}
+    )
+    
+    await log_activity(current_user.id, "password_changed", f"Changed password for {user['name']}")
+    
+    return {"message": "Password changed successfully"}
 
 # ============ ATTENDANCE ENDPOINTS ============
 
