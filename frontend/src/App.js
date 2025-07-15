@@ -37,7 +37,7 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       try {
-        const decoded = jwt_decode(token);
+        const decoded = jwtDecode(token);
         if (decoded.exp * 1000 > Date.now()) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           fetchUser();
