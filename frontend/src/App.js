@@ -5,13 +5,13 @@ import { jwtDecode } from 'jwt-decode';
 import { 
   UserIcon, 
   ClockIcon, 
-  CalendarIcon, 
+  CalendarDaysIcon as CalendarIcon, 
   DocumentTextIcon, 
   CurrencyDollarIcon,
   ChartBarIcon,
-  LogoutIcon,
-  MenuIcon,
-  XIcon,
+  ArrowRightOnRectangleIcon as LogoutIcon,
+  Bars3Icon as MenuIcon,
+  XMarkIcon as XIcon,
   CheckCircleIcon,
   XCircleIcon,
   EyeIcon,
@@ -20,7 +20,7 @@ import {
   PlusIcon,
   UserGroupIcon,
   ExclamationCircleIcon
-} from '@heroicons/react/outline';
+} from '@heroicons/react/24/outline';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
