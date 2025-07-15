@@ -394,20 +394,36 @@ async def get_attendance(current_user: User = Depends(get_current_user)):
 
 @api_router.post("/attendance/check-in")
 async def check_in(current_user: User = Depends(get_current_user)):
-    """Check in attendance"""
+    """Check in attendance with custom rules per employee"""
     uae_time = get_uae_time()
     date_str = uae_time.strftime("%Y-%m-%d")
     time_str = uae_time.strftime("%H:%M:%S")
+    
+    # Check if it's weekend (Friday or Saturday)
+    weekday = uae_time.weekday()  # 0 = Monday, 6 = Sunday
+    if weekday in [4, 5]:  # Friday = 4, Saturday = 5
+        raise HTTPException(status_code=400, detail="Cannot check in on weekends (Friday/Saturday)")
     
     # Check if already checked in today
     existing = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
     if existing and existing.get("check_in"):
         raise HTTPException(status_code=400, detail="Already checked in today")
     
-    # Check if late
-    work_start = datetime.strptime(current_user.working_hours_start, "%H:%M").time()
-    current_time = uae_time.time()
-    is_late = current_time > work_start
+    # Custom attendance rules
+    is_late = False
+    if current_user.name == "Hatem Mohamed Ahmed":
+        # Hatem has no time restrictions
+        is_late = False
+    elif current_user.name == "Tarek Wazzan":
+        # Tarek can start from 8 AM
+        work_start = datetime.strptime("08:00", "%H:%M").time()
+        current_time = uae_time.time()
+        is_late = current_time > work_start
+    else:
+        # All others: 9:00 AM - 6:00 PM
+        work_start = datetime.strptime("09:00", "%H:%M").time()
+        current_time = uae_time.time()
+        is_late = current_time > work_start
     
     attendance_data = {
         "id": str(uuid.uuid4()),
@@ -428,7 +444,7 @@ async def check_in(current_user: User = Depends(get_current_user)):
     else:
         await db.attendance.insert_one(attendance_data)
     
-    await log_activity(current_user.id, "check_in", f"Checked in at {time_str}")
+    await log_activity(current_user.id, "check_in", f"Checked in at {time_str} - {'Late' if is_late else 'On time'}")
     
     return {"message": "Checked in successfully", "time": time_str, "is_late": is_late}
 
