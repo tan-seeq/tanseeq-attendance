@@ -794,8 +794,22 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
 @api_router.get("/activity-logs")
 async def get_activity_logs(current_user: User = Depends(get_super_admin_user)):
     """Get activity logs (Super admin only)"""
-    logs = await db.activity_logs.find().sort("timestamp", -1).to_list(1000)
-    return logs
+    activity_records = await db.activity_logs.find().sort("timestamp", -1).to_list(1000)
+    
+    # Convert to clean format without ObjectId
+    activity_logs_list = []
+    for record in activity_records:
+        activity_logs_list.append({
+            "id": record.get("id", str(record.get("_id", ""))),
+            "user_id": record.get("user_id", ""),
+            "action": record.get("action", ""),
+            "details": record.get("details", ""),
+            "before_value": record.get("before_value"),
+            "after_value": record.get("after_value"),
+            "timestamp": record.get("timestamp")
+        })
+    
+    return activity_logs_list
 
 # ============ PAYROLL ENDPOINTS ============
 
