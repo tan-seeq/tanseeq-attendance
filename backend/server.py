@@ -574,36 +574,40 @@ async def reject_field_exit(field_exit_id: str, current_user: User = Depends(get
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
     """Get dashboard statistics"""
-    stats = {}
-    
-    if current_user.role in ["admin", "super_admin"]:
-        # Admin stats
-        total_users = await db.users.count_documents({})
-        today = get_uae_time().strftime("%Y-%m-%d")
-        present_today = await db.attendance.count_documents({"date": today, "status": {"$in": ["present", "late"]}})
-        pending_leaves = await db.leaves.count_documents({"status": "pending"})
-        pending_field_exits = await db.field_exits.count_documents({"status": "pending"})
+    try:
+        stats = {}
         
-        stats = {
-            "total_users": total_users,
-            "present_today": present_today,
-            "pending_leaves": pending_leaves,
-            "pending_field_exits": pending_field_exits
-        }
-    else:
-        # User stats
-        today = get_uae_time().strftime("%Y-%m-%d")
-        attendance_today = await db.attendance.find_one({"user_id": current_user.id, "date": today})
-        pending_leaves = await db.leaves.count_documents({"user_id": current_user.id, "status": "pending"})
-        pending_field_exits = await db.field_exits.count_documents({"user_id": current_user.id, "status": "pending"})
+        if current_user.role in ["admin", "super_admin"]:
+            # Admin stats
+            total_users = await db.users.count_documents({})
+            today = get_uae_time().strftime("%Y-%m-%d")
+            present_today = await db.attendance.count_documents({"date": today, "status": {"$in": ["present", "late"]}})
+            pending_leaves = await db.leaves.count_documents({"status": "pending"})
+            pending_field_exits = await db.field_exits.count_documents({"status": "pending"})
+            
+            stats = {
+                "total_users": total_users,
+                "present_today": present_today,
+                "pending_leaves": pending_leaves,
+                "pending_field_exits": pending_field_exits
+            }
+        else:
+            # User stats
+            today = get_uae_time().strftime("%Y-%m-%d")
+            attendance_today = await db.attendance.find_one({"user_id": current_user.id, "date": today})
+            pending_leaves = await db.leaves.count_documents({"user_id": current_user.id, "status": "pending"})
+            pending_field_exits = await db.field_exits.count_documents({"user_id": current_user.id, "status": "pending"})
+            
+            stats = {
+                "attendance_today": attendance_today,
+                "pending_leaves": pending_leaves,
+                "pending_field_exits": pending_field_exits
+            }
         
-        stats = {
-            "attendance_today": attendance_today,
-            "pending_leaves": pending_leaves,
-            "pending_field_exits": pending_field_exits
-        }
-    
-    return stats
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting dashboard stats: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error fetching dashboard statistics")
 
 # ============ ACTIVITY LOGS ENDPOINTS ============
 
