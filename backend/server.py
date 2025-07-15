@@ -394,6 +394,37 @@ async def get_attendance(current_user: User = Depends(get_current_user)):
     attendance = await db.attendance.find(query).to_list(1000)
     return attendance
 
+@api_router.put("/attendance/{attendance_id}")
+async def update_attendance(attendance_id: str, attendance_data: AttendanceUpdate, current_user: User = Depends(get_current_user)):
+    """Update attendance record (Hatem only)"""
+    if current_user.name != "Hatem Mohamed Ahmed":
+        raise HTTPException(status_code=403, detail="Only Hatem can edit attendance records")
+    
+    attendance = await db.attendance.find_one({"id": attendance_id})
+    if not attendance:
+        raise HTTPException(status_code=404, detail="Attendance record not found")
+    
+    # Get update data
+    update_data = {k: v for k, v in attendance_data.dict().items() if v is not None}
+    
+    if update_data:
+        # Recalculate working hours if both check_in and check_out are provided
+        if attendance_data.check_in and attendance_data.check_out:
+            try:
+                check_in_time = datetime.strptime(attendance_data.check_in, "%H:%M:%S")
+                check_out_time = datetime.strptime(attendance_data.check_out, "%H:%M:%S")
+                working_hours = (check_out_time - check_in_time).total_seconds() / 3600
+                update_data["working_hours"] = working_hours
+            except ValueError:
+                pass  # Invalid time format, skip calculation
+        
+        await db.attendance.update_one({"id": attendance_id}, {"$set": update_data})
+        await log_activity(current_user.id, "attendance_edited", f"Edited attendance record {attendance_id} for {attendance['user_name']}")
+    
+    # Return updated attendance
+    updated_attendance = await db.attendance.find_one({"id": attendance_id})
+    return updated_attendance
+
 @api_router.post("/attendance/check-in")
 async def check_in(current_user: User = Depends(get_current_user)):
     """Check in attendance with custom rules per employee"""
