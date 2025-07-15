@@ -36,6 +36,13 @@ security = HTTPBearer()
 # Create the main app
 app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 
+# Create uploads directory
+uploads_dir = ROOT_DIR / "uploads"
+uploads_dir.mkdir(exist_ok=True)
+
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+
 # Create router with /api prefix
 api_router = APIRouter(prefix="/api")
 
