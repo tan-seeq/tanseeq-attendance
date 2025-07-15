@@ -914,22 +914,120 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
 @api_router.get("/payroll/export/{month}")
 async def export_payroll(month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
     """Export payroll data (Admin only)"""
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+    
     payroll_data = await calculate_payroll(month, current_user)
     
     if format == "excel":
-        # For now, return JSON data with instruction
-        return {
-            "message": "Excel export functionality will be implemented",
-            "data": payroll_data,
-            "format": "excel"
-        }
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment
+        
+        # Create workbook and worksheet
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = f"Payroll {month}"
+        
+        # Headers
+        headers = ["Name", "Position", "Monthly Salary", "Daily Rate", "Working Days", "Total Hours", "Late Days", "Final Salary"]
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = Font(bold=True)
+            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center")
+        
+        # Data rows
+        for row, employee in enumerate(payroll_data, 2):
+            ws.cell(row=row, column=1, value=employee["name"])
+            ws.cell(row=row, column=2, value=employee["position"])
+            ws.cell(row=row, column=3, value=employee["monthly_salary"])
+            ws.cell(row=row, column=4, value=employee["daily_rate"])
+            ws.cell(row=row, column=5, value=employee["working_days"])
+            ws.cell(row=row, column=6, value=employee["total_hours"])
+            ws.cell(row=row, column=7, value=employee["late_days"])
+            ws.cell(row=row, column=8, value=employee["final_salary"])
+        
+        # Auto-adjust columns
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        return StreamingResponse(
+            BytesIO(output.read()),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=payroll_{month}.xlsx"}
+        )
+    
     elif format == "pdf":
-        # For now, return JSON data with instruction
-        return {
-            "message": "PDF export functionality will be implemented",
-            "data": payroll_data,
-            "format": "pdf"
-        }
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib import colors
+        
+        output = BytesIO()
+        doc = SimpleDocTemplate(output, pagesize=A4)
+        styles = getSampleStyleSheet()
+        
+        # Title
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=30,
+            alignment=1  # Center alignment
+        )
+        title = Paragraph(f"TANSEEQ Tax Consultancy - Payroll Report {month}", title_style)
+        
+        # Table data
+        table_data = [["Name", "Position", "Monthly Salary", "Daily Rate", "Working Days", "Final Salary"]]
+        for employee in payroll_data:
+            table_data.append([
+                employee["name"],
+                employee["position"],
+                f"AED {employee['monthly_salary']:.2f}",
+                f"AED {employee['daily_rate']:.2f}",
+                str(employee["working_days"]),
+                f"AED {employee['final_salary']:.2f}"
+            ])
+        
+        # Create table
+        table = Table(table_data, colWidths=[2*inch, 1.5*inch, 1.2*inch, 1.2*inch, 1*inch, 1.2*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        # Build PDF
+        story = [title, Spacer(1, 12), table]
+        doc.build(story)
+        
+        output.seek(0)
+        return StreamingResponse(
+            BytesIO(output.read()),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=payroll_{month}.pdf"}
+        )
+    
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'excel' or 'pdf'")
 
