@@ -737,7 +737,13 @@ const Employees = () => {
     monthly_salary: '',
     working_hours_start: '09:00',
     working_hours_end: '18:00',
-    phone: ''
+    phone: '',
+    has_flexible_schedule: false,
+    flexible_hours_per_day: 8,
+    flexible_start_range: '07:00-10:00',
+    flexible_end_range: '16:00-19:00',
+    flexible_core_hours: '10:00-15:00',
+    flexible_days_per_week: 5
   });
   const { user } = useAuth();
   const { t } = useLanguage();
