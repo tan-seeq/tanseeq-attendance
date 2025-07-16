@@ -1118,28 +1118,36 @@ async def get_reports(report_type: str, month: str, current_user: User = Depends
 
 @api_router.get("/reports/{report_type}/{month}/export")
 async def export_report(report_type: str, month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
-    """Export reports in Excel or PDF format"""
+    """Export reports in Excel or PDF format with professional design"""
     from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
     from reportlab.lib.pagesizes import letter, A4
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib import colors
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.lib.units import inch
+    from reportlab.pdfgen import canvas
     from io import BytesIO
     import os
+    from datetime import datetime
     
     # Parse month to get start and end dates
     start_date = f"{month}-01"
-    
-    # Get next month for end date
     year, month_num = map(int, month.split('-'))
     if month_num == 12:
         end_date = f"{year + 1}-01-01"
     else:
         end_date = f"{year}-{month_num + 1:02d}-01"
     
+    # Get month name in Arabic
+    month_names = {
+        1: "يناير", 2: "فبراير", 3: "مارس", 4: "أبريل", 5: "مايو", 6: "يونيو",
+        7: "يوليو", 8: "أغسطس", 9: "سبتمبر", 10: "أكتوبر", 11: "نوفمبر", 12: "ديسمبر"
+    }
+    month_name_ar = month_names.get(month_num, "")
+    
+    # Fetch data based on report type
     if report_type == "attendance":
         records = await db.attendance.find({
             "date": {"$gte": start_date, "$lt": end_date}
@@ -1153,10 +1161,14 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
                 "check_in": record.get("check_in", ""),
                 "check_out": record.get("check_out", ""),
                 "working_hours": record.get("working_hours", 0),
-                "status": record.get("status", "")
+                "status": record.get("status", ""),
+                "is_late": record.get("is_late", False)
             })
         
-        headers = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة"]
+        headers = ["Employee", "Date", "Check In", "Check Out", "Working Hours", "Status", "Late"]
+        headers_ar = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة", "متأخر"]
+        report_title = "Attendance Report"
+        report_title_ar = "تقرير الحضور"
         
     elif report_type == "leaves":
         records = await db.leaves.find({
@@ -1177,7 +1189,10 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
                 "status": record.get("status", "")
             })
         
-        headers = ["الموظف", "تاريخ البداية", "تاريخ النهاية", "عدد الأيام", "السبب", "الحالة"]
+        headers = ["Employee", "Start Date", "End Date", "Days Count", "Reason", "Status"]
+        headers_ar = ["الموظف", "تاريخ البداية", "تاريخ النهاية", "عدد الأيام", "السبب", "الحالة"]
+        report_title = "Leave Report"
+        report_title_ar = "تقرير الإجازات"
         
     elif report_type == "field-exits":
         records = await db.field_exits.find({
@@ -1186,59 +1201,141 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         
         report_data = []
         for record in records:
+            visit_types = {
+                "client_visit": "زيارة عميل",
+                "collection": "تحصيل",
+                "bank_visit": "زيارة بنك",
+                "personal": "شخصي",
+                "admin_errand": "مهمة إدارية"
+            }
             report_data.append({
                 "user_name": record.get("user_name", ""),
                 "date": record.get("date", ""),
-                "visit_type": record.get("visit_type", ""),
+                "visit_type": visit_types.get(record.get("visit_type", ""), record.get("visit_type", "")),
                 "client_name": record.get("client_name", ""),
                 "start_time": record.get("start_time", ""),
                 "end_time": record.get("end_time", ""),
                 "status": record.get("status", "")
             })
         
-        headers = ["الموظف", "التاريخ", "نوع الزيارة", "العميل", "وقت البداية", "وقت النهاية", "الحالة"]
+        headers = ["Employee", "Date", "Visit Type", "Client", "Start Time", "End Time", "Status"]
+        headers_ar = ["الموظف", "التاريخ", "نوع الزيارة", "العميل", "وقت البداية", "وقت النهاية", "الحالة"]
+        report_title = "Field Exit Report"
+        report_title_ar = "تقرير الزيارات الخارجية"
     
     else:
         raise HTTPException(status_code=400, detail="Invalid report type")
     
     if format == "excel":
-        # Create Excel file
+        # Create Excel file with professional design
         wb = Workbook()
         ws = wb.active
         ws.title = f"{report_type}_report_{month}"
         
-        # Add headers
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col)
-            cell.value = header
-            cell.font = Font(bold=True)
-            cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
-            cell.alignment = Alignment(horizontal="center")
+        # Set column widths
+        column_widths = [20, 15, 12, 12, 15, 12, 10]
+        for i, width in enumerate(column_widths[:len(headers)], 1):
+            ws.column_dimensions[get_column_letter(i)].width = width
         
-        # Add data
-        for row, record in enumerate(report_data, 2):
+        # Company header
+        ws.merge_cells('A1:G1')
+        company_cell = ws['A1']
+        company_cell.value = "TANSEEQ TAX CONSULTANCY"
+        company_cell.font = Font(name="Arial", size=18, bold=True, color="FFFFFF")
+        company_cell.fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+        company_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 30
+        
+        # Report title
+        ws.merge_cells('A2:G2')
+        title_cell = ws['A2']
+        title_cell.value = f"{report_title} - {report_title_ar}"
+        title_cell.font = Font(name="Arial", size=14, bold=True, color="1F4E79")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[2].height = 25
+        
+        # Period info
+        ws.merge_cells('A3:G3')
+        period_cell = ws['A3']
+        period_cell.value = f"Period: {start_date} to {end_date.split('-')[0]}-{end_date.split('-')[1]}-{int(end_date.split('-')[2])-1:02d} | Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        period_cell.font = Font(name="Arial", size=10, color="666666")
+        period_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[3].height = 20
+        
+        # Add empty row
+        ws.row_dimensions[4].height = 10
+        
+        # Headers
+        header_row = 5
+        for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
+            cell = ws.cell(row=header_row, column=col)
+            cell.value = f"{header_en}\n{header_ar}"
+            cell.font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border = Border(
+                left=Side(style='thin', color='000000'),
+                right=Side(style='thin', color='000000'),
+                top=Side(style='thin', color='000000'),
+                bottom=Side(style='thin', color='000000')
+            )
+        ws.row_dimensions[header_row].height = 35
+        
+        # Data rows
+        for row_idx, record in enumerate(report_data, header_row + 1):
+            row_color = "F2F2F2" if row_idx % 2 == 0 else "FFFFFF"
+            
             if report_type == "attendance":
-                ws.cell(row=row, column=1, value=record["user_name"])
-                ws.cell(row=row, column=2, value=record["date"])
-                ws.cell(row=row, column=3, value=record["check_in"])
-                ws.cell(row=row, column=4, value=record["check_out"])
-                ws.cell(row=row, column=5, value=record["working_hours"])
-                ws.cell(row=row, column=6, value=record["status"])
+                values = [
+                    record["user_name"],
+                    record["date"],
+                    record["check_in"],
+                    record["check_out"],
+                    f"{record['working_hours']:.1f}h" if record['working_hours'] else "0.0h",
+                    "Present" if record["status"] == "present" else "Late" if record["status"] == "late" else "Absent",
+                    "Yes" if record["is_late"] else "No"
+                ]
             elif report_type == "leaves":
-                ws.cell(row=row, column=1, value=record["user_name"])
-                ws.cell(row=row, column=2, value=record["start_date"])
-                ws.cell(row=row, column=3, value=record["end_date"])
-                ws.cell(row=row, column=4, value=record["days_count"])
-                ws.cell(row=row, column=5, value=record["reason"])
-                ws.cell(row=row, column=6, value=record["status"])
+                values = [
+                    record["user_name"],
+                    record["start_date"],
+                    record["end_date"],
+                    f"{record['days_count']} days",
+                    record["reason"],
+                    "Approved" if record["status"] == "approved" else "Rejected" if record["status"] == "rejected" else "Pending"
+                ]
             elif report_type == "field-exits":
-                ws.cell(row=row, column=1, value=record["user_name"])
-                ws.cell(row=row, column=2, value=record["date"])
-                ws.cell(row=row, column=3, value=record["visit_type"])
-                ws.cell(row=row, column=4, value=record["client_name"])
-                ws.cell(row=row, column=5, value=record["start_time"])
-                ws.cell(row=row, column=6, value=record["end_time"])
-                ws.cell(row=row, column=7, value=record["status"])
+                values = [
+                    record["user_name"],
+                    record["date"],
+                    record["visit_type"],
+                    record["client_name"],
+                    record["start_time"],
+                    record["end_time"],
+                    "Approved" if record["status"] == "approved" else "Rejected" if record["status"] == "rejected" else "Pending"
+                ]
+            
+            for col, value in enumerate(values, 1):
+                cell = ws.cell(row=row_idx, column=col)
+                cell.value = value
+                cell.font = Font(name="Arial", size=9)
+                cell.fill = PatternFill(start_color=row_color, end_color=row_color, fill_type="solid")
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.border = Border(
+                    left=Side(style='thin', color='CCCCCC'),
+                    right=Side(style='thin', color='CCCCCC'),
+                    top=Side(style='thin', color='CCCCCC'),
+                    bottom=Side(style='thin', color='CCCCCC')
+                )
+            ws.row_dimensions[row_idx].height = 20
+        
+        # Footer
+        footer_row = len(report_data) + header_row + 2
+        ws.merge_cells(f'A{footer_row}:G{footer_row}')
+        footer_cell = ws[f'A{footer_row}']
+        footer_cell.value = "TANSEEQ TAX CONSULTANCY - Employee Management System"
+        footer_cell.font = Font(name="Arial", size=9, italic=True, color="666666")
+        footer_cell.alignment = Alignment(horizontal="center", vertical="center")
         
         # Save to BytesIO
         output = BytesIO()
@@ -1248,61 +1345,126 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         return Response(
             content=output.getvalue(),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename={report_type}_report_{month}.xlsx"}
+            headers={"Content-Disposition": f"attachment; filename=TANSEEQ_{report_type}_report_{month}.xlsx"}
         )
     
     elif format == "pdf":
-        # Create PDF file
+        # Create PDF with professional design
         output = BytesIO()
-        doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+        doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
+        
+        story = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            spaceAfter=10,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.12, 0.31, 0.47)  # Dark blue
+        )
+        
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=16,
+            spaceAfter=20,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.27, 0.45, 0.77)  # Medium blue
+        )
+        
+        info_style = ParagraphStyle(
+            'InfoStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            spaceAfter=20,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.4, 0.4, 0.4)  # Gray
+        )
+        
+        # Company header
+        company_title = Paragraph("TANSEEQ TAX CONSULTANCY", title_style)
+        story.append(company_title)
+        story.append(Spacer(1, 12))
+        
+        # Report title
+        report_subtitle = Paragraph(f"{report_title}<br/>{report_title_ar}", subtitle_style)
+        story.append(report_subtitle)
+        
+        # Period info
+        period_info = Paragraph(f"Period: {start_date} to {end_date.split('-')[0]}-{end_date.split('-')[1]}-{int(end_date.split('-')[2])-1:02d}<br/>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
+        story.append(period_info)
+        story.append(Spacer(1, 20))
         
         # Create table data
         table_data = [headers]
         for record in report_data:
             if report_type == "attendance":
                 table_data.append([
-                    record["user_name"], record["date"], record["check_in"], 
-                    record["check_out"], str(record["working_hours"]), record["status"]
+                    record["user_name"][:20],  # Truncate long names
+                    record["date"], 
+                    record["check_in"], 
+                    record["check_out"],
+                    f"{record['working_hours']:.1f}h" if record['working_hours'] else "0.0h",
+                    "Present" if record["status"] == "present" else "Late" if record["status"] == "late" else "Absent",
+                    "Yes" if record["is_late"] else "No"
                 ])
             elif report_type == "leaves":
                 table_data.append([
-                    record["user_name"], record["start_date"], record["end_date"], 
-                    str(record["days_count"]), record["reason"], record["status"]
+                    record["user_name"][:20],
+                    record["start_date"], 
+                    record["end_date"], 
+                    f"{record['days_count']}d",
+                    record["reason"][:20],  # Truncate long reasons
+                    "Approved" if record["status"] == "approved" else "Rejected" if record["status"] == "rejected" else "Pending"
                 ])
             elif report_type == "field-exits":
                 table_data.append([
-                    record["user_name"], record["date"], record["visit_type"], 
-                    record["client_name"], record["start_time"], record["end_time"], record["status"]
+                    record["user_name"][:20],
+                    record["date"], 
+                    record["visit_type"][:15],
+                    record["client_name"][:15] if record["client_name"] else "",
+                    record["start_time"], 
+                    record["end_time"],
+                    "Approved" if record["status"] == "approved" else "Rejected" if record["status"] == "rejected" else "Pending"
                 ])
         
         # Create table
-        table = Table(table_data)
+        table = Table(table_data, repeatRows=1)
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            # Header styling
+            ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.27, 0.45, 0.77)),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+            
+            # Data styling
+            ('BACKGROUND', (0, 1), (-1, -1), colors.Color(0.98, 0.98, 0.98)),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.Color(0.8, 0.8, 0.8)),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.Color(0.95, 0.95, 0.95)]),
         ]))
         
-        # Build PDF
-        story = []
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=18,
-            spaceAfter=30,
-            alignment=1  # Center alignment
-        )
-        
-        title = Paragraph(f"TANSEEQ Tax Consultancy - {report_type.title()} Report ({month})", title_style)
-        story.append(title)
-        story.append(Spacer(1, 12))
         story.append(table)
+        story.append(Spacer(1, 30))
+        
+        # Footer
+        footer_style = ParagraphStyle(
+            'FooterStyle',
+            parent=styles['Normal'],
+            fontSize=8,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.5, 0.5, 0.5)  # Gray
+        )
+        footer = Paragraph("TANSEEQ TAX CONSULTANCY - Employee Management System", footer_style)
+        story.append(footer)
         
         doc.build(story)
         output.seek(0)
@@ -1310,7 +1472,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         return Response(
             content=output.getvalue(),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={report_type}_report_{month}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename=TANSEEQ_{report_type}_report_{month}.pdf"}
         )
     
     else:
