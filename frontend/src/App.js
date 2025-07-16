@@ -1524,8 +1524,8 @@ const FieldExits = () => {
   const [formData, setFormData] = useState({
     visit_type: 'client_visit',
     client_name: '',
-    start_time: '',
-    end_time: '',
+    expected_start_time: '',
+    expected_end_time: '',
     report: ''
   });
   const { user } = useAuth();
@@ -1550,23 +1550,50 @@ const FieldExits = () => {
     e.preventDefault();
     
     try {
-      await axios.post(`${API}/field-exits`, {
-        ...formData,
-        user_id: user.id,
-        user_name: user.name
-      });
+      const formDataToSend = new FormData();
+      formDataToSend.append('visit_type', formData.visit_type);
+      formDataToSend.append('client_name', formData.client_name);
+      formDataToSend.append('expected_start_time', formData.expected_start_time);
+      formDataToSend.append('expected_end_time', formData.expected_end_time);
+      formDataToSend.append('report', formData.report);
+      
+      await axios.post(`${API}/field-exits`, formDataToSend);
       
       setShowModal(false);
       setFormData({
         visit_type: 'client_visit',
         client_name: '',
-        start_time: '',
-        end_time: '',
+        expected_start_time: '',
+        expected_end_time: '',
         report: ''
       });
       fetchFieldExits();
+      alert('تم إنشاء طلب الخروج بنجاح');
     } catch (error) {
       console.error('Error creating field exit:', error);
+      alert('حدث خطأ في إنشاء طلب الخروج');
+    }
+  };
+
+  const handleDepartureTime = async (id) => {
+    try {
+      await axios.post(`${API}/field-exits/${id}/start`);
+      fetchFieldExits();
+      alert('تم تسجيل وقت الذهاب بنجاح');
+    } catch (error) {
+      console.error('Error recording departure time:', error);
+      alert('حدث خطأ في تسجيل وقت الذهاب');
+    }
+  };
+
+  const handleReturnTime = async (id) => {
+    try {
+      await axios.post(`${API}/field-exits/${id}/end`);
+      fetchFieldExits();
+      alert('تم تسجيل وقت العودة بنجاح');
+    } catch (error) {
+      console.error('Error recording return time:', error);
+      alert('حدث خطأ في تسجيل وقت العودة');
     }
   };
 
@@ -1630,19 +1657,17 @@ const FieldExits = () => {
                   اسم العميل
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  وقت البداية
+                  الوقت المتوقع
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  وقت النهاية
+                  الوقت الفعلي
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الحالة
                 </th>
-                {user?.role !== 'user' && (
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
-                  </th>
-                )}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الإجراءات
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -1658,10 +1683,16 @@ const FieldExits = () => {
                     {exit.client_name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {exit.start_time}
+                    <div className="text-xs">
+                      <div>من: {exit.expected_start_time || exit.start_time}</div>
+                      <div>إلى: {exit.expected_end_time || exit.end_time}</div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {exit.end_time}
+                    <div className="text-xs">
+                      <div>ذهب: {exit.actual_start_time || '-'}</div>
+                      <div>عاد: {exit.actual_end_time || '-'}</div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -1673,9 +1704,32 @@ const FieldExits = () => {
                        exit.status === 'rejected' ? 'مرفوض' : 'معلق'}
                     </span>
                   </td>
-                  {user?.role !== 'user' && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {exit.status === 'pending' && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex flex-col space-y-2">
+                      {/* User Actions */}
+                      {user?.role === 'user' && exit.user_id === user.id && exit.status === 'approved' && (
+                        <div className="flex space-x-2">
+                          {!exit.actual_start_time && (
+                            <button
+                              onClick={() => handleDepartureTime(exit.id)}
+                              className="px-3 py-1 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600"
+                            >
+                              تسجيل الذهاب
+                            </button>
+                          )}
+                          {exit.actual_start_time && !exit.actual_end_time && (
+                            <button
+                              onClick={() => handleReturnTime(exit.id)}
+                              className="px-3 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600"
+                            >
+                              تسجيل العودة
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Admin Actions */}
+                      {user?.role !== 'user' && exit.status === 'pending' && (
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleApprove(exit.id)}
@@ -1693,8 +1747,8 @@ const FieldExits = () => {
                           </button>
                         </div>
                       )}
-                    </td>
-                  )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -1742,12 +1796,65 @@ const FieldExits = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    وقت البداية
+                    وقت البداية المتوقع
                   </label>
                   <input
                     type="time"
-                    value={formData.start_time}
-                    onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                    value={formData.expected_start_time}
+                    onChange={(e) => setFormData({...formData, expected_start_time: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    وقت النهاية المتوقع
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.expected_end_time}
+                    onChange={(e) => setFormData({...formData, expected_end_time: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    تقرير الزيارة
+                  </label>
+                  <textarea
+                    value={formData.report}
+                    onChange={(e) => setFormData({...formData, report: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="اكتب تفاصيل الزيارة..."
+                  />
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    إنشاء الطلب
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
