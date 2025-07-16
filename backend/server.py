@@ -2193,8 +2193,8 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[5].height = 10
         
         # Headers with enhanced styling
-        headers = ["Name", "Position", "Monthly Salary", "Daily Rate", "Working Days", "Total Hours", "Late Days", "Final Salary"]
-        headers_ar = ["الاسم", "المنصب", "الراتب الشهري", "الراتب اليومي", "أيام العمل", "إجمالي الساعات", "الأيام المتأخرة", "الراتب النهائي"]
+        headers = ["Name", "Monthly Salary", "Daily Rate", "Working Days", "Total Hours", "Late Days", "Final Salary"]
+        headers_ar = ["الاسم", "الراتب الشهري", "الراتب اليومي", "أيام العمل", "إجمالي الساعات", "الأيام المتأخرة", "الراتب النهائي"]
         
         header_row = 6
         for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
