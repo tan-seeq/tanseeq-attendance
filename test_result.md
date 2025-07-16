@@ -160,6 +160,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ NEW PAYROLL REPORTS IMPLEMENTED AND TESTED: 1) /payroll/export/{month}?format=excel - Professional Excel export with TANSEEQ branding, clean formatting, proper file naming 2) /payroll/export/{month}?format=pdf - Professional PDF export with company header, clean design matching attendance reports 3) Both formats free of strange symbols (■■■■■■) 4) Company name 'TANSEEQ TAX CONSULTANCY' properly displayed 5) New design matches attendance/leave report styling as requested. All payroll export functionality working correctly."
+      - working: true
+        agent: "testing"
+        comment: "✅ ARABIC REVIEW REQUEST TESTING COMPLETED: 1) PAYROLL REPORTS WITHOUT POSITION COLUMN: Excel/PDF exports confirmed to exclude Position column as requested, proper column count and consistent formatting verified 2) CLEAN REPORTS: All attendance/leaves/field-exits/payroll reports completely free of ■■■■■■ symbols, professional TANSEEQ branding maintained 3) GENERAL SERVICE TESTING: Login, dashboard stats, and basic features all working correctly. 19/20 focused tests passed with only minor leave setup issue (no pending leaves to test approval). All Arabic review requirements successfully implemented and verified."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
