@@ -2241,7 +2241,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         
         # Footer
         footer_row = len(payroll_data) + header_row + 2
-        ws.merge_cells(f'A{footer_row}:H{footer_row}')
+        ws.merge_cells(f'A{footer_row}:G{footer_row}')
         footer_cell = ws[f'A{footer_row}']
         footer_cell.value = "TANSEEQ TAX CONSULTANCY - Employee Management System"
         footer_cell.font = Font(name="Arial", size=9, italic=True, color="666666")
