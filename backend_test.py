@@ -21,9 +21,9 @@ class TanseeqAPITester:
         
         # Test users (from the review request)
         self.test_users = {
-            'super_admin': {'email': 'hatem@tanseeq.com', 'password': 'hatem123'},
+            'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'},
             'admin': {'email': 'mahmoud@tanseeq.com', 'password': 'mahmoud123'},
-            'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'}
+            'super_admin': {'email': 'hatem@tanseeq.com', 'password': 'hatem123'}
         }
 
     def log_test(self, name: str, success: bool, details: str = ""):
