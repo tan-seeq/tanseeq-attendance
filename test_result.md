@@ -115,6 +115,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ COMPREHENSIVE BACKEND TESTING COMPLETED - All new API endpoints working correctly: 1) attendance/all (admin-only, returns 13 records with proper structure) 2) leaves/all (admin-only, working correctly) 3) field-exits/all (admin-only, returns 31 records) 4) reports/{type}/{month} for attendance/leaves/field-exits (admin-only, all working) 5) activity-logs with date filter (super-admin only, proper access control) 6) payroll/calculate/{month} (admin-only, processes 9 employees correctly) 7) All authentication endpoints working 8) Role-based access control properly implemented - users get 403 for admin endpoints, admins get 200 for admin endpoints, super-admin endpoints restricted correctly. Minor issue: Super admin password needs reset (hatem@tanseeq.com login fails) but this doesn't affect core functionality. All 41/42 functional tests passed."
+      - working: true
+        agent: "testing"
+        comment: "✅ ENHANCED REPORTING SYSTEM TESTING COMPLETED - Tested all requirements from review request: 1) Excel export for attendance/leaves/field-exits reports - all clean without strange symbols, professional formatting with TANSEEQ branding 2) PDF export for all report types - valid PDF files with proper headers and clean Arabic/English content 3) Attendance update API working correctly - successfully changes status from 'late' to 'present' and removes late flag 4) Custom date range reports working for all types (attendance, leaves, field-exits) 5) Super admin login now working (hatem@tanseeq.com / hatem123) 6) All 68/68 comprehensive backend tests passed + 11/11 enhanced reporting tests passed. Reports are professionally formatted with company branding, clean content, and proper file naming conventions."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
