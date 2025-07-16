@@ -201,8 +201,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix blank page issue for sidebar navigation"
-    - "Fix API endpoints for admin management views"
+    - "Enhanced field exit management UI with notes and departure/return tracking"
+    - "Fix report formatting and Excel export issues"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
