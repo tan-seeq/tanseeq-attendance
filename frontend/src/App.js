@@ -456,6 +456,7 @@ const Layout = ({ children }) => {
 const Dashboard = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalEmployees: 0,
     presentToday: 0,
