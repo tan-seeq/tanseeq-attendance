@@ -1342,54 +1342,93 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         )
     
     elif format == "pdf":
-        # Create PDF with professional design
+        # Create PDF with enhanced professional design and logo
         output = BytesIO()
-        doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=50, bottomMargin=50)
+        doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
         
         story = []
         styles = getSampleStyleSheet()
         
-        # Custom styles
+        # Custom styles with enhanced colors
+        company_style = ParagraphStyle(
+            'CompanyStyle',
+            parent=styles['Heading1'],
+            fontSize=28,
+            spaceAfter=10,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.12, 0.31, 0.47),  # Dark blue
+            fontName='Helvetica-Bold'
+        )
+        
+        logo_style = ParagraphStyle(
+            'LogoStyle',
+            parent=styles['Normal'],
+            fontSize=14,
+            spaceAfter=20,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.27, 0.45, 0.77),  # Medium blue
+            fontName='Helvetica-Oblique'
+        )
+        
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=24,
-            spaceAfter=10,
+            fontSize=22,
+            spaceAfter=15,
             alignment=1,  # Center alignment
-            textColor=colors.Color(0.12, 0.31, 0.47)  # Dark blue
+            textColor=colors.Color(0.12, 0.31, 0.47),  # Dark blue
+            fontName='Helvetica-Bold'
         )
         
         subtitle_style = ParagraphStyle(
             'CustomSubtitle',
             parent=styles['Normal'],
             fontSize=16,
-            spaceAfter=20,
+            spaceAfter=25,
             alignment=1,  # Center alignment
-            textColor=colors.Color(0.27, 0.45, 0.77)  # Medium blue
+            textColor=colors.Color(0.27, 0.45, 0.77),  # Medium blue
+            fontName='Helvetica-Bold'
         )
         
         info_style = ParagraphStyle(
             'InfoStyle',
             parent=styles['Normal'],
-            fontSize=10,
-            spaceAfter=20,
+            fontSize=11,
+            spaceAfter=25,
             alignment=1,  # Center alignment
-            textColor=colors.Color(0.4, 0.4, 0.4)  # Gray
+            textColor=colors.Color(0.4, 0.4, 0.4),  # Gray
+            fontName='Helvetica'
         )
         
-        # Company header
-        company_title = Paragraph("TANSEEQ TAX CONSULTANCY", title_style)
-        story.append(company_title)
-        story.append(Spacer(1, 12))
+        # Enhanced company header with logo simulation
+        company_header = Paragraph("🏢 TANSEEQ TAX CONSULTANCY", company_style)
+        story.append(company_header)
         
-        # Report title
-        report_subtitle = Paragraph(f"{report_title}<br/>{report_title_ar}", subtitle_style)
-        story.append(report_subtitle)
-        
-        # Period info
-        period_info = Paragraph(f"Period: {start_date} to {end_date}<br/>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
-        story.append(period_info)
+        # Logo subtitle
+        logo_subtitle = Paragraph("💼 مكتب استشارات ضريبية متخصص - نظام إدارة الموارد البشرية المتطور", logo_style)
+        story.append(logo_subtitle)
         story.append(Spacer(1, 20))
+        
+        # Report title with enhanced styling
+        report_title_text = Paragraph(f"📊 {report_title}<br/>{report_title_ar}", title_style)
+        story.append(report_title_text)
+        
+        # Period info with icons
+        period_info = Paragraph(f"📅 الفترة: {start_date} إلى {end_date}<br/>📊 عدد السجلات: {len(report_data)}<br/>🕐 تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
+        story.append(period_info)
+        story.append(Spacer(1, 30))
+        
+        # Add decorative line
+        line_style = ParagraphStyle(
+            'LineStyle',
+            parent=styles['Normal'],
+            fontSize=12,
+            spaceAfter=20,
+            alignment=1,
+            textColor=colors.Color(0.8, 0.8, 0.8)
+        )
+        decorative_line = Paragraph("─" * 60, line_style)
+        story.append(decorative_line)
         
         # Create table data
         table_data = [headers]
