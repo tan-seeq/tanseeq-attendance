@@ -1261,6 +1261,41 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/attendance-management" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <AttendanceManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/leave-management" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <LeaveManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/field-exit-management" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <FieldExitManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <Reports />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/activity-logs" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <ActivityLogs />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/payroll" element={
               <ProtectedRoute requiredRole="admin">
                 <Layout>
