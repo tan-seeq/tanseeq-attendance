@@ -522,35 +522,71 @@ async def get_all_attendance(current_user: User = Depends(get_current_user)):
     return attendance_list
 
 @api_router.put("/attendance/{attendance_id}")
-async def update_attendance(attendance_id: str, attendance_data: AttendanceUpdate, current_user: User = Depends(get_current_user)):
-    """Update attendance record (Hatem only)"""
-    if current_user.name != "Hatem Mohamed Ahmed":
-        raise HTTPException(status_code=403, detail="Only Hatem can edit attendance records")
-    
+async def update_attendance(attendance_id: str, attendance_data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Update attendance record (Super admin only)"""
     attendance = await db.attendance.find_one({"id": attendance_id})
     if not attendance:
         raise HTTPException(status_code=404, detail="Attendance record not found")
     
-    # Get update data
-    update_data = {k: v for k, v in attendance_data.dict().items() if v is not None}
+    # Store original values for logging
+    original_values = {
+        "check_in": attendance.get("check_in"),
+        "check_out": attendance.get("check_out"),
+        "status": attendance.get("status"),
+        "is_late": attendance.get("is_late")
+    }
     
-    if update_data:
-        # Recalculate working hours if both check_in and check_out are provided
-        if attendance_data.check_in and attendance_data.check_out:
-            try:
-                check_in_time = datetime.strptime(attendance_data.check_in, "%H:%M:%S")
-                check_out_time = datetime.strptime(attendance_data.check_out, "%H:%M:%S")
-                working_hours = (check_out_time - check_in_time).total_seconds() / 3600
-                update_data["working_hours"] = working_hours
-            except ValueError:
-                pass  # Invalid time format, skip calculation
-        
-        await db.attendance.update_one({"id": attendance_id}, {"$set": update_data})
-        await log_activity(current_user.id, "attendance_edited", f"Edited attendance record {attendance_id} for {attendance['user_name']}")
+    # Update values
+    update_data = {}
+    if "check_in" in attendance_data:
+        update_data["check_in"] = attendance_data["check_in"]
+    if "check_out" in attendance_data:
+        update_data["check_out"] = attendance_data["check_out"]
+    if "status" in attendance_data:
+        update_data["status"] = attendance_data["status"]
+        # If status is manually set to present, remove late flag
+        if attendance_data["status"] == "present":
+            update_data["is_late"] = False
     
-    # Return updated attendance
-    updated_attendance = await db.attendance.find_one({"id": attendance_id})
-    return updated_attendance
+    # Calculate working hours if both check_in and check_out are available
+    if update_data.get("check_in") and update_data.get("check_out"):
+        try:
+            check_in_time = datetime.strptime(update_data["check_in"], "%H:%M:%S")
+            check_out_time = datetime.strptime(update_data["check_out"], "%H:%M:%S")
+            
+            # Handle overnight shifts
+            if check_out_time < check_in_time:
+                check_out_time += timedelta(days=1)
+            
+            working_hours = (check_out_time - check_in_time).total_seconds() / 3600
+            update_data["working_hours"] = working_hours
+        except ValueError:
+            pass  # Invalid time format, skip calculation
+    
+    # When admin edits the attendance, assume it's correct and not late
+    if "check_in" in update_data or "check_out" in update_data:
+        update_data["is_late"] = False
+        if "status" not in update_data:
+            update_data["status"] = "present"
+    
+    # Update the record
+    await db.attendance.update_one({"id": attendance_id}, {"$set": update_data})
+    
+    # Log the activity
+    changes = []
+    for key, new_value in update_data.items():
+        old_value = original_values.get(key, attendance.get(key))
+        if old_value != new_value:
+            changes.append(f"{key}: {old_value} -> {new_value}")
+    
+    if changes:
+        await log_activity(
+            current_user.id, 
+            "attendance_updated", 
+            f"Updated attendance for {attendance.get('user_name', 'Unknown')}: {', '.join(changes)}"
+        )
+    
+    return {"message": "Attendance updated successfully"}
 
 @api_router.post("/attendance/check-in")
 async def check_in(current_user: User = Depends(get_current_user)):
