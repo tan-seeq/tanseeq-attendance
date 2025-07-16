@@ -894,7 +894,7 @@ const Employees = () => {
             <div className="text-sm text-gray-600">
               Total: {employees.length} employees
             </div>
-            {user?.name === "Hatem Mohamed Ahmed" && (
+            {(user?.role === 'admin' || user?.role === 'super_admin') && (
               <button
                 onClick={openAddModal}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
