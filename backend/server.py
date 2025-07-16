@@ -2126,52 +2126,127 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
 
 @api_router.get("/payroll/export/{month}")
 async def export_payroll(month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
-    """Export payroll data (Admin only)"""
+    """Export payroll data with professional design matching attendance reports"""
     from io import BytesIO
     from fastapi.responses import StreamingResponse
     
     payroll_data = await calculate_payroll(month, current_user)
     
     if format == "excel":
-        import openpyxl
-        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        from datetime import datetime
         
         # Create workbook and worksheet
-        wb = openpyxl.Workbook()
+        wb = Workbook()
         ws = wb.active
-        ws.title = f"Payroll {month}"
+        ws.title = f"payroll_{month}"
         
-        # Headers
+        # Set column widths
+        column_widths = [20, 15, 15, 12, 12, 12, 12, 15]
+        for i, width in enumerate(column_widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+        
+        # Company header with logo styling
+        ws.merge_cells('A1:H1')
+        company_cell = ws['A1']
+        company_cell.value = "TANSEEQ TAX CONSULTANCY"
+        company_cell.font = Font(name="Arial", size=20, bold=True, color="FFFFFF")
+        company_cell.fill = PatternFill(start_color="2B5797", end_color="1B4477", fill_type="solid")
+        company_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 40
+        
+        # Logo area (simulated with styling)
+        ws.merge_cells('A2:H2')
+        logo_cell = ws['A2']
+        logo_cell.value = "مكتب استشارات ضريبية متخصص"
+        logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
+        logo_cell.fill = PatternFill(start_color="E6EFFF", end_color="E6EFFF", fill_type="solid")
+        logo_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[2].height = 25
+        
+        # Report title with enhanced styling
+        ws.merge_cells('A3:H3')
+        title_cell = ws['A3']
+        title_cell.value = f"Payroll Report - تقرير الرواتب"
+        title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
+        title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[3].height = 30
+        
+        # Enhanced period info
+        ws.merge_cells('A4:H4')
+        period_cell = ws['A4']
+        period_cell.value = f"الشهر: {month} | عدد الموظفين: {len(payroll_data)} | تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        period_cell.font = Font(name="Arial", size=10, color="555555")
+        period_cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
+        period_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[4].height = 25
+        
+        # Add decorative separator
+        ws.merge_cells('A5:H5')
+        separator_cell = ws['A5']
+        separator_cell.value = "=" * 80
+        separator_cell.font = Font(name="Arial", size=8, color="CCCCCC")
+        separator_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[5].height = 10
+        
+        # Headers with enhanced styling
         headers = ["Name", "Position", "Monthly Salary", "Daily Rate", "Working Days", "Total Hours", "Late Days", "Final Salary"]
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = Font(bold=True)
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-            cell.alignment = Alignment(horizontal="center")
+        headers_ar = ["الاسم", "المنصب", "الراتب الشهري", "الراتب اليومي", "أيام العمل", "إجمالي الساعات", "الأيام المتأخرة", "الراتب النهائي"]
+        
+        header_row = 6
+        for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
+            cell = ws.cell(row=header_row, column=col)
+            cell.value = f"{header_en}\n{header_ar}"
+            cell.font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="2B5797", end_color="2B5797", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.border = Border(
+                left=Side(style='medium', color='000000'),
+                right=Side(style='medium', color='000000'),
+                top=Side(style='medium', color='000000'),
+                bottom=Side(style='medium', color='000000')
+            )
+        ws.row_dimensions[header_row].height = 40
         
         # Data rows
-        for row, employee in enumerate(payroll_data, 2):
-            ws.cell(row=row, column=1, value=employee["name"])
-            ws.cell(row=row, column=2, value=employee["position"])
-            ws.cell(row=row, column=3, value=employee["monthly_salary"])
-            ws.cell(row=row, column=4, value=employee["daily_rate"])
-            ws.cell(row=row, column=5, value=employee["working_days"])
-            ws.cell(row=row, column=6, value=employee["total_hours"])
-            ws.cell(row=row, column=7, value=employee["late_days"])
-            ws.cell(row=row, column=8, value=employee["final_salary"])
+        for row_idx, employee in enumerate(payroll_data, header_row + 1):
+            row_color = "F2F2F2" if row_idx % 2 == 0 else "FFFFFF"
+            
+            values = [
+                employee["name"],
+                employee["position"],
+                f"AED {employee['monthly_salary']:.2f}",
+                f"AED {employee['daily_rate']:.2f}",
+                str(employee["working_days"]),
+                f"{employee.get('total_hours', 0):.1f}h",
+                str(employee.get("late_days", 0)),
+                f"AED {employee['final_salary']:.2f}"
+            ]
+            
+            for col, value in enumerate(values, 1):
+                cell = ws.cell(row=row_idx, column=col)
+                cell.value = value
+                cell.font = Font(name="Arial", size=9)
+                cell.fill = PatternFill(start_color=row_color, end_color=row_color, fill_type="solid")
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.border = Border(
+                    left=Side(style='thin', color='CCCCCC'),
+                    right=Side(style='thin', color='CCCCCC'),
+                    top=Side(style='thin', color='CCCCCC'),
+                    bottom=Side(style='thin', color='CCCCCC')
+                )
+            ws.row_dimensions[row_idx].height = 20
         
-        # Auto-adjust columns
-        for column in ws.columns:
-            max_length = 0
-            column_letter = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = (max_length + 2)
-            ws.column_dimensions[column_letter].width = adjusted_width
+        # Footer
+        footer_row = len(payroll_data) + header_row + 2
+        ws.merge_cells(f'A{footer_row}:H{footer_row}')
+        footer_cell = ws[f'A{footer_row}']
+        footer_cell.value = "TANSEEQ TAX CONSULTANCY - Employee Management System"
+        footer_cell.font = Font(name="Arial", size=9, italic=True, color="666666")
+        footer_cell.alignment = Alignment(horizontal="center", vertical="center")
         
         # Save to BytesIO
         output = BytesIO()
@@ -2181,7 +2256,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         return StreamingResponse(
             BytesIO(output.read()),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename=payroll_{month}.xlsx"}
+            headers={"Content-Disposition": f"attachment; filename=TANSEEQ_payroll_report_{month}.xlsx"}
         )
     
     elif format == "pdf":
@@ -2190,55 +2265,147 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import inch
         from reportlab.lib import colors
+        from datetime import datetime
         
         output = BytesIO()
-        doc = SimpleDocTemplate(output, pagesize=A4)
+        doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+        
+        story = []
         styles = getSampleStyleSheet()
         
-        # Title
+        # Custom styles with enhanced colors
+        company_style = ParagraphStyle(
+            'CompanyStyle',
+            parent=styles['Heading1'],
+            fontSize=28,
+            spaceAfter=10,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.12, 0.31, 0.47),  # Dark blue
+            fontName='Helvetica-Bold'
+        )
+        
+        logo_style = ParagraphStyle(
+            'LogoStyle',
+            parent=styles['Normal'],
+            fontSize=14,
+            spaceAfter=20,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.27, 0.45, 0.77),  # Medium blue
+            fontName='Helvetica-Oblique'
+        )
+        
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=16,
-            spaceAfter=30,
-            alignment=1  # Center alignment
+            fontSize=22,
+            spaceAfter=15,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.12, 0.31, 0.47),  # Dark blue
+            fontName='Helvetica-Bold'
         )
-        title = Paragraph(f"TANSEEQ Tax Consultancy - Payroll Report {month}", title_style)
         
-        # Table data
+        subtitle_style = ParagraphStyle(
+            'CustomSubtitle',
+            parent=styles['Normal'],
+            fontSize=16,
+            spaceAfter=25,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.27, 0.45, 0.77),  # Medium blue
+            fontName='Helvetica-Bold'
+        )
+        
+        info_style = ParagraphStyle(
+            'InfoStyle',
+            parent=styles['Normal'],
+            fontSize=11,
+            spaceAfter=25,
+            alignment=1,  # Center alignment
+            textColor=colors.Color(0.4, 0.4, 0.4),  # Gray
+            fontName='Helvetica'
+        )
+        
+        # Enhanced company header
+        company_header = Paragraph("TANSEEQ TAX CONSULTANCY", company_style)
+        story.append(company_header)
+        
+        # Logo subtitle
+        logo_subtitle = Paragraph("مكتب استشارات ضريبية متخصص - نظام إدارة الموارد البشرية المتطور", logo_style)
+        story.append(logo_subtitle)
+        story.append(Spacer(1, 20))
+        
+        # Report title with enhanced styling
+        report_title_text = Paragraph("Payroll Report<br/>تقرير الرواتب", title_style)
+        story.append(report_title_text)
+        
+        # Period info
+        period_info = Paragraph(f"الشهر: {month}<br/>عدد الموظفين: {len(payroll_data)}<br/>تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
+        story.append(period_info)
+        story.append(Spacer(1, 30))
+        
+        # Add decorative line
+        line_style = ParagraphStyle(
+            'LineStyle',
+            parent=styles['Normal'],
+            fontSize=12,
+            spaceAfter=20,
+            alignment=1,
+            textColor=colors.Color(0.8, 0.8, 0.8)
+        )
+        decorative_line = Paragraph("=" * 60, line_style)
+        story.append(decorative_line)
+        
+        # Create table data
         table_data = [["Name", "Position", "Monthly Salary", "Daily Rate", "Working Days", "Final Salary"]]
         for employee in payroll_data:
             table_data.append([
-                employee["name"],
-                employee["position"],
+                employee["name"][:20],  # Truncate long names
+                employee["position"][:15],
                 f"AED {employee['monthly_salary']:.2f}",
                 f"AED {employee['daily_rate']:.2f}",
                 str(employee["working_days"]),
                 f"AED {employee['final_salary']:.2f}"
             ])
         
-        # Create table
-        table = Table(table_data, colWidths=[2*inch, 1.5*inch, 1.2*inch, 1.2*inch, 1*inch, 1.2*inch])
+        # Create table with enhanced styling
+        table = Table(table_data, colWidths=[2.2*inch, 1.5*inch, 1.3*inch, 1.3*inch, 1*inch, 1.3*inch])
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.17, 0.34, 0.59)),  # Dark blue header
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('TOPPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.Color(0.95, 0.95, 0.95)),  # Light gray alternating
+            ('GRID', (0, 0), (-1, -1), 1, colors.Color(0.7, 0.7, 0.7)),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.Color(0.95, 0.95, 0.95)]),
         ]))
         
+        story.append(table)
+        story.append(Spacer(1, 30))
+        
+        # Professional footer
+        footer_style = ParagraphStyle(
+            'FooterStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            alignment=1,
+            textColor=colors.Color(0.4, 0.4, 0.4),
+            fontName='Helvetica-Oblique'
+        )
+        footer_text = Paragraph("TANSEEQ TAX CONSULTANCY - Employee Management System", footer_style)
+        story.append(footer_text)
+        
         # Build PDF
-        story = [title, Spacer(1, 12), table]
         doc.build(story)
         
         output.seek(0)
         return StreamingResponse(
             BytesIO(output.read()),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=payroll_{month}.pdf"}
+            headers={"Content-Disposition": f"attachment; filename=TANSEEQ_payroll_report_{month}.pdf"}
         )
     
     else:
