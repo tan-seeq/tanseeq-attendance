@@ -554,59 +554,93 @@ async def update_attendance(attendance_id: str, attendance_data: AttendanceUpdat
 
 @api_router.post("/attendance/check-in")
 async def check_in(current_user: User = Depends(get_current_user)):
-    """Check in attendance with custom rules per employee"""
-    uae_time = get_uae_time()
+    """Check in attendance"""
+    # Get current UAE time
+    uae_time = datetime.now(UAE_TZ)
     date_str = uae_time.strftime("%Y-%m-%d")
     time_str = uae_time.strftime("%H:%M:%S")
     
-    # Check if it's weekend (Friday or Saturday)
-    weekday = uae_time.weekday()  # 0 = Monday, 6 = Sunday
-    if weekday in [4, 5]:  # Friday = 4, Saturday = 5
-        raise HTTPException(status_code=400, detail="Cannot check in on weekends (Friday/Saturday)")
-    
-    # Check if already checked in today
-    existing = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
-    if existing and existing.get("check_in"):
+    # Check if user already checked in today
+    existing_attendance = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
+    if existing_attendance and existing_attendance.get("check_in"):
         raise HTTPException(status_code=400, detail="Already checked in today")
     
-    # Custom attendance rules
-    is_late = False
-    if current_user.name == "Hatem Mohamed Ahmed":
-        # Hatem has no time restrictions
-        is_late = False
-    elif current_user.name == "Tarek Wazzan":
-        # Tarek can start from 8 AM
-        work_start = datetime.strptime("08:00", "%H:%M").time()
-        current_time = uae_time.time()
-        is_late = current_time > work_start
+    # Check if it's Friday or Saturday (weekend)
+    weekday = uae_time.weekday()  # 0=Monday, 6=Sunday
+    if weekday == 4 or weekday == 5:  # Friday=4, Saturday=5
+        is_weekend = True
     else:
-        # All others: 9:00 AM - 6:00 PM
-        work_start = datetime.strptime("09:00", "%H:%M").time()
-        current_time = uae_time.time()
-        is_late = current_time > work_start
+        is_weekend = False
     
+    # Get user details for schedule checking
+    user_details = await db.users.find_one({"id": current_user.id})
+    
+    # Determine if user is late based on their schedule type
+    is_late = False
+    status = "present"
+    
+    if user_details.get("has_flexible_schedule", False):
+        # Flexible schedule logic
+        start_range = user_details.get("flexible_start_range", "07:00-10:00")
+        core_hours = user_details.get("flexible_core_hours", "10:00-15:00")
+        
+        # Parse flexible start range
+        start_earliest, start_latest = start_range.split("-")
+        core_start, core_end = core_hours.split("-")
+        
+        current_time = datetime.strptime(time_str, "%H:%M:%S").time()
+        start_latest_time = datetime.strptime(start_latest, "%H:%M").time()
+        core_start_time = datetime.strptime(core_start, "%H:%M").time()
+        
+        # For flexible schedule, they're late if they miss core hours start
+        if current_time > core_start_time:
+            is_late = True
+            status = "late"
+    else:
+        # Fixed schedule logic
+        if current_user.name == "Hatem Mohamed Ahmed":
+            # Hatem has no restrictions
+            pass
+        elif current_user.name == "Tarek Wazzan":
+            # Tarek can start from 8 AM
+            if uae_time.hour > 8 or (uae_time.hour == 8 and uae_time.minute > 0):
+                is_late = True
+                status = "late"
+        else:
+            # Others should be here by 9 AM
+            if uae_time.hour > 9 or (uae_time.hour == 9 and uae_time.minute > 0):
+                is_late = True
+                status = "late"
+    
+    # Create attendance record
     attendance_data = {
         "id": str(uuid.uuid4()),
         "user_id": current_user.id,
         "user_name": current_user.name,
         "date": date_str,
         "check_in": time_str,
-        "status": "late" if is_late else "present",
+        "check_out": None,
+        "working_hours": None,
+        "status": status,
         "is_late": is_late,
+        "is_weekend": is_weekend,
+        "schedule_type": "flexible" if user_details.get("has_flexible_schedule", False) else "fixed",
         "created_at": datetime.utcnow()
     }
     
-    if existing:
+    if existing_attendance:
+        # Update existing record
         await db.attendance.update_one(
             {"user_id": current_user.id, "date": date_str},
             {"$set": attendance_data}
         )
     else:
+        # Create new record
         await db.attendance.insert_one(attendance_data)
     
-    await log_activity(current_user.id, "check_in", f"Checked in at {time_str} - {'Late' if is_late else 'On time'}")
+    await log_activity(current_user.id, "check_in", f"Checked in at {time_str} ({'flexible' if user_details.get('has_flexible_schedule', False) else 'fixed'} schedule)")
     
-    return {"message": "Checked in successfully", "time": time_str, "is_late": is_late}
+    return {"message": "Checked in successfully", "time": time_str, "is_late": is_late, "schedule_type": attendance_data["schedule_type"]}
 
 @api_router.post("/attendance/check-out")
 async def check_out(current_user: User = Depends(get_current_user)):
