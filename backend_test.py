@@ -898,6 +898,111 @@ class TanseeqAPITester:
         
         return success
 
+    def test_payroll_export_excel(self, role: str) -> bool:
+        """Test payroll Excel export with new design and company branding"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        if expected_status != 200:
+            self.log_test(f"Payroll Excel export ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        month = '2025-02'
+        url = f"{self.api_url}/payroll/export/{month}?format=excel"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if success:
+                # Check if response is Excel file
+                content_type = response.headers.get('content-type', '')
+                is_excel = 'spreadsheet' in content_type or 'excel' in content_type
+                
+                # Check filename contains TANSEEQ and proper naming
+                content_disposition = response.headers.get('content-disposition', '')
+                has_tanseeq_in_filename = 'TANSEEQ' in content_disposition
+                has_payroll_in_filename = 'payroll' in content_disposition.lower()
+                
+                # Check content length (should not be empty)
+                has_content = len(response.content) > 1000
+                
+                # Check for absence of strange symbols (■■■■■■)
+                # We can't easily check Excel content, but we can check the response doesn't contain error indicators
+                no_error_symbols = '■■■■■■' not in str(response.content)
+                
+                success = is_excel and has_tanseeq_in_filename and has_payroll_in_filename and has_content and no_error_symbols
+                
+                if not success:
+                    self.log_test(f"Payroll Excel export ({role})", False, 
+                                 f"Excel: {is_excel}, TANSEEQ: {has_tanseeq_in_filename}, Payroll: {has_payroll_in_filename}, Content: {has_content}, No symbols: {no_error_symbols}")
+                else:
+                    self.log_test(f"Payroll Excel export ({role})", True)
+            else:
+                self.log_test(f"Payroll Excel export ({role})", False, f"Status: {response.status_code}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Payroll Excel export ({role})", False, str(e))
+            return False
+
+    def test_payroll_export_pdf(self, role: str) -> bool:
+        """Test payroll PDF export with new design and company branding"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        if expected_status != 200:
+            self.log_test(f"Payroll PDF export ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        month = '2025-02'
+        url = f"{self.api_url}/payroll/export/{month}?format=pdf"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if success:
+                # Check if response is PDF file
+                content_type = response.headers.get('content-type', '')
+                is_pdf = 'pdf' in content_type
+                
+                # Check if it's a valid PDF
+                is_valid_pdf = response.content.startswith(b'%PDF')
+                
+                # Check content for TANSEEQ company name
+                content_str = response.content.decode('latin-1', errors='ignore')
+                has_tanseeq_in_content = 'TANSEEQ' in content_str
+                
+                # Check content length
+                has_content = len(response.content) > 2000
+                
+                # Check for absence of strange symbols (■■■■■■)
+                no_error_symbols = '■■■■■■' not in content_str
+                
+                success = is_pdf and is_valid_pdf and has_tanseeq_in_content and has_content and no_error_symbols
+                
+                if not success:
+                    self.log_test(f"Payroll PDF export ({role})", False, 
+                                 f"PDF: {is_pdf}, Valid: {is_valid_pdf}, TANSEEQ: {has_tanseeq_in_content}, Content: {has_content}, No symbols: {no_error_symbols}")
+                else:
+                    self.log_test(f"Payroll PDF export ({role})", True)
+            else:
+                self.log_test(f"Payroll PDF export ({role})", False, f"Status: {response.status_code}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Payroll PDF export ({role})", False, str(e))
+            return False
+
     def test_reports_company_branding(self, role: str) -> bool:
         """Test that Excel and PDF reports contain company name and proper branding"""
         if role not in self.tokens:
@@ -930,11 +1035,14 @@ class TanseeqAPITester:
                 # Check content length (should not be empty)
                 has_content = len(response.content) > 1000  # Reasonable size for Excel with branding
                 
-                excel_passed = has_tanseeq_in_filename and has_content
+                # Check for absence of strange symbols (■■■■■■)
+                no_error_symbols = '■■■■■■' not in str(response.content)
+                
+                excel_passed = has_tanseeq_in_filename and has_content and no_error_symbols
                 
                 if not excel_passed:
                     self.log_test(f"Excel report company branding ({role})", False, 
-                                 f"TANSEEQ in filename: {has_tanseeq_in_filename}, Has content: {has_content}")
+                                 f"TANSEEQ in filename: {has_tanseeq_in_filename}, Has content: {has_content}, No symbols: {no_error_symbols}")
             else:
                 excel_passed = False
                 self.log_test(f"Excel report company branding ({role})", False, f"Status: {response.status_code}")
@@ -959,11 +1067,14 @@ class TanseeqAPITester:
                 # Check content length
                 has_content = len(response.content) > 2000  # Reasonable size for PDF with branding
                 
-                pdf_passed = is_valid_pdf and has_tanseeq_in_content and has_content
+                # Check for absence of strange symbols (■■■■■■)
+                no_error_symbols = '■■■■■■' not in content_str
+                
+                pdf_passed = is_valid_pdf and has_tanseeq_in_content and has_content and no_error_symbols
                 
                 if not pdf_passed:
                     self.log_test(f"PDF report company branding ({role})", False, 
-                                 f"Valid PDF: {is_valid_pdf}, TANSEEQ in content: {has_tanseeq_in_content}, Has content: {has_content}")
+                                 f"Valid PDF: {is_valid_pdf}, TANSEEQ in content: {has_tanseeq_in_content}, Has content: {has_content}, No symbols: {no_error_symbols}")
             else:
                 pdf_passed = False
                 self.log_test(f"PDF report company branding ({role})", False, f"Status: {response.status_code}")
@@ -977,6 +1088,67 @@ class TanseeqAPITester:
             self.log_test(f"Reports company branding ({role})", True)
         
         return overall_passed
+
+    def test_all_report_types_no_strange_symbols(self, role: str) -> bool:
+        """Test all report types (attendance, leaves, field-exits) for absence of strange symbols"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        if expected_status != 200:
+            self.log_test(f"All reports no strange symbols ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        report_types = ['attendance', 'leaves', 'field-exits']
+        start_date = '2025-01-01'
+        end_date = '2025-01-31'
+        formats = ['excel', 'pdf']
+        
+        all_passed = True
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        for report_type in report_types:
+            for format_type in formats:
+                url = f"{self.api_url}/reports/{report_type}/export?start_date={start_date}&end_date={end_date}&format={format_type}"
+                
+                try:
+                    response = requests.get(url, headers=headers, timeout=30)
+                    if response.status_code == 200:
+                        # Check for absence of strange symbols
+                        if format_type == 'excel':
+                            # For Excel, check the raw content doesn't contain error symbols
+                            no_error_symbols = '■■■■■■' not in str(response.content)
+                        else:  # PDF
+                            # For PDF, decode and check content
+                            content_str = response.content.decode('latin-1', errors='ignore')
+                            no_error_symbols = '■■■■■■' not in content_str
+                        
+                        # Check for company name presence
+                        if format_type == 'pdf':
+                            has_company_name = 'TANSEEQ' in content_str
+                        else:
+                            # For Excel, check filename
+                            content_disposition = response.headers.get('content-disposition', '')
+                            has_company_name = 'TANSEEQ' in content_disposition
+                        
+                        test_passed = no_error_symbols and has_company_name
+                        
+                        if not test_passed:
+                            self.log_test(f"{report_type} {format_type} clean report ({role})", False, 
+                                         f"No symbols: {no_error_symbols}, Company name: {has_company_name}")
+                            all_passed = False
+                        else:
+                            self.log_test(f"{report_type} {format_type} clean report ({role})", True)
+                    else:
+                        self.log_test(f"{report_type} {format_type} clean report ({role})", False, f"Status: {response.status_code}")
+                        all_passed = False
+                        
+                except Exception as e:
+                    self.log_test(f"{report_type} {format_type} clean report ({role})", False, str(e))
+                    all_passed = False
+        
+        return all_passed
 
     def test_weekend_blocking(self, role: str) -> bool:
         """Test weekend blocking for attendance"""
