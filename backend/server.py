@@ -114,9 +114,15 @@ class UserResponse(BaseModel):
     working_hours_start: str
     working_hours_end: str
     phone: str
-    hire_date: Optional[datetime]
-    is_active: bool
-    created_at: datetime
+    hire_date: Optional[datetime] = None
+    is_active: bool = True
+    has_custom_schedule: bool = False
+    has_flexible_schedule: bool = False
+    flexible_hours_per_day: float = 8.0
+    flexible_start_range: str = "07:00-10:00"
+    flexible_end_range: str = "16:00-19:00"
+    flexible_core_hours: str = "10:00-15:00"
+    flexible_days_per_week: int = 5
 
 class LoginRequest(BaseModel):
     email: str
