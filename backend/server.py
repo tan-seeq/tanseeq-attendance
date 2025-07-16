@@ -680,7 +680,7 @@ async def check_in(current_user: User = Depends(get_current_user)):
 
 @api_router.post("/attendance/check-out")
 async def check_out(current_user: User = Depends(get_current_user)):
-    """Check out attendance"""
+    """Check out attendance - with full flexibility for all employees"""
     uae_time = get_uae_time()
     date_str = uae_time.strftime("%Y-%m-%d")
     time_str = uae_time.strftime("%H:%M:%S")
@@ -693,19 +693,40 @@ async def check_out(current_user: User = Depends(get_current_user)):
     if attendance.get("check_out"):
         raise HTTPException(status_code=400, detail="Already checked out today")
     
-    # Calculate working hours
+    # Calculate working hours (handle day crossing if needed)
     check_in_time = datetime.strptime(attendance["check_in"], "%H:%M:%S")
     check_out_time = datetime.strptime(time_str, "%H:%M:%S")
+    
+    # Handle case where checkout is after midnight (next day)
+    if check_out_time < check_in_time:
+        check_out_time += timedelta(days=1)
+    
     working_hours = (check_out_time - check_in_time).total_seconds() / 3600
     
+    # Ensure working hours are positive and reasonable (max 24 hours)
+    if working_hours < 0:
+        working_hours = 0
+    elif working_hours > 24:
+        working_hours = 24
+    
+    # Update attendance record
     await db.attendance.update_one(
         {"user_id": current_user.id, "date": date_str},
-        {"$set": {"check_out": time_str, "working_hours": working_hours}}
+        {"$set": {
+            "check_out": time_str, 
+            "working_hours": working_hours,
+            "flexible_checkout": True  # Mark as flexible checkout
+        }}
     )
     
-    await log_activity(current_user.id, "check_out", f"Checked out at {time_str}")
+    await log_activity(current_user.id, "check_out", f"Checked out at {time_str} - Working hours: {working_hours:.1f}h")
     
-    return {"message": "Checked out successfully", "time": time_str, "working_hours": working_hours}
+    return {
+        "message": "Checked out successfully", 
+        "time": time_str, 
+        "working_hours": working_hours,
+        "flexible_schedule": True
+    }
 
 # ============ LEAVE ENDPOINTS ============
 
