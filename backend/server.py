@@ -747,6 +747,34 @@ async def get_field_exits(current_user: User = Depends(get_current_user)):
     
     return field_exits_list
 
+@api_router.get("/field-exits/all")
+async def get_all_field_exits(current_user: User = Depends(get_current_user)):
+    """Get all field exit requests for admin/super_admin"""
+    if current_user.role == "user":
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    field_exit_records = await db.field_exits.find({}).sort("created_at", -1).to_list(1000)
+    
+    # Convert to clean format without ObjectId
+    field_exits_list = []
+    for record in field_exit_records:
+        field_exits_list.append({
+            "id": record.get("id", str(record.get("_id", ""))),
+            "user_id": record.get("user_id", ""),
+            "user_name": record.get("user_name", ""),
+            "date": record.get("date", ""),
+            "visit_type": record.get("visit_type", ""),
+            "client_name": record.get("client_name", ""),
+            "start_time": record.get("start_time", ""),
+            "end_time": record.get("end_time", ""),
+            "report": record.get("report", ""),
+            "status": record.get("status", "pending"),
+            "approved_by": record.get("approved_by"),
+            "created_at": record.get("created_at")
+        })
+    
+    return field_exits_list
+
 @api_router.post("/field-exits", response_model=FieldExit)
 async def create_field_exit_request(field_exit_data: FieldExitCreate, current_user: User = Depends(get_current_user)):
     """Create field exit request"""
