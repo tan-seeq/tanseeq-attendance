@@ -2217,7 +2217,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             
             values = [
                 employee["name"],
-                employee["position"],
                 f"AED {employee['monthly_salary']:.2f}",
                 f"AED {employee['daily_rate']:.2f}",
                 str(employee["working_days"]),
