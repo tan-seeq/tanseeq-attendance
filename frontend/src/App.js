@@ -994,6 +994,9 @@ const Employees = () => {
                     {employee.has_custom_schedule && (
                       <div className="text-xs text-blue-600">Custom Schedule</div>
                     )}
+                    {employee.has_flexible_schedule && (
+                      <div className="text-xs text-green-600">دوام مرن</div>
+                    )}
                   </td>
                   {user?.name === "Hatem Mohamed Ahmed" && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
