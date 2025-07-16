@@ -1214,49 +1214,65 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         for i, width in enumerate(column_widths[:len(headers)], 1):
             ws.column_dimensions[get_column_letter(i)].width = width
         
-        # Company header
+        # Company header with logo styling
         ws.merge_cells('A1:G1')
         company_cell = ws['A1']
-        company_cell.value = "TANSEEQ TAX CONSULTANCY"
-        company_cell.font = Font(name="Arial", size=18, bold=True, color="FFFFFF")
-        company_cell.fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+        company_cell.value = "🏢 TANSEEQ TAX CONSULTANCY"
+        company_cell.font = Font(name="Arial", size=20, bold=True, color="FFFFFF")
+        company_cell.fill = PatternFill(start_color="2B5797", end_color="1B4477", fill_type="solid")
         company_cell.alignment = Alignment(horizontal="center", vertical="center")
-        ws.row_dimensions[1].height = 30
+        ws.row_dimensions[1].height = 40
         
-        # Report title
+        # Logo area (simulated with styling)
         ws.merge_cells('A2:G2')
-        title_cell = ws['A2']
-        title_cell.value = f"{report_title} - {report_title_ar}"
-        title_cell.font = Font(name="Arial", size=14, bold=True, color="1F4E79")
-        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        logo_cell = ws['A2']
+        logo_cell.value = "💼 مكتب استشارات ضريبية متخصص"
+        logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
+        logo_cell.fill = PatternFill(start_color="E6EFFF", end_color="E6EFFF", fill_type="solid")
+        logo_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[2].height = 25
         
-        # Period info
+        # Report title with enhanced styling
         ws.merge_cells('A3:G3')
-        period_cell = ws['A3']
-        period_cell.value = f"Period: {start_date} to {end_date} | Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        period_cell.font = Font(name="Arial", size=10, color="666666")
+        title_cell = ws['A3']
+        title_cell.value = f"📊 {report_title} - {report_title_ar}"
+        title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
+        title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[3].height = 30
+        
+        # Enhanced period info with icons
+        ws.merge_cells('A4:G4')
+        period_cell = ws['A4']
+        period_cell.value = f"📅 الفترة: {start_date} إلى {end_date} | 📊 عدد السجلات: {len(report_data)} | 🕐 تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        period_cell.font = Font(name="Arial", size=10, color="555555")
+        period_cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
         period_cell.alignment = Alignment(horizontal="center", vertical="center")
-        ws.row_dimensions[3].height = 20
+        ws.row_dimensions[4].height = 25
         
-        # Add empty row
-        ws.row_dimensions[4].height = 10
+        # Add decorative separator
+        ws.merge_cells('A5:G5')
+        separator_cell = ws['A5']
+        separator_cell.value = "─" * 80
+        separator_cell.font = Font(name="Arial", size=8, color="CCCCCC")
+        separator_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[5].height = 10
         
-        # Headers
-        header_row = 5
+        # Headers with enhanced styling
+        header_row = 6
         for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
             cell = ws.cell(row=header_row, column=col)
             cell.value = f"{header_en}\n{header_ar}"
-            cell.font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+            cell.font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="2B5797", end_color="2B5797", fill_type="solid")
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             cell.border = Border(
-                left=Side(style='thin', color='000000'),
-                right=Side(style='thin', color='000000'),
-                top=Side(style='thin', color='000000'),
-                bottom=Side(style='thin', color='000000')
+                left=Side(style='medium', color='000000'),
+                right=Side(style='medium', color='000000'),
+                top=Side(style='medium', color='000000'),
+                bottom=Side(style='medium', color='000000')
             )
-        ws.row_dimensions[header_row].height = 35
+        ws.row_dimensions[header_row].height = 40
         
         # Data rows
         for row_idx, record in enumerate(report_data, header_row + 1):
