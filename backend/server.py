@@ -347,26 +347,28 @@ async def get_users(current_user: User = Depends(get_admin_user)):
     return [UserResponse(**user) for user in users]
 
 @api_router.post("/users", response_model=UserResponse)
-async def create_user(user_data: UserCreate, current_user: User = Depends(get_admin_user)):
-    """Create new user (Admin only)"""
+async def create_user(user: UserCreate, current_user: User = Depends(get_super_admin_user)):
+    """Create new user (Super admin only)"""
     # Check if user already exists
-    existing_user = await db.users.find_one({"email": user_data.email})
+    existing_user = await db.users.find_one({"email": user.email})
     if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
+        raise HTTPException(status_code=400, detail="User with this email already exists")
     
-    # Hash password
-    hashed_password = hash_password(user_data.password)
+    # Create new user
+    user_dict = user.dict()
+    user_dict["id"] = str(uuid.uuid4())
+    user_dict["password"] = hash_password(user.password)
+    user_dict["created_at"] = datetime.utcnow()
+    user_dict["has_custom_schedule"] = False
     
-    # Create user
-    user_dict = user_data.dict()
-    user_dict["password"] = hashed_password
-    user = User(**user_dict)
+    # Calculate daily rate
+    user_dict["daily_rate"] = user_dict["monthly_salary"] / 22
     
-    await db.users.insert_one(user.dict())
+    await db.users.insert_one(user_dict)
     
-    await log_activity(current_user.id, "user_created", f"Created user {user.email}")
+    await log_activity(current_user.id, "user_created", f"Created user {user.name} ({user.email})")
     
-    return UserResponse(**user.dict())
+    return UserResponse(**user_dict)
 
 @api_router.put("/users/{user_id}", response_model=UserResponse)
 async def update_user(user_id: str, user_data: UserUpdate, current_user: User = Depends(get_admin_user)):
