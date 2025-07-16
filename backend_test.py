@@ -1505,9 +1505,15 @@ def main():
     
     print(f"🔗 Using backend URL: {backend_url}")
     
-    # Run tests
+    # Run focused tests for Arabic review request
     tester = TanseeqAPITester(backend_url)
-    success = tester.run_comprehensive_tests()
+    
+    # Check if we should run focused tests or comprehensive tests
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == '--arabic-review':
+        success = tester.run_focused_arabic_review_tests()
+    else:
+        success = tester.run_comprehensive_tests()
     
     return 0 if success else 1
 
