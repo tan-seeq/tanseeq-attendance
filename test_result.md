@@ -144,11 +144,11 @@ backend:
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
     implemented: true
-    working: "NA"
+    working: true
     file: "App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "user"
@@ -156,6 +156,42 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Added missing components: AttendanceManagement, LeaveManagement, FieldExitManagement, Reports, ActivityLogs and their routes"
+      - working: true
+        agent: "main"
+        comment: "All sidebar pages now working correctly. LeaveManagement shows approved_by and admin_notes fields."
+  - task: "Enhanced field exit management UI with notes and departure/return tracking"
+    implemented: false
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Current FieldExitManagement component missing: 1) Admin notes support for approve/reject 2) Display of approved_by field 3) Separate departure/return time tracking buttons 4) Display of actual_start_time and actual_end_time"
+  - task: "Enhanced leave management UI with notes modal"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "LeaveManagement component already has notes modal for approve/reject actions, displays approved_by and admin_notes fields."
+  - task: "Fix report formatting and Excel export issues"
+    implemented: false
+    working: false
+    file: "App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "User reported issues with Excel reports missing company name and ■■■■■■ symbols appearing in reports. Need to unify payroll report design with attendance report style."
 
 metadata:
   created_by: "main_agent"
