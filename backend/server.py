@@ -2149,7 +2149,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             ws.column_dimensions[get_column_letter(i)].width = width
         
         # Company header with logo styling
-        ws.merge_cells('A1:H1')
+        ws.merge_cells('A1:G1')
         company_cell = ws['A1']
         company_cell.value = "TANSEEQ TAX CONSULTANCY"
         company_cell.font = Font(name="Arial", size=20, bold=True, color="FFFFFF")
@@ -2158,7 +2158,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[1].height = 40
         
         # Logo area (simulated with styling)
-        ws.merge_cells('A2:H2')
+        ws.merge_cells('A2:G2')
         logo_cell = ws['A2']
         logo_cell.value = "مكتب استشارات ضريبية متخصص"
         logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
@@ -2167,7 +2167,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[2].height = 25
         
         # Report title with enhanced styling
-        ws.merge_cells('A3:H3')
+        ws.merge_cells('A3:G3')
         title_cell = ws['A3']
         title_cell.value = f"Payroll Report - تقرير الرواتب"
         title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
@@ -2176,7 +2176,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[3].height = 30
         
         # Enhanced period info
-        ws.merge_cells('A4:H4')
+        ws.merge_cells('A4:G4')
         period_cell = ws['A4']
         period_cell.value = f"الشهر: {month} | عدد الموظفين: {len(payroll_data)} | تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         period_cell.font = Font(name="Arial", size=10, color="555555")
@@ -2185,7 +2185,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[4].height = 25
         
         # Add decorative separator
-        ws.merge_cells('A5:H5')
+        ws.merge_cells('A5:G5')
         separator_cell = ws['A5']
         separator_cell.value = "=" * 80
         separator_cell.font = Font(name="Arial", size=8, color="CCCCCC")
