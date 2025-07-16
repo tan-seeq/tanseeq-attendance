@@ -925,16 +925,25 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
 # ============ ACTIVITY LOGS ENDPOINTS ============
 
 @api_router.get("/activity-logs")
-async def get_activity_logs(current_user: User = Depends(get_super_admin_user)):
+async def get_activity_logs(date: str = None, current_user: User = Depends(get_super_admin_user)):
     """Get activity logs (Super admin only)"""
-    activity_records = await db.activity_logs.find().sort("timestamp", -1).to_list(1000)
+    query = {}
+    if date:
+        query["timestamp"] = {"$gte": f"{date}T00:00:00.000Z", "$lte": f"{date}T23:59:59.999Z"}
+    
+    activity_records = await db.activity_logs.find(query).sort("timestamp", -1).to_list(1000)
     
     # Convert to clean format without ObjectId
     activity_logs_list = []
     for record in activity_records:
+        # Get user name from user_id
+        user = await db.users.find_one({"id": record.get("user_id")})
+        user_name = user.get("name", "Unknown") if user else "Unknown"
+        
         activity_logs_list.append({
             "id": record.get("id", str(record.get("_id", ""))),
             "user_id": record.get("user_id", ""),
+            "user_name": user_name,
             "action": record.get("action", ""),
             "details": record.get("details", ""),
             "before_value": record.get("before_value"),
@@ -943,6 +952,87 @@ async def get_activity_logs(current_user: User = Depends(get_super_admin_user)):
         })
     
     return activity_logs_list
+
+# ============ REPORTS ENDPOINTS ============
+
+@api_router.get("/reports/{report_type}/{month}")
+async def get_reports(report_type: str, month: str, current_user: User = Depends(get_admin_user)):
+    """Get reports for attendance, leaves, or field-exits"""
+    
+    # Parse month to get start and end dates
+    start_date = f"{month}-01"
+    
+    # Get next month for end date
+    year, month_num = map(int, month.split('-'))
+    if month_num == 12:
+        end_date = f"{year + 1}-01-01"
+    else:
+        end_date = f"{year}-{month_num + 1:02d}-01"
+    
+    if report_type == "attendance":
+        records = await db.attendance.find({
+            "date": {"$gte": start_date, "$lt": end_date}
+        }).sort("date", -1).to_list(1000)
+        
+        report_data = []
+        for record in records:
+            report_data.append({
+                "user_name": record.get("user_name", ""),
+                "date": record.get("date", ""),
+                "check_in": record.get("check_in", ""),
+                "check_out": record.get("check_out", ""),
+                "working_hours": record.get("working_hours", 0),
+                "status": record.get("status", ""),
+                "is_late": record.get("is_late", False)
+            })
+    
+    elif report_type == "leaves":
+        records = await db.leaves.find({
+            "$or": [
+                {"start_date": {"$gte": start_date, "$lt": end_date}},
+                {"end_date": {"$gte": start_date, "$lt": end_date}}
+            ]
+        }).sort("created_at", -1).to_list(1000)
+        
+        report_data = []
+        for record in records:
+            report_data.append({
+                "user_name": record.get("user_name", ""),
+                "date": record.get("start_date", ""),
+                "start_date": record.get("start_date", ""),
+                "end_date": record.get("end_date", ""),
+                "days_count": record.get("days_count", 0),
+                "reason": record.get("reason", ""),
+                "status": record.get("status", "")
+            })
+    
+    elif report_type == "field-exits":
+        records = await db.field_exits.find({
+            "date": {"$gte": start_date, "$lt": end_date}
+        }).sort("created_at", -1).to_list(1000)
+        
+        report_data = []
+        for record in records:
+            report_data.append({
+                "user_name": record.get("user_name", ""),
+                "date": record.get("date", ""),
+                "visit_type": record.get("visit_type", ""),
+                "client_name": record.get("client_name", ""),
+                "start_time": record.get("start_time", ""),
+                "end_time": record.get("end_time", ""),
+                "status": record.get("status", "")
+            })
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid report type")
+    
+    return report_data
+
+@api_router.get("/reports/{report_type}/{month}/export")
+async def export_report(report_type: str, month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
+    """Export reports in Excel or PDF format"""
+    # This is a placeholder - would need implementation for actual file generation
+    return {"message": f"Export {report_type} report for {month} in {format} format"}
 
 # ============ PAYROLL ENDPOINTS ============
 
