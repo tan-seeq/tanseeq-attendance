@@ -440,6 +440,33 @@ async def get_attendance(current_user: User = Depends(get_current_user)):
     
     return attendance_list
 
+@api_router.get("/attendance/all")
+async def get_all_attendance(current_user: User = Depends(get_current_user)):
+    """Get all attendance records for admin/super_admin"""
+    if current_user.role == "user":
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    attendance_records = await db.attendance.find({}).sort("date", -1).to_list(1000)
+    
+    # Convert to clean format without ObjectId
+    attendance_list = []
+    for record in attendance_records:
+        attendance_list.append({
+            "id": record.get("id", str(record.get("_id", ""))),
+            "user_id": record.get("user_id", ""),
+            "user_name": record.get("user_name", ""),
+            "date": record.get("date", ""),
+            "check_in": record.get("check_in"),
+            "check_out": record.get("check_out"),
+            "working_hours": record.get("working_hours"),
+            "status": record.get("status", ""),
+            "is_late": record.get("is_late", False),
+            "field_exit": record.get("field_exit"),
+            "created_at": record.get("created_at")
+        })
+    
+    return attendance_list
+
 @api_router.put("/attendance/{attendance_id}")
 async def update_attendance(attendance_id: str, attendance_data: AttendanceUpdate, current_user: User = Depends(get_current_user)):
     """Update attendance record (Hatem only)"""
