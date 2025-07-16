@@ -1222,6 +1222,13 @@ class TanseeqAPITester:
             print(f"\n📊 Testing Enhanced Reporting System ({role.upper()}):")
             self.test_reports_export_excel(role)
             self.test_reports_export_pdf(role)
+            self.test_reports_company_branding(role)
+            self.test_all_report_types_no_strange_symbols(role)
+            
+            # Payroll reporting tests (from review request)
+            print(f"\n💰 Testing Payroll Reporting System ({role.upper()}):")
+            self.test_payroll_export_excel(role)
+            self.test_payroll_export_pdf(role)
             
             # Role-specific endpoints
             self.test_users_endpoint(role)
