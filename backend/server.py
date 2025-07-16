@@ -2144,7 +2144,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.title = f"payroll_{month}"
         
         # Set column widths
-        column_widths = [20, 15, 15, 12, 12, 12, 12, 15]
+        column_widths = [20, 15, 12, 12, 12, 12, 15]
         for i, width in enumerate(column_widths, 1):
             ws.column_dimensions[get_column_letter(i)].width = width
         
