@@ -371,20 +371,36 @@ async def create_user(user: UserCreate, current_user: User = Depends(get_super_a
     return UserResponse(**user_dict)
 
 @api_router.put("/users/{user_id}", response_model=UserResponse)
-async def update_user(user_id: str, user_data: UserUpdate, current_user: User = Depends(get_admin_user)):
-    """Update user (Admin only)"""
+async def update_user(user_id: str, user_update: UserUpdate, current_user: User = Depends(get_super_admin_user)):
+    """Update user (Super admin only)"""
     user = await db.users.find_one({"id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Get update data
-    update_data = {k: v for k, v in user_data.dict().items() if v is not None}
+    # Store original values for logging
+    original_user = user.copy()
+    
+    # Update user data
+    update_data = user_update.dict(exclude_unset=True)
+    
+    # Recalculate daily rate if monthly salary changed
+    if "monthly_salary" in update_data:
+        update_data["daily_rate"] = update_data["monthly_salary"] / 22
     
     if update_data:
         await db.users.update_one({"id": user_id}, {"$set": update_data})
-        await log_activity(current_user.id, "user_updated", f"Updated user {user['email']}")
+        
+        # Log the changes
+        changes = []
+        for key, new_value in update_data.items():
+            old_value = original_user.get(key)
+            if old_value != new_value:
+                changes.append(f"{key}: {old_value} -> {new_value}")
+        
+        if changes:
+            await log_activity(current_user.id, "user_updated", f"Updated user {user['name']}: {', '.join(changes)}")
     
-    # Return updated user
+    # Get updated user
     updated_user = await db.users.find_one({"id": user_id})
     return UserResponse(**updated_user)
 
