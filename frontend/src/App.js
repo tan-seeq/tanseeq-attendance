@@ -2562,6 +2562,10 @@ const LeaveManagement = () => {
 const FieldExitManagement = () => {
   const [fieldExits, setFieldExits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [selectedFieldExit, setSelectedFieldExit] = useState(null);
+  const [actionType, setActionType] = useState(''); // 'approve' or 'reject'
+  const [notes, setNotes] = useState('');
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -2580,21 +2584,37 @@ const FieldExitManagement = () => {
     }
   };
 
-  const handleApprove = async (id) => {
-    try {
-      await axios.post(`${API}/field-exits/${id}/approve`);
-      fetchAllFieldExits();
-    } catch (error) {
-      console.error('Error approving field exit:', error);
-    }
+  const handleApprove = async (fieldExit) => {
+    setSelectedFieldExit(fieldExit);
+    setActionType('approve');
+    setShowNotesModal(true);
   };
 
-  const handleReject = async (id) => {
+  const handleReject = async (fieldExit) => {
+    setSelectedFieldExit(fieldExit);
+    setActionType('reject');
+    setShowNotesModal(true);
+  };
+
+  const submitAction = async () => {
+    if (!selectedFieldExit) return;
+
     try {
-      await axios.post(`${API}/field-exits/${id}/reject`);
+      const endpoint = actionType === 'approve' ? 'approve' : 'reject';
+      const requestData = notes ? { notes } : {};
+      
+      await axios.post(`${API}/field-exits/${selectedFieldExit.id}/${endpoint}`, requestData);
+      
+      setShowNotesModal(false);
+      setSelectedFieldExit(null);
+      setNotes('');
+      setActionType('');
       fetchAllFieldExits();
+      
+      alert(`Field exit request ${actionType === 'approve' ? 'approved' : 'rejected'} successfully`);
     } catch (error) {
-      console.error('Error rejecting field exit:', error);
+      console.error(`Error ${actionType}ing field exit:`, error);
+      alert(`Error ${actionType}ing field exit request`);
     }
   };
 
@@ -2632,16 +2652,22 @@ const FieldExitManagement = () => {
                   اسم العميل
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  وقت البداية
+                  الوقت المتوقع
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  وقت النهاية
+                  الوقت الفعلي
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   تقرير الزيارة
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الحالة
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  تم الموافقة/الرفض من قبل
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الملاحظات
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الإجراءات
@@ -2664,10 +2690,16 @@ const FieldExitManagement = () => {
                     {exit.client_name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {exit.start_time}
+                    <div className="text-xs">
+                      <div>من: {exit.expected_start_time || exit.start_time}</div>
+                      <div>إلى: {exit.expected_end_time || exit.end_time}</div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {exit.end_time}
+                    <div className="text-xs">
+                      <div>ذهب: {exit.actual_start_time || '-'}</div>
+                      <div>عاد: {exit.actual_end_time || '-'}</div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     <div className="max-w-xs overflow-hidden text-ellipsis">
@@ -2684,18 +2716,26 @@ const FieldExitManagement = () => {
                        exit.status === 'rejected' ? 'مرفوض' : 'معلق'}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {exit.approved_by || exit.rejected_by || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    <div className="max-w-xs overflow-hidden text-ellipsis">
+                      {exit.admin_notes || '-'}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {exit.status === 'pending' && (
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleApprove(exit.id)}
+                          onClick={() => handleApprove(exit)}
                           className="text-green-600 hover:text-green-900"
                           title="Approve"
                         >
                           <CheckCircleIcon className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleReject(exit.id)}
+                          onClick={() => handleReject(exit)}
                           className="text-red-600 hover:text-red-900"
                           title="Reject"
                         >
@@ -2710,6 +2750,66 @@ const FieldExitManagement = () => {
           </table>
         </div>
       </div>
+
+      {/* Action Modal with Notes */}
+      {showNotesModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                {actionType === 'approve' ? 'موافقة على الزيارة الخارجية' : 'رفض الزيارة الخارجية'}
+              </h3>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  الموظف: {selectedFieldExit?.user_name}
+                </p>
+                <p className="text-sm text-gray-600 mb-2">
+                  نوع الزيارة: {visitTypeOptions[selectedFieldExit?.visit_type]}
+                </p>
+                <p className="text-sm text-gray-600 mb-2">
+                  التاريخ: {selectedFieldExit?.date}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  العميل: {selectedFieldExit?.client_name || 'غير محدد'}
+                </p>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الملاحظات (اختياري)
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="أدخل أي ملاحظات..."
+                />
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={submitAction}
+                  className={`flex-1 px-4 py-2 ${
+                    actionType === 'approve' ? 'bg-green-500 hover:bg-green-700' : 'bg-red-500 hover:bg-red-700'
+                  } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                >
+                  {actionType === 'approve' ? 'موافقة' : 'رفض'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNotesModal(false);
+                    setSelectedFieldExit(null);
+                    setNotes('');
+                    setActionType('');
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
