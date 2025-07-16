@@ -1243,6 +1243,325 @@ class TanseeqAPITester:
         
         return all_passed
 
+    def test_field_exits_actual_times_display(self, role: str) -> bool:
+        """Test that field-exits endpoint returns actual_start_time and actual_end_time"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'field-exits', token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Check if response includes actual time fields
+            has_actual_times = True
+            if response:  # If there are records
+                first_record = response[0]
+                required_fields = ['actual_start_time', 'actual_end_time', 'expected_start_time', 'expected_end_time']
+                missing_fields = [field for field in required_fields if field not in first_record]
+                
+                if missing_fields:
+                    has_actual_times = False
+                    self.log_test(f"Field exits actual times display ({role})", False, 
+                                 f"Missing fields: {missing_fields}")
+                else:
+                    self.log_test(f"Field exits actual times display ({role})", True)
+            else:
+                # No records to test, but endpoint works
+                self.log_test(f"Field exits actual times display ({role})", True, "No records to verify fields")
+            
+            return has_actual_times
+        else:
+            self.log_test(f"Field exits actual times display ({role})", False, str(response))
+            return False
+
+    def test_field_exits_all_actual_times_display(self, role: str) -> bool:
+        """Test that field-exits/all endpoint returns actual_start_time and actual_end_time for admins"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'field-exits/all', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success and isinstance(response, list):
+            # Check if response includes actual time fields
+            has_actual_times = True
+            if response:  # If there are records
+                first_record = response[0]
+                required_fields = ['actual_start_time', 'actual_end_time', 'expected_start_time', 'expected_end_time']
+                missing_fields = [field for field in required_fields if field not in first_record]
+                
+                if missing_fields:
+                    has_actual_times = False
+                    self.log_test(f"Field exits all actual times display ({role})", False, 
+                                 f"Missing fields: {missing_fields}")
+                else:
+                    self.log_test(f"Field exits all actual times display ({role})", True)
+            else:
+                # No records to test, but endpoint works
+                self.log_test(f"Field exits all actual times display ({role})", True, "No records to verify fields")
+            
+            return has_actual_times
+        else:
+            test_passed = success if expected_status != 200 else False
+            self.log_test(f"Field exits all actual times display ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            return test_passed
+
+    def test_field_exit_creation_with_expected_times_comprehensive(self, role: str) -> bool:
+        """Comprehensive test for field exit creation with expected times"""
+        if role not in self.tokens:
+            return False
+        
+        # Test creating field exit with expected times
+        url = f"{self.api_url}/field-exits"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        # Use form data as the endpoint expects Form parameters
+        form_data = {
+            'visit_type': 'client_visit',
+            'client_name': 'شركة الاختبار للاستشارات الضريبية',
+            'expected_start_time': '09:30:00',
+            'expected_end_time': '11:30:00',
+            'report': 'زيارة عميل لمناقشة الخدمات الضريبية والمتابعة'
+        }
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                # Check if response contains the expected structure
+                has_id = 'id' in response_data
+                has_message = 'message' in response_data
+                success = success and has_id and has_message
+                
+                # Store the field exit ID for further testing
+                if has_id:
+                    setattr(self, f'comprehensive_field_exit_id_{role}', response_data['id'])
+                
+                # Verify the created record has expected times
+                if has_id:
+                    verify_success, verify_response = self.make_request('GET', 'field-exits', token=self.tokens[role])
+                    if verify_success and isinstance(verify_response, list):
+                        created_record = None
+                        for record in verify_response:
+                            if record.get('id') == response_data['id']:
+                                created_record = record
+                                break
+                        
+                        if created_record:
+                            has_expected_start = created_record.get('expected_start_time') == '09:30:00'
+                            has_expected_end = created_record.get('expected_end_time') == '11:30:00'
+                            has_actual_start_null = created_record.get('actual_start_time') is None
+                            has_actual_end_null = created_record.get('actual_end_time') is None
+                            
+                            success = success and has_expected_start and has_expected_end and has_actual_start_null and has_actual_end_null
+                            
+                            if not success:
+                                self.log_test(f"Field exit creation comprehensive ({role})", False, 
+                                             f"Expected start: {has_expected_start}, Expected end: {has_expected_end}, Actual start null: {has_actual_start_null}, Actual end null: {has_actual_end_null}")
+                            else:
+                                self.log_test(f"Field exit creation comprehensive ({role})", True)
+                        else:
+                            self.log_test(f"Field exit creation comprehensive ({role})", False, "Created record not found in response")
+                            success = False
+                    else:
+                        self.log_test(f"Field exit creation comprehensive ({role})", False, "Could not verify created record")
+                        success = False
+            else:
+                self.log_test(f"Field exit creation comprehensive ({role})", False, 
+                             f"Status: {response.status_code}, Response: {response.text}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Field exit creation comprehensive ({role})", False, str(e))
+            return False
+
+    def test_field_exit_departure_return_flow(self, role: str) -> bool:
+        """Test complete departure and return flow for field exits"""
+        if role not in self.tokens:
+            return False
+        
+        # Get or create a field exit ID to test with
+        field_exit_id = getattr(self, f'comprehensive_field_exit_id_{role}', None)
+        if not field_exit_id:
+            # Try to get existing field exits
+            success, field_exits = self.make_request('GET', 'field-exits', token=self.tokens[role])
+            if success and field_exits:
+                field_exit_id = field_exits[0].get('id')
+        
+        if not field_exit_id:
+            self.log_test(f"Field exit departure return flow ({role})", False, "No field exit ID available for testing")
+            return False
+        
+        # Test departure (start) endpoint
+        start_success, start_response = self.make_request('POST', f'field-exits/{field_exit_id}/start', 
+                                                        token=self.tokens[role])
+        
+        # Accept both success and "already recorded" error
+        start_already_recorded = not start_success and 'already recorded' in str(start_response).lower()
+        start_test_passed = start_success or start_already_recorded
+        
+        # Test return (end) endpoint
+        end_success, end_response = self.make_request('POST', f'field-exits/{field_exit_id}/end', 
+                                                    token=self.tokens[role])
+        
+        # Accept success, "already recorded" error, or "must record departure first" error
+        end_already_recorded = not end_success and 'already recorded' in str(end_response).lower()
+        end_must_depart_first = not end_success and 'departure' in str(end_response).lower()
+        end_test_passed = end_success or end_already_recorded or end_must_depart_first
+        
+        overall_passed = start_test_passed and end_test_passed
+        
+        if overall_passed:
+            # Verify that actual times are now set
+            verify_success, verify_response = self.make_request('GET', 'field-exits', token=self.tokens[role])
+            if verify_success and isinstance(verify_response, list):
+                updated_record = None
+                for record in verify_response:
+                    if record.get('id') == field_exit_id:
+                        updated_record = record
+                        break
+                
+                if updated_record:
+                    has_actual_start = updated_record.get('actual_start_time') is not None
+                    has_actual_end = updated_record.get('actual_end_time') is not None
+                    
+                    # If start was successful, actual_start_time should be set
+                    if start_success:
+                        overall_passed = overall_passed and has_actual_start
+                    
+                    # If end was successful, actual_end_time should be set
+                    if end_success:
+                        overall_passed = overall_passed and has_actual_end
+                    
+                    self.log_test(f"Field exit departure return flow ({role})", overall_passed, 
+                                 f"Start: {start_test_passed}, End: {end_test_passed}, Actual start set: {has_actual_start}, Actual end set: {has_actual_end}" if not overall_passed else "")
+                else:
+                    self.log_test(f"Field exit departure return flow ({role})", False, "Could not find updated record")
+                    overall_passed = False
+            else:
+                self.log_test(f"Field exit departure return flow ({role})", overall_passed, 
+                             f"Start: {start_test_passed}, End: {end_test_passed} (could not verify actual times)")
+        else:
+            self.log_test(f"Field exit departure return flow ({role})", False, 
+                         f"Start: {start_test_passed} ({start_response}), End: {end_test_passed} ({end_response})")
+        
+        return overall_passed
+
+    def test_dashboard_buttons_functionality(self, role: str) -> bool:
+        """Test dashboard functionality and buttons"""
+        if role not in self.tokens:
+            return False
+        
+        # Test dashboard stats endpoint
+        success, response = self.make_request('GET', 'dashboard/stats', token=self.tokens[role])
+        
+        if success:
+            # Verify response structure based on role
+            if role == 'user':
+                expected_keys = ['attendance_today', 'pending_leaves', 'pending_field_exits']
+            else:  # admin or super_admin
+                expected_keys = ['total_users', 'present_today', 'pending_leaves', 'pending_field_exits']
+            
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Additional checks for data integrity
+            data_integrity = True
+            if role in ['admin', 'super_admin']:
+                # Check that numeric values are actually numbers
+                numeric_fields = ['total_users', 'present_today', 'pending_leaves', 'pending_field_exits']
+                for field in numeric_fields:
+                    if field in response and not isinstance(response[field], (int, float)):
+                        data_integrity = False
+                        break
+            else:
+                # For users, check attendance_today structure if present
+                if response.get('attendance_today') is not None:
+                    attendance = response['attendance_today']
+                    if not isinstance(attendance, dict) or 'date' not in attendance:
+                        data_integrity = False
+            
+            overall_success = has_expected_keys and data_integrity
+            
+            self.log_test(f"Dashboard buttons functionality ({role})", overall_success,
+                         f"Expected keys: {has_expected_keys}, Data integrity: {data_integrity}" if not overall_success else "")
+            return overall_success
+        else:
+            self.log_test(f"Dashboard buttons functionality ({role})", False, str(response))
+            return False
+
+    def run_field_exit_time_tests(self):
+        """Run comprehensive tests for field exit time issues (Arabic review request)"""
+        print("🚀 اختبار مشكلة أوقات الزيارات الخارجية - TANSEEQ HR Backend API")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 80)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Test both user and admin roles
+        roles = ['user', 'admin']
+        
+        for role in roles:
+            print(f"\n🔐 Testing {role.upper()} role for field exit time functionality:")
+            print("-" * 60)
+            
+            # Login
+            if not self.test_login(role):
+                print(f"❌ Login failed for {role} - trying alternative")
+                if role == 'admin':
+                    role = 'super_admin'
+                    if not self.test_login(role):
+                        print("❌ Both admin and super_admin login failed - skipping role")
+                        continue
+                else:
+                    print(f"❌ Login failed for {role} - skipping role")
+                    continue
+            
+            # 1. Test field exit endpoints display actual times
+            print(f"\n✅ 1. اختبار عرض الأوقات الفعلية في endpoints الزيارات الخارجية:")
+            print("-" * 50)
+            self.test_field_exits_actual_times_display(role)
+            
+            if role in ['admin', 'super_admin']:
+                self.test_field_exits_all_actual_times_display(role)
+            
+            # 2. Test creating new field exit with expected times
+            print(f"\n✅ 2. اختبار إنشاء زيارة خارجية جديدة:")
+            print("-" * 50)
+            self.test_field_exit_creation_with_expected_times_comprehensive(role)
+            
+            # 3. Test departure and return endpoints
+            print(f"\n✅ 3. اختبار endpoints الذهاب والعودة:")
+            print("-" * 50)
+            self.test_field_exit_departure_return_flow(role)
+            
+            # 4. Test dashboard functionality
+            print(f"\n✅ 4. اختبار أزرار Dashboard:")
+            print("-" * 50)
+            self.test_dashboard_buttons_functionality(role)
+            
+            # Additional comprehensive tests for admin role
+            if role in ['admin', 'super_admin']:
+                print(f"\n✅ اختبارات إضافية للمديرين:")
+                print("-" * 50)
+                self.test_field_exit_approve_with_notes(role)
+                self.test_field_exit_reject_with_notes(role)
+                self.test_field_exits_all_with_approved_by_and_notes(role)
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print(f"📊 TEST SUMMARY: {self.tests_passed}/{self.tests_run} tests passed")
+        print(f"✅ Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed == self.tests_run
+
     def test_all_reports_clean_no_strange_symbols(self, role: str) -> bool:
         """Test all reports (attendance, leaves, field-exits, payroll) are clean without ■■■■■■ symbols"""
         if role not in self.tokens:
