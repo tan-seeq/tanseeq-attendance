@@ -1467,6 +1467,751 @@ const Payroll = () => {
   );
 };
 
+// Attendance Management Component (Admin)
+const AttendanceManagement = () => {
+  const [attendance, setAttendance] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [editData, setEditData] = useState({});
+  const { user } = useAuth();
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    fetchAllAttendance();
+  }, []);
+
+  const fetchAllAttendance = async () => {
+    try {
+      const response = await axios.get(`${API}/attendance/all`);
+      setAttendance(response.data);
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (record) => {
+    setEditingRecord(record.id);
+    setEditData({
+      check_in: record.check_in,
+      check_out: record.check_out,
+      status: record.status
+    });
+  };
+
+  const handleSave = async (id) => {
+    try {
+      await axios.put(`${API}/attendance/${id}`, editData);
+      setEditingRecord(null);
+      fetchAllAttendance();
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingRecord(null);
+    setEditData({});
+  };
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">إدارة الحضور - TANSEEQ Tax Consultancy</h2>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الموظف
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  التاريخ
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الحضور
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الانصراف
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ساعات العمل
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الحالة
+                </th>
+                {user?.name === "Hatem Mohamed Ahmed" && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الإجراءات
+                  </th>
+                )}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {attendance.map((record) => (
+                <tr key={record.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {record.user_name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {record.date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingRecord === record.id ? (
+                      <input
+                        type="time"
+                        value={editData.check_in || ''}
+                        onChange={(e) => setEditData({...editData, check_in: e.target.value})}
+                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      />
+                    ) : (
+                      record.check_in || '--'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingRecord === record.id ? (
+                      <input
+                        type="time"
+                        value={editData.check_out || ''}
+                        onChange={(e) => setEditData({...editData, check_out: e.target.value})}
+                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      />
+                    ) : (
+                      record.check_out || '--'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {record.working_hours ? `${record.working_hours.toFixed(1)} ساعة` : '--'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      record.status === 'present' ? 'bg-green-100 text-green-800' :
+                      record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {record.status === 'present' ? 'حاضر' : 
+                       record.status === 'late' ? 'متأخر' : 'غائب'}
+                    </span>
+                  </td>
+                  {user?.name === "Hatem Mohamed Ahmed" && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {editingRecord === record.id ? (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleSave(record.id)}
+                            className="text-green-600 hover:text-green-900"
+                          >
+                            <CheckCircleIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={handleCancel}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <XCircleIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleEdit(record)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Leave Management Component (Admin)
+const LeaveManagement = () => {
+  const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
+  const { user } = useAuth();
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    fetchAllLeaves();
+  }, []);
+
+  const fetchAllLeaves = async () => {
+    try {
+      const response = await axios.get(`${API}/leaves/all`);
+      setLeaves(response.data);
+    } catch (error) {
+      console.error('Error fetching leaves:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await axios.post(`${API}/leaves/${id}/approve`);
+      fetchAllLeaves();
+    } catch (error) {
+      console.error('Error approving leave:', error);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await axios.post(`${API}/leaves/${id}/reject`);
+      fetchAllLeaves();
+    } catch (error) {
+      console.error('Error rejecting leave:', error);
+    }
+  };
+
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setShowImageModal(true);
+  };
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">إدارة الإجازات - TANSEEQ Tax Consultancy</h2>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الموظف
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  تاريخ البداية
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  تاريخ النهاية
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  عدد الأيام
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  السبب
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  المرفق
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الحالة
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الإجراءات
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {leaves.map((leave) => (
+                <tr key={leave.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {leave.user_name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.start_date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.end_date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.days_count} يوم
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.reason}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.attachment_url ? (
+                      <button
+                        onClick={() => handleImageClick(`${BACKEND_URL}${leave.attachment_url}`)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      leave.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      leave.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {leave.status === 'approved' ? 'موافق عليه' : 
+                       leave.status === 'rejected' ? 'مرفوض' : 'معلق'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {leave.status === 'pending' && (
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleApprove(leave.id)}
+                          className="text-green-600 hover:text-green-900"
+                          title="Approve"
+                        >
+                          <CheckCircleIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleReject(leave.id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Reject"
+                        >
+                          <XCircleIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="relative max-w-4xl max-h-full">
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2"
+            >
+              <XIcon className="h-6 w-6" />
+            </button>
+            <img
+              src={selectedImage}
+              alt="Leave attachment"
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Field Exit Management Component (Admin)
+const FieldExitManagement = () => {
+  const [fieldExits, setFieldExits] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    fetchAllFieldExits();
+  }, []);
+
+  const fetchAllFieldExits = async () => {
+    try {
+      const response = await axios.get(`${API}/field-exits/all`);
+      setFieldExits(response.data);
+    } catch (error) {
+      console.error('Error fetching field exits:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await axios.post(`${API}/field-exits/${id}/approve`);
+      fetchAllFieldExits();
+    } catch (error) {
+      console.error('Error approving field exit:', error);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await axios.post(`${API}/field-exits/${id}/reject`);
+      fetchAllFieldExits();
+    } catch (error) {
+      console.error('Error rejecting field exit:', error);
+    }
+  };
+
+  const visitTypeOptions = {
+    client_visit: 'زيارة عميل',
+    collection: 'تحصيل',
+    bank_visit: 'زيارة بنك',
+    personal: 'شخصي',
+    admin_errand: 'مهمة إدارية'
+  };
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">إدارة الزيارات الخارجية - TANSEEQ Tax Consultancy</h2>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الموظف
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  التاريخ
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  نوع الزيارة
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  اسم العميل
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  وقت البداية
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  وقت النهاية
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  تقرير الزيارة
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الحالة
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الإجراءات
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {fieldExits.map((exit) => (
+                <tr key={exit.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {exit.user_name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {exit.date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {visitTypeOptions[exit.visit_type]}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {exit.client_name || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {exit.start_time}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {exit.end_time}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    <div className="max-w-xs overflow-hidden text-ellipsis">
+                      {exit.report || '-'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      exit.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      exit.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {exit.status === 'approved' ? 'موافق عليه' : 
+                       exit.status === 'rejected' ? 'مرفوض' : 'معلق'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {exit.status === 'pending' && (
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleApprove(exit.id)}
+                          className="text-green-600 hover:text-green-900"
+                          title="Approve"
+                        >
+                          <CheckCircleIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleReject(exit.id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Reject"
+                        >
+                          <XCircleIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Reports Component
+const Reports = () => {
+  const [reportType, setReportType] = useState('attendance');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [reportData, setReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const { t } = useLanguage();
+
+  const fetchReport = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API}/reports/${reportType}/${selectedMonth}`);
+      setReportData(response.data);
+    } catch (error) {
+      console.error('Error fetching report:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExport = async (format) => {
+    try {
+      const response = await axios.get(`${API}/reports/${reportType}/${selectedMonth}/export?format=${format}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${reportType}_report_${selectedMonth}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting report:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReport();
+  }, [reportType, selectedMonth]);
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">التقارير - TANSEEQ Tax Consultancy</h2>
+          <div className="flex space-x-2">
+            <select
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="attendance">تقرير الحضور</option>
+              <option value="leaves">تقرير الإجازات</option>
+              <option value="field-exits">تقرير الزيارات الخارجية</option>
+            </select>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {Array.from({length: 12}, (_, i) => {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const monthStr = date.toISOString().slice(0, 7);
+                return (
+                  <option key={monthStr} value={monthStr}>
+                    {date.toLocaleDateString('ar', { year: 'numeric', month: 'long' })}
+                  </option>
+                );
+              })}
+            </select>
+            <button
+              onClick={() => handleExport('excel')}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              تصدير Excel
+            </button>
+            <button
+              onClick={() => handleExport('pdf')}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              تصدير PDF
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الموظف
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    التاريخ
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    التفاصيل
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    الحالة
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {reportData.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {item.user_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {item.date}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {reportType === 'attendance' && `${item.check_in || '--'} - ${item.check_out || '--'}`}
+                      {reportType === 'leaves' && `${item.start_date} إلى ${item.end_date} (${item.days_count} يوم)`}
+                      {reportType === 'field-exits' && `${item.visit_type} - ${item.start_time} إلى ${item.end_time}`}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        item.status === 'approved' || item.status === 'present' ? 'bg-green-100 text-green-800' :
+                        item.status === 'rejected' || item.status === 'absent' ? 'bg-red-100 text-red-800' :
+                        item.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {item.status === 'approved' ? 'موافق عليه' : 
+                         item.status === 'rejected' ? 'مرفوض' : 
+                         item.status === 'present' ? 'حاضر' :
+                         item.status === 'late' ? 'متأخر' :
+                         item.status === 'absent' ? 'غائب' :
+                         'معلق'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Activity Logs Component (Super Admin only)
+const ActivityLogs = () => {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
+  const { user } = useAuth();
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    fetchActivities();
+  }, [selectedDate]);
+
+  const fetchActivities = async () => {
+    try {
+      const response = await axios.get(`${API}/activity-logs?date=${selectedDate}`);
+      setActivities(response.data);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">سجل الأنشطة - TANSEEQ Tax Consultancy</h2>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الوقت
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  المستخدم
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  النشاط
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  التفاصيل
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {activities.map((activity) => (
+                <tr key={activity.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(activity.timestamp).toLocaleTimeString('ar')}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {activity.user_name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {activity.action}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {activity.details}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {activities.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">لا توجد أنشطة في هذا التاريخ</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Leaves Management Component
 const Leaves = () => {
   const [leaves, setLeaves] = useState([]);
