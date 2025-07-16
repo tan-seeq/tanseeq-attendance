@@ -866,7 +866,13 @@ const Employees = () => {
       monthly_salary: '',
       working_hours_start: '09:00',
       working_hours_end: '18:00',
-      phone: ''
+      phone: '',
+      has_flexible_schedule: false,
+      flexible_hours_per_day: 8,
+      flexible_start_range: '07:00-10:00',
+      flexible_end_range: '16:00-19:00',
+      flexible_core_hours: '10:00-15:00',
+      flexible_days_per_week: 5
     });
     setShowAddModal(true);
   };
@@ -882,7 +888,13 @@ const Employees = () => {
       monthly_salary: employee.monthly_salary.toString(),
       working_hours_start: employee.working_hours_start,
       working_hours_end: employee.working_hours_end,
-      phone: employee.phone
+      phone: employee.phone,
+      has_flexible_schedule: employee.has_flexible_schedule || false,
+      flexible_hours_per_day: employee.flexible_hours_per_day || 8,
+      flexible_start_range: employee.flexible_start_range || '07:00-10:00',
+      flexible_end_range: employee.flexible_end_range || '16:00-19:00',
+      flexible_core_hours: employee.flexible_core_hours || '10:00-15:00',
+      flexible_days_per_week: employee.flexible_days_per_week || 5
     });
     setShowEditModal(true);
   };
