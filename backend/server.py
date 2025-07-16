@@ -937,101 +937,205 @@ async def get_all_field_exits(current_user: User = Depends(get_current_user)):
     
     return field_exits_list
 
-@api_router.post("/field-exits", response_model=FieldExit)
-async def create_field_exit_request(field_exit_data: FieldExitCreate, current_user: User = Depends(get_current_user)):
+@api_router.post("/field-exits", response_model=dict)
+async def create_field_exit_request(
+    visit_type: str = Form(...),
+    client_name: str = Form(""),
+    expected_start_time: str = Form(...),
+    expected_end_time: str = Form(...),
+    report: str = Form(""),
+    current_user: User = Depends(get_current_user)
+):
     """Create field exit request"""
-    field_exit = FieldExit(**field_exit_data.dict())
-    await db.field_exits.insert_one(field_exit.dict())
-    
-    # Log the field exit in attendance history
-    uae_time = get_uae_time()
+    # Get current UAE time
+    uae_time = datetime.now(UAE_TZ)
     date_str = uae_time.strftime("%Y-%m-%d")
     
-    # Check if there's attendance record for today
-    attendance_record = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
-    
-    if attendance_record:
-        # Add field exit info to attendance record
-        field_exit_info = {
-            "field_exit_id": field_exit.id,
-            "visit_type": field_exit_data.visit_type,
-            "client_name": field_exit_data.client_name,
-            "start_time": field_exit_data.start_time,
-            "end_time": field_exit_data.end_time,
-            "report": field_exit_data.report
-        }
-        
-        await db.attendance.update_one(
-            {"user_id": current_user.id, "date": date_str},
-            {"$set": {"field_exit": field_exit_info}}
-        )
-    
-    visit_type_ar = {
-        "client_visit": "زيارة عميل",
-        "collection": "تحصيل",
-        "bank_visit": "زيارة بنك",
-        "personal": "شخصي",
-        "admin_errand": "مهمة إدارية"
+    # Create field exit request
+    field_exit = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user.id,
+        "user_name": current_user.name,
+        "date": date_str,
+        "visit_type": visit_type,
+        "client_name": client_name,
+        "expected_start_time": expected_start_time,
+        "expected_end_time": expected_end_time,
+        "actual_start_time": None,  # Will be set when user clicks "تسجيل الذهاب"
+        "actual_end_time": None,    # Will be set when user clicks "تسجيل العودة"
+        "report": report,
+        "status": "pending",
+        "approved_by": None,
+        "approved_by_id": None,
+        "approved_at": None,
+        "rejected_by": None,
+        "rejected_by_id": None,
+        "rejected_at": None,
+        "admin_notes": "",
+        "created_at": datetime.utcnow(),
+        "exit_status": "requested"  # requested, departed, returned, completed
     }
     
-    await log_activity(current_user.id, "field_exit_requested", 
-                      f"Requested field exit: {visit_type_ar.get(field_exit_data.visit_type, field_exit_data.visit_type)}")
+    await db.field_exits.insert_one(field_exit)
     
-    return field_exit
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "field_exit_requested", 
+        f"Requested field exit for {visit_type} from {expected_start_time} to {expected_end_time}"
+    )
+    
+    return {"message": "Field exit request created successfully", "id": field_exit["id"]}
 
-@api_router.put("/field-exits/{field_exit_id}", response_model=FieldExit)
-async def update_field_exit_request(field_exit_id: str, field_exit_data: FieldExitUpdate, current_user: User = Depends(get_current_user)):
-    """Update field exit request"""
+@api_router.post("/field-exits/{field_exit_id}/start")
+async def start_field_exit(field_exit_id: str, current_user: User = Depends(get_current_user)):
+    """Record actual departure time"""
     field_exit = await db.field_exits.find_one({"id": field_exit_id})
     if not field_exit:
         raise HTTPException(status_code=404, detail="Field exit request not found")
     
-    # Check permissions
-    if current_user.role == "user" and field_exit["user_id"] != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this request")
+    # Check if this is the user's request
+    if field_exit.get("user_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
     
-    # Get update data
-    update_data = {k: v for k, v in field_exit_data.dict().items() if v is not None}
+    # Check if already departed
+    if field_exit.get("actual_start_time"):
+        raise HTTPException(status_code=400, detail="Already recorded departure time")
     
-    if update_data:
-        await db.field_exits.update_one({"id": field_exit_id}, {"$set": update_data})
-        await log_activity(current_user.id, "field_exit_updated", f"Updated field exit request {field_exit_id}")
+    # Get current UAE time
+    uae_time = datetime.now(UAE_TZ)
+    actual_start_time = uae_time.strftime("%H:%M:%S")
     
-    # Return updated field exit
-    updated_field_exit = await db.field_exits.find_one({"id": field_exit_id})
-    return FieldExit(**updated_field_exit)
+    # Update field exit with actual start time
+    await db.field_exits.update_one(
+        {"id": field_exit_id},
+        {"$set": {
+            "actual_start_time": actual_start_time,
+            "exit_status": "departed"
+        }}
+    )
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "field_exit_departed", 
+        f"Departed for {field_exit.get('visit_type', 'Unknown')} at {actual_start_time}"
+    )
+    
+    return {"message": "Departure time recorded successfully", "actual_start_time": actual_start_time}
+
+@api_router.post("/field-exits/{field_exit_id}/end")
+async def end_field_exit(field_exit_id: str, current_user: User = Depends(get_current_user)):
+    """Record actual return time"""
+    field_exit = await db.field_exits.find_one({"id": field_exit_id})
+    if not field_exit:
+        raise HTTPException(status_code=404, detail="Field exit request not found")
+    
+    # Check if this is the user's request
+    if field_exit.get("user_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Check if already returned
+    if field_exit.get("actual_end_time"):
+        raise HTTPException(status_code=400, detail="Already recorded return time")
+    
+    # Check if departed first
+    if not field_exit.get("actual_start_time"):
+        raise HTTPException(status_code=400, detail="Must record departure time first")
+    
+    # Get current UAE time
+    uae_time = datetime.now(UAE_TZ)
+    actual_end_time = uae_time.strftime("%H:%M:%S")
+    
+    # Update field exit with actual end time
+    await db.field_exits.update_one(
+        {"id": field_exit_id},
+        {"$set": {
+            "actual_end_time": actual_end_time,
+            "exit_status": "returned"
+        }}
+    )
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "field_exit_returned", 
+        f"Returned from {field_exit.get('visit_type', 'Unknown')} at {actual_end_time}"
+    )
+    
+    return {"message": "Return time recorded successfully", "actual_end_time": actual_end_time}
 
 @api_router.post("/field-exits/{field_exit_id}/approve")
-async def approve_field_exit(field_exit_id: str, current_user: User = Depends(get_admin_user)):
-    """Approve field exit request (Admin only)"""
+async def approve_field_exit(field_exit_id: str, approval_data: dict = None, current_user: User = Depends(get_admin_user)):
+    """Approve field exit request with optional notes"""
     field_exit = await db.field_exits.find_one({"id": field_exit_id})
     if not field_exit:
         raise HTTPException(status_code=404, detail="Field exit request not found")
     
-    await db.field_exits.update_one(
-        {"id": field_exit_id},
-        {"$set": {"status": "approved", "approved_by": current_user.id}}
+    if field_exit.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Field exit request has already been processed")
+    
+    # Get notes from request body
+    notes = ""
+    if approval_data and "notes" in approval_data:
+        notes = approval_data["notes"]
+    
+    # Update field exit status
+    update_data = {
+        "status": "approved",
+        "approved_by": current_user.name,
+        "approved_by_id": current_user.id,
+        "approved_at": datetime.utcnow(),
+        "admin_notes": notes,
+        "exit_status": "approved"
+    }
+    
+    await db.field_exits.update_one({"id": field_exit_id}, {"$set": update_data})
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "field_exit_approved", 
+        f"Approved field exit request for {field_exit.get('user_name', 'Unknown')} - {field_exit.get('visit_type', 'Unknown')}" + (f" with notes: {notes}" if notes else "")
     )
     
-    await log_activity(current_user.id, "field_exit_approved", f"Approved field exit request {field_exit_id}")
-    
-    return {"message": "Field exit approved successfully"}
+    return {"message": "Field exit request approved successfully", "approved_by": current_user.name, "notes": notes}
 
 @api_router.post("/field-exits/{field_exit_id}/reject")
-async def reject_field_exit(field_exit_id: str, current_user: User = Depends(get_admin_user)):
-    """Reject field exit request (Admin only)"""
+async def reject_field_exit(field_exit_id: str, rejection_data: dict = None, current_user: User = Depends(get_admin_user)):
+    """Reject field exit request with optional notes"""
     field_exit = await db.field_exits.find_one({"id": field_exit_id})
     if not field_exit:
         raise HTTPException(status_code=404, detail="Field exit request not found")
     
-    await db.field_exits.update_one(
-        {"id": field_exit_id},
-        {"$set": {"status": "rejected", "approved_by": current_user.id}}
+    if field_exit.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Field exit request has already been processed")
+    
+    # Get notes from request body
+    notes = ""
+    if rejection_data and "notes" in rejection_data:
+        notes = rejection_data["notes"]
+    
+    # Update field exit status
+    update_data = {
+        "status": "rejected",
+        "rejected_by": current_user.name,
+        "rejected_by_id": current_user.id,
+        "rejected_at": datetime.utcnow(),
+        "admin_notes": notes,
+        "exit_status": "rejected"
+    }
+    
+    await db.field_exits.update_one({"id": field_exit_id}, {"$set": update_data})
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "field_exit_rejected", 
+        f"Rejected field exit request for {field_exit.get('user_name', 'Unknown')} - {field_exit.get('visit_type', 'Unknown')}" + (f" with notes: {notes}" if notes else "")
     )
     
-    await log_activity(current_user.id, "field_exit_rejected", f"Rejected field exit request {field_exit_id}")
-    
-    return {"message": "Field exit rejected successfully"}
+    return {"message": "Field exit request rejected successfully", "rejected_by": current_user.name, "notes": notes}
 
 # ============ DASHBOARD ENDPOINTS ============
 
