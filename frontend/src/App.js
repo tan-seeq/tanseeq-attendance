@@ -451,15 +451,21 @@ const Layout = ({ children }) => {
   );
 };
 
-// Dashboard Component
+// Dashboard Component - Enhanced Professional Design
 const Dashboard = () => {
-  const [stats, setStats] = useState({});
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [stats, setStats] = useState({
+    totalEmployees: 0,
+    presentToday: 0,
+    pendingLeaves: 0,
+    pendingFieldExits: 0,
+    todayAttendance: []
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
+    fetchDashboardStats();
   }, []);
 
   const fetchStats = async () => {
