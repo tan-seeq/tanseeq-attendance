@@ -1431,7 +1431,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Add decorative separator
         ws.merge_cells('A5:G5')
         separator_cell = ws['A5']
-        separator_cell.value = "─" * 80
+        separator_cell.value = "=" * 80
         separator_cell.font = Font(name="Arial", size=8, color="CCCCCC")
         separator_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[5].height = 10
