@@ -19,7 +19,9 @@ import {
   TrashIcon,
   PlusIcon,
   UserGroupIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  DocumentArrowDownIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
