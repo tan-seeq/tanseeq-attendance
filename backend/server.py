@@ -404,6 +404,24 @@ async def update_user(user_id: str, user_update: UserUpdate, current_user: User 
     updated_user = await db.users.find_one({"id": user_id})
     return UserResponse(**updated_user)
 
+@api_router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_user: User = Depends(get_super_admin_user)):
+    """Delete user (Super admin only)"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Don't allow deleting own account
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete own account")
+    
+    # Delete user
+    await db.users.delete_one({"id": user_id})
+    
+    await log_activity(current_user.id, "user_deleted", f"Deleted user {user['name']} ({user['email']})")
+    
+    return {"message": "User deleted successfully"}
+
 @api_router.post("/users/{user_id}/change-password")
 async def change_user_password(user_id: str, password_data: dict, current_user: User = Depends(get_current_user)):
     """Change user password (Hatem only)"""
