@@ -86,6 +86,12 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     hire_date: Optional[datetime] = None
     is_active: Optional[bool] = None
+    has_flexible_schedule: Optional[bool] = None
+    flexible_hours_per_day: Optional[float] = None
+    flexible_start_range: Optional[str] = None  # e.g., "07:00-10:00" 
+    flexible_end_range: Optional[str] = None    # e.g., "16:00-19:00"
+    flexible_core_hours: Optional[str] = None   # e.g., "10:00-15:00" (must be present)
+    flexible_days_per_week: Optional[int] = None
 
 class User(UserBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
