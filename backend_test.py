@@ -193,6 +193,100 @@ class TanseeqAPITester:
             self.log_test(f"Get field exits ({role})", False, str(response))
             return False
 
+    def test_attendance_all_endpoint(self, role: str) -> bool:
+        """Test attendance/all endpoint (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'attendance/all', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200:
+            success = success and isinstance(response, list)
+        
+        self.log_test(f"Get all attendance ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_leaves_all_endpoint(self, role: str) -> bool:
+        """Test leaves/all endpoint (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'leaves/all', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200:
+            success = success and isinstance(response, list)
+        
+        self.log_test(f"Get all leaves ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_field_exits_all_endpoint(self, role: str) -> bool:
+        """Test field-exits/all endpoint (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'field-exits/all', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200:
+            success = success and isinstance(response, list)
+        
+        self.log_test(f"Get all field exits ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_reports_endpoint(self, role: str) -> bool:
+        """Test reports endpoint (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Test different report types
+        report_types = ['attendance', 'leaves', 'field-exits']
+        month = '2025-02'
+        
+        all_passed = True
+        for report_type in report_types:
+            success, response = self.make_request('GET', f'reports/{report_type}/{month}', 
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            if expected_status == 200:
+                success = success and isinstance(response, list)
+            
+            test_passed = success
+            self.log_test(f"Get {report_type} report ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            
+            if not test_passed:
+                all_passed = False
+        
+        return all_passed
+
+    def test_activity_logs_with_date(self, role: str) -> bool:
+        """Test activity logs with date filter (super admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('GET', 'activity-logs?date=2025-02-01', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200:
+            success = success and isinstance(response, list)
+        
+        self.log_test(f"Get activity logs with date filter ({role})", success, 
+                     str(response) if not success else "")
+        return success
+
     def test_activity_logs(self, role: str) -> bool:
         """Test activity logs endpoint (super admin only)"""
         if role not in self.tokens:
