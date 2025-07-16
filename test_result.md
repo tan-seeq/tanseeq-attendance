@@ -118,6 +118,28 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ ENHANCED REPORTING SYSTEM TESTING COMPLETED - Tested all requirements from review request: 1) Excel export for attendance/leaves/field-exits reports - all clean without strange symbols, professional formatting with TANSEEQ branding 2) PDF export for all report types - valid PDF files with proper headers and clean Arabic/English content 3) Attendance update API working correctly - successfully changes status from 'late' to 'present' and removes late flag 4) Custom date range reports working for all types (attendance, leaves, field-exits) 5) Super admin login now working (hatem@tanseeq.com / hatem123) 6) All 68/68 comprehensive backend tests passed + 11/11 enhanced reporting tests passed. Reports are professionally formatted with company branding, clean content, and proper file naming conventions."
+  - task: "Enhanced field exit management with departure/return tracking"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend already supports actual_start_time, actual_end_time, approved_by, admin_notes for field exits. Includes /start and /end endpoints for tracking actual departure/return times."
+  - task: "Enhanced leave management with approval tracking and notes"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend already supports approved_by, rejected_by, admin_notes for leave requests. Approval/rejection endpoints accept notes parameter."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
