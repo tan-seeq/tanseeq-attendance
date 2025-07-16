@@ -2354,11 +2354,10 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         story.append(decorative_line)
         
         # Create table data
-        table_data = [["Name", "Position", "Monthly Salary", "Daily Rate", "Working Days", "Final Salary"]]
+        table_data = [["Name", "Monthly Salary", "Daily Rate", "Working Days", "Final Salary"]]
         for employee in payroll_data:
             table_data.append([
                 employee["name"][:20],  # Truncate long names
-                employee["position"][:15],
                 f"AED {employee['monthly_salary']:.2f}",
                 f"AED {employee['daily_rate']:.2f}",
                 str(employee["working_days"]),
@@ -2366,7 +2365,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             ])
         
         # Create table with enhanced styling
-        table = Table(table_data, colWidths=[2.2*inch, 1.5*inch, 1.3*inch, 1.3*inch, 1*inch, 1.3*inch])
+        table = Table(table_data, colWidths=[2.5*inch, 1.5*inch, 1.5*inch, 1.2*inch, 1.5*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.17, 0.34, 0.59)),  # Dark blue header
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
