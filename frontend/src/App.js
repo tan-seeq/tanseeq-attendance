@@ -2296,6 +2296,10 @@ const LeaveManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [selectedLeave, setSelectedLeave] = useState(null);
+  const [actionType, setActionType] = useState(''); // 'approve' or 'reject'
+  const [notes, setNotes] = useState('');
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -2314,21 +2318,37 @@ const LeaveManagement = () => {
     }
   };
 
-  const handleApprove = async (id) => {
-    try {
-      await axios.post(`${API}/leaves/${id}/approve`);
-      fetchAllLeaves();
-    } catch (error) {
-      console.error('Error approving leave:', error);
-    }
+  const handleApprove = async (leave) => {
+    setSelectedLeave(leave);
+    setActionType('approve');
+    setShowNotesModal(true);
   };
 
-  const handleReject = async (id) => {
+  const handleReject = async (leave) => {
+    setSelectedLeave(leave);
+    setActionType('reject');
+    setShowNotesModal(true);
+  };
+
+  const submitAction = async () => {
+    if (!selectedLeave) return;
+
     try {
-      await axios.post(`${API}/leaves/${id}/reject`);
+      const endpoint = actionType === 'approve' ? 'approve' : 'reject';
+      const requestData = notes ? { notes } : {};
+      
+      await axios.post(`${API}/leaves/${selectedLeave.id}/${endpoint}`, requestData);
+      
+      setShowNotesModal(false);
+      setSelectedLeave(null);
+      setNotes('');
+      setActionType('');
       fetchAllLeaves();
+      
+      alert(`Leave request ${actionType === 'approve' ? 'approved' : 'rejected'} successfully`);
     } catch (error) {
-      console.error('Error rejecting leave:', error);
+      console.error(`Error ${actionType}ing leave:`, error);
+      alert(`Error ${actionType}ing leave request`);
     }
   };
 
@@ -2372,6 +2392,12 @@ const LeaveManagement = () => {
                   الحالة
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  تم الموافقة/الرفض من قبل
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  الملاحظات
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الإجراءات
                 </th>
               </tr>
@@ -2391,8 +2417,10 @@ const LeaveManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {leave.days_count} يوم
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {leave.reason}
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    <div className="max-w-xs overflow-hidden text-ellipsis">
+                      {leave.reason}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {leave.attachment_url ? (
@@ -2416,18 +2444,26 @@ const LeaveManagement = () => {
                        leave.status === 'rejected' ? 'مرفوض' : 'معلق'}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {leave.approved_by || leave.rejected_by || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    <div className="max-w-xs overflow-hidden text-ellipsis">
+                      {leave.admin_notes || '-'}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {leave.status === 'pending' && (
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleApprove(leave.id)}
+                          onClick={() => handleApprove(leave)}
                           className="text-green-600 hover:text-green-900"
                           title="Approve"
                         >
                           <CheckCircleIcon className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleReject(leave.id)}
+                          onClick={() => handleReject(leave)}
                           className="text-red-600 hover:text-red-900"
                           title="Reject"
                         >
@@ -2442,6 +2478,63 @@ const LeaveManagement = () => {
           </table>
         </div>
       </div>
+
+      {/* Action Modal with Notes */}
+      {showNotesModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                {actionType === 'approve' ? 'موافقة على الإجازة' : 'رفض الإجازة'}
+              </h3>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  الموظف: {selectedLeave?.user_name}
+                </p>
+                <p className="text-sm text-gray-600 mb-2">
+                  من {selectedLeave?.start_date} إلى {selectedLeave?.end_date}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  السبب: {selectedLeave?.reason}
+                </p>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  الملاحظات (اختياري)
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="أدخل أي ملاحظات..."
+                />
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={submitAction}
+                  className={`flex-1 px-4 py-2 ${
+                    actionType === 'approve' ? 'bg-green-500 hover:bg-green-700' : 'bg-red-500 hover:bg-red-700'
+                  } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                >
+                  {actionType === 'approve' ? 'موافقة' : 'رفض'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowNotesModal(false);
+                    setSelectedLeave(null);
+                    setNotes('');
+                    setActionType('');
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Modal */}
       {showImageModal && (
