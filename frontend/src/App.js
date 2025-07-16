@@ -724,8 +724,21 @@ const Employees = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [newPassword, setNewPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+    position: '',
+    monthly_salary: '',
+    working_hours_start: '09:00',
+    working_hours_end: '18:00',
+    phone: ''
+  });
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -761,9 +774,111 @@ const Employees = () => {
     }
   };
 
+  const handleAddEmployee = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await axios.post(`${API}/users`, {
+        ...formData,
+        monthly_salary: parseFloat(formData.monthly_salary),
+        hire_date: new Date().toISOString()
+      });
+      setShowAddModal(false);
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        role: 'user',
+        position: '',
+        monthly_salary: '',
+        working_hours_start: '09:00',
+        working_hours_end: '18:00',
+        phone: ''
+      });
+      fetchEmployees();
+      alert('Employee added successfully');
+    } catch (error) {
+      console.error('Error adding employee:', error);
+      alert('Error adding employee: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
+  const handleEditEmployee = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await axios.put(`${API}/users/${selectedEmployee.id}`, {
+        ...formData,
+        monthly_salary: parseFloat(formData.monthly_salary)
+      });
+      setShowEditModal(false);
+      setSelectedEmployee(null);
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        role: 'user',
+        position: '',
+        monthly_salary: '',
+        working_hours_start: '09:00',
+        working_hours_end: '18:00',
+        phone: ''
+      });
+      fetchEmployees();
+      alert('Employee updated successfully');
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      alert('Error updating employee: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+  };
+
+  const handleDeleteEmployee = async (employee) => {
+    if (window.confirm(`Are you sure you want to delete ${employee.name}?`)) {
+      try {
+        await axios.delete(`${API}/users/${employee.id}`);
+        fetchEmployees();
+        alert('Employee deleted successfully');
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        alert('Error deleting employee: ' + (error.response?.data?.detail || 'Unknown error'));
+      }
+    }
+  };
+
   const openPasswordModal = (employee) => {
     setSelectedEmployee(employee);
     setShowPasswordModal(true);
+  };
+
+  const openAddModal = () => {
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: 'user',
+      position: '',
+      monthly_salary: '',
+      working_hours_start: '09:00',
+      working_hours_end: '18:00',
+      phone: ''
+    });
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (employee) => {
+    setSelectedEmployee(employee);
+    setFormData({
+      name: employee.name,
+      email: employee.email,
+      password: '',
+      role: employee.role,
+      position: employee.position,
+      monthly_salary: employee.monthly_salary.toString(),
+      working_hours_start: employee.working_hours_start,
+      working_hours_end: employee.working_hours_end,
+      phone: employee.phone
+    });
+    setShowEditModal(true);
   };
 
   if (loading) {
@@ -775,8 +890,19 @@ const Employees = () => {
       <div className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">TANSEEQ Tax Consultancy - {t('employees')}</h2>
-          <div className="text-sm text-gray-600">
-            Total: {employees.length} employees
+          <div className="flex items-center space-x-2">
+            <div className="text-sm text-gray-600">
+              Total: {employees.length} employees
+            </div>
+            {user?.name === "Hatem Mohamed Ahmed" && (
+              <button
+                onClick={openAddModal}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                إضافة موظف
+              </button>
+            )}
           </div>
         </div>
         
@@ -853,13 +979,29 @@ const Employees = () => {
                   </td>
                   {user?.name === "Hatem Mohamed Ahmed" && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => openPasswordModal(employee)}
-                        className="text-blue-600 hover:text-blue-900 mr-2"
-                        title="Change Password"
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => openEditModal(employee)}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="Edit Employee"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => openPasswordModal(employee)}
+                          className="text-green-600 hover:text-green-900"
+                          title="Change Password"
+                        >
+                          <ExclamationCircleIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEmployee(employee)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Delete Employee"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -868,6 +1010,255 @@ const Employees = () => {
           </table>
         </div>
       </div>
+
+      {/* Add Employee Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                إضافة موظف جديد
+              </h3>
+              <form onSubmit={handleAddEmployee} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الدور</label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => setFormData({...formData, role: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="user">موظف</option>
+                    <option value="admin">مدير</option>
+                    <option value="super_admin">مدير عام</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">المنصب</label>
+                  <input
+                    type="text"
+                    value={formData.position}
+                    onChange={(e) => setFormData({...formData, position: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الراتب الشهري (AED)</label>
+                  <input
+                    type="number"
+                    value={formData.monthly_salary}
+                    onChange={(e) => setFormData({...formData, monthly_salary: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">بداية الدوام</label>
+                    <input
+                      type="time"
+                      value={formData.working_hours_start}
+                      onChange={(e) => setFormData({...formData, working_hours_start: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">نهاية الدوام</label>
+                    <input
+                      type="time"
+                      value={formData.working_hours_end}
+                      onChange={(e) => setFormData({...formData, working_hours_end: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    إضافة الموظف
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Employee Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                تعديل بيانات الموظف - {selectedEmployee?.name}
+              </h3>
+              <form onSubmit={handleEditEmployee} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الدور</label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => setFormData({...formData, role: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="user">موظف</option>
+                    <option value="admin">مدير</option>
+                    <option value="super_admin">مدير عام</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">المنصب</label>
+                  <input
+                    type="text"
+                    value={formData.position}
+                    onChange={(e) => setFormData({...formData, position: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الراتب الشهري (AED)</label>
+                  <input
+                    type="number"
+                    value={formData.monthly_salary}
+                    onChange={(e) => setFormData({...formData, monthly_salary: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">بداية الدوام</label>
+                    <input
+                      type="time"
+                      value={formData.working_hours_start}
+                      onChange={(e) => setFormData({...formData, working_hours_start: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">نهاية الدوام</label>
+                    <input
+                      type="time"
+                      value={formData.working_hours_end}
+                      onChange={(e) => setFormData({...formData, working_hours_end: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    حفظ التعديلات
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Password Change Modal */}
       {showPasswordModal && (
