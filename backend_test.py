@@ -270,6 +270,164 @@ class TanseeqAPITester:
         
         return all_passed
 
+    def test_reports_custom_date_range(self, role: str) -> bool:
+        """Test reports with custom date range (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Test different report types with custom date range
+        report_types = ['attendance', 'leaves', 'field-exits']
+        start_date = '2025-01-01'
+        end_date = '2025-01-31'
+        
+        all_passed = True
+        for report_type in report_types:
+            success, response = self.make_request('GET', f'reports/{report_type}?start_date={start_date}&end_date={end_date}', 
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            if expected_status == 200:
+                success = success and isinstance(response, list)
+            
+            test_passed = success
+            self.log_test(f"Get {report_type} report with custom dates ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            
+            if not test_passed:
+                all_passed = False
+        
+        return all_passed
+
+    def test_reports_export_excel(self, role: str) -> bool:
+        """Test Excel export functionality (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Test Excel export for different report types
+        report_types = ['attendance', 'leaves', 'field-exits']
+        start_date = '2025-01-01'
+        end_date = '2025-01-31'
+        
+        all_passed = True
+        for report_type in report_types:
+            url = f"{self.api_url}/reports/{report_type}/export?start_date={start_date}&end_date={end_date}&format=excel"
+            headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=30)
+                success = response.status_code == expected_status
+                
+                if expected_status == 200 and success:
+                    # Check if response is Excel file
+                    content_type = response.headers.get('content-type', '')
+                    is_excel = 'spreadsheet' in content_type or 'excel' in content_type
+                    has_content = len(response.content) > 0
+                    success = is_excel and has_content
+                
+                test_passed = success
+                self.log_test(f"Export {report_type} Excel ({role})", test_passed, 
+                             f"Status: {response.status_code}, Content-Type: {response.headers.get('content-type', 'N/A')}" if not test_passed else "")
+                
+                if not test_passed:
+                    all_passed = False
+                    
+            except Exception as e:
+                self.log_test(f"Export {report_type} Excel ({role})", False, str(e))
+                all_passed = False
+        
+        return all_passed
+
+    def test_reports_export_pdf(self, role: str) -> bool:
+        """Test PDF export functionality (admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Test PDF export for different report types
+        report_types = ['attendance', 'leaves', 'field-exits']
+        start_date = '2025-01-01'
+        end_date = '2025-01-31'
+        
+        all_passed = True
+        for report_type in report_types:
+            url = f"{self.api_url}/reports/{report_type}/export?start_date={start_date}&end_date={end_date}&format=pdf"
+            headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=30)
+                success = response.status_code == expected_status
+                
+                if expected_status == 200 and success:
+                    # Check if response is PDF file
+                    content_type = response.headers.get('content-type', '')
+                    is_pdf = 'pdf' in content_type
+                    has_content = len(response.content) > 0
+                    # Check for PDF magic bytes
+                    is_valid_pdf = response.content.startswith(b'%PDF')
+                    success = is_pdf and has_content and is_valid_pdf
+                
+                test_passed = success
+                self.log_test(f"Export {report_type} PDF ({role})", test_passed, 
+                             f"Status: {response.status_code}, Content-Type: {response.headers.get('content-type', 'N/A')}" if not test_passed else "")
+                
+                if not test_passed:
+                    all_passed = False
+                    
+            except Exception as e:
+                self.log_test(f"Export {report_type} PDF ({role})", False, str(e))
+                all_passed = False
+        
+        return all_passed
+
+    def test_attendance_update_endpoint(self, role: str) -> bool:
+        """Test attendance update endpoint to fix late status (super admin only)"""
+        if role not in self.tokens:
+            return False
+            
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # First, get attendance records to find one to update
+        success, attendance_records = self.make_request('GET', 'attendance/all', 
+                                                       token=self.tokens[role])
+        
+        if not success or not attendance_records:
+            self.log_test(f"Attendance update test setup ({role})", False, "No attendance records found")
+            return False
+        
+        # Find a record to update (preferably a late one)
+        test_record = None
+        for record in attendance_records:
+            if record.get('id'):
+                test_record = record
+                break
+        
+        if not test_record:
+            self.log_test(f"Attendance update test setup ({role})", False, "No valid attendance record found")
+            return False
+        
+        # Test updating attendance to make it "present" instead of "late"
+        update_data = {
+            "status": "present",
+            "check_in": "09:00:00",
+            "check_out": "17:00:00"
+        }
+        
+        success, response = self.make_request('PUT', f'attendance/{test_record["id"]}', 
+                                            update_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        test_passed = success
+        self.log_test(f"Update attendance status ({role})", test_passed, 
+                     str(response) if not test_passed else "")
+        
+        return test_passed
+
     def test_activity_logs_with_date(self, role: str) -> bool:
         """Test activity logs with date filter (super admin only)"""
         if role not in self.tokens:
