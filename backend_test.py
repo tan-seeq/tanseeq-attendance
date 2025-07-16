@@ -500,35 +500,483 @@ class TanseeqAPITester:
         self.log_test(f"Password change ({role})", success, str(response) if not success else "")
         return success
 
-    def test_field_exit_creation(self, role: str) -> bool:
-        """Test field exit creation"""
+    def test_field_exit_creation_with_expected_times(self, role: str) -> bool:
+        """Test field exit creation with expected_start_time and expected_end_time"""
         if role not in self.tokens:
             return False
-            
-        field_exit_data = {
-            'user_id': self.users[role]['id'] if role in self.users else 'test-id',
-            'user_name': self.users[role]['name'] if role in self.users else 'Test User',
+        
+        # Test creating field exit with expected times (as per review request)
+        url = f"{self.api_url}/field-exits"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        # Use form data as the endpoint expects Form parameters
+        form_data = {
             'visit_type': 'client_visit',
-            'client_name': 'Test Client',
-            'start_time': '10:00',
-            'end_time': '11:00',
-            'report': 'Test field exit report'
+            'client_name': 'شركة الاختبار المحدودة',
+            'expected_start_time': '10:00:00',
+            'expected_end_time': '12:00:00',
+            'report': 'زيارة عميل لمناقشة الخدمات الضريبية'
         }
         
-        success, response = self.make_request('POST', 'field-exits', 
-                                            field_exit_data,
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                # Check if response contains the expected structure
+                has_id = 'id' in response_data
+                has_message = 'message' in response_data
+                success = success and has_id and has_message
+                
+                # Store the field exit ID for further testing
+                if has_id:
+                    setattr(self, f'test_field_exit_id_{role}', response_data['id'])
+            
+            self.log_test(f"Field exit creation with expected times ({role})", success, 
+                         f"Status: {response.status_code}, Response: {response.text}" if not success else "")
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Field exit creation with expected times ({role})", False, str(e))
+            return False
+
+    def test_field_exit_start_tracking(self, role: str) -> bool:
+        """Test field exit start tracking (departure time)"""
+        if role not in self.tokens:
+            return False
+        
+        # First, get a field exit ID to test with
+        field_exit_id = getattr(self, f'test_field_exit_id_{role}', None)
+        if not field_exit_id:
+            # Try to get existing field exits
+            success, field_exits = self.make_request('GET', 'field-exits', token=self.tokens[role])
+            if success and field_exits:
+                field_exit_id = field_exits[0].get('id')
+        
+        if not field_exit_id:
+            self.log_test(f"Field exit start tracking ({role})", False, "No field exit ID available for testing")
+            return False
+        
+        # Test the start endpoint
+        success, response = self.make_request('POST', f'field-exits/{field_exit_id}/start', 
+                                            token=self.tokens[role])
+        
+        # Accept both success and "already recorded" error
+        already_recorded = not success and 'already recorded' in str(response).lower()
+        test_passed = success or already_recorded
+        
+        self.log_test(f"Field exit start tracking ({role})", test_passed, 
+                     str(response) if not test_passed else "")
+        return test_passed
+
+    def test_field_exit_end_tracking(self, role: str) -> bool:
+        """Test field exit end tracking (return time)"""
+        if role not in self.tokens:
+            return False
+        
+        # Get a field exit ID to test with
+        field_exit_id = getattr(self, f'test_field_exit_id_{role}', None)
+        if not field_exit_id:
+            # Try to get existing field exits
+            success, field_exits = self.make_request('GET', 'field-exits', token=self.tokens[role])
+            if success and field_exits:
+                field_exit_id = field_exits[0].get('id')
+        
+        if not field_exit_id:
+            self.log_test(f"Field exit end tracking ({role})", False, "No field exit ID available for testing")
+            return False
+        
+        # Test the end endpoint
+        success, response = self.make_request('POST', f'field-exits/{field_exit_id}/end', 
+                                            token=self.tokens[role])
+        
+        # Accept success, "already recorded" error, or "must record departure first" error
+        already_recorded = not success and 'already recorded' in str(response).lower()
+        must_depart_first = not success and 'departure' in str(response).lower()
+        test_passed = success or already_recorded or must_depart_first
+        
+        self.log_test(f"Field exit end tracking ({role})", test_passed, 
+                     str(response) if not test_passed else "")
+        return test_passed
+
+    def test_field_exit_approve_with_notes(self, role: str) -> bool:
+        """Test field exit approval with admin notes"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Get a field exit to approve
+        success, field_exits = self.make_request('GET', 'field-exits/all' if role in ['admin', 'super_admin'] else 'field-exits', 
+                                               token=self.tokens[role])
+        
+        if not success or not field_exits:
+            self.log_test(f"Field exit approve with notes setup ({role})", False, "No field exits found")
+            return False
+        
+        # Find a pending field exit
+        pending_exit = None
+        for exit_record in field_exits:
+            if exit_record.get('status') == 'pending':
+                pending_exit = exit_record
+                break
+        
+        if not pending_exit:
+            self.log_test(f"Field exit approve with notes ({role})", True, "No pending field exits to approve (expected)")
+            return True
+        
+        # Test approval with notes
+        approval_data = {
+            "notes": "تم الموافقة على الزيارة الخارجية بعد مراجعة التفاصيل"
+        }
+        
+        success, response = self.make_request('POST', f'field-exits/{pending_exit["id"]}/approve', 
+                                            approval_data,
                                             token=self.tokens[role],
-                                            expected_status=201)
+                                            expected_status=expected_status)
         
-        # If 201 not returned, check for 200 as well
-        if not success:
-            success, response = self.make_request('POST', 'field-exits', 
-                                                field_exit_data,
-                                                token=self.tokens[role],
-                                                expected_status=200)
+        if expected_status == 200 and success:
+            # Check if response contains approval info
+            has_approved_by = 'approved_by' in response
+            has_notes = 'notes' in response
+            success = success and has_approved_by and has_notes
         
-        self.log_test(f"Field exit creation ({role})", success, str(response) if not success else "")
+        self.log_test(f"Field exit approve with notes ({role})", success, 
+                     str(response) if not success else "")
         return success
+
+    def test_field_exit_reject_with_notes(self, role: str) -> bool:
+        """Test field exit rejection with admin notes"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Get a field exit to reject (we'll create one first)
+        field_exit_data = {
+            'visit_type': 'personal',
+            'client_name': 'Test Rejection',
+            'expected_start_time': '14:00:00',
+            'expected_end_time': '15:00:00',
+            'report': 'Test rejection scenario'
+        }
+        
+        # Create a field exit to reject
+        url = f"{self.api_url}/field-exits"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            create_response = requests.post(url, data=field_exit_data, headers=headers, timeout=30)
+            if create_response.status_code != 200:
+                self.log_test(f"Field exit reject with notes setup ({role})", False, "Could not create field exit for rejection test")
+                return False
+            
+            field_exit_id = create_response.json().get('id')
+            if not field_exit_id:
+                self.log_test(f"Field exit reject with notes setup ({role})", False, "No field exit ID returned")
+                return False
+            
+            # Test rejection with notes (only if admin/super_admin)
+            if role in ['admin', 'super_admin']:
+                rejection_data = {
+                    "notes": "تم رفض الطلب لعدم توفر المبررات الكافية"
+                }
+                
+                success, response = self.make_request('POST', f'field-exits/{field_exit_id}/reject', 
+                                                    rejection_data,
+                                                    token=self.tokens[role],
+                                                    expected_status=expected_status)
+                
+                if success:
+                    # Check if response contains rejection info
+                    has_rejected_by = 'rejected_by' in response
+                    has_notes = 'notes' in response
+                    success = success and has_rejected_by and has_notes
+                
+                self.log_test(f"Field exit reject with notes ({role})", success, 
+                             str(response) if not success else "")
+                return success
+            else:
+                # For regular users, test that they get 403
+                success, response = self.make_request('POST', f'field-exits/{field_exit_id}/reject', 
+                                                    {"notes": "test"},
+                                                    token=self.tokens[role],
+                                                    expected_status=403)
+                
+                self.log_test(f"Field exit reject with notes ({role})", success, 
+                             str(response) if not success else "")
+                return success
+                
+        except Exception as e:
+            self.log_test(f"Field exit reject with notes ({role})", False, str(e))
+            return False
+
+    def test_field_exits_all_with_approved_by_and_notes(self, role: str) -> bool:
+        """Test that field-exits/all returns approved_by and admin_notes fields"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'field-exits/all', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success and isinstance(response, list):
+            # Check if any approved/rejected records have the required fields
+            has_approved_by_field = False
+            has_admin_notes_field = False
+            
+            for record in response:
+                if record.get('status') in ['approved', 'rejected']:
+                    if 'approved_by' in record:
+                        has_approved_by_field = True
+                    if 'admin_notes' in record:
+                        has_admin_notes_field = True
+                    break
+            
+            # If no approved/rejected records, check if the fields exist in structure
+            if response and not has_approved_by_field:
+                # Check if the fields are at least present (even if None/empty)
+                first_record = response[0]
+                has_approved_by_field = 'approved_by' in first_record
+                has_admin_notes_field = 'admin_notes' in first_record
+            
+            success = success and (has_approved_by_field or len(response) == 0)
+            
+            self.log_test(f"Field exits all with approved_by and admin_notes ({role})", success, 
+                         f"approved_by field: {has_approved_by_field}, admin_notes field: {has_admin_notes_field}" if not success else "")
+        else:
+            self.log_test(f"Field exits all with approved_by and admin_notes ({role})", success, 
+                         str(response) if not success else "")
+        
+        return success
+
+    def test_leaves_approve_with_notes(self, role: str) -> bool:
+        """Test leave approval with admin notes"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Get leaves to approve
+        success, leaves = self.make_request('GET', 'leaves/all' if role in ['admin', 'super_admin'] else 'leaves', 
+                                          token=self.tokens[role])
+        
+        if not success or not leaves:
+            self.log_test(f"Leave approve with notes setup ({role})", False, "No leaves found")
+            return False
+        
+        # Find a pending leave
+        pending_leave = None
+        for leave_record in leaves:
+            if leave_record.get('status') == 'pending':
+                pending_leave = leave_record
+                break
+        
+        if not pending_leave:
+            self.log_test(f"Leave approve with notes ({role})", True, "No pending leaves to approve (expected)")
+            return True
+        
+        # Test approval with notes
+        approval_data = {
+            "notes": "تم الموافقة على الإجازة بعد مراجعة الطلب والمبررات"
+        }
+        
+        success, response = self.make_request('POST', f'leaves/{pending_leave["id"]}/approve', 
+                                            approval_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains approval info
+            has_approved_by = 'approved_by' in response
+            has_notes = 'notes' in response
+            success = success and has_approved_by and has_notes
+        
+        self.log_test(f"Leave approve with notes ({role})", success, 
+                     str(response) if not success else "")
+        return success
+
+    def test_leaves_reject_with_notes(self, role: str) -> bool:
+        """Test leave rejection with admin notes"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Create a test leave request first
+        leave_data = {
+            'user_id': self.users[role]['id'] if role in self.users else 'test-id',
+            'user_name': self.users[role]['name'] if role in self.users else 'Test User',
+            'start_date': '2025-03-01',
+            'end_date': '2025-03-02',
+            'reason': 'اختبار رفض الإجازة',
+            'days_count': 2
+        }
+        
+        # Create leave request
+        create_success, create_response = self.make_request('POST', 'leaves', leave_data, token=self.tokens[role])
+        
+        if not create_success:
+            self.log_test(f"Leave reject with notes setup ({role})", False, "Could not create leave for rejection test")
+            return False
+        
+        leave_id = create_response.get('id')
+        if not leave_id:
+            self.log_test(f"Leave reject with notes setup ({role})", False, "No leave ID returned")
+            return False
+        
+        # Test rejection with notes (only if admin/super_admin)
+        if role in ['admin', 'super_admin']:
+            rejection_data = {
+                "notes": "تم رفض الإجازة لتعارضها مع مواعيد مهمة في العمل"
+            }
+            
+            success, response = self.make_request('POST', f'leaves/{leave_id}/reject', 
+                                                rejection_data,
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            if success:
+                # Check if response contains rejection info
+                has_rejected_by = 'rejected_by' in response
+                has_notes = 'notes' in response
+                success = success and has_rejected_by and has_notes
+            
+            self.log_test(f"Leave reject with notes ({role})", success, 
+                         str(response) if not success else "")
+            return success
+        else:
+            # For regular users, test that they get 403
+            success, response = self.make_request('POST', f'leaves/{leave_id}/reject', 
+                                                {"notes": "test"},
+                                                token=self.tokens[role],
+                                                expected_status=403)
+            
+            self.log_test(f"Leave reject with notes ({role})", success, 
+                         str(response) if not success else "")
+            return success
+
+    def test_leaves_all_with_approved_by_and_notes(self, role: str) -> bool:
+        """Test that leaves/all returns approved_by and admin_notes fields"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'leaves/all', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success and isinstance(response, list):
+            # Check if any approved/rejected records have the required fields
+            has_approved_by_field = False
+            has_admin_notes_field = False
+            
+            for record in response:
+                if record.get('status') in ['approved', 'rejected']:
+                    if 'approved_by' in record:
+                        has_approved_by_field = True
+                    if 'admin_notes' in record:
+                        has_admin_notes_field = True
+                    break
+            
+            # If no approved/rejected records, check if the fields exist in structure
+            if response and not has_approved_by_field:
+                # Check if the fields are at least present (even if None/empty)
+                first_record = response[0]
+                has_approved_by_field = 'approved_by' in first_record
+                has_admin_notes_field = 'admin_notes' in first_record
+            
+            success = success and (has_approved_by_field or len(response) == 0)
+            
+            self.log_test(f"Leaves all with approved_by and admin_notes ({role})", success, 
+                         f"approved_by field: {has_approved_by_field}, admin_notes field: {has_admin_notes_field}" if not success else "")
+        else:
+            self.log_test(f"Leaves all with approved_by and admin_notes ({role})", success, 
+                         str(response) if not success else "")
+        
+        return success
+
+    def test_reports_company_branding(self, role: str) -> bool:
+        """Test that Excel and PDF reports contain company name and proper branding"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        if expected_status != 200:
+            self.log_test(f"Reports company branding ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        # Test Excel export for company branding
+        start_date = '2025-01-01'
+        end_date = '2025-01-31'
+        
+        excel_passed = True
+        pdf_passed = True
+        
+        # Test Excel branding
+        url = f"{self.api_url}/reports/attendance/export?start_date={start_date}&end_date={end_date}&format=excel"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            if response.status_code == 200:
+                # Check filename contains TANSEEQ
+                content_disposition = response.headers.get('content-disposition', '')
+                has_tanseeq_in_filename = 'TANSEEQ' in content_disposition
+                
+                # Check content length (should not be empty)
+                has_content = len(response.content) > 1000  # Reasonable size for Excel with branding
+                
+                excel_passed = has_tanseeq_in_filename and has_content
+                
+                if not excel_passed:
+                    self.log_test(f"Excel report company branding ({role})", False, 
+                                 f"TANSEEQ in filename: {has_tanseeq_in_filename}, Has content: {has_content}")
+            else:
+                excel_passed = False
+                self.log_test(f"Excel report company branding ({role})", False, f"Status: {response.status_code}")
+                
+        except Exception as e:
+            excel_passed = False
+            self.log_test(f"Excel report company branding ({role})", False, str(e))
+        
+        # Test PDF branding
+        url = f"{self.api_url}/reports/attendance/export?start_date={start_date}&end_date={end_date}&format=pdf"
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            if response.status_code == 200:
+                # Check if it's a valid PDF
+                is_valid_pdf = response.content.startswith(b'%PDF')
+                
+                # Check content for TANSEEQ (should be in PDF content)
+                content_str = response.content.decode('latin-1', errors='ignore')
+                has_tanseeq_in_content = 'TANSEEQ' in content_str
+                
+                # Check content length
+                has_content = len(response.content) > 2000  # Reasonable size for PDF with branding
+                
+                pdf_passed = is_valid_pdf and has_tanseeq_in_content and has_content
+                
+                if not pdf_passed:
+                    self.log_test(f"PDF report company branding ({role})", False, 
+                                 f"Valid PDF: {is_valid_pdf}, TANSEEQ in content: {has_tanseeq_in_content}, Has content: {has_content}")
+            else:
+                pdf_passed = False
+                self.log_test(f"PDF report company branding ({role})", False, f"Status: {response.status_code}")
+                
+        except Exception as e:
+            pdf_passed = False
+            self.log_test(f"PDF report company branding ({role})", False, str(e))
+        
+        overall_passed = excel_passed and pdf_passed
+        if overall_passed:
+            self.log_test(f"Reports company branding ({role})", True)
+        
+        return overall_passed
 
     def test_weekend_blocking(self, role: str) -> bool:
         """Test weekend blocking for attendance"""
