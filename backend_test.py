@@ -2014,12 +2014,14 @@ def main():
     
     print(f"🔗 Using backend URL: {backend_url}")
     
-    # Run field exit time tests for Arabic review request
+    # Run tests based on command line arguments
     tester = TanseeqAPITester(backend_url)
     
     # Check if we should run focused tests or comprehensive tests
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '--field-exit-times':
+    if len(sys.argv) > 1 and sys.argv[1] == '--flexible-schedule':
+        success = tester.run_flexible_schedule_tests()
+    elif len(sys.argv) > 1 and sys.argv[1] == '--field-exit-times':
         success = tester.run_field_exit_time_tests()
     elif len(sys.argv) > 1 and sys.argv[1] == '--arabic-review':
         success = tester.run_focused_arabic_review_tests()
