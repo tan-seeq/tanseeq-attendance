@@ -1824,12 +1824,14 @@ def main():
     
     print(f"🔗 Using backend URL: {backend_url}")
     
-    # Run focused tests for Arabic review request
+    # Run field exit time tests for Arabic review request
     tester = TanseeqAPITester(backend_url)
     
     # Check if we should run focused tests or comprehensive tests
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '--arabic-review':
+    if len(sys.argv) > 1 and sys.argv[1] == '--field-exit-times':
+        success = tester.run_field_exit_time_tests()
+    elif len(sys.argv) > 1 and sys.argv[1] == '--arabic-review':
         success = tester.run_focused_arabic_review_tests()
     else:
         success = tester.run_comprehensive_tests()
