@@ -430,6 +430,13 @@ class TanseeqAPITester:
             self.test_leaves_endpoint(role)
             self.test_field_exits_endpoint(role)
             
+            # New admin endpoints
+            self.test_attendance_all_endpoint(role)
+            self.test_leaves_all_endpoint(role)
+            self.test_field_exits_all_endpoint(role)
+            self.test_reports_endpoint(role)
+            self.test_activity_logs_with_date(role)
+            
             # Role-specific endpoints
             self.test_users_endpoint(role)
             self.test_activity_logs(role)
