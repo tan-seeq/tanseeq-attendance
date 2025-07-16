@@ -468,16 +468,52 @@ const Dashboard = () => {
     fetchDashboardStats();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchDashboardStats = async () => {
     try {
-      const response = await axios.get(`${API}/dashboard/stats`);
-      setStats(response.data);
+      const [employeesRes, attendanceRes, leavesRes, fieldExitsRes] = await Promise.all([
+        axios.get(`${API}/users`),
+        axios.get(`${API}/attendance`),
+        axios.get(`${API}/leaves`),
+        axios.get(`${API}/field-exits`)
+      ]);
+
+      const todayDate = new Date().toISOString().slice(0, 10);
+      const todayAttendance = attendanceRes.data.filter(record => record.date === todayDate);
+      
+      setStats({
+        totalEmployees: employeesRes.data.length,
+        presentToday: todayAttendance.filter(record => record.status === 'present' || record.status === 'late').length,
+        pendingLeaves: leavesRes.data.filter(leave => leave.status === 'pending').length,
+        pendingFieldExits: fieldExitsRes.data.filter(exit => exit.status === 'pending').length,
+        todayAttendance
+      });
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error('Error fetching dashboard stats:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'صباح الخير';
+    if (hour < 17) return 'مساء الخير';
+    return 'مساء الخير';
+  };
+
+  const StatCard = ({ title, value, icon: Icon, color, bgColor, textColor }) => (
+    <div className={`${bgColor} rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`${textColor} text-sm font-medium opacity-80`}>{title}</p>
+          <p className={`${textColor} text-3xl font-bold mt-2`}>{value}</p>
+        </div>
+        <div className={`${color} p-3 rounded-full`}>
+          <Icon className="h-8 w-8 text-white" />
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
