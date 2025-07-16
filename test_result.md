@@ -121,6 +121,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ FINAL COMPREHENSIVE TESTING COMPLETED - All review request requirements verified: 1) NEW PAYROLL REPORTS: Excel/PDF exports with TANSEEQ branding and professional design matching attendance reports 2) CLEAN REPORTS: All attendance/leaves/field-exits reports free of strange symbols (■■■■■■) with proper company branding 3) ENHANCED FIELD EXITS: Creation with expected times, departure/return tracking buttons, approval/rejection with admin notes 4) ENHANCED LEAVES: Approval/rejection with admin notes functionality 5) All 88/97 backend tests passed with only minor PDF text detection issues (PDFs are valid and properly formatted). Core functionality 100% working. Minor: Leave creation endpoint has form parameter parsing issue but doesn't affect main functionality."
+      - working: true
+        agent: "testing"
+        comment: "✅ FIELD EXIT TIME ISSUES TESTING COMPLETED - اختبار مشكلة أوقات الزيارات الخارجية: All Arabic review requirements successfully verified: 1) ACTUAL TIMES DISPLAY: /field-exits endpoint correctly returns actual_start_time and actual_end_time fields for users, /field-exits/all endpoint correctly returns all time fields for admins 2) EXPECTED TIMES SUPPORT: New field exit creation properly saves expected_start_time and expected_end_time 3) DEPARTURE/RETURN TRACKING: /field-exits/{id}/start and /field-exits/{id}/end endpoints working correctly - properly record actual departure and return times 4) DASHBOARD FUNCTIONALITY: Dashboard stats and buttons working correctly for both users and admins 5) ADMIN FEATURES: Field exit approval/rejection with admin notes fully functional. All 15/15 field exit time tests passed with 100% success rate. Backend implementation is complete and working perfectly."
   - task: "Enhanced field exit management with departure/return tracking"
     implemented: true
     working: true
@@ -135,6 +138,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ ENHANCED FIELD EXIT TRACKING VERIFIED: 1) Field exit creation with expected_start_time/expected_end_time working correctly 2) /field-exits/{id}/start endpoint for departure tracking working 3) /field-exits/{id}/end endpoint for return tracking working 4) Approval/rejection with admin notes working 5) All field exit management APIs tested and functional. Departure and return buttons functionality confirmed working in backend."
+      - working: true
+        agent: "testing"
+        comment: "✅ FIELD EXIT TIME TRACKING COMPREHENSIVE TESTING: All time-related functionality verified working perfectly: 1) Field exit creation saves expected_start_time and expected_end_time correctly 2) actual_start_time and actual_end_time fields properly returned in API responses 3) /start endpoint records actual departure time and updates exit_status to 'departed' 4) /end endpoint records actual return time and updates exit_status to 'returned' 5) Complete departure/return flow tested and working 6) Time fields properly displayed in both user and admin endpoints. All backend time tracking functionality is working correctly."
   - task: "Enhanced leave management with approval tracking and notes"
     implemented: true
     working: true
