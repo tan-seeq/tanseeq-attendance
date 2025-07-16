@@ -347,8 +347,8 @@ async def get_users(current_user: User = Depends(get_admin_user)):
     return [UserResponse(**user) for user in users]
 
 @api_router.post("/users", response_model=UserResponse)
-async def create_user(user: UserCreate, current_user: User = Depends(get_super_admin_user)):
-    """Create new user (Super admin only)"""
+async def create_user(user: UserCreate, current_user: User = Depends(get_admin_user)):
+    """Create new user (Admin only)"""
     # Check if user already exists
     existing_user = await db.users.find_one({"email": user.email})
     if existing_user:
@@ -371,8 +371,8 @@ async def create_user(user: UserCreate, current_user: User = Depends(get_super_a
     return UserResponse(**user_dict)
 
 @api_router.put("/users/{user_id}", response_model=UserResponse)
-async def update_user(user_id: str, user_update: UserUpdate, current_user: User = Depends(get_super_admin_user)):
-    """Update user (Super admin only)"""
+async def update_user(user_id: str, user_update: UserUpdate, current_user: User = Depends(get_admin_user)):
+    """Update user (Admin only)"""
     user = await db.users.find_one({"id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -405,8 +405,8 @@ async def update_user(user_id: str, user_update: UserUpdate, current_user: User 
     return UserResponse(**updated_user)
 
 @api_router.delete("/users/{user_id}")
-async def delete_user(user_id: str, current_user: User = Depends(get_super_admin_user)):
-    """Delete user (Super admin only)"""
+async def delete_user(user_id: str, current_user: User = Depends(get_admin_user)):
+    """Delete user (Admin only)"""
     user = await db.users.find_one({"id": user_id})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
