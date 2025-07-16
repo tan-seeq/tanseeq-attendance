@@ -1579,20 +1579,20 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         )
         
         # Enhanced company header with logo simulation
-        company_header = Paragraph("🏢 TANSEEQ TAX CONSULTANCY", company_style)
+        company_header = Paragraph("TANSEEQ TAX CONSULTANCY", company_style)
         story.append(company_header)
         
         # Logo subtitle
-        logo_subtitle = Paragraph("💼 مكتب استشارات ضريبية متخصص - نظام إدارة الموارد البشرية المتطور", logo_style)
+        logo_subtitle = Paragraph("مكتب استشارات ضريبية متخصص - نظام إدارة الموارد البشرية المتطور", logo_style)
         story.append(logo_subtitle)
         story.append(Spacer(1, 20))
         
         # Report title with enhanced styling
-        report_title_text = Paragraph(f"📊 {report_title}<br/>{report_title_ar}", title_style)
+        report_title_text = Paragraph(f"{report_title}<br/>{report_title_ar}", title_style)
         story.append(report_title_text)
         
         # Period info with icons
-        period_info = Paragraph(f"📅 الفترة: {start_date} إلى {end_date}<br/>📊 عدد السجلات: {len(report_data)}<br/>🕐 تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
+        period_info = Paragraph(f"الفترة: {start_date} إلى {end_date}<br/>عدد السجلات: {len(report_data)}<br/>تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
         story.append(period_info)
         story.append(Spacer(1, 30))
         
@@ -1605,7 +1605,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             alignment=1,
             textColor=colors.Color(0.8, 0.8, 0.8)
         )
-        decorative_line = Paragraph("─" * 60, line_style)
+        decorative_line = Paragraph("=" * 60, line_style)
         story.append(decorative_line)
         
         # Create table data
