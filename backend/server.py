@@ -1119,8 +1119,202 @@ async def get_reports(report_type: str, month: str, current_user: User = Depends
 @api_router.get("/reports/{report_type}/{month}/export")
 async def export_report(report_type: str, month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
     """Export reports in Excel or PDF format"""
-    # This is a placeholder - would need implementation for actual file generation
-    return {"message": f"Export {report_type} report for {month} in {format} format"}
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from io import BytesIO
+    import os
+    
+    # Parse month to get start and end dates
+    start_date = f"{month}-01"
+    
+    # Get next month for end date
+    year, month_num = map(int, month.split('-'))
+    if month_num == 12:
+        end_date = f"{year + 1}-01-01"
+    else:
+        end_date = f"{year}-{month_num + 1:02d}-01"
+    
+    if report_type == "attendance":
+        records = await db.attendance.find({
+            "date": {"$gte": start_date, "$lt": end_date}
+        }).sort("date", -1).to_list(1000)
+        
+        report_data = []
+        for record in records:
+            report_data.append({
+                "user_name": record.get("user_name", ""),
+                "date": record.get("date", ""),
+                "check_in": record.get("check_in", ""),
+                "check_out": record.get("check_out", ""),
+                "working_hours": record.get("working_hours", 0),
+                "status": record.get("status", "")
+            })
+        
+        headers = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة"]
+        
+    elif report_type == "leaves":
+        records = await db.leaves.find({
+            "$or": [
+                {"start_date": {"$gte": start_date, "$lt": end_date}},
+                {"end_date": {"$gte": start_date, "$lt": end_date}}
+            ]
+        }).sort("created_at", -1).to_list(1000)
+        
+        report_data = []
+        for record in records:
+            report_data.append({
+                "user_name": record.get("user_name", ""),
+                "start_date": record.get("start_date", ""),
+                "end_date": record.get("end_date", ""),
+                "days_count": record.get("days_count", 0),
+                "reason": record.get("reason", ""),
+                "status": record.get("status", "")
+            })
+        
+        headers = ["الموظف", "تاريخ البداية", "تاريخ النهاية", "عدد الأيام", "السبب", "الحالة"]
+        
+    elif report_type == "field-exits":
+        records = await db.field_exits.find({
+            "date": {"$gte": start_date, "$lt": end_date}
+        }).sort("created_at", -1).to_list(1000)
+        
+        report_data = []
+        for record in records:
+            report_data.append({
+                "user_name": record.get("user_name", ""),
+                "date": record.get("date", ""),
+                "visit_type": record.get("visit_type", ""),
+                "client_name": record.get("client_name", ""),
+                "start_time": record.get("start_time", ""),
+                "end_time": record.get("end_time", ""),
+                "status": record.get("status", "")
+            })
+        
+        headers = ["الموظف", "التاريخ", "نوع الزيارة", "العميل", "وقت البداية", "وقت النهاية", "الحالة"]
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid report type")
+    
+    if format == "excel":
+        # Create Excel file
+        wb = Workbook()
+        ws = wb.active
+        ws.title = f"{report_type}_report_{month}"
+        
+        # Add headers
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col)
+            cell.value = header
+            cell.font = Font(bold=True)
+            cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center")
+        
+        # Add data
+        for row, record in enumerate(report_data, 2):
+            if report_type == "attendance":
+                ws.cell(row=row, column=1, value=record["user_name"])
+                ws.cell(row=row, column=2, value=record["date"])
+                ws.cell(row=row, column=3, value=record["check_in"])
+                ws.cell(row=row, column=4, value=record["check_out"])
+                ws.cell(row=row, column=5, value=record["working_hours"])
+                ws.cell(row=row, column=6, value=record["status"])
+            elif report_type == "leaves":
+                ws.cell(row=row, column=1, value=record["user_name"])
+                ws.cell(row=row, column=2, value=record["start_date"])
+                ws.cell(row=row, column=3, value=record["end_date"])
+                ws.cell(row=row, column=4, value=record["days_count"])
+                ws.cell(row=row, column=5, value=record["reason"])
+                ws.cell(row=row, column=6, value=record["status"])
+            elif report_type == "field-exits":
+                ws.cell(row=row, column=1, value=record["user_name"])
+                ws.cell(row=row, column=2, value=record["date"])
+                ws.cell(row=row, column=3, value=record["visit_type"])
+                ws.cell(row=row, column=4, value=record["client_name"])
+                ws.cell(row=row, column=5, value=record["start_time"])
+                ws.cell(row=row, column=6, value=record["end_time"])
+                ws.cell(row=row, column=7, value=record["status"])
+        
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        return Response(
+            content=output.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={report_type}_report_{month}.xlsx"}
+        )
+    
+    elif format == "pdf":
+        # Create PDF file
+        output = BytesIO()
+        doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+        
+        # Create table data
+        table_data = [headers]
+        for record in report_data:
+            if report_type == "attendance":
+                table_data.append([
+                    record["user_name"], record["date"], record["check_in"], 
+                    record["check_out"], str(record["working_hours"]), record["status"]
+                ])
+            elif report_type == "leaves":
+                table_data.append([
+                    record["user_name"], record["start_date"], record["end_date"], 
+                    str(record["days_count"]), record["reason"], record["status"]
+                ])
+            elif report_type == "field-exits":
+                table_data.append([
+                    record["user_name"], record["date"], record["visit_type"], 
+                    record["client_name"], record["start_time"], record["end_time"], record["status"]
+                ])
+        
+        # Create table
+        table = Table(table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        # Build PDF
+        story = []
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            spaceAfter=30,
+            alignment=1  # Center alignment
+        )
+        
+        title = Paragraph(f"TANSEEQ Tax Consultancy - {report_type.title()} Report ({month})", title_style)
+        story.append(title)
+        story.append(Spacer(1, 12))
+        story.append(table)
+        
+        doc.build(story)
+        output.seek(0)
+        
+        return Response(
+            content=output.getvalue(),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={report_type}_report_{month}.pdf"}
+        )
+    
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format. Use 'excel' or 'pdf'")
 
 # ============ PAYROLL ENDPOINTS ============
 
