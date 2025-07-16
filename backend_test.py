@@ -1236,8 +1236,21 @@ class TanseeqAPITester:
             self.test_payroll_calculation(role)
             self.test_password_change(role)
             
+            # Enhanced field exit and leave management tests (from review request)
+            print(f"\n🚶 Testing Enhanced Field Exit Management ({role.upper()}):")
+            self.test_field_exit_creation_with_expected_times(role)
+            self.test_field_exit_start_tracking(role)
+            self.test_field_exit_end_tracking(role)
+            self.test_field_exit_approve_with_notes(role)
+            self.test_field_exit_reject_with_notes(role)
+            self.test_field_exits_all_with_approved_by_and_notes(role)
+            
+            print(f"\n🏖️ Testing Enhanced Leave Management ({role.upper()}):")
+            self.test_leaves_approve_with_notes(role)
+            self.test_leaves_reject_with_notes(role)
+            self.test_leaves_all_with_approved_by_and_notes(role)
+            
             # Feature-specific tests
-            self.test_field_exit_creation(role)
             self.test_weekend_blocking(role)
             
             # Logout
