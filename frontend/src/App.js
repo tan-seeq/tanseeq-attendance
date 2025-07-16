@@ -21,7 +21,8 @@ import {
   UserGroupIcon,
   ExclamationCircleIcon,
   DocumentArrowDownIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
