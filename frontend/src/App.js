@@ -643,17 +643,23 @@ const Dashboard = () => {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+          <button 
+            onClick={() => window.location.href = '/attendance'}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
             <ClockIcon className="h-8 w-8 mx-auto mb-2" />
             <p className="font-semibold">تسجيل الحضور</p>
           </button>
           
-          <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+          <button 
+            onClick={() => window.location.href = '/leaves'}
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
             <CalendarIcon className="h-8 w-8 mx-auto mb-2" />
             <p className="font-semibold">طلب إجازة</p>
           </button>
           
-          <button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+          <button 
+            onClick={() => window.location.href = '/field-exits'}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
             <DocumentTextIcon className="h-8 w-8 mx-auto mb-2" />
             <p className="font-semibold">زيارة خارجية</p>
           </button>
