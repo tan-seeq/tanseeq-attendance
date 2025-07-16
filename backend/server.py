@@ -897,13 +897,20 @@ async def get_field_exits(current_user: User = Depends(get_current_user)):
             "id": record.get("id", str(record.get("_id", ""))),
             "user_id": record.get("user_id", ""),
             "user_name": record.get("user_name", ""),
+            "date": record.get("date", ""),
             "visit_type": record.get("visit_type", ""),
             "client_name": record.get("client_name", ""),
             "start_time": record.get("start_time", ""),
             "end_time": record.get("end_time", ""),
+            "expected_start_time": record.get("expected_start_time", ""),
+            "expected_end_time": record.get("expected_end_time", ""),
+            "actual_start_time": record.get("actual_start_time", ""),
+            "actual_end_time": record.get("actual_end_time", ""),
             "report": record.get("report", ""),
             "status": record.get("status", "pending"),
             "approved_by": record.get("approved_by"),
+            "rejected_by": record.get("rejected_by"),
+            "admin_notes": record.get("admin_notes", ""),
             "created_at": record.get("created_at")
         })
     
