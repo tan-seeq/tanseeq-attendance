@@ -516,89 +516,154 @@ const Dashboard = () => {
   );
 
   if (loading) {
-    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {user?.role === 'user' ? (
-          <>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <ClockIcon className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">الحضور اليوم</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats.attendance_today ? t('checked_in') : 'لم يتم التسجيل'}
-                  </p>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 px-6 rounded-lg mb-8 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+              <UserIcon className="h-12 w-12 text-white" />
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <CalendarIcon className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{t('pending_leaves')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.pending_leaves || 0}</p>
-                </div>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-1">
+                {getGreeting()}، {user.name}
+              </h1>
+              <p className="text-blue-100 text-lg">
+                {user.role === 'super_admin' ? 'المدير العام' : 
+                 user.role === 'admin' ? 'المدير' : 'الموظف'}
+              </p>
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <DocumentTextIcon className="h-8 w-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{t('pending_field_exits')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.pending_field_exits || 0}</p>
-                </div>
-              </div>
+          </div>
+          <div className="text-right">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <h2 className="text-2xl font-bold mb-1">TANSEEQ</h2>
+              <p className="text-blue-100">Tax Consultancy</p>
             </div>
-          </>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatCard
+          title="إجمالي الموظفين"
+          value={stats.totalEmployees}
+          icon={UserIcon}
+          color="bg-blue-600"
+          bgColor="bg-gradient-to-r from-blue-100 to-blue-200"
+          textColor="text-blue-800"
+        />
+        <StatCard
+          title="الحضور اليوم"
+          value={stats.presentToday}
+          icon={ClockIcon}
+          color="bg-green-600"
+          bgColor="bg-gradient-to-r from-green-100 to-green-200"
+          textColor="text-green-800"
+        />
+        <StatCard
+          title="طلبات الإجازات المعلقة"
+          value={stats.pendingLeaves}
+          icon={CalendarIcon}
+          color="bg-yellow-600"
+          bgColor="bg-gradient-to-r from-yellow-100 to-yellow-200"
+          textColor="text-yellow-800"
+        />
+        <StatCard
+          title="طلبات الخروج المعلقة"
+          value={stats.pendingFieldExits}
+          icon={DocumentTextIcon}
+          color="bg-purple-600"
+          bgColor="bg-gradient-to-r from-purple-100 to-purple-200"
+          textColor="text-purple-800"
+        />
+      </div>
+
+      {/* Today's Attendance */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+          <ClockIcon className="h-6 w-6 mr-2 text-blue-600" />
+          حضور اليوم
+        </h3>
+        
+        {stats.todayAttendance.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">الموظف</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">الحضور</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">الانصراف</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.todayAttendance.map((record, index) => (
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="py-3 px-4 font-medium text-gray-800">{record.user_name}</td>
+                    <td className="py-3 px-4 text-gray-600">{record.check_in || '--'}</td>
+                    <td className="py-3 px-4 text-gray-600">{record.check_out || '--'}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        record.status === 'present' ? 'bg-green-100 text-green-800' :
+                        record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {record.status === 'present' ? 'حاضر' : 
+                         record.status === 'late' ? 'متأخر' : 'غائب'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <UserGroupIcon className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{t('total_users')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total_users || 0}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <ClockIcon className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{t('present_today')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.present_today || 0}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <CalendarIcon className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{t('pending_leaves')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.pending_leaves || 0}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="flex items-center">
-                <DocumentTextIcon className="h-8 w-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">{t('pending_field_exits')}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.pending_field_exits || 0}</p>
-                </div>
-              </div>
-            </div>
-          </>
+          <div className="text-center py-12">
+            <ClockIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-gray-500">لا يوجد سجلات حضور اليوم</p>
+          </div>
         )}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+          <Cog6ToothIcon className="h-6 w-6 mr-2 text-blue-600" />
+          الإجراءات السريعة
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+            <ClockIcon className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-semibold">تسجيل الحضور</p>
+          </button>
+          
+          <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+            <CalendarIcon className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-semibold">طلب إجازة</p>
+          </button>
+          
+          <button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+            <DocumentTextIcon className="h-8 w-8 mx-auto mb-2" />
+            <p className="font-semibold">زيارة خارجية</p>
+          </button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-8 text-center text-gray-500">
+        <p className="text-sm">
+          نظام إدارة الموارد البشرية - TANSEEQ Tax Consultancy © 2025
+        </p>
       </div>
     </div>
   );
