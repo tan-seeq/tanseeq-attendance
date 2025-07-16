@@ -810,36 +810,74 @@ async def create_leave_request(
     return leave
 
 @api_router.post("/leaves/{leave_id}/approve")
-async def approve_leave(leave_id: str, current_user: User = Depends(get_admin_user)):
-    """Approve leave request (Admin only)"""
+async def approve_leave(leave_id: str, approval_data: dict = None, current_user: User = Depends(get_admin_user)):
+    """Approve leave request with optional notes"""
     leave = await db.leaves.find_one({"id": leave_id})
     if not leave:
         raise HTTPException(status_code=404, detail="Leave request not found")
     
-    await db.leaves.update_one(
-        {"id": leave_id},
-        {"$set": {"status": "approved", "approved_by": current_user.id}}
+    if leave.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Leave request has already been processed")
+    
+    # Get notes from request body
+    notes = ""
+    if approval_data and "notes" in approval_data:
+        notes = approval_data["notes"]
+    
+    # Update leave status
+    update_data = {
+        "status": "approved",
+        "approved_by": current_user.name,
+        "approved_by_id": current_user.id,
+        "approved_at": datetime.utcnow(),
+        "admin_notes": notes
+    }
+    
+    await db.leaves.update_one({"id": leave_id}, {"$set": update_data})
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "leave_approved", 
+        f"Approved leave request for {leave.get('user_name', 'Unknown')} from {leave.get('start_date')} to {leave.get('end_date')}" + (f" with notes: {notes}" if notes else "")
     )
     
-    await log_activity(current_user.id, "leave_approved", f"Approved leave request {leave_id}")
-    
-    return {"message": "Leave approved successfully"}
+    return {"message": "Leave request approved successfully", "approved_by": current_user.name, "notes": notes}
 
 @api_router.post("/leaves/{leave_id}/reject")
-async def reject_leave(leave_id: str, current_user: User = Depends(get_admin_user)):
-    """Reject leave request (Admin only)"""
+async def reject_leave(leave_id: str, rejection_data: dict = None, current_user: User = Depends(get_admin_user)):
+    """Reject leave request with optional notes"""
     leave = await db.leaves.find_one({"id": leave_id})
     if not leave:
         raise HTTPException(status_code=404, detail="Leave request not found")
     
-    await db.leaves.update_one(
-        {"id": leave_id},
-        {"$set": {"status": "rejected", "approved_by": current_user.id}}
+    if leave.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Leave request has already been processed")
+    
+    # Get notes from request body
+    notes = ""
+    if rejection_data and "notes" in rejection_data:
+        notes = rejection_data["notes"]
+    
+    # Update leave status
+    update_data = {
+        "status": "rejected",
+        "rejected_by": current_user.name,
+        "rejected_by_id": current_user.id,
+        "rejected_at": datetime.utcnow(),
+        "admin_notes": notes
+    }
+    
+    await db.leaves.update_one({"id": leave_id}, {"$set": update_data})
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "leave_rejected", 
+        f"Rejected leave request for {leave.get('user_name', 'Unknown')} from {leave.get('start_date')} to {leave.get('end_date')}" + (f" with notes: {notes}" if notes else "")
     )
     
-    await log_activity(current_user.id, "leave_rejected", f"Rejected leave request {leave_id}")
-    
-    return {"message": "Leave rejected successfully"}
+    return {"message": "Leave request rejected successfully", "rejected_by": current_user.name, "notes": notes}
 
 # ============ FIELD EXIT ENDPOINTS ============
 
