@@ -70,6 +70,12 @@ class UserBase(BaseModel):
     phone: str = ""
     hire_date: Optional[datetime] = None
     is_active: bool = True
+    has_flexible_schedule: bool = False
+    flexible_hours_per_day: float = 8.0
+    flexible_start_range: str = "07:00-10:00"  # Range when employee can start
+    flexible_end_range: str = "16:00-19:00"    # Range when employee can end
+    flexible_core_hours: str = "10:00-15:00"   # Hours when employee must be present
+    flexible_days_per_week: int = 5
 
 class UserCreate(UserBase):
     password: str
