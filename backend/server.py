@@ -1253,7 +1253,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Company header with logo styling
         ws.merge_cells('A1:G1')
         company_cell = ws['A1']
-        company_cell.value = "🏢 TANSEEQ TAX CONSULTANCY"
+        company_cell.value = "TANSEEQ TAX CONSULTANCY"
         company_cell.font = Font(name="Arial", size=20, bold=True, color="FFFFFF")
         company_cell.fill = PatternFill(start_color="2B5797", end_color="1B4477", fill_type="solid")
         company_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -1262,7 +1262,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Logo area (simulated with styling)
         ws.merge_cells('A2:G2')
         logo_cell = ws['A2']
-        logo_cell.value = "💼 مكتب استشارات ضريبية متخصص"
+        logo_cell.value = "مكتب استشارات ضريبية متخصص"
         logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
         logo_cell.fill = PatternFill(start_color="E6EFFF", end_color="E6EFFF", fill_type="solid")
         logo_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -1271,16 +1271,16 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Report title with enhanced styling
         ws.merge_cells('A3:G3')
         title_cell = ws['A3']
-        title_cell.value = f"📊 {report_title} - {report_title_ar}"
+        title_cell.value = f"{report_title} - {report_title_ar}"
         title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
         title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
         title_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[3].height = 30
         
-        # Enhanced period info with icons
+        # Enhanced period info
         ws.merge_cells('A4:G4')
         period_cell = ws['A4']
-        period_cell.value = f"📅 الفترة: {start_date} إلى {end_date} | 📊 عدد السجلات: {len(report_data)} | 🕐 تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        period_cell.value = f"الفترة: {start_date} إلى {end_date} | عدد السجلات: {len(report_data)} | تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         period_cell.font = Font(name="Arial", size=10, color="555555")
         period_cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
         period_cell.alignment = Alignment(horizontal="center", vertical="center")
