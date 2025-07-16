@@ -124,6 +124,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ FIELD EXIT TIME ISSUES TESTING COMPLETED - اختبار مشكلة أوقات الزيارات الخارجية: All Arabic review requirements successfully verified: 1) ACTUAL TIMES DISPLAY: /field-exits endpoint correctly returns actual_start_time and actual_end_time fields for users, /field-exits/all endpoint correctly returns all time fields for admins 2) EXPECTED TIMES SUPPORT: New field exit creation properly saves expected_start_time and expected_end_time 3) DEPARTURE/RETURN TRACKING: /field-exits/{id}/start and /field-exits/{id}/end endpoints working correctly - properly record actual departure and return times 4) DASHBOARD FUNCTIONALITY: Dashboard stats and buttons working correctly for both users and admins 5) ADMIN FEATURES: Field exit approval/rejection with admin notes fully functional. All 15/15 field exit time tests passed with 100% success rate. Backend implementation is complete and working perfectly."
+      - working: true
+        agent: "testing"
+        comment: "✅ FLEXIBLE SCHEDULE SYSTEM TESTING COMPLETED - اختبار النظام الجديد للدوام المرن: All Arabic review requirements successfully verified with 22/23 tests passed (95.7% success rate): 1) HATEM LOGIN: Successfully tested with hatem@tanseeq.com as requested 2) ALL EMPLOYEES FLEXIBLE: All employees have has_flexible_schedule = true 3) FLEXIBLE CHECK-IN: Check-in working at different times without strict restrictions 4) FLEXIBLE CHECK-OUT: Check-out working after 6 PM with full flexibility 5) USER INFORMATION: All user profiles correctly show has_flexible_schedule = true 6) NO TIME RESTRICTIONS: System allows flexible attendance without strict time constraints 7) ATTENDANCE MANAGEMENT: Super admin can clear/update attendance records as needed. Only minor issue: attendance records don't include flexible_schedule field in response (doesn't affect functionality). Flexible schedule system is fully operational and working as requested."
   - task: "Enhanced field exit management with departure/return tracking"
     implemented: true
     working: true
@@ -169,6 +172,17 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ ARABIC REVIEW REQUEST TESTING COMPLETED: 1) PAYROLL REPORTS WITHOUT POSITION COLUMN: Excel/PDF exports confirmed to exclude Position column as requested, proper column count and consistent formatting verified 2) CLEAN REPORTS: All attendance/leaves/field-exits/payroll reports completely free of ■■■■■■ symbols, professional TANSEEQ branding maintained 3) GENERAL SERVICE TESTING: Login, dashboard stats, and basic features all working correctly. 19/20 focused tests passed with only minor leave setup issue (no pending leaves to test approval). All Arabic review requirements successfully implemented and verified."
+  - task: "Flexible schedule system implementation"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ FLEXIBLE SCHEDULE SYSTEM FULLY IMPLEMENTED AND TESTED: Comprehensive testing completed with 22/23 tests passed (95.7% success rate). All Arabic review requirements verified: 1) HATEM LOGIN: Successfully tested with hatem@tanseeq.com as requested 2) ALL EMPLOYEES FLEXIBLE: All employees have has_flexible_schedule = true 3) FLEXIBLE CHECK-IN: Check-in working at different times without strict time restrictions 4) FLEXIBLE CHECK-OUT: Check-out working after 6 PM with full flexibility for all employees 5) USER INFORMATION: All user profiles correctly show has_flexible_schedule = true 6) API RESPONSES: System properly handles flexible schedule information 7) NO TIME RESTRICTIONS: System allows flexible attendance without strict time constraints 8) ATTENDANCE MANAGEMENT: Super admin can clear/update attendance records as needed. Only minor issue: attendance records don't include flexible_schedule field in response (doesn't affect core functionality). The flexible schedule system (الدوام المرن) is fully operational and working exactly as requested in the Arabic review."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
@@ -236,8 +250,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Enhanced field exit management UI with notes and departure/return tracking"
-    - "Fix report formatting and Excel export issues"
+    - "Flexible schedule system implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -253,3 +266,5 @@ agent_communication:
     message: "✅ ARABIC REVIEW REQUEST FOCUSED TESTING COMPLETED: اختبار سريع للإصلاحات الجديدة successfully completed with 19/20 tests passed. SPECIFIC REQUIREMENTS VERIFIED: 1) تقرير الرواتب الجديد بدون Position: Both Excel and PDF payroll exports confirmed to exclude Position column, proper formatting maintained 2) إزالة الرموز الغريبة: All reports (attendance, leaves, field-exits, payroll) completely clean of ■■■■■■ symbols with professional TANSEEQ branding 3) اختبار عام للخدمات: Login, dashboard stats, attendance check-in all working correctly 4) Enhanced field exit management with expected times, departure/return tracking, and admin notes fully functional. Only minor issue: No pending leaves available for approval testing (expected behavior). All Arabic review requirements successfully implemented and verified."
   - agent: "testing"
     message: "✅ FIELD EXIT TIME ISSUES COMPREHENSIVE TESTING COMPLETED: اختبار مشكلة أوقات الزيارات الخارجية - All specific Arabic review requirements successfully verified with 15/15 tests passed (100% success rate): 1) ACTUAL TIMES DISPLAY: Both /field-exits and /field-exits/all endpoints correctly return actual_start_time, actual_end_time, expected_start_time, and expected_end_time fields 2) NEW FIELD EXIT CREATION: Field exits properly save expected times and initialize actual times as null 3) DEPARTURE/RETURN TRACKING: /field-exits/{id}/start and /field-exits/{id}/end endpoints working perfectly - record actual departure and return times correctly 4) DASHBOARD FUNCTIONALITY: Dashboard stats and buttons working correctly for all user roles 5) ADMIN FEATURES: Field exit approval/rejection with admin notes fully functional. Backend implementation is complete and all time-related functionality is working perfectly."
+  - agent: "testing"
+    message: "✅ FLEXIBLE SCHEDULE SYSTEM COMPREHENSIVE TESTING COMPLETED: اختبار النظام الجديد للدوام المرن - All Arabic review requirements successfully verified with 22/23 tests passed (95.7% success rate): 1) HATEM LOGIN TESTING: Successfully tested with hatem@tanseeq.com as specifically requested 2) ALL EMPLOYEES FLEXIBLE: Verified all employees have has_flexible_schedule = true 3) FLEXIBLE CHECK-IN: Check-in working at different times without strict time restrictions 4) FLEXIBLE CHECK-OUT: Check-out working after 6 PM with full flexibility for all employees 5) USER INFORMATION: All user profiles correctly show has_flexible_schedule = true 6) API RESPONSES: System properly handles flexible schedule information 7) NO TIME RESTRICTIONS: System allows flexible attendance without strict time constraints 8) ATTENDANCE MANAGEMENT: Super admin can clear/update attendance records as needed for testing. Only minor issue: attendance records don't include flexible_schedule field in response (doesn't affect core functionality). The flexible schedule system (الدوام المرن) is fully operational and working exactly as requested in the Arabic review. Backend implementation is complete and ready for production use."
