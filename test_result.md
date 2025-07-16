@@ -160,16 +160,19 @@ frontend:
         agent: "main"
         comment: "All sidebar pages now working correctly. LeaveManagement shows approved_by and admin_notes fields."
   - task: "Enhanced field exit management UI with notes and departure/return tracking"
-    implemented: false
-    working: false
+    implemented: true
+    working: "manual_testing_required"
     file: "App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
         comment: "Current FieldExitManagement component missing: 1) Admin notes support for approve/reject 2) Display of approved_by field 3) Separate departure/return time tracking buttons 4) Display of actual_start_time and actual_end_time"
+      - working: "manual_testing_required"
+        agent: "main"
+        comment: "✅ UPDATED: Enhanced both FieldExitManagement (admin) and FieldExits (user) components with: 1) Admin notes modal for approve/reject 2) Display of approved_by/rejected_by fields 3) Display of admin_notes 4) Separate departure/return tracking buttons for users 5) Display of expected vs actual times 6) Form updated to use expected_start_time/expected_end_time"
   - task: "Enhanced leave management UI with notes modal"
     implemented: true
     working: true
