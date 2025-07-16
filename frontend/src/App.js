@@ -1792,6 +1792,21 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/activity-logs" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <ActivityLogs />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/payroll" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <Payroll />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
       </LanguageProvider>
