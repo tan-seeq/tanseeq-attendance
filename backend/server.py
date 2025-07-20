@@ -2544,6 +2544,10 @@ async def calculate_late_penalties(month: str, current_user: User = Depends(get_
         penalties = []
         
         for employee in employees:
+            # Skip admin and super_admin roles - they don't have attendance tracking
+            if employee.get("role") in ["admin", "super_admin"]:
+                continue
+                
             # Get attendance records for this employee in this month
             attendance_records = await db.attendance.find({
                 "user_id": employee["id"],
