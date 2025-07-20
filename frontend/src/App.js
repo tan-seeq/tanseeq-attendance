@@ -1035,6 +1035,150 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Late Penalty System (Super Admin Only) */}
+      {user?.name === "Hatem Mohamed Ahmed" && (
+        <div className="mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <ExclamationTriangleIcon className="h-5 w-5 ml-2 text-orange-600" />
+                نظام خصومات التأخير المتقدم
+              </h3>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                />
+                <button
+                  onClick={calculateLatePenalties}
+                  disabled={penaltyLoading}
+                  className={`px-4 py-2 rounded-md text-sm text-white ${
+                    penaltyLoading 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-orange-600 hover:bg-orange-700'
+                  } flex items-center`}
+                >
+                  {penaltyLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      جاري الحساب...
+                    </>
+                  ) : (
+                    '🧮 حساب الخصومات'
+                  )}
+                </button>
+                {penalties.length > 0 && (
+                  <button
+                    onClick={applyLatePenalties}
+                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center"
+                  >
+                    ⚠️ تطبيق الخصومات
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Penalty Rules Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-blue-800 mb-2">📋 قواعد نظام الخصومات:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• أول 15 دقيقة تأخير × 4 مرات = <strong>مجاناً</strong></li>
+                <li>• أكثر من 4 مرات: تُجمع الدقائق وتُخصم من الراتب</li>
+                <li>• أكثر من 20 دقيقة: خصم بالوقت الفعلي</li>
+                <li>• من ساعة إلى ساعتين: خصم <strong>نصف يوم</strong></li>
+                <li>• أكثر من ساعتين: خصم <strong>يوم كامل</strong></li>
+              </ul>
+            </div>
+
+            {showPenaltySection && penalties.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center border-b pb-2">
+                  <h4 className="font-semibold text-gray-800">نتائج حساب الخصومات - {selectedMonth}</h4>
+                  <div className="text-sm text-gray-600">
+                    إجمالي الموظفين المتأخرين: <strong>{penalties.length}</strong>
+                  </div>
+                </div>
+                
+                <div className="overflow-x-auto max-h-96">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">الموظف</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">مرات التأخير</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">إجمالي الدقائق</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">دقائق مجانية</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">دقائق خصم</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">نوع الخصم</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">مبلغ الخصم</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {penalties.map((penalty, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                            {penalty.user_name}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-center">
+                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                              {penalty.late_incidents}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-center text-red-600 font-medium">
+                            {penalty.total_late_minutes} دقيقة
+                          </td>
+                          <td className="px-4 py-4 text-sm text-center text-green-600 font-medium">
+                            {penalty.free_late_minutes} دقيقة
+                          </td>
+                          <td className="px-4 py-4 text-sm text-center text-red-600 font-bold">
+                            {penalty.penalty_minutes} دقيقة
+                          </td>
+                          <td className="px-4 py-4 text-sm text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              penalty.penalty_type === 'minutes' ? 'bg-blue-100 text-blue-800' :
+                              penalty.penalty_type === 'actual_time' ? 'bg-orange-100 text-orange-800' :
+                              penalty.penalty_type === 'half_day' ? 'bg-red-100 text-red-800' :
+                              penalty.penalty_type === 'full_day' ? 'bg-red-200 text-red-900' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {penalty.penalty_type === 'minutes' ? 'دقائق' :
+                               penalty.penalty_type === 'actual_time' ? 'وقت فعلي' :
+                               penalty.penalty_type === 'half_day' ? 'نصف يوم' :
+                               penalty.penalty_type === 'full_day' ? 'يوم كامل' : 'لا يوجد'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-center font-bold text-red-600">
+                            {penalty.penalty_amount > 0 ? `${penalty.penalty_amount.toFixed(2)} درهم` : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-gray-700">إجمالي الخصومات:</span>
+                    <span className="text-xl font-bold text-red-600">
+                      {penalties.reduce((sum, p) => sum + p.penalty_amount, 0).toFixed(2)} درهم
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showPenaltySection && penalties.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <ExclamationTriangleIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                <p>لا يوجد موظفين متأخرين في الشهر المحدد</p>
+                <p className="text-sm mt-1">🎉 جميع الموظفين ملتزمون بالحضور في الوقت!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <div className="mt-8 text-center text-gray-500">
         <p className="text-sm">
