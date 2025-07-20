@@ -3358,6 +3358,384 @@ async def get_message_stats(message_id: str, current_user: User = Depends(get_cu
         "time_ago": get_time_ago(message["created_at"])
     }
 
+# ============ SUPER ADMIN: CREATE REQUESTS ON BEHALF OF EMPLOYEES ============
+
+@api_router.post("/admin/create-leave-request")
+async def create_leave_request_for_employee(
+    user_id: str = Form(...),
+    start_date: str = Form(...),
+    end_date: str = Form(...), 
+    reason: str = Form(...),
+    leave_type: str = Form("annual"),
+    days_count: int = Form(...),
+    notes: str = Form(""),
+    file: Optional[UploadFile] = File(None),
+    current_user: User = Depends(get_super_admin_user)
+):
+    """Super Admin: Create leave request on behalf of employee"""
+    try:
+        # Get employee details
+        employee = await db.users.find_one({"id": user_id})
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Handle file upload if present
+        file_path = None
+        attachment_url = None
+        if file and file.filename:
+            file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+            file_name = f"leave_{uuid.uuid4().hex}.{file_extension}"
+            file_path = uploads_dir / file_name
+            
+            with open(file_path, "wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+            
+            attachment_url = f"/uploads/{file_name}"
+        
+        # Create leave request
+        leave_request = Leave(
+            user_id=user_id,
+            user_name=employee["name"],
+            start_date=start_date,
+            end_date=end_date,
+            reason=reason,
+            days_count=days_count,
+            attachment_url=attachment_url,
+            status="approved",  # Auto-approve requests created by Super Admin
+            approved_by=current_user.name
+        )
+        
+        # Add additional fields for admin-created requests
+        leave_dict = leave_request.dict()
+        leave_dict.update({
+            "approved_by_id": current_user.id,
+            "approved_at": datetime.utcnow(),
+            "admin_notes": f"Request created by Super Admin ({current_user.name}) on behalf of employee. Notes: {notes}",
+            "created_by_admin": True,
+            "created_by_admin_id": current_user.id,
+            "created_by_admin_name": current_user.name,
+            "leave_type": leave_type,
+            "file_path": str(file_path) if file_path else None
+        })
+        
+        await db.leaves.insert_one(leave_dict)
+        
+        # Log activity
+        await log_activity(
+            current_user.id, 
+            "admin_leave_created", 
+            f"Created leave request for {employee['name']} from {start_date} to {end_date}"
+        )
+        
+        # Send notification to employee
+        message = Message(
+            title="✅ طلب إجازة معتمد",
+            content=f"""عزيزي/عزيزتي {employee['name']},
+
+تم إنشاء واعتماد طلب إجازة نيابة عنك من قبل الإدارة:
+
+📅 من تاريخ: {start_date}
+📅 إلى تاريخ: {end_date}  
+📝 السبب: {reason}
+📋 عدد الأيام: {days_count}
+📋 ملاحظات الإدارة: {leave_dict['admin_notes']}
+
+تم الموافقة على الطلب تلقائياً.
+
+إدارة الموارد البشرية
+TANSEEQ TAX CONSULTANCY""",
+            message_type="leave_approved",
+            from_user_id=current_user.id,
+            from_user_name=f"إدارة الموارد البشرية ({current_user.name})",
+            to_user_ids=[user_id],
+            priority="normal"
+        )
+        
+        await db.messages.insert_one(message.dict())
+        
+        return {
+            "message": "Leave request created and approved successfully",
+            "leave_id": leave_request.id,
+            "employee_name": employee["name"],
+            "status": "approved"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating leave request: {str(e)}")
+
+@api_router.post("/admin/create-field-exit-request")
+async def create_field_exit_request_for_employee(
+    user_id: str = Form(...),
+    date: str = Form(...),
+    visit_type: str = Form(...),
+    client_name: str = Form(""),
+    expected_start_time: str = Form(...),
+    expected_end_time: str = Form(...),
+    report: str = Form(""),
+    notes: str = Form(""),
+    current_user: User = Depends(get_super_admin_user)
+):
+    """Super Admin: Create field exit request on behalf of employee"""
+    try:
+        # Get employee details
+        employee = await db.users.find_one({"id": user_id})
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Create field exit request
+        field_exit_request = FieldExit(
+            user_id=user_id,
+            user_name=employee["name"],
+            visit_type=visit_type,
+            client_name=client_name,
+            start_time=expected_start_time,
+            end_time=expected_end_time,
+            report=report,
+            status="approved",  # Auto-approve requests created by Super Admin
+            approved_by=current_user.name
+        )
+        
+        # Add additional fields for admin-created requests
+        field_exit_dict = field_exit_request.dict()
+        field_exit_dict.update({
+            "date": date,
+            "expected_start_time": expected_start_time,
+            "expected_end_time": expected_end_time,
+            "actual_start_time": None,
+            "actual_end_time": None,
+            "approved_by_id": current_user.id,
+            "approved_at": datetime.utcnow(),
+            "admin_notes": f"Request created by Super Admin ({current_user.name}) on behalf of employee. Notes: {notes}",
+            "created_by_admin": True,
+            "created_by_admin_id": current_user.id,
+            "created_by_admin_name": current_user.name,
+            "exit_status": "approved"
+        })
+        
+        await db.field_exits.insert_one(field_exit_dict)
+        
+        # Log activity
+        await log_activity(
+            current_user.id, 
+            "admin_field_exit_created", 
+            f"Created field exit request for {employee['name']} on {date} - {visit_type}"
+        )
+        
+        # Send notification to employee
+        message = Message(
+            title="✅ طلب زيارة خارجية معتمد",
+            content=f"""عزيزي/عزيزتي {employee['name']},
+
+تم إنشاء واعتماد طلب زيارة خارجية نيابة عنك من قبل الإدارة:
+
+📅 التاريخ: {date}
+📝 نوع الزيارة: {visit_type}
+👤 العميل: {client_name}
+🕘 الوقت المتوقع للخروج: {expected_start_time}
+🕘 الوقت المتوقع للعودة: {expected_end_time}
+📋 ملاحظات الإدارة: {field_exit_dict['admin_notes']}
+
+تم الموافقة على الطلب تلقائياً.
+
+إدارة الموارد البشرية
+TANSEEQ TAX CONSULTANCY""",
+            message_type="field_exit_approved",
+            from_user_id=current_user.id,
+            from_user_name=f"إدارة الموارد البشرية ({current_user.name})",
+            to_user_ids=[user_id],
+            priority="normal"
+        )
+        
+        await db.messages.insert_one(message.dict())
+        
+        return {
+            "message": "Field exit request created and approved successfully",
+            "field_exit_id": field_exit_request.id,
+            "employee_name": employee["name"],
+            "status": "approved"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating field exit request: {str(e)}")
+
+# ============ ADMIN: ATTACHMENT VIEWING CAPABILITY ============
+
+@api_router.get("/admin/view-attachment/{request_type}/{request_id}")
+async def view_attachment(
+    request_type: str, 
+    request_id: str, 
+    current_user: User = Depends(get_admin_user)
+):
+    """Admin/Super Admin: View attachment from leave or field exit request"""
+    try:
+        if request_type not in ["leave", "field-exit"]:
+            raise HTTPException(status_code=400, detail="Invalid request type. Must be 'leave' or 'field-exit'")
+        
+        # Get the request
+        if request_type == "leave":
+            request_data = await db.leaves.find_one({"id": request_id})
+        else:  # field-exit
+            request_data = await db.field_exits.find_one({"id": request_id})
+        
+        if not request_data:
+            raise HTTPException(status_code=404, detail=f"{request_type.title()} request not found")
+        
+        # Check if request has attachment
+        file_path = request_data.get("file_path") or request_data.get("attachment_url")
+        if not file_path:
+            raise HTTPException(status_code=404, detail="No attachment found for this request")
+        
+        # Handle both file_path and attachment_url formats
+        if file_path.startswith("/uploads/"):
+            actual_file_path = uploads_dir / file_path.replace("/uploads/", "")
+        else:
+            actual_file_path = Path(file_path)
+        
+        if not actual_file_path.exists():
+            raise HTTPException(status_code=404, detail="Attachment file not found on server")
+        
+        # Read file and return as base64 for frontend display
+        import base64
+        from mimetypes import guess_type
+        
+        with open(actual_file_path, "rb") as file:
+            file_content = file.read()
+            file_base64 = base64.b64encode(file_content).decode()
+            
+            # Get mime type
+            mime_type, _ = guess_type(str(actual_file_path))
+            if not mime_type:
+                mime_type = "application/octet-stream"
+            
+            # Get file name
+            file_name = actual_file_path.name
+            
+            return {
+                "file_name": file_name,
+                "mime_type": mime_type,
+                "file_size": len(file_content),
+                "file_data": f"data:{mime_type};base64,{file_base64}",
+                "request_type": request_type,
+                "request_id": request_id,
+                "employee_name": request_data.get("user_name", "Unknown"),
+                "created_at": request_data.get("created_at", "Unknown")
+            }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error viewing attachment: {str(e)}")
+
+@api_router.get("/admin/attachments-list")
+async def list_requests_with_attachments(current_user: User = Depends(get_admin_user)):
+    """Admin/Super Admin: Get list of all requests with attachments"""
+    try:
+        # Get leave requests with attachments
+        leave_requests = await db.leaves.find({
+            "$or": [
+                {"file_path": {"$exists": True, "$ne": None, "$ne": ""}},
+                {"attachment_url": {"$exists": True, "$ne": None, "$ne": ""}}
+            ]
+        }).to_list(1000)
+        
+        # Get field exit requests with attachments (future feature - currently not implemented)
+        field_exit_requests = []  # Field exits don't have file attachments yet
+        
+        # Format the response
+        attachments_list = []
+        
+        # Process leave requests
+        for leave in leave_requests:
+            attachments_list.append({
+                "request_type": "leave",
+                "request_id": leave["id"],
+                "employee_name": leave.get("user_name", "Unknown"),
+                "date_range": f"{leave.get('start_date', '')} to {leave.get('end_date', '')}",
+                "reason": leave.get("reason", ""),
+                "status": leave.get("status", "pending"),
+                "created_at": leave.get("created_at", ""),
+                "has_attachment": bool(leave.get("file_path") or leave.get("attachment_url"))
+            })
+        
+        # Process field exit requests (when file attachments are added)
+        for field_exit in field_exit_requests:
+            attachments_list.append({
+                "request_type": "field_exit",
+                "request_id": field_exit["id"],
+                "employee_name": field_exit.get("user_name", "Unknown"),
+                "date_range": field_exit.get("date", ""),
+                "reason": field_exit.get("visit_type", ""),
+                "status": field_exit.get("status", "pending"),
+                "created_at": field_exit.get("created_at", ""),
+                "has_attachment": bool(field_exit.get("file_path"))
+            })
+        
+        # Sort by created_at (newest first)
+        attachments_list.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        
+        return {
+            "total_attachments": len(attachments_list),
+            "leave_attachments": len(leave_requests),
+            "field_exit_attachments": len(field_exit_requests),
+            "attachments": attachments_list
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing attachments: {str(e)}")
+
+# ============ AUTOMATION STATUS AND CONTROL ============
+
+@api_router.get("/automation/status")
+async def get_automation_status(current_user: User = Depends(get_super_admin_user)):
+    """Get status of automation systems"""
+    try:
+        # Check if automation scheduler is running (basic check)
+        import subprocess
+        
+        automation_running = False
+        try:
+            # Check if automation_scheduler.py process is running
+            result = subprocess.run(
+                ["pgrep", "-f", "automation_scheduler.py"],
+                capture_output=True, text=True
+            )
+            automation_running = bool(result.returncode == 0)
+        except:
+            automation_running = False
+        
+        # Get recent automation logs/activity
+        recent_messages = await db.messages.find({
+            "message_type": {"$in": ["late_warning", "absence_warning", "penalty_notification"]},
+            "created_at": {"$gte": datetime.utcnow() - timedelta(days=7)}
+        }).sort("created_at", -1).limit(10).to_list(10)
+        
+        # Get recent penalty applications (if late_penalties collection exists)
+        recent_penalties = []
+        try:
+            recent_penalties = await db.late_penalties.find({
+                "applied_at": {"$gte": datetime.utcnow() - timedelta(days=30)}
+            }).sort("applied_at", -1).limit(5).to_list(5)
+        except:
+            pass  # Collection might not exist yet
+        
+        return {
+            "automation_scheduler_running": automation_running,
+            "scheduled_tasks": {
+                "late_warnings": "Daily at 09:30 AM UAE",
+                "absence_warnings": "Daily at 11:00 AM UAE", 
+                "monthly_penalties": "1st day of month at 02:00 AM UAE"
+            },
+            "recent_activity": {
+                "total_recent_notifications": len(recent_messages),
+                "recent_penalty_applications": len(recent_penalties),
+                "last_notification": recent_messages[0]["created_at"] if recent_messages else None,
+                "last_penalty_application": recent_penalties[0]["applied_at"] if recent_penalties else None
+            },
+            "system_status": "active" if automation_running else "inactive"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting automation status: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
