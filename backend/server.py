@@ -103,6 +103,47 @@ class User(UserBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+# ============ MESSAGE MODELS ============
+
+class Message(BaseModel):
+    """Internal message system for company announcements"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    message_type: str = "general"  # general, friday_work, urgent, announcement
+    from_user_id: str
+    from_user_name: str
+    to_user_ids: List[str] = []  # Empty list means send to all
+    is_read_by: List[str] = []  # List of user IDs who have read the message
+    priority: str = "normal"  # normal, high, urgent
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None
+    is_active: bool = True
+
+class MessageCreate(BaseModel):
+    title: str
+    content: str
+    message_type: str = "general"
+    to_user_ids: List[str] = []
+    priority: str = "normal"
+    expires_at: Optional[datetime] = None
+
+class MessageResponse(BaseModel):
+    id: str
+    title: str
+    content: str
+    message_type: str
+    from_user_id: str
+    from_user_name: str
+    to_user_ids: List[str]
+    is_read_by: List[str]
+    priority: str
+    created_at: datetime
+    expires_at: Optional[datetime]
+    is_active: bool
+    is_read: bool = False  # Will be set based on current user
+    time_ago: str = ""  # Human readable time
+
 class UserResponse(BaseModel):
     id: str
     name: str
