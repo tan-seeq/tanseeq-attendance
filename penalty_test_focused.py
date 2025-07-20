@@ -333,7 +333,7 @@ class PenaltySystemTester:
 if __name__ == "__main__":
     # Get backend URL from environment
     import os
-    backend_url = "https://5266bffb-8b43-4224-98c0-7d1fc682d7ce.preview.emergentagent.com"
+    backend_url = "https://30a05bd9-7bfe-4c65-bd6c-556baa821b78.preview.emergentagent.com"
     
     print(f"🔗 Using backend URL: {backend_url}")
     
