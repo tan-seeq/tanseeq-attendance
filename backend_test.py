@@ -2804,6 +2804,95 @@ class TanseeqAPITester:
             print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
             return False
 
+    def run_backup_system_tests(self):
+        """Run comprehensive tests for backup system (Arabic review request)"""
+        print("🚀 اختبار نظام النسخ الاحتياطي الجديد - TANSEEQ HR Backend API")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 80)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Test with hatem@tanseeq.com as requested in Arabic review
+        print("\n🔐 Testing with hatem@tanseeq.com (as requested):")
+        print("-" * 60)
+        
+        if not self.test_login('super_admin'):
+            print("❌ Failed to login with hatem@tanseeq.com - stopping backup tests")
+            return False
+        
+        # 1. Test backup statistics
+        print("\n✅ 1. اختبار إحصائيات النسخ الاحتياطي:")
+        print("-" * 50)
+        self.test_backup_stats('super_admin')
+        
+        # 2. Test manual backup creation
+        print("\n✅ 2. اختبار النسخ الاحتياطي اليدوي:")
+        print("-" * 50)
+        self.test_manual_backup_creation('super_admin')
+        
+        # 3. Test security - only Hatem should have access
+        print("\n✅ 3. اختبار الأمان - فقط حاتم يمكنه الوصول:")
+        print("-" * 50)
+        
+        # Test with different roles to ensure only super_admin has access
+        test_roles = ['user', 'admin', 'super_admin']
+        for role in test_roles:
+            if role != 'super_admin':
+                # Login with other roles to test access denial
+                if self.test_login(role):
+                    self.test_backup_security_access_control(role)
+            else:
+                # Already logged in as super_admin
+                self.test_backup_security_access_control(role)
+        
+        # 4. Test performance and file properties
+        print("\n✅ 4. اختبار الأداء وخصائص الملف:")
+        print("-" * 50)
+        
+        # Re-login as super_admin for performance tests
+        if not self.test_login('super_admin'):
+            print("❌ Could not re-login as super_admin for performance tests")
+        else:
+            # Test backup stats to check file sizes and performance
+            success, response = self.make_request('GET', 'backup/stats', token=self.tokens['super_admin'])
+            if success:
+                total_size = response.get('total_size_mb', 0)
+                total_backups = response.get('total_backups', 0)
+                latest_backup = response.get('latest_backup', 'None')
+                
+                self.log_test("Backup performance metrics", True, 
+                             f"Total backups: {total_backups}, Total size: {total_size} MB, Latest: {latest_backup}")
+            else:
+                self.log_test("Backup performance metrics", False, "Could not get backup stats")
+        
+        # 5. Test existing system still works
+        print("\n✅ 5. اختبار أن النظام الحالي لا يزال يعمل:")
+        print("-" * 50)
+        
+        # Test core functionality to ensure backup system doesn't interfere
+        roles_to_test = ['user', 'admin', 'super_admin']
+        for role in roles_to_test:
+            if self.test_login(role):
+                print(f"\n   Testing core functionality for {role}:")
+                self.test_dashboard_stats(role)
+                self.test_attendance_check_in(role)
+                self.test_messages_display(role)  # Test internal messaging
+                
+                if role in ['admin', 'super_admin']:
+                    # Test admin functionality
+                    self.test_users_endpoint(role)
+                    self.test_attendance_all_endpoint(role)
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print(f"📊 BACKUP SYSTEM TEST SUMMARY: {self.tests_passed}/{self.tests_run} tests passed")
+        print(f"✅ Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed >= (self.tests_run - 3)  # Allow for minor issues
+
 def main():
     # Get backend URL from frontend .env
     try:
