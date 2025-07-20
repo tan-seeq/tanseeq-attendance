@@ -205,6 +205,17 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ BACKUP SYSTEM COMPREHENSIVE TESTING COMPLETED: اختبار نظام النسخ الاحتياطي الجديد - All Arabic review requirements successfully verified with 25/27 tests passed (92.6% success rate): 1) BACKUP STATISTICS TESTING: Successfully tested with hatem@tanseeq.com as requested - /backup/stats endpoint working correctly, returns proper structure with total_backups, total_size_mb, latest_backup, backup_directory, recent_logs, auto_backup_enabled, backup_schedule 2) MANUAL BACKUP CREATION: /backup/manual POST endpoint working correctly - creates backup files with proper naming (manual_backup_TIMESTAMP.zip), records file size, logs to database 3) SECURITY TESTING: Proper access control verified - only super_admin (Hatem) can access backup endpoints, other roles get 403 errors as expected 4) PERFORMANCE TESTING: Backup file sizes and performance metrics working correctly 5) EXISTING SYSTEM COMPATIBILITY: All core functionality (attendance, messaging, dashboard) continues working correctly after backup system implementation. Minor issues: Some access control tests need refinement but core backup functionality is 100% working. Backup system is fully operational and ready for production use."
+  - task: "Complex late penalty system implementation"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPLEX LATE PENALTY SYSTEM COMPREHENSIVE TESTING COMPLETED: اختبار نظام الخصومات المعقد للتأخير - All Arabic review requirements successfully verified with 14/14 tests passed (100% success rate): 1) PENALTY CALCULATION ENDPOINT: /penalties/late/{month} GET working correctly for admin/super_admin roles with proper complex rule implementation 2) COMPLEX PENALTY RULES VERIFIED: First 15 minutes × 4 times = free, after 4 times deduct actual minutes, 20+ minutes deduct actual time, 1-2 hours = half day, 2+ hours = full day - all rules correctly implemented 3) PENALTY APPLICATION: /penalties/apply/{month} POST working correctly - only Hatem (hatem@tanseeq.com) can apply penalties as requested, proper database storage and activity logging 4) PENALTY HISTORY: /penalties/history/{user_id} GET working correctly - users can see own history, admins can see all histories 5) SECURITY TESTING: Proper access control verified - regular users denied calculation/application access, only admins can calculate, only Hatem can apply 6) DAILY SALARY CALCULATION: Correct calculation of daily rate (monthly_salary / 30) and penalty amounts 7) DATABASE INTEGRATION: Penalties properly stored in late_penalties collection with complete audit trail. Complex penalty system is fully operational and ready for production use."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
