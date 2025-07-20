@@ -3275,16 +3275,29 @@ async def mark_message_as_read(message_id: str, current_user: User = Depends(get
 async def get_unread_count(current_user: User = Depends(get_current_user)):
     """Get count of unread messages for current user"""
     query = {
-        "$or": [
-            {"to_user_ids": {"$in": [current_user.id]}},
-            {"to_user_ids": {"$size": 0}},
-            {"to_user_ids": []}
-        ],
-        "is_active": True,
-        "is_read_by": {"$ne": current_user.id},  # Not read by current user
-        "$or": [
-            {"expires_at": None},
-            {"expires_at": {"$gt": datetime.utcnow()}}
+        "$and": [
+            {
+                "$or": [
+                    {"to_user_ids": {"$in": [current_user.id]}},
+                    {
+                        "$and": [
+                            {"$or": [
+                                {"to_user_ids": {"$size": 0}},
+                                {"to_user_ids": []}
+                            ]},
+                            {"message_type": {"$nin": ["late_warning", "absence_warning", "penalty_notification"]}}
+                        ]
+                    }
+                ]
+            },
+            {"is_active": True},
+            {"is_read_by": {"$ne": current_user.id}},  # Not read by current user
+            {
+                "$or": [
+                    {"expires_at": None},
+                    {"expires_at": {"$gt": datetime.utcnow()}}
+                ]
+            }
         ]
     }
     
