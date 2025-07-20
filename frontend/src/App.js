@@ -481,6 +481,15 @@ const Dashboard = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
 
+  // Custom message state (Admin & Super Admin)
+  const [showCustomMessageModal, setShowCustomMessageModal] = useState(false);
+  const [customMessage, setCustomMessage] = useState({
+    title: '',
+    content: '',
+    priority: 'normal'
+  });
+  const [sendingMessage, setSendingMessage] = useState(false);
+
   // Backup state (Super Admin only)
   const [backupStats, setBackupStats] = useState(null);
   const [showBackupSection, setShowBackupSection] = useState(false);
