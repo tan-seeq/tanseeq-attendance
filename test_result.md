@@ -272,7 +272,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Internal messaging system implementation"
+    - "New backup system implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
