@@ -588,6 +588,42 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  // Penalty functions (Super Admin only)
+  const calculateLatePenalties = async () => {
+    if (user?.name !== "Hatem Mohamed Ahmed") return;
+    
+    setPenaltyLoading(true);
+    try {
+      const response = await axios.get(`${API}/penalties/late/${selectedMonth}`);
+      setPenalties(response.data);
+      setShowPenaltySection(true);
+    } catch (error) {
+      console.error('Error calculating penalties:', error);
+      alert('حدث خطأ في حساب الخصومات');
+    } finally {
+      setPenaltyLoading(false);
+    }
+  };
+
+  const applyLatePenalties = async () => {
+    if (user?.name !== "Hatem Mohamed Ahmed") return;
+    
+    const confirm = window.confirm(
+      `هل أنت متأكد من تطبيق خصومات التأخير لشهر ${selectedMonth}؟\nسيتم خصم المبالغ من الرواتب تلقائياً.`
+    );
+    
+    if (!confirm) return;
+    
+    try {
+      const response = await axios.post(`${API}/penalties/apply/${selectedMonth}`);
+      alert(`تم تطبيق خصومات التأخير بنجاح!\nعدد الموظفين: ${response.data.total_employees}\nإجمالي الخصم: ${response.data.total_penalty_amount} درهم`);
+      calculateLatePenalties(); // Refresh data
+    } catch (error) {
+      console.error('Error applying penalties:', error);
+      alert('حدث خطأ في تطبيق الخصومات');
+    }
+  };
+
   const fetchDashboardStats = async () => {
     try {
       const [employeesRes, attendanceRes, leavesRes, fieldExitsRes] = await Promise.all([
