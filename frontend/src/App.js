@@ -363,9 +363,11 @@ const Layout = ({ children }) => {
       { name: t('field_exits'), href: '/field-exit-management', icon: DocumentTextIcon },
       { name: t('reports'), href: '/reports', icon: DocumentTextIcon },
       { name: t('payroll'), href: '/payroll', icon: CurrencyDollarIcon },
+      { name: 'عرض المرفقات', href: '/attachment-viewer', icon: FolderIcon },
     ] : []),
     ...(user?.role === 'super_admin' ? [
       { name: t('activity_logs'), href: '/activity-logs', icon: DocumentTextIcon },
+      { name: 'إنشاء طلبات للموظفين', href: '/admin-request-creation', icon: PlusIcon },
     ] : []),
   ];
 
