@@ -2653,6 +2653,16 @@ class TanseeqAPITester:
             self.test_manual_backup_creation(role)
             self.test_backup_security_access_control(role)
             
+            # NEW: Late Penalty System Tests (Arabic review request)
+            print(f"\n⏰ Testing Late Penalty System ({role.upper()}):")
+            self.test_penalties_late_calculation(role)
+            self.test_penalties_complex_rules_verification(role)
+            self.test_penalties_apply(role)
+            self.test_penalties_history(role)
+            self.test_penalties_security_access_control(role)
+            self.test_penalties_hatem_only_application(role)
+            self.test_penalties_daily_salary_calculation(role)
+            
             # NEW: Internal Messaging System Tests (current focus)
             print(f"\n📨 Testing Internal Messaging System ({role.upper()}):")
             self.test_messages_creation_general(role)
