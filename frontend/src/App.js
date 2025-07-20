@@ -869,6 +869,64 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Automatic Notifications Section (Admin & Super Admin) */}
+      {(user?.role === "admin" || user?.role === "super_admin") && (
+        <div className="mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <BellIcon className="h-5 w-5 ml-2 text-orange-600" />
+                التنبيهات التلقائية
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <ClockIcon className="h-6 w-6 text-yellow-600 ml-2" />
+                  <h4 className="font-semibold text-yellow-800">تنبيهات التأخير</h4>
+                </div>
+                <p className="text-sm text-yellow-700 mb-3">
+                  إرسال تنبيهات للموظفين المتأخرين اليوم تلقائياً
+                </p>
+                <button
+                  onClick={sendLateWarnings}
+                  className="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 text-sm flex items-center w-full justify-center"
+                >
+                  ⚠️ إرسال تنبيهات التأخير
+                </button>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-red-600 ml-2" />
+                  <h4 className="font-semibold text-red-800">تنبيهات الغياب</h4>
+                </div>
+                <p className="text-sm text-red-700 mb-3">
+                  إرسال تنبيهات للموظفين الغائبين بدون إذن اليوم
+                </p>
+                <button
+                  onClick={sendAbsenceWarnings}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center w-full justify-center"
+                >
+                  🚨 إرسال تنبيهات الغياب
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-semibold text-blue-800 mb-2">📋 ملاحظات هامة:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• يتم إرسال تنبيه واحد فقط لكل موظف في اليوم الواحد</li>
+                <li>• تنبيهات الغياب تتحقق من الإجازات المعتمدة أولاً</li>
+                <li>• يتم إرسال التنبيهات للموظف مباشرة في صفحة الرسائل</li>
+                <li>• التنبيهات تتضمن تفاصيل الخصم المحتمل حسب سياسة الشركة</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
