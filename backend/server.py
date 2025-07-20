@@ -2506,6 +2506,231 @@ async def update_payroll(user_id: str, month: str, payroll_data: dict, current_u
     
     return {"message": "Payroll override saved successfully"}
 
+# ============ ADVANCED LATE PENALTY SYSTEM ============
+
+class LatePenalty(BaseModel):
+    """Late penalty calculation model"""
+    user_id: str
+    user_name: str
+    month: str
+    total_late_minutes: int
+    late_incidents: int
+    free_late_minutes: int  # First 15 minutes x 4 times = 60 minutes free
+    penalty_minutes: int
+    penalty_amount: float
+    penalty_days: float
+    daily_salary: float
+    monthly_salary: float
+    penalty_type: str  # "minutes", "half_day", "full_day"
+    details: List[dict]
+
+@api_router.get("/penalties/late/{month}")
+async def calculate_late_penalties(month: str, current_user: User = Depends(get_admin_user)):
+    """Calculate late penalties for a specific month (Admin only)"""
+    try:
+        # Parse month (format: YYYY-MM)
+        year, month_num = map(int, month.split('-'))
+        
+        # Get all employees
+        employees = await db.users.find({"is_active": True}).to_list(1000)
+        
+        # Get attendance records for the month
+        start_date = datetime(year, int(month_num), 1).strftime('%Y-%m-%d')
+        if int(month_num) == 12:
+            end_date = datetime(year + 1, 1, 1).strftime('%Y-%m-%d')
+        else:
+            end_date = datetime(year, int(month_num) + 1, 1).strftime('%Y-%m-%d')
+        
+        penalties = []
+        
+        for employee in employees:
+            # Get attendance records for this employee in this month
+            attendance_records = await db.attendance.find({
+                "user_id": employee["id"],
+                "date": {"$gte": start_date, "$lt": end_date},
+                "is_late": True
+            }).to_list(1000)
+            
+            if not attendance_records:
+                continue  # No late records for this employee
+            
+            # Calculate penalties based on complex rules
+            total_late_minutes = 0
+            late_incidents = len(attendance_records)
+            details = []
+            
+            # Calculate total late minutes
+            for record in attendance_records:
+                check_in = record.get('check_in')
+                if not check_in:
+                    continue
+                
+                # Parse check-in time
+                check_in_time = datetime.strptime(check_in, '%H:%M:%S').time()
+                
+                # Calculate late minutes based on user-specific rules
+                late_minutes = 0
+                if employee.get('has_flexible_schedule', False):
+                    # Flexible schedule users - calculate based on flexible_start_range
+                    flexible_start = employee.get('flexible_start_range', '07:00-11:00')
+                    _, end_time = flexible_start.split('-')
+                    target_hour, target_minute = map(int, end_time.split(':'))
+                    target_time = datetime.strptime(f'{target_hour:02d}:{target_minute:02d}', '%H:%M').time()
+                else:
+                    # Fixed schedule users
+                    if employee['name'] == 'Hatem Mohamed Ahmed':
+                        continue  # Hatem has no time restrictions
+                    elif employee['name'] == 'Tarek Wazzan':
+                        target_time = datetime.strptime('08:00', '%H:%M').time()
+                    else:
+                        target_time = datetime.strptime('09:00', '%H:%M').time()
+                
+                # Calculate minutes late
+                if check_in_time > target_time:
+                    check_in_minutes = check_in_time.hour * 60 + check_in_time.minute
+                    target_minutes = target_time.hour * 60 + target_time.minute
+                    late_minutes = check_in_minutes - target_minutes
+                
+                total_late_minutes += late_minutes
+                details.append({
+                    "date": record.get('date'),
+                    "check_in": check_in,
+                    "late_minutes": late_minutes,
+                    "target_time": target_time.strftime('%H:%M')
+                })
+            
+            if total_late_minutes == 0:
+                continue
+            
+            # Apply complex penalty rules
+            monthly_salary = employee.get('monthly_salary', 0)
+            daily_salary = monthly_salary / 30
+            
+            # Rule 1: First 15 minutes x 4 times = free
+            free_late_minutes = min(60, late_incidents * 15)  # Maximum 60 minutes free
+            if late_incidents <= 4:
+                free_late_minutes = total_late_minutes  # All free if 4 or less incidents
+            
+            penalty_minutes = max(0, total_late_minutes - free_late_minutes)
+            
+            # Apply penalty rules
+            penalty_amount = 0
+            penalty_days = 0
+            penalty_type = "none"
+            
+            if penalty_minutes > 0:
+                if penalty_minutes <= 20:
+                    # Rule 2: After 4 times, deduct actual minutes
+                    penalty_amount = (penalty_minutes / (8 * 60)) * daily_salary  # Minutes as fraction of day
+                    penalty_days = penalty_minutes / (8 * 60)
+                    penalty_type = "minutes"
+                elif penalty_minutes <= 120:  # Up to 2 hours
+                    # Rule 3: More than 20 minutes, deduct actual time
+                    penalty_amount = (penalty_minutes / (8 * 60)) * daily_salary
+                    penalty_days = penalty_minutes / (8 * 60)
+                    penalty_type = "actual_time"
+                    
+                    if penalty_minutes >= 60:  # 1-2 hours = half day
+                        penalty_amount = daily_salary * 0.5
+                        penalty_days = 0.5
+                        penalty_type = "half_day"
+                else:
+                    # Rule 4: More than 2 hours = full day
+                    penalty_amount = daily_salary
+                    penalty_days = 1.0
+                    penalty_type = "full_day"
+            
+            penalty = LatePenalty(
+                user_id=employee["id"],
+                user_name=employee["name"],
+                month=month,
+                total_late_minutes=total_late_minutes,
+                late_incidents=late_incidents,
+                free_late_minutes=free_late_minutes,
+                penalty_minutes=penalty_minutes,
+                penalty_amount=penalty_amount,
+                penalty_days=penalty_days,
+                daily_salary=daily_salary,
+                monthly_salary=monthly_salary,
+                penalty_type=penalty_type,
+                details=details
+            )
+            
+            penalties.append(penalty)
+        
+        return penalties
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating late penalties: {str(e)}")
+
+@api_router.post("/penalties/apply/{month}")
+async def apply_late_penalties(month: str, current_user: User = Depends(get_super_admin_user)):
+    """Apply calculated late penalties to payroll (Super admin only)"""
+    try:
+        # Get calculated penalties
+        penalties = await calculate_late_penalties(month, current_user)
+        
+        # Store penalties in database
+        penalty_records = []
+        for penalty in penalties:
+            penalty_record = {
+                "id": f"penalty_{penalty.user_id}_{month}",
+                "user_id": penalty.user_id,
+                "user_name": penalty.user_name,
+                "month": month,
+                "total_late_minutes": penalty.total_late_minutes,
+                "penalty_amount": penalty.penalty_amount,
+                "penalty_days": penalty.penalty_days,
+                "penalty_type": penalty.penalty_type,
+                "applied_by": current_user.id,
+                "applied_at": datetime.utcnow(),
+                "status": "applied"
+            }
+            
+            # Insert or update penalty record
+            await db.late_penalties.update_one(
+                {"id": penalty_record["id"]},
+                {"$set": penalty_record},
+                upsert=True
+            )
+            
+            penalty_records.append(penalty_record)
+        
+        # Log activity
+        total_penalties = sum(p.penalty_amount for p in penalties)
+        await log_activity(
+            current_user.id, 
+            "penalties_applied", 
+            f"Applied late penalties for {month}: {len(penalties)} employees, AED {total_penalties:.2f}"
+        )
+        
+        return {
+            "message": f"Late penalties applied successfully for {month}",
+            "total_employees": len(penalties),
+            "total_penalty_amount": total_penalties,
+            "penalties": penalty_records
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error applying late penalties: {str(e)}")
+
+@api_router.get("/penalties/history/{user_id}")
+async def get_penalty_history(user_id: str, current_user: User = Depends(get_current_user)):
+    """Get penalty history for a user"""
+    # Users can only see their own history, admins can see all
+    if current_user.role == "user" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    try:
+        penalty_records = await db.late_penalties.find(
+            {"user_id": user_id}
+        ).sort("applied_at", -1).to_list(1000)
+        
+        return penalty_records
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting penalty history: {str(e)}")
+
 # ============ AUTO BACKUP ENDPOINTS ============
 
 @api_router.get("/backup/stats")
