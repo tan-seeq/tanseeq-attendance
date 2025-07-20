@@ -3735,6 +3735,18 @@ class TanseeqAPITester:
             self.test_attendance_update_endpoint('super_admin')
             self.test_reports_export_excel('super_admin')
             self.test_reports_export_pdf('super_admin')
+            
+            # HIGH PRIORITY: Test new super admin endpoints
+            print(f"\n🚀 Testing HIGH PRIORITY Super Admin Features:")
+            self.test_automation_status('super_admin')
+            self.test_admin_create_leave_request('super_admin')
+            self.test_admin_create_field_exit_request('super_admin')
+            self.test_admin_attachments_list('super_admin')
+            self.test_admin_view_attachment('super_admin')
+            self.test_notifications_late_warning('super_admin')
+            self.test_notifications_absence_warning('super_admin')
+            self.test_notifications_penalty_applied('super_admin')
+            
             self.test_logout('super_admin')
         else:
             print("⚠️  Super admin login failed - password may need to be reset by admin")
