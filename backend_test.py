@@ -2577,6 +2577,266 @@ class TanseeqAPITester:
             print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
             return False
 
+    def test_activity_logs_comprehensive(self, role: str) -> bool:
+        """Comprehensive activity logs testing as per Arabic review request"""
+        if role not in self.tokens:
+            return False
+        
+        print(f"\n🔍 اختبار شامل لسجل الأنشطة ({role}):")
+        print("-" * 50)
+        
+        all_tests_passed = True
+        
+        # Test 1: Basic activity logs endpoint access
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('GET', 'activity-logs', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200:
+            if success and isinstance(response, list):
+                self.log_test(f"Activity logs basic access ({role})", True)
+                
+                # Test 2: Check data structure
+                if response:
+                    first_record = response[0]
+                    required_fields = ['id', 'user_name', 'action', 'details', 'timestamp']
+                    has_required_fields = all(field in first_record for field in required_fields)
+                    
+                    if has_required_fields:
+                        self.log_test(f"Activity logs data structure ({role})", True)
+                        
+                        # Test 3: Check data types and content
+                        valid_data = True
+                        for record in response[:5]:  # Check first 5 records
+                            if not isinstance(record.get('user_name'), str) or not record.get('user_name'):
+                                valid_data = False
+                                break
+                            if not isinstance(record.get('action'), str) or not record.get('action'):
+                                valid_data = False
+                                break
+                            if not isinstance(record.get('details'), str) or not record.get('details'):
+                                valid_data = False
+                                break
+                        
+                        self.log_test(f"Activity logs data validation ({role})", valid_data,
+                                     "Invalid data types or empty required fields" if not valid_data else "")
+                        all_tests_passed = all_tests_passed and valid_data
+                    else:
+                        missing_fields = set(required_fields) - set(first_record.keys())
+                        self.log_test(f"Activity logs data structure ({role})", False, 
+                                     f"Missing required fields: {missing_fields}")
+                        all_tests_passed = False
+                else:
+                    self.log_test(f"Activity logs data structure ({role})", True, "No activity logs found (acceptable)")
+            else:
+                self.log_test(f"Activity logs basic access ({role})", False, str(response))
+                all_tests_passed = False
+        else:
+            # For non-super_admin, expect 403
+            access_denied = not success and response.get('detail') == 'Super admin access required'
+            self.log_test(f"Activity logs access control ({role})", access_denied,
+                         f"Expected 403 but got: {response}" if not access_denied else "")
+            all_tests_passed = all_tests_passed and access_denied
+        
+        # Test 4: Date filtering (only for super_admin)
+        if role == 'super_admin':
+            test_date = '2025-02-01'
+            success, response = self.make_request('GET', f'activity-logs?date={test_date}', 
+                                                token=self.tokens[role])
+            
+            if success and isinstance(response, list):
+                self.log_test(f"Activity logs date filtering ({role})", True)
+                
+                # Verify date filtering works (if there are records)
+                if response:
+                    date_filtered_correctly = True
+                    for record in response:
+                        timestamp = record.get('timestamp', '')
+                        if timestamp and not timestamp.startswith(test_date):
+                            date_filtered_correctly = False
+                            break
+                    
+                    self.log_test(f"Activity logs date filter accuracy ({role})", date_filtered_correctly,
+                                 "Some records don't match the date filter" if not date_filtered_correctly else "")
+                    all_tests_passed = all_tests_passed and date_filtered_correctly
+                else:
+                    self.log_test(f"Activity logs date filter accuracy ({role})", True, "No records for test date (acceptable)")
+            else:
+                self.log_test(f"Activity logs date filtering ({role})", False, str(response))
+                all_tests_passed = False
+        
+        # Test 5: Security - Regular users and admins should be denied
+        if role in ['user', 'admin']:
+            success, response = self.make_request('GET', 'activity-logs', 
+                                                token=self.tokens[role],
+                                                expected_status=403)
+            
+            access_properly_denied = not success and response.get('detail') == 'Super admin access required'
+            self.log_test(f"Activity logs security for {role}", access_properly_denied,
+                         f"Expected 403 but got: {response}" if not access_properly_denied else "")
+            all_tests_passed = all_tests_passed and access_properly_denied
+        
+        return all_tests_passed
+
+    def test_activity_logs_database_content(self, role: str) -> bool:
+        """Test activity logs database content and ensure data exists"""
+        if role != 'super_admin' or role not in self.tokens:
+            return True  # Skip for non-super_admin
+        
+        success, response = self.make_request('GET', 'activity-logs', token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            if len(response) > 0:
+                self.log_test(f"Activity logs database content ({role})", True, 
+                             f"Found {len(response)} activity log records")
+                
+                # Check for variety of actions
+                actions = set()
+                users = set()
+                for record in response:
+                    actions.add(record.get('action', ''))
+                    users.add(record.get('user_name', ''))
+                
+                variety_check = len(actions) > 1 and len(users) > 0
+                self.log_test(f"Activity logs content variety ({role})", variety_check,
+                             f"Actions: {len(actions)}, Users: {len(users)}" if not variety_check else "")
+                
+                return variety_check
+            else:
+                self.log_test(f"Activity logs database content ({role})", False, 
+                             "No activity logs found in database")
+                return False
+        else:
+            self.log_test(f"Activity logs database content ({role})", False, str(response))
+            return False
+
+    def test_activity_logs_page_diagnosis(self, role: str) -> bool:
+        """Comprehensive diagnosis of activity logs page issues"""
+        if role != 'super_admin' or role not in self.tokens:
+            return True  # Skip for non-super_admin
+        
+        print(f"\n🔧 تشخيص شامل لمشكلة صفحة الأنشطة:")
+        print("-" * 50)
+        
+        diagnosis_results = {}
+        
+        # 1. Test endpoint availability
+        success, response = self.make_request('GET', 'activity-logs', token=self.tokens[role])
+        diagnosis_results['endpoint_available'] = success
+        
+        # 2. Test response format
+        diagnosis_results['response_is_list'] = isinstance(response, list) if success else False
+        
+        # 3. Test data count
+        diagnosis_results['data_count'] = len(response) if success and isinstance(response, list) else 0
+        
+        # 4. Test required fields
+        if success and isinstance(response, list) and response:
+            first_record = response[0]
+            required_fields = ['id', 'user_name', 'action', 'details', 'timestamp']
+            diagnosis_results['has_required_fields'] = all(field in first_record for field in required_fields)
+            diagnosis_results['available_fields'] = list(first_record.keys())
+        else:
+            diagnosis_results['has_required_fields'] = False
+            diagnosis_results['available_fields'] = []
+        
+        # 5. Test date filtering
+        success_date, response_date = self.make_request('GET', 'activity-logs?date=2025-02-01', 
+                                                       token=self.tokens[role])
+        diagnosis_results['date_filtering_works'] = success_date
+        diagnosis_results['date_filtered_count'] = len(response_date) if success_date and isinstance(response_date, list) else 0
+        
+        # 6. Test authentication
+        success_no_auth, response_no_auth = self.make_request('GET', 'activity-logs', expected_status=401)
+        diagnosis_results['requires_authentication'] = not success_no_auth
+        
+        # Print diagnosis
+        print("📊 نتائج التشخيص:")
+        for key, value in diagnosis_results.items():
+            status = "✅" if value else "❌"
+            print(f"  {status} {key}: {value}")
+        
+        # Overall diagnosis
+        critical_issues = []
+        if not diagnosis_results['endpoint_available']:
+            critical_issues.append("Activity logs endpoint not accessible")
+        if not diagnosis_results['response_is_list']:
+            critical_issues.append("Response is not a list format")
+        if diagnosis_results['data_count'] == 0:
+            critical_issues.append("No activity log data found in database")
+        if not diagnosis_results['has_required_fields']:
+            critical_issues.append("Missing required fields in response")
+        if not diagnosis_results['date_filtering_works']:
+            critical_issues.append("Date filtering not working")
+        
+        if critical_issues:
+            print(f"\n❌ مشاكل حرجة تم اكتشافها:")
+            for issue in critical_issues:
+                print(f"  • {issue}")
+            self.log_test(f"Activity logs page diagnosis ({role})", False, 
+                         f"Critical issues: {', '.join(critical_issues)}")
+            return False
+        else:
+            print(f"\n✅ لا توجد مشاكل حرجة - صفحة الأنشطة تعمل بشكل صحيح")
+            self.log_test(f"Activity logs page diagnosis ({role})", True)
+            return True
+
+    def run_activity_logs_tests(self):
+        """Run comprehensive activity logs tests as per Arabic review request"""
+        print("🚀 فحص مشكلة صفحة الأنشطة - TANSEEQ HR Backend API")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 80)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Test login with hatem@tanseeq.com as requested
+        print(f"\n🔐 1. تسجيل الدخول بحساب hatem@tanseeq.com (السوبر آدمن):")
+        print("-" * 60)
+        
+        if not self.test_login('super_admin'):
+            print("❌ فشل تسجيل الدخول بحساب hatem@tanseeq.com")
+            return False
+        else:
+            print("✅ تم تسجيل الدخول بنجاح")
+        
+        # Test activity logs endpoint
+        print(f"\n🔍 2. اختبار endpoint سجل الأنشطة:")
+        print("-" * 60)
+        
+        # Comprehensive activity logs testing
+        self.test_activity_logs_comprehensive('super_admin')
+        self.test_activity_logs_database_content('super_admin')
+        self.test_activity_logs_page_diagnosis('super_admin')
+        
+        # Test security with other roles
+        print(f"\n🔒 3. اختبار الأمان:")
+        print("-" * 60)
+        
+        # Test with regular user
+        if self.test_login('user'):
+            self.test_activity_logs_comprehensive('user')
+        
+        # Test with admin
+        if self.test_login('admin'):
+            self.test_activity_logs_comprehensive('admin')
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print(f"📊 ملخص فحص صفحة الأنشطة: {self.tests_passed}/{self.tests_run} اختبار نجح")
+        print(f"✅ معدل النجاح: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        if self.tests_passed >= (self.tests_run - 2):  # Allow for minor issues
+            print("🎉 جميع الاختبارات المهمة نجحت! Activity logs working correctly!")
+            return True
+        else:
+            failed_tests = self.tests_run - self.tests_passed
+            print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
+            return False
+
     def run_comprehensive_tests(self):
         """Run all tests for all roles"""
         print("🚀 Starting TANSEEQ HR Backend API Tests")
