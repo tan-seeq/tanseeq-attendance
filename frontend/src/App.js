@@ -563,6 +563,69 @@ const Dashboard = () => {
     }
   };
 
+  // Custom message functions
+  const sendCustomMessage = async () => {
+    if (!customMessage.title.trim() || !customMessage.content.trim()) {
+      alert('يرجى إدخال عنوان ونص الرسالة');
+      return;
+    }
+
+    setSendingMessage(true);
+    try {
+      const response = await axios.post(`${API}/messages/custom`, {
+        title: customMessage.title,
+        content: customMessage.content,
+        priority: customMessage.priority,
+        to_user_ids: [] // Send to all employees
+      });
+      
+      alert(`تم إرسال الرسالة بنجاح!\nالعنوان: ${response.data.title}\nتم الإرسال لعدد: ${response.data.recipients_count} موظف`);
+      
+      // Reset form
+      setCustomMessage({
+        title: '',
+        content: '',
+        priority: 'normal'
+      });
+      setShowCustomMessageModal(false);
+      
+      // Refresh messages
+      fetchMessages();
+      fetchUnreadCount();
+      
+    } catch (error) {
+      console.error('Error sending custom message:', error);
+      alert('حدث خطأ في إرسال الرسالة');
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  // Automatic notification functions
+  const sendLateWarnings = async () => {
+    try {
+      const response = await axios.post(`${API}/notifications/late-warning`);
+      alert(`تم إرسال تنبيهات التأخير!\nعدد الموظفين المتأخرين: ${response.data.notifications_sent}\nالتاريخ: ${response.data.date}`);
+      fetchMessages();
+      fetchUnreadCount();
+    } catch (error) {
+      console.error('Error sending late warnings:', error);
+      alert('حدث خطأ في إرسال تنبيهات التأخير');
+    }
+  };
+
+  const sendAbsenceWarnings = async () => {
+    try {
+      const response = await axios.post(`${API}/notifications/absence-warning`);
+      alert(`تم إرسال تنبيهات الغياب!\nعدد الموظفين الغائبين بدون إذن: ${response.data.notifications_sent}\nالتاريخ: ${response.data.date}`);
+      fetchMessages();
+      fetchUnreadCount();
+    } catch (error) {
+      console.error('Error sending absence warnings:', error);
+      alert('حدث خطأ في إرسال تنبيهات الغياب');
+    }
+  };
+
   // Backup functions (Super Admin only)
   const fetchBackupStats = async () => {
     if (user?.name !== "Hatem Mohamed Ahmed") return;
