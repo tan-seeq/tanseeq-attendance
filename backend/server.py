@@ -3031,8 +3031,11 @@ async def send_absence_warning_notifications():
         # Get current date
         today = get_uae_time().date().strftime('%Y-%m-%d')
         
-        # Get all active employees
-        all_employees = await db.users.find({"is_active": True}).to_list(1000)
+        # Get all active employees with role "user" only (exclude admin/super_admin)
+        all_employees = await db.users.find({
+            "is_active": True,
+            "role": "user"  # Only regular employees, not admin/super_admin
+        }).to_list(1000)
         
         # Find employees with no attendance record today (absent)
         absent_employees = []
