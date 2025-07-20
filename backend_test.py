@@ -4678,6 +4678,73 @@ class TanseeqAPITester:
         
         return test_passed
 
+    def run_message_privacy_tests(self):
+        """Run specific tests for message privacy as requested in Arabic review"""
+        print("🔒 STARTING MESSAGE PRIVACY TESTING")
+        print("اختبار حرج - خصوصية رسائل التأخير والغياب")
+        print("=" * 60)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Login all user types for comprehensive testing
+        login_results = []
+        for role in ['user', 'admin', 'super_admin']:
+            login_results.append(self.test_login(role))
+        
+        if not any(login_results):
+            print("❌ All logins failed - stopping tests")
+            return False
+        
+        print(f"\n✅ Successfully logged in users:")
+        for role in ['user', 'admin', 'super_admin']:
+            if role in self.users:
+                print(f"   - {role}: {self.users[role]['name']} ({self.users[role]['email']})")
+        
+        # Run the specific privacy tests requested in Arabic review
+        print("\n📋 TESTING MESSAGE PRIVACY REQUIREMENTS")
+        print("-" * 50)
+        
+        test_results = []
+        
+        # Test 1: Late warning message privacy
+        test_results.append(self.test_message_privacy_late_warnings())
+        
+        # Test 2: Absence warning message privacy
+        test_results.append(self.test_message_privacy_absence_warnings())
+        
+        # Test 3: Penalty notification message privacy
+        test_results.append(self.test_message_privacy_penalty_notifications())
+        
+        # Test 4: Unread count privacy
+        test_results.append(self.test_unread_count_privacy())
+        
+        # Test 5: General messages visibility (Friday announcements should be visible to all)
+        test_results.append(self.test_general_messages_visibility())
+        
+        # Summary
+        passed_tests = sum(test_results)
+        total_tests = len(test_results)
+        
+        print(f"\n🎯 MESSAGE PRIVACY TESTING SUMMARY")
+        print("=" * 60)
+        print(f"Total tests run: {total_tests}")
+        print(f"Tests passed: {passed_tests}")
+        print(f"Tests failed: {total_tests - passed_tests}")
+        print(f"Success rate: {(passed_tests / total_tests * 100):.1f}%")
+        
+        if passed_tests == total_tests:
+            print("🎉 ALL MESSAGE PRIVACY TESTS PASSED!")
+            print("✅ رسائل التأخير والغياب والخصومات خاصة بكل موظف")
+            print("✅ الرسائل العامة (إعلانات الجمعة) تظهر للجميع")
+            print("✅ عداد الرسائل غير المقروءة لا يشمل رسائل الآخرين")
+        else:
+            print(f"⚠️  {total_tests - passed_tests} tests failed")
+        
+        return passed_tests == total_tests
+
     def run_arabic_review_tests(self):
         """Run specific tests for Arabic review request"""
         print("🚀 STARTING ARABIC REVIEW REQUEST TESTING")
