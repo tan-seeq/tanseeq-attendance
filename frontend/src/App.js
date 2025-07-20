@@ -2798,18 +2798,17 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/activity-logs" element={
+            <Route path="/admin-request-creation" element={
               <ProtectedRoute requiredRole="super_admin">
                 <Layout>
-                  <ActivityLogs />
+                  <AdminRequestCreation />
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/payroll" element={
+            <Route path="/attachment-viewer" element={
               <ProtectedRoute requiredRole="admin">
                 <Layout>
-                  <Payroll />
+                  <AttachmentViewer />
                 </Layout>
               </ProtectedRoute>
             } />
