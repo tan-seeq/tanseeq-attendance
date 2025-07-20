@@ -488,7 +488,70 @@ async def check_in_with_qr(
         "method": attendance_data.get("check_in_method", "standard")
     }
 
-# ============ AUTH ENDPOINTS ============
+@api_router.post("/attendance/check-out-with-qr")
+async def check_out_with_qr(
+    qr_code: str = Form(...),
+    current_user: User = Depends(get_current_user)
+):
+    """Check out with QR code verification"""
+    
+    # Skip QR verification for admin, super_admin, and specific user
+    skip_verification = (
+        current_user.role in ["admin", "super_admin"] or 
+        current_user.email == "hatemmo186@gmail.com"
+    )
+    
+    if not skip_verification:
+        # Verify QR code for regular users
+        if not verify_daily_qr_code(qr_code):
+            raise HTTPException(
+                status_code=400,
+                detail="رمز QR غير صحيح أو منتهي الصلاحية. يرجى مسح الرمز الموجود في مدخل المكتب."
+            )
+    
+    # Check if checked in today
+    today = get_uae_time().date().strftime('%Y-%m-%d')
+    existing_attendance = await db.attendance.find_one({
+        "user_id": current_user.id,
+        "date": today
+    })
+    
+    if not existing_attendance or not existing_attendance.get("check_in"):
+        raise HTTPException(status_code=400, detail="لم يتم تسجيل الحضور اليوم. يجب تسجيل الحضور أولاً.")
+    
+    if existing_attendance.get("check_out"):
+        raise HTTPException(status_code=400, detail="تم تسجيل الانصراف مسبقاً اليوم")
+    
+    # Get current UAE time
+    current_time = get_uae_time()
+    check_out_time = current_time.strftime('%H:%M:%S')
+    
+    # Update attendance record
+    attendance_update = {
+        "check_out": check_out_time,
+        "qr_verified_out": not skip_verification,
+        "check_out_method": "qr_code" if not skip_verification else "admin_bypass"
+    }
+    
+    await db.attendance.update_one(
+        {"user_id": current_user.id, "date": today},
+        {"$set": attendance_update}
+    )
+    
+    # Log activity
+    verification_info = " (QR verified)" if not skip_verification else " (admin bypass)"
+    await log_activity(
+        current_user.id, 
+        "check_out", 
+        f"Checked out at {check_out_time}{verification_info}"
+    )
+    
+    return {
+        "message": "تم تسجيل الانصراف بنجاح ✅",
+        "check_out_time": check_out_time,
+        "qr_verified": attendance_update.get("qr_verified_out", False),
+        "method": attendance_update.get("check_out_method", "standard")
+    }
 
 @api_router.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
