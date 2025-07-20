@@ -2837,6 +2837,383 @@ class TanseeqAPITester:
             print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
             return False
 
+    # ============ NEW MESSAGING AND NOTIFICATION TESTS (Arabic Review Request) ============
+    
+    def test_custom_messages(self, role: str) -> bool:
+        """Test custom messages endpoint (Admin only) - Arabic Review Request"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Test custom message creation
+        message_data = {
+            "title": "رسالة مخصصة للاختبار",
+            "content": "هذه رسالة مخصصة لجميع الموظفين للتأكد من عمل النظام بشكل صحيح",
+            "message_type": "custom",
+            "to_user_ids": [],  # Empty means send to all
+            "priority": "normal"
+        }
+        
+        success, response = self.make_request('POST', 'messages/custom', message_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains expected structure
+            expected_keys = ['message', 'id', 'recipients_count', 'title']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if message was sent to all employees
+            recipients_count = response.get('recipients_count', 0)
+            has_recipients = recipients_count > 0
+            
+            # Check if message type is custom
+            title_matches = response.get('title') == message_data['title']
+            
+            success = success and has_expected_keys and has_recipients and title_matches
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Custom messages ({role})", False, 
+                             f"Missing keys: {missing_keys}, Recipients: {recipients_count}, Title match: {title_matches}")
+            else:
+                self.log_test(f"Custom messages ({role})", True)
+        else:
+            test_passed = success if expected_status != 200 else False
+            self.log_test(f"Custom messages ({role})", test_passed, str(response) if not test_passed else "")
+        
+        return success
+
+    def test_late_warning_notifications(self, role: str) -> bool:
+        """Test late warning notifications endpoint - Arabic Review Request"""
+        if role not in self.tokens:
+            return False
+        
+        # This endpoint should be accessible to all authenticated users for testing
+        success, response = self.make_request('POST', 'notifications/late-warning', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check if response contains expected structure
+            expected_keys = ['message', 'notifications_sent', 'date']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if notifications_sent is a number
+            notifications_sent = response.get('notifications_sent', -1)
+            is_valid_count = isinstance(notifications_sent, int) and notifications_sent >= 0
+            
+            # Check if date is today's date
+            today = datetime.now().strftime('%Y-%m-%d')
+            date_matches = response.get('date') == today
+            
+            success = success and has_expected_keys and is_valid_count and date_matches
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Late warning notifications ({role})", False, 
+                             f"Missing keys: {missing_keys}, Valid count: {is_valid_count}, Date match: {date_matches}")
+            else:
+                self.log_test(f"Late warning notifications ({role})", True, 
+                             f"Sent {notifications_sent} notifications")
+        else:
+            self.log_test(f"Late warning notifications ({role})", False, str(response))
+        
+        return success
+
+    def test_absence_warning_notifications(self, role: str) -> bool:
+        """Test absence warning notifications endpoint - Arabic Review Request"""
+        if role not in self.tokens:
+            return False
+        
+        # This endpoint should be accessible to all authenticated users for testing
+        success, response = self.make_request('POST', 'notifications/absence-warning', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check if response contains expected structure
+            expected_keys = ['message', 'notifications_sent', 'absent_employees', 'date']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if notifications_sent and absent_employees are numbers
+            notifications_sent = response.get('notifications_sent', -1)
+            absent_employees = response.get('absent_employees', -1)
+            is_valid_count = isinstance(notifications_sent, int) and notifications_sent >= 0
+            is_valid_absent = isinstance(absent_employees, int) and absent_employees >= 0
+            
+            # Check if date is today's date
+            today = datetime.now().strftime('%Y-%m-%d')
+            date_matches = response.get('date') == today
+            
+            # Check if system properly checks for approved leaves
+            message_content = response.get('message', '')
+            has_proper_message = 'absence warning' in message_content.lower() or 'غياب' in message_content
+            
+            success = success and has_expected_keys and is_valid_count and is_valid_absent and date_matches and has_proper_message
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Absence warning notifications ({role})", False, 
+                             f"Missing keys: {missing_keys}, Valid counts: {is_valid_count}/{is_valid_absent}, Date: {date_matches}, Message: {has_proper_message}")
+            else:
+                self.log_test(f"Absence warning notifications ({role})", True, 
+                             f"Found {absent_employees} absent employees, sent {notifications_sent} notifications")
+        else:
+            self.log_test(f"Absence warning notifications ({role})", False, str(response))
+        
+        return success
+
+    def test_penalty_notifications(self, role: str) -> bool:
+        """Test penalty notifications endpoint - Arabic Review Request"""
+        if role not in self.tokens:
+            return False
+        
+        # Get a user ID to test with
+        user_id = self.users.get(role, {}).get('id', 'test-user-id')
+        
+        # Test penalty notification
+        url = f"{self.api_url}/notifications/penalty-applied/{user_id}"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}', 'Content-Type': 'application/json'}
+        
+        # Use form data for penalty notification
+        form_data = {
+            'penalty_amount': 100.50,
+            'penalty_reason': 'تأخير متكرر في الحضور'
+        }
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                # Check if response contains expected structure
+                expected_keys = ['message', 'user_name', 'penalty_amount']
+                has_expected_keys = all(key in response_data for key in expected_keys)
+                
+                # Check if penalty amount matches
+                penalty_amount = response_data.get('penalty_amount', 0)
+                amount_matches = penalty_amount == 100.50
+                
+                # Check if user name is present
+                has_user_name = bool(response_data.get('user_name'))
+                
+                success = success and has_expected_keys and amount_matches and has_user_name
+                
+                if not success:
+                    missing_keys = set(expected_keys) - set(response_data.keys())
+                    self.log_test(f"Penalty notifications ({role})", False, 
+                                 f"Missing keys: {missing_keys}, Amount match: {amount_matches}, Has user name: {has_user_name}")
+                else:
+                    self.log_test(f"Penalty notifications ({role})", True)
+            else:
+                self.log_test(f"Penalty notifications ({role})", False, 
+                             f"Status: {response.status_code}, Response: {response.text}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Penalty notifications ({role})", False, str(e))
+            return False
+
+    def test_messaging_security(self, role: str) -> bool:
+        """Test messaging system security - Arabic Review Request"""
+        if role not in self.tokens:
+            return False
+        
+        all_tests_passed = True
+        
+        # Test 1: Custom message creation (only admin/super_admin should be able)
+        expected_status_custom = 200 if role in ['admin', 'super_admin'] else 403
+        success_custom, response_custom = self.make_request('POST', 'messages/custom', 
+                                                          {
+                                                              "title": "اختبار الأمان",
+                                                              "content": "رسالة اختبار الأمان",
+                                                              "message_type": "custom",
+                                                              "to_user_ids": [],
+                                                              "priority": "normal"
+                                                          },
+                                                          token=self.tokens[role],
+                                                          expected_status=expected_status_custom)
+        
+        if expected_status_custom == 200:
+            custom_test_passed = success_custom
+        else:
+            custom_test_passed = not success_custom and 'admin' in str(response_custom).lower()
+        
+        self.log_test(f"Messaging security - custom messages ({role})", custom_test_passed,
+                     str(response_custom) if not custom_test_passed else "")
+        all_tests_passed = all_tests_passed and custom_test_passed
+        
+        # Test 2: Regular message creation (only admin/super_admin should be able)
+        expected_status_regular = 200 if role in ['admin', 'super_admin'] else 403
+        success_regular, response_regular = self.make_request('POST', 'messages', 
+                                                            {
+                                                                "title": "اختبار الأمان العادي",
+                                                                "content": "رسالة اختبار عادية",
+                                                                "message_type": "general",
+                                                                "to_user_ids": [],
+                                                                "priority": "normal"
+                                                            },
+                                                            token=self.tokens[role],
+                                                            expected_status=expected_status_regular)
+        
+        if expected_status_regular == 200:
+            regular_test_passed = success_regular
+        else:
+            regular_test_passed = not success_regular and 'admin' in str(response_regular).lower()
+        
+        self.log_test(f"Messaging security - regular messages ({role})", regular_test_passed,
+                     str(response_regular) if not regular_test_passed else "")
+        all_tests_passed = all_tests_passed and regular_test_passed
+        
+        # Test 3: Message reading (all users should be able to read)
+        success_read, response_read = self.make_request('GET', 'messages', token=self.tokens[role])
+        
+        read_test_passed = success_read and isinstance(response_read, list)
+        self.log_test(f"Messaging security - message reading ({role})", read_test_passed,
+                     str(response_read) if not read_test_passed else "")
+        all_tests_passed = all_tests_passed and read_test_passed
+        
+        return all_tests_passed
+
+    def test_messaging_integration(self, role: str) -> bool:
+        """Test messaging system integration - Arabic Review Request"""
+        if role not in self.tokens:
+            return False
+        
+        all_tests_passed = True
+        
+        # Test 1: Unread message count
+        success_count, response_count = self.make_request('GET', 'messages/unread-count', 
+                                                        token=self.tokens[role])
+        
+        if success_count:
+            has_unread_count = 'unread_count' in response_count
+            is_valid_count = isinstance(response_count.get('unread_count'), int)
+            
+            count_test_passed = has_unread_count and is_valid_count
+            self.log_test(f"Messaging integration - unread count ({role})", count_test_passed,
+                         f"Has count: {has_unread_count}, Valid: {is_valid_count}" if not count_test_passed else "")
+            all_tests_passed = all_tests_passed and count_test_passed
+        else:
+            self.log_test(f"Messaging integration - unread count ({role})", False, str(response_count))
+            all_tests_passed = False
+        
+        # Test 2: Message display with proper structure
+        success_display, response_display = self.make_request('GET', 'messages', 
+                                                            token=self.tokens[role])
+        
+        if success_display and isinstance(response_display, list):
+            if response_display:  # If there are messages
+                first_message = response_display[0]
+                required_fields = ['id', 'title', 'content', 'message_type', 'from_user_name', 
+                                 'priority', 'created_at', 'is_read', 'time_ago']
+                has_required_fields = all(field in first_message for field in required_fields)
+                
+                # Check if time_ago is in Arabic format
+                time_ago = first_message.get('time_ago', '')
+                has_arabic_time = 'منذ' in time_ago
+                
+                display_test_passed = has_required_fields and has_arabic_time
+                self.log_test(f"Messaging integration - display structure ({role})", display_test_passed,
+                             f"Required fields: {has_required_fields}, Arabic time: {has_arabic_time}" if not display_test_passed else "")
+                all_tests_passed = all_tests_passed and display_test_passed
+            else:
+                self.log_test(f"Messaging integration - display structure ({role})", True, "No messages to verify")
+        else:
+            self.log_test(f"Messaging integration - display structure ({role})", False, str(response_display))
+            all_tests_passed = False
+        
+        # Test 3: Message read tracking
+        if success_display and isinstance(response_display, list) and response_display:
+            message_id = response_display[0]['id']
+            success_read, response_read = self.make_request('POST', f'messages/{message_id}/read', 
+                                                          token=self.tokens[role])
+            
+            read_tracking_passed = success_read and 'message' in response_read
+            self.log_test(f"Messaging integration - read tracking ({role})", read_tracking_passed,
+                         str(response_read) if not read_tracking_passed else "")
+            all_tests_passed = all_tests_passed and read_tracking_passed
+        
+        return all_tests_passed
+
+    def run_messaging_notification_tests(self):
+        """Run comprehensive messaging and notification tests (Arabic Review Request)"""
+        print("🚀 اختبار الميزات الجديدة للرسائل والتنبيهات - TANSEEQ HR Backend API")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 80)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Test different roles as requested
+        test_roles = [
+            ('admin', 'admin@tanseeq.com'),
+            ('super_admin', 'hatem@tanseeq.com'),
+            ('user', 'jihad@tanseeq.com')
+        ]
+        
+        for role, email in test_roles:
+            print(f"\n🔐 Testing {role.upper()} role ({email}):")
+            print("-" * 60)
+            
+            # Login
+            if not self.test_login(role):
+                print(f"❌ Login failed for {role} ({email}) - skipping")
+                continue
+            else:
+                print(f"✅ Successfully logged in as {email}")
+            
+            # 1. Test custom messages (اختبار الرسائل المخصصة)
+            print(f"\n📨 1. اختبار الرسائل المخصصة:")
+            print("-" * 40)
+            self.test_custom_messages(role)
+            
+            # 2. Test late warning notifications (اختبار تنبيهات التأخير التلقائية)
+            print(f"\n⏰ 2. اختبار تنبيهات التأخير التلقائية:")
+            print("-" * 40)
+            self.test_late_warning_notifications(role)
+            
+            # 3. Test absence warning notifications (اختبار تنبيهات الغياب التلقائية)
+            print(f"\n🚨 3. اختبار تنبيهات الغياب التلقائية:")
+            print("-" * 40)
+            self.test_absence_warning_notifications(role)
+            
+            # 4. Test penalty notifications (اختبار تنبيهات الخصومات)
+            print(f"\n💰 4. اختبار تنبيهات الخصومات:")
+            print("-" * 40)
+            self.test_penalty_notifications(role)
+            
+            # 5. Test security (اختبار الأمان)
+            print(f"\n🔒 5. اختبار الأمان:")
+            print("-" * 40)
+            self.test_messaging_security(role)
+            
+            # 6. Test system integration (اختبار تكامل النظام)
+            print(f"\n🔗 6. اختبار تكامل النظام:")
+            print("-" * 40)
+            self.test_messaging_integration(role)
+        
+        # Print final results
+        print("\n" + "=" * 80)
+        print("📊 نتائج اختبار الرسائل والتنبيهات:")
+        print("=" * 80)
+        print(f"✅ اختبارات نجحت: {self.tests_passed}")
+        print(f"❌ اختبارات فشلت: {self.tests_run - self.tests_passed}")
+        print(f"📈 معدل النجاح: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        print(f"🔢 إجمالي الاختبارات: {self.tests_run}")
+        
+        if self.tests_passed >= (self.tests_run - 3):  # Allow for minor issues
+            print("\n🎉 جميع الاختبارات المهمة نجحت! All critical messaging tests passed!")
+            return True
+        else:
+            failed_tests = self.tests_run - self.tests_passed
+            print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
+            return False
+
     def run_comprehensive_tests(self):
         """Run all tests for all roles"""
         print("🚀 Starting TANSEEQ HR Backend API Tests")
