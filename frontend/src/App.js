@@ -485,6 +485,12 @@ const Dashboard = () => {
   const [showBackupSection, setShowBackupSection] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
 
+  // Penalty system state (Super Admin only)
+  const [penalties, setPenalties] = useState([]);
+  const [showPenaltySection, setShowPenaltySection] = useState(false);
+  const [penaltyLoading, setPenaltyLoading] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+
   useEffect(() => {
     fetchDashboardStats();
     fetchMessages();
