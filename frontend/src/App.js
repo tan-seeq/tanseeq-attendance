@@ -22,7 +22,10 @@ import {
   ExclamationCircleIcon,
   DocumentArrowDownIcon,
   MagnifyingGlassIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  BellIcon,
+  ChevronDownIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
