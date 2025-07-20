@@ -283,7 +283,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "New backup system implementation"
+    - "Complex late penalty system implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
