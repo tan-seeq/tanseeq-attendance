@@ -2971,50 +2971,37 @@ class TanseeqAPITester:
         # Get a user ID to test with
         user_id = self.users.get(role, {}).get('id', 'test-user-id')
         
-        # Test penalty notification
-        url = f"{self.api_url}/notifications/penalty-applied/{user_id}"
-        headers = {'Authorization': f'Bearer {self.tokens[role]}', 'Content-Type': 'application/json'}
+        # Test penalty notification with query parameters
+        penalty_amount = 100.50
+        penalty_reason = "تأخير متكرر في الحضور"
         
-        # Use form data for penalty notification
-        form_data = {
-            'penalty_amount': 100.50,
-            'penalty_reason': 'تأخير متكرر في الحضور'
-        }
+        success, response = self.make_request('POST', f'notifications/penalty-applied/{user_id}?penalty_amount={penalty_amount}&penalty_reason={penalty_reason}', 
+                                            token=self.tokens[role])
         
-        try:
-            response = requests.post(url, data=form_data, headers=headers, timeout=30)
-            success = response.status_code == 200
+        if success:
+            # Check if response contains expected structure
+            expected_keys = ['message', 'user_name', 'penalty_amount']
+            has_expected_keys = all(key in response for key in expected_keys)
             
-            if success:
-                response_data = response.json()
-                # Check if response contains expected structure
-                expected_keys = ['message', 'user_name', 'penalty_amount']
-                has_expected_keys = all(key in response_data for key in expected_keys)
-                
-                # Check if penalty amount matches
-                penalty_amount = response_data.get('penalty_amount', 0)
-                amount_matches = penalty_amount == 100.50
-                
-                # Check if user name is present
-                has_user_name = bool(response_data.get('user_name'))
-                
-                success = success and has_expected_keys and amount_matches and has_user_name
-                
-                if not success:
-                    missing_keys = set(expected_keys) - set(response_data.keys())
-                    self.log_test(f"Penalty notifications ({role})", False, 
-                                 f"Missing keys: {missing_keys}, Amount match: {amount_matches}, Has user name: {has_user_name}")
-                else:
-                    self.log_test(f"Penalty notifications ({role})", True)
-            else:
+            # Check if penalty amount matches
+            returned_penalty_amount = response.get('penalty_amount', 0)
+            amount_matches = returned_penalty_amount == penalty_amount
+            
+            # Check if user name is present
+            has_user_name = bool(response.get('user_name'))
+            
+            success = success and has_expected_keys and amount_matches and has_user_name
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
                 self.log_test(f"Penalty notifications ({role})", False, 
-                             f"Status: {response.status_code}, Response: {response.text}")
-            
-            return success
-            
-        except Exception as e:
-            self.log_test(f"Penalty notifications ({role})", False, str(e))
-            return False
+                             f"Missing keys: {missing_keys}, Amount match: {amount_matches}, Has user name: {has_user_name}")
+            else:
+                self.log_test(f"Penalty notifications ({role})", True)
+        else:
+            self.log_test(f"Penalty notifications ({role})", False, str(response))
+        
+        return success
 
     def test_messaging_security(self, role: str) -> bool:
         """Test messaging system security - Arabic Review Request"""
