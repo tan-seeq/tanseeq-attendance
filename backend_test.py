@@ -3705,6 +3705,21 @@ class TanseeqAPITester:
             self.test_messages_statistics(role)
             self.test_messages_security_access_control(role)
             
+            # NEW HIGH PRIORITY: Automation and Admin Enhancement Tests
+            print(f"\n🤖 Testing Automation and Notification System ({role.upper()}):")
+            self.test_notifications_late_warning(role)
+            self.test_notifications_absence_warning(role)
+            self.test_notifications_penalty_applied(role)
+            self.test_automation_status(role)
+            
+            print(f"\n👨‍💼 Testing Super Admin Request Creation ({role.upper()}):")
+            self.test_admin_create_leave_request(role)
+            self.test_admin_create_field_exit_request(role)
+            
+            print(f"\n📎 Testing Admin Attachment Management ({role.upper()}):")
+            self.test_admin_attachments_list(role)
+            self.test_admin_view_attachment(role)
+            
             # Feature-specific tests
             self.test_weekend_blocking(role)
             
