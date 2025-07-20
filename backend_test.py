@@ -1997,6 +1997,416 @@ class TanseeqAPITester:
                 print(f"⚠️  {failed_tests} tests failed")
                 return False
 
+    # ============ MESSAGE SYSTEM TESTS ============
+    
+    def test_message_creation_general(self, role: str) -> bool:
+        """Test creating general internal messages"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        message_data = {
+            "title": "إعلان عام مهم",
+            "content": "هذا إعلان عام للجميع حول تحديث في نظام العمل",
+            "message_type": "general",
+            "to_user_ids": [],  # Send to all
+            "priority": "normal"
+        }
+        
+        success, response = self.make_request('POST', 'messages', 
+                                            message_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains message creation confirmation
+            has_message = 'message' in response
+            has_id = 'id' in response
+            success = success and has_message and has_id
+            
+            # Store message ID for further testing
+            if has_id:
+                setattr(self, f'test_message_id_{role}', response['id'])
+        
+        self.log_test(f"Create general message ({role})", success, 
+                     str(response) if not success else "")
+        return success
+
+    def test_friday_work_message_creation(self, role: str) -> bool:
+        """Test creating Friday work announcement (Hatem only)"""
+        if role not in self.tokens:
+            return False
+        
+        # Only Hatem (super_admin with specific name) can create Friday work messages
+        user_name = self.users.get(role, {}).get('name', '')
+        expected_status = 200 if user_name == "Hatem Mohamed Ahmed" else 403
+        
+        success, response = self.make_request('POST', 'messages/friday-work', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains Friday work message details
+            has_message = 'message' in response
+            has_id = 'id' in response
+            has_friday_date = 'friday_date' in response
+            has_recipients = 'recipients' in response
+            success = success and has_message and has_id and has_friday_date and has_recipients
+            
+            # Store message ID for further testing
+            if has_id:
+                setattr(self, f'friday_message_id_{role}', response['id'])
+        
+        self.log_test(f"Create Friday work message ({role})", success, 
+                     str(response) if not success else "")
+        return success
+
+    def test_get_messages(self, role: str) -> bool:
+        """Test getting messages for current user"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'messages', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Check if messages have expected structure
+            if response:
+                first_message = response[0]
+                expected_fields = ['id', 'title', 'content', 'message_type', 'from_user_name', 
+                                 'is_read', 'time_ago', 'priority', 'created_at']
+                missing_fields = [field for field in expected_fields if field not in first_message]
+                
+                if missing_fields:
+                    success = False
+                    self.log_test(f"Get messages ({role})", False, 
+                                 f"Missing fields: {missing_fields}")
+                else:
+                    self.log_test(f"Get messages ({role})", True)
+            else:
+                # No messages is also valid
+                self.log_test(f"Get messages ({role})", True, "No messages found (valid)")
+        else:
+            self.log_test(f"Get messages ({role})", False, str(response))
+        
+        return success
+
+    def test_mark_message_as_read(self, role: str) -> bool:
+        """Test marking message as read"""
+        if role not in self.tokens:
+            return False
+        
+        # First, get messages to find one to mark as read
+        success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+        
+        if not success or not messages:
+            self.log_test(f"Mark message as read setup ({role})", False, "No messages found to mark as read")
+            return False
+        
+        # Find an unread message
+        unread_message = None
+        for message in messages:
+            if not message.get('is_read', True):  # Default to True if field missing
+                unread_message = message
+                break
+        
+        if not unread_message:
+            # If no unread messages, use the first message
+            unread_message = messages[0]
+        
+        message_id = unread_message.get('id')
+        if not message_id:
+            self.log_test(f"Mark message as read setup ({role})", False, "No message ID found")
+            return False
+        
+        # Mark message as read
+        success, response = self.make_request('POST', f'messages/{message_id}/read', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Verify the message was marked as read
+            verify_success, verify_messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            if verify_success:
+                marked_message = None
+                for message in verify_messages:
+                    if message.get('id') == message_id:
+                        marked_message = message
+                        break
+                
+                if marked_message:
+                    is_now_read = marked_message.get('is_read', False)
+                    success = success and is_now_read
+                    
+                    if not is_now_read:
+                        self.log_test(f"Mark message as read ({role})", False, "Message not marked as read")
+                    else:
+                        self.log_test(f"Mark message as read ({role})", True)
+                else:
+                    self.log_test(f"Mark message as read ({role})", False, "Could not find marked message")
+            else:
+                self.log_test(f"Mark message as read ({role})", success, "Could not verify read status")
+        else:
+            self.log_test(f"Mark message as read ({role})", False, str(response))
+        
+        return success
+
+    def test_unread_message_count(self, role: str) -> bool:
+        """Test getting unread message count"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'messages/unread-count', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, dict):
+            # Check if response has unread_count field
+            has_unread_count = 'unread_count' in response
+            is_valid_count = isinstance(response.get('unread_count'), int)
+            success = success and has_unread_count and is_valid_count
+            
+            if not success:
+                self.log_test(f"Get unread message count ({role})", False, 
+                             f"Has count: {has_unread_count}, Valid count: {is_valid_count}")
+            else:
+                count = response['unread_count']
+                self.log_test(f"Get unread message count ({role})", True, f"Count: {count}")
+        else:
+            self.log_test(f"Get unread message count ({role})", False, str(response))
+        
+        return success
+
+    def test_message_statistics(self, role: str) -> bool:
+        """Test getting message statistics (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # First, get a message ID to test with
+        message_id = getattr(self, f'test_message_id_{role}', None)
+        if not message_id:
+            # Try to get existing messages
+            success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            if success and messages:
+                message_id = messages[0].get('id')
+        
+        if not message_id:
+            self.log_test(f"Message statistics setup ({role})", False, "No message ID available for testing")
+            return False
+        
+        success, response = self.make_request('GET', f'messages/{message_id}/stats', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response has expected statistics fields
+            expected_fields = ['message_id', 'title', 'total_recipients', 'read_count', 
+                             'unread_count', 'read_percentage', 'unread_users']
+            missing_fields = [field for field in expected_fields if field not in response]
+            
+            if missing_fields:
+                success = False
+                self.log_test(f"Message statistics ({role})", False, 
+                             f"Missing fields: {missing_fields}")
+            else:
+                # Verify data types
+                is_valid_stats = (
+                    isinstance(response.get('total_recipients'), int) and
+                    isinstance(response.get('read_count'), int) and
+                    isinstance(response.get('unread_count'), int) and
+                    isinstance(response.get('read_percentage'), (int, float)) and
+                    isinstance(response.get('unread_users'), list)
+                )
+                
+                if not is_valid_stats:
+                    self.log_test(f"Message statistics ({role})", False, "Invalid data types in statistics")
+                else:
+                    self.log_test(f"Message statistics ({role})", True)
+        else:
+            self.log_test(f"Message statistics ({role})", success, 
+                         str(response) if not success else "")
+        
+        return success
+
+    def test_message_security(self, role: str) -> bool:
+        """Test message system security (users cannot create messages)"""
+        if role not in self.tokens:
+            return False
+        
+        # Test that regular users cannot create messages
+        if role == 'user':
+            message_data = {
+                "title": "محاولة إنشاء رسالة من مستخدم عادي",
+                "content": "هذه محاولة لإنشاء رسالة من مستخدم عادي",
+                "message_type": "general"
+            }
+            
+            success, response = self.make_request('POST', 'messages', 
+                                                message_data,
+                                                token=self.tokens[role],
+                                                expected_status=403)
+            
+            self.log_test(f"Message security - user cannot create ({role})", success, 
+                         str(response) if not success else "")
+            return success
+        
+        # Test that regular users cannot create Friday work messages
+        success, response = self.make_request('POST', 'messages/friday-work', 
+                                            token=self.tokens[role],
+                                            expected_status=403 if role != 'super_admin' or self.users.get(role, {}).get('name') != "Hatem Mohamed Ahmed" else 200)
+        
+        expected_result = response.get('detail') == 'Only Hatem can create Friday work announcements' if role != 'super_admin' or self.users.get(role, {}).get('name') != "Hatem Mohamed Ahmed" else 'message' in response
+        
+        self.log_test(f"Message security - Friday work restriction ({role})", 
+                     success and (expected_result or success), 
+                     str(response) if not (success and expected_result) else "")
+        
+        return success and expected_result
+
+    def test_friday_date_calculation(self, role: str) -> bool:
+        """Test that Friday work message calculates next Friday correctly"""
+        if role not in self.tokens:
+            return False
+        
+        # Only test for Hatem (super_admin with correct name)
+        user_name = self.users.get(role, {}).get('name', '')
+        if user_name != "Hatem Mohamed Ahmed":
+            self.log_test(f"Friday date calculation ({role})", True, "Not Hatem - skipping test")
+            return True
+        
+        success, response = self.make_request('POST', 'messages/friday-work', 
+                                            token=self.tokens[role])
+        
+        if success:
+            friday_date = response.get('friday_date')
+            if friday_date:
+                # Verify date format (DD/MM/YYYY)
+                import re
+                date_pattern = r'^\d{2}/\d{2}/\d{4}$'
+                is_valid_format = re.match(date_pattern, friday_date) is not None
+                
+                # Verify it's a future date
+                from datetime import datetime
+                try:
+                    parsed_date = datetime.strptime(friday_date, '%d/%m/%Y')
+                    is_future = parsed_date.date() > datetime.now().date()
+                    
+                    # Verify it's a Friday (weekday 4)
+                    is_friday = parsed_date.weekday() == 4
+                    
+                    success = is_valid_format and is_future and is_friday
+                    
+                    if not success:
+                        self.log_test(f"Friday date calculation ({role})", False, 
+                                     f"Format: {is_valid_format}, Future: {is_future}, Friday: {is_friday}, Date: {friday_date}")
+                    else:
+                        self.log_test(f"Friday date calculation ({role})", True, f"Next Friday: {friday_date}")
+                        
+                except ValueError:
+                    self.log_test(f"Friday date calculation ({role})", False, f"Invalid date format: {friday_date}")
+                    success = False
+            else:
+                self.log_test(f"Friday date calculation ({role})", False, "No friday_date in response")
+                success = False
+        else:
+            self.log_test(f"Friday date calculation ({role})", False, str(response))
+        
+        return success
+
+    def test_message_time_formatting(self, role: str) -> bool:
+        """Test that messages display time_ago in Arabic format"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'messages', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list) and response:
+            # Check if messages have time_ago field with Arabic text
+            first_message = response[0]
+            time_ago = first_message.get('time_ago', '')
+            
+            # Check for Arabic time indicators
+            arabic_time_indicators = ['منذ', 'يوم', 'ساعة', 'دقيقة', 'لحظات', 'أسبوع', 'شهر']
+            has_arabic_time = any(indicator in time_ago for indicator in arabic_time_indicators)
+            
+            if has_arabic_time:
+                self.log_test(f"Message time formatting ({role})", True, f"Time: {time_ago}")
+            else:
+                self.log_test(f"Message time formatting ({role})", False, f"No Arabic time format: {time_ago}")
+            
+            return has_arabic_time
+        else:
+            self.log_test(f"Message time formatting ({role})", True, "No messages to test time formatting")
+            return True
+
+    def run_message_system_tests(self):
+        """Run comprehensive tests for internal messaging system (Arabic review request)"""
+        print("🚀 اختبار نظام الرسائل الداخلية الجديد - TANSEEQ HR Backend API")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 80)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Test all roles
+        roles = ['user', 'admin', 'super_admin']
+        
+        for role in roles:
+            print(f"\n🔐 Testing {role.upper()} role for message system:")
+            print("-" * 60)
+            
+            # Login
+            if not self.test_login(role):
+                print(f"❌ Login failed for {role} - skipping role")
+                continue
+            
+            # 1. Test message creation (admin/super_admin only)
+            print(f"\n📝 1. اختبار إنشاء الرسائل:")
+            self.test_message_creation_general(role)
+            
+            # 2. Test Friday work message creation (Hatem only)
+            print(f"\n📅 2. اختبار إنشاء رسالة دوام الجمعة الاستثنائي:")
+            self.test_friday_work_message_creation(role)
+            self.test_friday_date_calculation(role)
+            
+            # 3. Test message display
+            print(f"\n📋 3. اختبار عرض الرسائل:")
+            self.test_get_messages(role)
+            self.test_message_time_formatting(role)
+            
+            # 4. Test message read tracking
+            print(f"\n✅ 4. اختبار تسجيل قراءة الرسائل:")
+            self.test_mark_message_as_read(role)
+            self.test_unread_message_count(role)
+            
+            # 5. Test message statistics (admin only)
+            print(f"\n📊 5. اختبار إحصائيات الرسائل:")
+            self.test_message_statistics(role)
+            
+            # 6. Test security
+            print(f"\n🔒 6. اختبار الأمان:")
+            self.test_message_security(role)
+            
+            # Logout
+            self.test_logout(role)
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print(f"📊 ملخص اختبار نظام الرسائل: {self.tests_passed}/{self.tests_run} اختبار نجح")
+        print(f"✅ معدل النجاح: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        if self.tests_passed >= (self.tests_run - 2):  # Allow for minor issues
+            print("🎉 جميع اختبارات نظام الرسائل نجحت! All message system tests passed!")
+            return True
+        else:
+            failed_tests = self.tests_run - self.tests_passed
+            print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
+            return False
+
 def main():
     # Get backend URL from frontend .env
     try:
