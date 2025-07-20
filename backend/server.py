@@ -2950,7 +2950,7 @@ async def send_late_warning_notifications():
         # Get current date
         today = get_uae_time().date().strftime('%Y-%m-%d')
         
-        # Find employees who are late today
+        # Find employees who are late today - EXCLUDE admin and super_admin roles
         late_attendance = await db.attendance.find({
             "date": today,
             "is_late": True
@@ -2964,6 +2964,15 @@ async def send_late_warning_notifications():
             check_in_time = record.get("check_in", "")
             
             if not user_id:
+                continue
+            
+            # Get user details to check role
+            user_details = await db.users.find_one({"id": user_id})
+            if not user_details:
+                continue
+                
+            # Skip if user is admin or super_admin - they don't have attendance tracking
+            if user_details.get("role") in ["admin", "super_admin"]:
                 continue
             
             # Check if notification already sent today
