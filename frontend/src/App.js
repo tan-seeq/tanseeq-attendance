@@ -29,7 +29,8 @@ import {
   ShieldCheckIcon,
   FolderIcon,
   ServerIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
