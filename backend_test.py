@@ -1133,6 +1133,387 @@ class TanseeqAPITester:
         
         return all_passed
 
+    # ============ BACKUP SYSTEM TESTS ============
+    
+    def test_backup_stats(self, role: str) -> bool:
+        """Test backup statistics endpoint (Super admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('GET', 'backup/stats', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains expected backup stats structure
+            expected_keys = ['total_backups', 'total_size_mb', 'latest_backup', 'latest_backup_date', 
+                           'backup_directory', 'recent_logs', 'auto_backup_enabled', 'backup_schedule']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if recent_logs is a list
+            has_logs_list = isinstance(response.get('recent_logs', []), list)
+            
+            success = success and has_expected_keys and has_logs_list
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Backup stats ({role})", False, 
+                             f"Missing keys: {missing_keys}, Logs list: {has_logs_list}")
+            else:
+                self.log_test(f"Backup stats ({role})", True)
+        else:
+            self.log_test(f"Backup stats ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_manual_backup_creation(self, role: str) -> bool:
+        """Test manual backup creation endpoint (Super admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('POST', 'backup/manual', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains expected backup creation structure
+            expected_keys = ['message', 'backup_file', 'file_size_mb', 'created_at']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if file size is reasonable (should be > 0)
+            has_reasonable_size = response.get('file_size_mb', 0) > 0
+            
+            # Check if backup file name follows expected pattern
+            backup_file = response.get('backup_file', '')
+            has_proper_filename = 'manual_backup_' in backup_file and backup_file.endswith('.zip')
+            
+            success = success and has_expected_keys and has_reasonable_size and has_proper_filename
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Manual backup creation ({role})", False, 
+                             f"Missing keys: {missing_keys}, Size: {response.get('file_size_mb', 0)}, Filename: {backup_file}")
+            else:
+                self.log_test(f"Manual backup creation ({role})", True)
+        else:
+            self.log_test(f"Manual backup creation ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_backup_security_access_control(self, role: str) -> bool:
+        """Test that only Hatem (super_admin) can access backup endpoints"""
+        if role not in self.tokens:
+            return False
+        
+        # Test backup stats access
+        expected_status_stats = 200 if role == 'super_admin' else 403
+        success_stats, response_stats = self.make_request('GET', 'backup/stats', 
+                                                        token=self.tokens[role],
+                                                        expected_status=expected_status_stats)
+        
+        # Test manual backup access
+        expected_status_manual = 200 if role == 'super_admin' else 403
+        success_manual, response_manual = self.make_request('POST', 'backup/manual', 
+                                                          token=self.tokens[role],
+                                                          expected_status=expected_status_manual)
+        
+        # For non-super_admin users, we expect 403 errors
+        if role != 'super_admin':
+            access_denied_stats = not success_stats and response_stats.get('detail') == 'Super admin access required'
+            access_denied_manual = not success_manual and response_manual.get('detail') == 'Super admin access required'
+            
+            test_passed = access_denied_stats and access_denied_manual
+            self.log_test(f"Backup security access control ({role})", test_passed, 
+                         f"Stats denied: {access_denied_stats}, Manual denied: {access_denied_manual}")
+        else:
+            # For super_admin, both should succeed (or manual might fail due to system limitations)
+            test_passed = success_stats
+            self.log_test(f"Backup security access control ({role})", test_passed, 
+                         f"Stats success: {success_stats}, Manual success: {success_manual}")
+        
+        return test_passed
+
+    # ============ INTERNAL MESSAGING SYSTEM TESTS ============
+    
+    def test_messages_creation_general(self, role: str) -> bool:
+        """Test general message creation (Admin/Super admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        message_data = {
+            "title": "رسالة اختبار عامة",
+            "content": "هذه رسالة اختبار للنظام الداخلي للرسائل. يرجى تجاهل هذه الرسالة.",
+            "message_type": "general",
+            "to_user_ids": [],  # Send to all
+            "priority": "normal"
+        }
+        
+        success, response = self.make_request('POST', 'messages', message_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains expected structure
+            has_message = 'message' in response
+            has_id = 'id' in response
+            success = success and has_message and has_id
+            
+            # Store message ID for further testing
+            if has_id:
+                setattr(self, f'test_message_id_{role}', response['id'])
+        
+        self.log_test(f"Messages creation general ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_messages_friday_work_creation(self, role: str) -> bool:
+        """Test Friday work message creation (Hatem only)"""
+        if role not in self.tokens:
+            return False
+        
+        # Only Hatem (super_admin with specific name) should be able to create Friday work messages
+        user_name = self.users.get(role, {}).get('name', '')
+        expected_status = 200 if role == 'super_admin' and user_name == 'Hatem Mohamed Ahmed' else 403
+        
+        success, response = self.make_request('POST', 'messages/friday-work', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains expected Friday work structure
+            expected_keys = ['message', 'id', 'friday_date', 'recipients']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if Friday date is in correct format (DD/MM/YYYY)
+            friday_date = response.get('friday_date', '')
+            has_proper_date_format = len(friday_date.split('/')) == 3 and len(friday_date) == 10
+            
+            success = success and has_expected_keys and has_proper_date_format
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Friday work message creation ({role})", False, 
+                             f"Missing keys: {missing_keys}, Date format: {friday_date}")
+            else:
+                self.log_test(f"Friday work message creation ({role})", True)
+        else:
+            self.log_test(f"Friday work message creation ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_messages_display(self, role: str) -> bool:
+        """Test messages display endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'messages', token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Check if messages have expected structure
+            if response:  # If there are messages
+                first_message = response[0]
+                expected_keys = ['id', 'title', 'content', 'message_type', 'from_user_name', 
+                               'priority', 'created_at', 'is_read', 'time_ago']
+                has_expected_keys = all(key in first_message for key in expected_keys)
+                
+                # Check if time_ago is in Arabic format
+                time_ago = first_message.get('time_ago', '')
+                has_arabic_time = 'منذ' in time_ago
+                
+                success = success and has_expected_keys and has_arabic_time
+                
+                if not success:
+                    missing_keys = set(expected_keys) - set(first_message.keys())
+                    self.log_test(f"Messages display ({role})", False, 
+                                 f"Missing keys: {missing_keys}, Arabic time: {has_arabic_time}")
+                else:
+                    self.log_test(f"Messages display ({role})", True)
+            else:
+                # No messages, but endpoint works
+                self.log_test(f"Messages display ({role})", True, "No messages to verify structure")
+        else:
+            self.log_test(f"Messages display ({role})", False, str(response))
+        
+        return success
+
+    def test_messages_read_tracking(self, role: str) -> bool:
+        """Test message read tracking functionality"""
+        if role not in self.tokens:
+            return False
+        
+        # First get messages to find one to mark as read
+        success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+        
+        if not success or not messages:
+            self.log_test(f"Messages read tracking setup ({role})", False, "No messages found")
+            return False
+        
+        # Find an unread message
+        unread_message = None
+        for message in messages:
+            if not message.get('is_read', True):
+                unread_message = message
+                break
+        
+        if not unread_message:
+            # Try to use any message
+            unread_message = messages[0] if messages else None
+        
+        if not unread_message:
+            self.log_test(f"Messages read tracking ({role})", False, "No message available for testing")
+            return False
+        
+        # Test marking message as read
+        success, response = self.make_request('POST', f'messages/{unread_message["id"]}/read', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check if response indicates success
+            has_success_message = 'message' in response and 'read' in response['message'].lower()
+            success = success and has_success_message
+        
+        self.log_test(f"Messages read tracking ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_messages_unread_count(self, role: str) -> bool:
+        """Test unread messages count endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'messages/unread-count', token=self.tokens[role])
+        
+        if success:
+            # Check if response contains unread_count
+            has_unread_count = 'unread_count' in response
+            is_valid_count = isinstance(response.get('unread_count'), int) and response.get('unread_count') >= 0
+            
+            success = success and has_unread_count and is_valid_count
+            
+            if not success:
+                self.log_test(f"Messages unread count ({role})", False, 
+                             f"Has count: {has_unread_count}, Valid count: {is_valid_count}")
+            else:
+                self.log_test(f"Messages unread count ({role})", True)
+        else:
+            self.log_test(f"Messages unread count ({role})", False, str(response))
+        
+        return success
+
+    def test_messages_statistics(self, role: str) -> bool:
+        """Test message statistics endpoint (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # First get messages to find one to get stats for
+        if role in ['admin', 'super_admin']:
+            success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            
+            if not success or not messages:
+                self.log_test(f"Messages statistics setup ({role})", False, "No messages found")
+                return False
+            
+            message_id = messages[0]['id']
+        else:
+            message_id = 'test-message-id'  # Dummy ID for access control test
+        
+        success, response = self.make_request('GET', f'messages/{message_id}/stats', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains expected statistics structure
+            expected_keys = ['message_id', 'title', 'total_recipients', 'read_count', 
+                           'unread_count', 'read_percentage', 'unread_users', 'created_at', 'time_ago']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if unread_users is a list
+            has_unread_users_list = isinstance(response.get('unread_users', []), list)
+            
+            # Check if read_percentage is valid
+            read_percentage = response.get('read_percentage', -1)
+            has_valid_percentage = 0 <= read_percentage <= 100
+            
+            success = success and has_expected_keys and has_unread_users_list and has_valid_percentage
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Messages statistics ({role})", False, 
+                             f"Missing keys: {missing_keys}, Users list: {has_unread_users_list}, Percentage: {read_percentage}")
+            else:
+                self.log_test(f"Messages statistics ({role})", True)
+        else:
+            self.log_test(f"Messages statistics ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_messages_security_access_control(self, role: str) -> bool:
+        """Test message system security and access control"""
+        if role not in self.tokens:
+            return False
+        
+        # Test message creation access (only admin/super_admin should be able to create)
+        message_data = {
+            "title": "اختبار الأمان",
+            "content": "رسالة اختبار للأمان",
+            "message_type": "general",
+            "to_user_ids": [],
+            "priority": "normal"
+        }
+        
+        expected_status_create = 200 if role in ['admin', 'super_admin'] else 403
+        success_create, response_create = self.make_request('POST', 'messages', message_data,
+                                                          token=self.tokens[role],
+                                                          expected_status=expected_status_create)
+        
+        # Test Friday work creation access (only Hatem should be able to create)
+        user_name = self.users.get(role, {}).get('name', '')
+        expected_status_friday = 200 if role == 'super_admin' and user_name == 'Hatem Mohamed Ahmed' else 403
+        success_friday, response_friday = self.make_request('POST', 'messages/friday-work',
+                                                          token=self.tokens[role],
+                                                          expected_status=expected_status_friday)
+        
+        # Test message stats access (only admin/super_admin should be able to view)
+        expected_status_stats = 200 if role in ['admin', 'super_admin'] else 403
+        success_stats, response_stats = self.make_request('GET', 'messages/test-id/stats',
+                                                        token=self.tokens[role],
+                                                        expected_status=expected_status_stats)
+        
+        # Evaluate results based on role
+        if role == 'user':
+            # Regular users should be denied for creation and stats, but Friday work should also be denied
+            access_denied_create = not success_create and 'admin' in str(response_create).lower()
+            access_denied_friday = not success_friday and ('hatem' in str(response_friday).lower() or 'admin' in str(response_friday).lower())
+            access_denied_stats = not success_stats and 'admin' in str(response_stats).lower()
+            
+            test_passed = access_denied_create and access_denied_friday and access_denied_stats
+            self.log_test(f"Messages security access control ({role})", test_passed, 
+                         f"Create denied: {access_denied_create}, Friday denied: {access_denied_friday}, Stats denied: {access_denied_stats}")
+        elif role == 'admin':
+            # Admin should be able to create and view stats, but not create Friday work
+            can_create = success_create
+            access_denied_friday = not success_friday and 'hatem' in str(response_friday).lower()
+            can_view_stats = success_stats or response_stats.get('detail') == 'Message not found'  # 404 is acceptable
+            
+            test_passed = can_create and access_denied_friday and can_view_stats
+            self.log_test(f"Messages security access control ({role})", test_passed, 
+                         f"Can create: {can_create}, Friday denied: {access_denied_friday}, Can view stats: {can_view_stats}")
+        else:  # super_admin
+            # Super admin should be able to do everything
+            can_create = success_create
+            can_create_friday = success_friday if user_name == 'Hatem Mohamed Ahmed' else not success_friday
+            can_view_stats = success_stats or response_stats.get('detail') == 'Message not found'  # 404 is acceptable
+            
+            test_passed = can_create and can_create_friday and can_view_stats
+            self.log_test(f"Messages security access control ({role})", test_passed, 
+                         f"Can create: {can_create}, Can create Friday: {can_create_friday}, Can view stats: {can_view_stats}")
+        
+        return test_passed
+
     def test_weekend_blocking(self, role: str) -> bool:
         """Test weekend blocking for attendance"""
         if role not in self.tokens:
