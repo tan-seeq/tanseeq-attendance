@@ -476,6 +476,11 @@ const Dashboard = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
 
+  // Backup state (Super Admin only)
+  const [backupStats, setBackupStats] = useState(null);
+  const [showBackupSection, setShowBackupSection] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
+
   useEffect(() => {
     fetchDashboardStats();
     fetchMessages();
