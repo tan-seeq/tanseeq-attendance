@@ -2909,8 +2909,258 @@ def get_time_ago(created_at: datetime) -> str:
     else:
         return "منذ لحظات"
 
+@api_router.post("/messages/custom")
+async def create_custom_message(message_data: MessageCreate, current_user: User = Depends(get_admin_user)):
+    """Create custom message for all employees (Admin/Super Admin only)"""
+    if current_user.role not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Only admins can create custom messages")
+    
+    # If to_user_ids is empty, send to all users
+    if not message_data.to_user_ids:
+        all_users = await db.users.find({"is_active": True}).to_list(1000)
+        message_data.to_user_ids = [user["id"] for user in all_users]
+    
+    # Create custom message
+    message = Message(
+        title=message_data.title,
+        content=message_data.content,
+        message_type="custom",
+        from_user_id=current_user.id,
+        from_user_name=current_user.name,
+        to_user_ids=message_data.to_user_ids,
+        priority=message_data.priority or "normal",
+        expires_at=message_data.expires_at
+    )
+    
+    await db.messages.insert_one(message.dict())
+    
+    await log_activity(current_user.id, "custom_message_created", f"Created custom message: {message.title}")
+    
+    return {
+        "message": "Custom message sent successfully", 
+        "id": message.id,
+        "recipients_count": len(message_data.to_user_ids),
+        "title": message.title
+    }
+
+@api_router.post("/notifications/late-warning")
+async def send_late_warning_notifications():
+    """Send automatic late warning notifications"""
+    try:
+        # Get current date
+        today = get_uae_time().date().strftime('%Y-%m-%d')
+        
+        # Find employees who are late today
+        late_attendance = await db.attendance.find({
+            "date": today,
+            "is_late": True
+        }).to_list(1000)
+        
+        notifications_sent = 0
+        
+        for record in late_attendance:
+            user_id = record.get("user_id")
+            user_name = record.get("user_name")
+            check_in_time = record.get("check_in", "")
+            
+            if not user_id:
+                continue
+            
+            # Check if notification already sent today
+            existing_notification = await db.messages.find_one({
+                "message_type": "late_warning",
+                "to_user_ids": {"$in": [user_id]},
+                "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)}
+            })
+            
+            if existing_notification:
+                continue  # Already sent notification today
+            
+            # Create late warning message
+            title = "⚠️ تنبيه تأخير"
+            content = f"""عزيزي/عزيزتي {user_name}،
+
+تم تسجيل تأخيرك اليوم في الساعة {check_in_time}.
+
+نذكركم بأهمية الالتزام بمواعيد العمل المحددة، حيث أن التأخير المتكرر قد يؤدي إلى:
+• خصم من الراتب الشهري
+• إجراءات إدارية
+
+نرجو منكم الالتزام بمواعيد العمل في المستقبل.
+
+شكراً لتفهمكم،
+إدارة الموارد البشرية
+TANSEEQ TAX CONSULTANCY"""
+            
+            # Create notification message
+            message = Message(
+                title=title,
+                content=content,
+                message_type="late_warning",
+                from_user_id="system",
+                from_user_name="نظام الموارد البشرية",
+                to_user_ids=[user_id],
+                priority="high"
+            )
+            
+            await db.messages.insert_one(message.dict())
+            notifications_sent += 1
+        
+        return {
+            "message": "Late warning notifications sent",
+            "notifications_sent": notifications_sent,
+            "date": today
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending late notifications: {str(e)}")
+
+@api_router.post("/notifications/absence-warning")
+async def send_absence_warning_notifications():
+    """Send automatic absence warning notifications"""
+    try:
+        # Get current date
+        today = get_uae_time().date().strftime('%Y-%m-%d')
+        
+        # Get all active employees
+        all_employees = await db.users.find({"is_active": True}).to_list(1000)
+        
+        # Find employees with no attendance record today (absent)
+        absent_employees = []
+        
+        for employee in all_employees:
+            attendance_record = await db.attendance.find_one({
+                "user_id": employee["id"],
+                "date": today
+            })
+            
+            if not attendance_record:
+                # Check if they have approved leave today
+                approved_leave = await db.leaves.find_one({
+                    "user_id": employee["id"],
+                    "start_date": {"$lte": today},
+                    "end_date": {"$gte": today},
+                    "status": "approved"
+                })
+                
+                # Check if they have approved field exit
+                approved_field_exit = await db.field_exits.find_one({
+                    "user_id": employee["id"],
+                    "date": today,
+                    "status": "approved"
+                })
+                
+                # If no leave or field exit, they are absent without permission
+                if not approved_leave and not approved_field_exit:
+                    absent_employees.append(employee)
+        
+        notifications_sent = 0
+        
+        for employee in absent_employees:
+            user_id = employee["id"]
+            user_name = employee["name"]
+            
+            # Check if notification already sent today
+            existing_notification = await db.messages.find_one({
+                "message_type": "absence_warning",
+                "to_user_ids": {"$in": [user_id]},
+                "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)}
+            })
+            
+            if existing_notification:
+                continue  # Already sent notification today
+            
+            # Create absence warning message
+            title = "🚨 تنبيه غياب بدون إذن"
+            content = f"""عزيزي/عزيزتي {user_name}،
+
+لم يتم تسجيل حضورك اليوم {today} ولا يوجد طلب إجازة معتمد.
+
+وفقاً لسياسة الشركة:
+• الغياب بدون إذن = خصم يومين من الراتب
+• يرجى تقديم مبرر للغياب أو شهادة مرضية إن وجدت
+
+في حال كان لديكم عذر مقبول، يرجى التواصل مع الإدارة فوراً.
+
+إدارة الموارد البشرية
+TANSEEQ TAX CONSULTANCY"""
+            
+            # Create notification message  
+            message = Message(
+                title=title,
+                content=content,
+                message_type="absence_warning",
+                from_user_id="system",
+                from_user_name="نظام الموارد البشرية",
+                to_user_ids=[user_id],
+                priority="urgent"
+            )
+            
+            await db.messages.insert_one(message.dict())
+            notifications_sent += 1
+        
+        return {
+            "message": "Absence warning notifications sent",
+            "notifications_sent": notifications_sent,
+            "absent_employees": len(absent_employees),
+            "date": today
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending absence notifications: {str(e)}")
+
+@api_router.post("/notifications/penalty-applied/{user_id}")
+async def send_penalty_notification(user_id: str, penalty_amount: float, penalty_reason: str):
+    """Send penalty applied notification to specific user"""
+    try:
+        # Get user details
+        user_details = await db.users.find_one({"id": user_id})
+        if not user_details:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        user_name = user_details["name"]
+        
+        # Create penalty notification message
+        title = "💰 تنبيه خصم من الراتب"
+        content = f"""عزيزي/عزيزتي {user_name}،
+
+نعلمكم بأنه تم تطبيق خصم على راتبكم الشهري:
+
+💸 مبلغ الخصم: {penalty_amount:.2f} درهم
+📋 السبب: {penalty_reason}
+📅 تاريخ التطبيق: {datetime.now().strftime('%Y-%m-%d')}
+
+هذا الخصم مطبق وفقاً لسياسة الشركة ونظام الحضور والانصراف.
+
+للاستفسار أو المراجعة، يرجى التواصل مع إدارة الموارد البشرية.
+
+إدارة الموارد البشرية
+TANSEEQ TAX CONSULTANCY"""
+        
+        # Create notification message
+        message = Message(
+            title=title,
+            content=content,
+            message_type="penalty_notification",
+            from_user_id="system",
+            from_user_name="نظام الموارد البشرية",
+            to_user_ids=[user_id],
+            priority="high"
+        )
+        
+        await db.messages.insert_one(message.dict())
+        
+        return {
+            "message": "Penalty notification sent successfully",
+            "user_name": user_name,
+            "penalty_amount": penalty_amount
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending penalty notification: {str(e)}")
+
 @api_router.post("/messages")
-async def create_message(message_data: MessageCreate, current_user: User = Depends(get_current_user)):
+async def create_message(message_data: MessageCreate, current_user: User = Depends(get_admin_user)):
     """Create new internal message"""
     if current_user.role not in ["admin", "super_admin"]:
         raise HTTPException(status_code=403, detail="Only admins can create messages")
