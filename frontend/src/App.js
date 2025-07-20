@@ -618,6 +618,87 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Messages Section */}
+      <div className="mb-8">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+              <BellIcon className="h-5 w-5 ml-2 text-blue-600" />
+              الرسائل والإعلانات
+              {unreadCount > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 mr-2">
+                  {unreadCount}
+                </span>
+              )}
+            </h3>
+            <div className="flex space-x-2">
+              {user?.name === "Hatem Mohamed Ahmed" && (
+                <button
+                  onClick={sendFridayWorkMessage}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm flex items-center"
+                >
+                  🚨 دوام الجمعة الاستثنائي
+                </button>
+              )}
+              <button
+                onClick={() => setShowMessages(!showMessages)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center"
+              >
+                {showMessages ? 'إخفاء الرسائل' : 'عرض الرسائل'}
+                <ChevronDownIcon className={`h-4 w-4 mr-1 transition-transform ${showMessages ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          {showMessages && (
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {messages.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <BellIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                  <p>لا توجد رسائل حالياً</p>
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    onClick={() => handleMessageClick(message)}
+                    className={`border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all ${
+                      message.is_read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'
+                    } ${message.priority === 'urgent' ? 'border-l-4 border-l-red-500' : ''}`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className={`font-medium ${!message.is_read ? 'font-bold text-blue-800' : 'text-gray-800'}`}>
+                        {message.message_type === 'friday_work' && '🚨 '}
+                        {message.priority === 'urgent' && '⚠️ '}
+                        {message.title}
+                      </h4>
+                      <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        <span>{message.time_ago}</span>
+                        {!message.is_read && <span className="w-2 h-2 bg-blue-600 rounded-full"></span>}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {message.content.substring(0, 100)}...
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-gray-500">من: {message.from_user_name}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        message.message_type === 'friday_work' ? 'bg-red-100 text-red-700' :
+                        message.message_type === 'urgent' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {message.message_type === 'friday_work' ? 'دوام جمعة' :
+                         message.message_type === 'urgent' ? 'عاجل' : 'عام'}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
