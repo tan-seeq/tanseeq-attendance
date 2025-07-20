@@ -802,6 +802,14 @@ const Dashboard = () => {
                   🚨 دوام الجمعة الاستثنائي
                 </button>
               )}
+              {(user?.role === "admin" || user?.role === "super_admin") && (
+                <button
+                  onClick={() => setShowCustomMessageModal(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm flex items-center"
+                >
+                  ✉️ رسالة مخصصة
+                </button>
+              )}
               <button
                 onClick={() => setShowMessages(!showMessages)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center"
