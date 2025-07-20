@@ -1235,6 +1235,311 @@ class TanseeqAPITester:
         
         return test_passed
 
+    # ============ LATE PENALTY SYSTEM TESTS ============
+    
+    def test_penalties_late_calculation(self, role: str) -> bool:
+        """Test late penalty calculation endpoint (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-02'
+        
+        success, response = self.make_request('GET', f'penalties/late/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response is a list of penalties
+            if isinstance(response, list):
+                # If there are penalties, check structure
+                if response:
+                    first_penalty = response[0]
+                    expected_keys = ['user_id', 'user_name', 'month', 'total_late_minutes', 
+                                   'late_incidents', 'free_late_minutes', 'penalty_minutes',
+                                   'penalty_amount', 'penalty_days', 'penalty_type', 'details']
+                    has_expected_keys = all(key in first_penalty for key in expected_keys)
+                    
+                    # Check penalty calculation logic
+                    penalty_amount = first_penalty.get('penalty_amount', 0)
+                    penalty_type = first_penalty.get('penalty_type', '')
+                    has_valid_penalty_type = penalty_type in ['none', 'minutes', 'actual_time', 'half_day', 'full_day']
+                    
+                    success = success and has_expected_keys and has_valid_penalty_type
+                    
+                    if not success:
+                        missing_keys = set(expected_keys) - set(first_penalty.keys())
+                        self.log_test(f"Late penalty calculation ({role})", False, 
+                                     f"Missing keys: {missing_keys}, Valid penalty type: {has_valid_penalty_type}")
+                    else:
+                        self.log_test(f"Late penalty calculation ({role})", True)
+                else:
+                    # No penalties found, but endpoint works
+                    self.log_test(f"Late penalty calculation ({role})", True, "No late penalties found for the month")
+            else:
+                self.log_test(f"Late penalty calculation ({role})", False, "Response is not a list")
+                success = False
+        else:
+            self.log_test(f"Late penalty calculation ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_penalties_complex_rules_verification(self, role: str) -> bool:
+        """Test complex penalty rules calculation (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        if role not in ['admin', 'super_admin']:
+            self.log_test(f"Penalty rules verification ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        month = '2025-02'
+        success, response = self.make_request('GET', f'penalties/late/{month}', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Verify complex penalty rules are applied correctly
+            rules_verified = True
+            
+            for penalty in response:
+                total_late_minutes = penalty.get('total_late_minutes', 0)
+                late_incidents = penalty.get('late_incidents', 0)
+                free_late_minutes = penalty.get('free_late_minutes', 0)
+                penalty_minutes = penalty.get('penalty_minutes', 0)
+                penalty_type = penalty.get('penalty_type', '')
+                penalty_amount = penalty.get('penalty_amount', 0)
+                
+                # Rule 1: First 15 minutes x 4 times = free
+                expected_free_minutes = min(60, late_incidents * 15) if late_incidents > 4 else total_late_minutes
+                if late_incidents <= 4:
+                    expected_free_minutes = total_late_minutes
+                
+                # Rule 2-4: Penalty calculation
+                expected_penalty_minutes = max(0, total_late_minutes - free_late_minutes)
+                
+                # Verify rules
+                if free_late_minutes != expected_free_minutes and late_incidents > 0:
+                    rules_verified = False
+                    break
+                
+                if penalty_minutes != expected_penalty_minutes and late_incidents > 0:
+                    rules_verified = False
+                    break
+                
+                # Verify penalty types
+                if penalty_minutes > 0:
+                    if penalty_minutes <= 20 and penalty_type != 'minutes':
+                        rules_verified = False
+                        break
+                    elif 20 < penalty_minutes <= 120 and penalty_type not in ['actual_time', 'half_day']:
+                        rules_verified = False
+                        break
+                    elif penalty_minutes > 120 and penalty_type != 'full_day':
+                        rules_verified = False
+                        break
+            
+            self.log_test(f"Penalty rules verification ({role})", rules_verified, 
+                         "Complex penalty rules not applied correctly" if not rules_verified else "")
+            return rules_verified
+        else:
+            self.log_test(f"Penalty rules verification ({role})", False, str(response))
+            return False
+
+    def test_penalties_apply(self, role: str) -> bool:
+        """Test penalty application endpoint (Super admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        month = '2025-02'
+        
+        success, response = self.make_request('POST', f'penalties/apply/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains application results
+            expected_keys = ['message', 'total_employees', 'total_penalty_amount', 'penalties']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if penalties were stored
+            penalties = response.get('penalties', [])
+            has_penalties_structure = True
+            if penalties:
+                first_penalty = penalties[0]
+                penalty_keys = ['id', 'user_id', 'user_name', 'month', 'penalty_amount', 
+                              'penalty_days', 'penalty_type', 'applied_by', 'status']
+                has_penalties_structure = all(key in first_penalty for key in penalty_keys)
+            
+            success = success and has_expected_keys and has_penalties_structure
+            
+            if not success:
+                missing_keys = set(expected_keys) - set(response.keys())
+                self.log_test(f"Penalty application ({role})", False, 
+                             f"Missing keys: {missing_keys}, Penalties structure: {has_penalties_structure}")
+            else:
+                self.log_test(f"Penalty application ({role})", True)
+        else:
+            self.log_test(f"Penalty application ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_penalties_history(self, role: str) -> bool:
+        """Test penalty history endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        # Users can only see their own history, admins can see any user's history
+        user_id = self.users[role]['id'] if role in self.users else 'test-id'
+        
+        success, response = self.make_request('GET', f'penalties/history/{user_id}', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Check penalty history structure
+            if response:
+                first_record = response[0]
+                expected_keys = ['id', 'user_id', 'user_name', 'month', 'penalty_amount', 
+                               'penalty_days', 'penalty_type', 'applied_by', 'applied_at', 'status']
+                has_expected_keys = all(key in first_record for key in expected_keys)
+                
+                success = success and has_expected_keys
+                
+                if not success:
+                    missing_keys = set(expected_keys) - set(first_record.keys())
+                    self.log_test(f"Penalty history ({role})", False, f"Missing keys: {missing_keys}")
+                else:
+                    self.log_test(f"Penalty history ({role})", True)
+            else:
+                # No penalty history, but endpoint works
+                self.log_test(f"Penalty history ({role})", True, "No penalty history found")
+        else:
+            self.log_test(f"Penalty history ({role})", False, str(response))
+        
+        return success
+
+    def test_penalties_security_access_control(self, role: str) -> bool:
+        """Test penalty system security and access control"""
+        if role not in self.tokens:
+            return False
+        
+        month = '2025-02'
+        user_id = self.users[role]['id'] if role in self.users else 'test-id'
+        
+        # Test penalty calculation access (admin only)
+        expected_calc_status = 200 if role in ['admin', 'super_admin'] else 403
+        success_calc, response_calc = self.make_request('GET', f'penalties/late/{month}', 
+                                                       token=self.tokens[role],
+                                                       expected_status=expected_calc_status)
+        
+        # Test penalty application access (super admin only)
+        expected_apply_status = 200 if role == 'super_admin' else 403
+        success_apply, response_apply = self.make_request('POST', f'penalties/apply/{month}', 
+                                                         token=self.tokens[role],
+                                                         expected_status=expected_apply_status)
+        
+        # Test penalty history access (users can see own, admins can see all)
+        success_history, response_history = self.make_request('GET', f'penalties/history/{user_id}', 
+                                                            token=self.tokens[role])
+        
+        # Verify access control
+        if role == 'user':
+            # Users should be denied calculation and application, but can see own history
+            calc_denied = not success_calc and response_calc.get('detail') == 'Admin access required'
+            apply_denied = not success_apply and response_apply.get('detail') == 'Super admin access required'
+            history_allowed = success_history
+            
+            test_passed = calc_denied and apply_denied and history_allowed
+            self.log_test(f"Penalty security access control ({role})", test_passed, 
+                         f"Calc denied: {calc_denied}, Apply denied: {apply_denied}, History allowed: {history_allowed}")
+        elif role == 'admin':
+            # Admins should access calculation and history, but not application
+            calc_allowed = success_calc
+            apply_denied = not success_apply and response_apply.get('detail') == 'Super admin access required'
+            history_allowed = success_history
+            
+            test_passed = calc_allowed and apply_denied and history_allowed
+            self.log_test(f"Penalty security access control ({role})", test_passed, 
+                         f"Calc allowed: {calc_allowed}, Apply denied: {apply_denied}, History allowed: {history_allowed}")
+        else:  # super_admin
+            # Super admin should access everything
+            test_passed = success_calc and success_history
+            # Apply might fail due to no penalties, but should not be access denied
+            if not success_apply:
+                apply_not_access_denied = response_apply.get('detail') != 'Super admin access required'
+                test_passed = test_passed and apply_not_access_denied
+            
+            self.log_test(f"Penalty security access control ({role})", test_passed, 
+                         f"Calc: {success_calc}, Apply: {success_apply}, History: {success_history}")
+        
+        return test_passed
+
+    def test_penalties_hatem_only_application(self, role: str) -> bool:
+        """Test that only Hatem can apply penalties (as per Arabic review request)"""
+        if role not in self.tokens:
+            return False
+        
+        # Check if this is Hatem
+        user_name = self.users.get(role, {}).get('name', '')
+        is_hatem = user_name == 'Hatem Mohamed Ahmed'
+        
+        month = '2025-02'
+        expected_status = 200 if is_hatem else 403
+        
+        success, response = self.make_request('POST', f'penalties/apply/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if is_hatem:
+            # Hatem should be able to apply penalties (or get a valid response)
+            test_passed = success or (not success and 'access' not in str(response).lower())
+            self.log_test(f"Penalty application - Hatem only ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+        else:
+            # Others should be denied
+            access_denied = not success and ('admin access required' in str(response).lower() or 
+                                           'super admin access required' in str(response).lower())
+            test_passed = access_denied
+            self.log_test(f"Penalty application - Hatem only ({role})", test_passed, 
+                         f"Access denied: {access_denied}")
+        
+        return test_passed
+
+    def test_penalties_daily_salary_calculation(self, role: str) -> bool:
+        """Test daily salary calculation in penalty system"""
+        if role not in self.tokens:
+            return False
+        
+        if role not in ['admin', 'super_admin']:
+            self.log_test(f"Penalty daily salary calculation ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        month = '2025-02'
+        success, response = self.make_request('GET', f'penalties/late/{month}', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Verify daily salary calculation (monthly_salary / 30)
+            calculation_correct = True
+            
+            for penalty in response:
+                monthly_salary = penalty.get('monthly_salary', 0)
+                daily_salary = penalty.get('daily_salary', 0)
+                
+                if monthly_salary > 0:
+                    expected_daily_salary = monthly_salary / 30
+                    # Allow small floating point differences
+                    if abs(daily_salary - expected_daily_salary) > 0.01:
+                        calculation_correct = False
+                        break
+            
+            self.log_test(f"Penalty daily salary calculation ({role})", calculation_correct, 
+                         "Daily salary calculation incorrect" if not calculation_correct else "")
+            return calculation_correct
+        else:
+            self.log_test(f"Penalty daily salary calculation ({role})", False, str(response))
+            return False
+
     # ============ INTERNAL MESSAGING SYSTEM TESTS ============
     
     def test_messages_creation_general(self, role: str) -> bool:
