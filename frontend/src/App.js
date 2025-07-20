@@ -822,6 +822,69 @@ const Dashboard = () => {
           نظام إدارة الموارد البشرية - TANSEEQ Tax Consultancy © 2025
         </p>
       </div>
+
+      {/* Message Modal */}
+      {showMessageModal && selectedMessage && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl leading-6 font-bold text-gray-900 flex items-center">
+                  {selectedMessage.message_type === 'friday_work' && '🚨 '}
+                  {selectedMessage.priority === 'urgent' && '⚠️ '}
+                  {selectedMessage.title}
+                </h3>
+                <button
+                  onClick={() => setShowMessageModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                  <span>من: {selectedMessage.from_user_name}</span>
+                  <span>{selectedMessage.time_ago}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    selectedMessage.message_type === 'friday_work' ? 'bg-red-100 text-red-700' :
+                    selectedMessage.message_type === 'urgent' ? 'bg-orange-100 text-orange-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {selectedMessage.message_type === 'friday_work' ? 'دوام جمعة' :
+                     selectedMessage.message_type === 'urgent' ? 'عاجل' : 'عام'}
+                  </span>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    selectedMessage.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+                    selectedMessage.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
+                    {selectedMessage.priority === 'urgent' ? 'عاجل جداً' :
+                     selectedMessage.priority === 'high' ? 'مهم' : 'عادي'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mb-6 bg-white border rounded-lg p-4 max-h-96 overflow-y-auto">
+                <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                  {selectedMessage.content}
+                </div>
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowMessageModal(false)}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                >
+                  إغلاق
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
