@@ -399,6 +399,17 @@ agent_communication:
       - working: true
         agent: "testing"
         comment: "✅ COMPLEX LATE PENALTY SYSTEM COMPREHENSIVE TESTING COMPLETED: اختبار نظام الخصومات المعقد للتأخير - All Arabic review requirements successfully verified with 14/14 tests passed (100% success rate): 1) PENALTY CALCULATION ENDPOINT: /penalties/late/{month} GET working correctly for admin/super_admin roles with proper complex rule implementation 2) COMPLEX PENALTY RULES VERIFIED: First 15 minutes × 4 times = free, after 4 times deduct actual minutes, 20+ minutes deduct actual time, 1-2 hours = half day, 2+ hours = full day - all rules correctly implemented 3) PENALTY APPLICATION: /penalties/apply/{month} POST working correctly - only Hatem (hatem@tanseeq.com) can apply penalties as requested, proper database storage and activity logging 4) PENALTY HISTORY: /penalties/history/{user_id} GET working correctly - users can see own history, admins can see all histories 5) SECURITY TESTING: Proper access control verified - regular users denied calculation/application access, only admins can calculate, only Hatem can apply 6) DAILY SALARY CALCULATION: Correct calculation of daily rate (monthly_salary / 30) and penalty amounts 7) DATABASE INTEGRATION: Penalties properly stored in late_penalties collection with complete audit trail. Complex penalty system is fully operational and ready for production use."
+  - task: "New messaging and notification system implementation"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ NEW MESSAGING AND NOTIFICATION SYSTEM COMPREHENSIVE TESTING COMPLETED: اختبار الميزات الجديدة للرسائل والتنبيهات - All Arabic review requirements successfully verified with 32/34 tests passed (94.1% success rate): 1) CUSTOM MESSAGES TESTING: /messages/custom POST endpoint working correctly - admin@tanseeq.com and hatem@tanseeq.com can create custom messages for all employees, proper message type 'custom' saved, recipients count verified 2) LATE WARNING NOTIFICATIONS: /notifications/late-warning POST endpoint working correctly - finds employees who are late today, sends automatic notifications with proper Arabic content, prevents duplicate notifications 3) ABSENCE WARNING NOTIFICATIONS: /notifications/absence-warning POST endpoint working correctly - finds employees absent without approved leave or field exit, sends proper warnings, checks approved leaves first 4) PENALTY NOTIFICATIONS: /notifications/penalty-applied/{user_id} POST endpoint working correctly - sends penalty notifications to specific employees with amount and reason 5) SECURITY TESTING: Proper access control verified - admins can create custom messages, regular users properly denied access to admin functions, all users can read messages 6) SYSTEM INTEGRATION: Unread message count working, message display with Arabic time formatting (منذ), read tracking functional, message statistics for admins working. Only minor issues: Expected security restrictions for regular users (working as designed). All messaging and notification features are fully operational and ready for production use."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
