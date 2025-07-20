@@ -4830,7 +4830,9 @@ def main():
         success = tester.run_focused_arabic_review_tests()
     elif len(sys.argv) > 1 and sys.argv[1] == '--message-system':
         success = tester.run_message_system_tests()
-    elif len(sys.argv) > 1 and sys.argv[1] == '--arabic-review':
+    elif len(sys.argv) > 1 and sys.argv[1] == '--message-privacy':
+        success = tester.run_message_privacy_tests()
+    elif len(sys.argv) > 1 and sys.argv[1] == '--arabic-review-full':
         success = tester.run_arabic_review_tests()
     else:
         success = tester.run_comprehensive_tests()
