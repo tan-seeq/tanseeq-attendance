@@ -2506,6 +2506,232 @@ async def update_payroll(user_id: str, month: str, payroll_data: dict, current_u
     
     return {"message": "Payroll override saved successfully"}
 
+# ============ INTERNAL MESSAGES ENDPOINTS ============
+
+def get_time_ago(created_at: datetime) -> str:
+    """Calculate human readable time ago"""
+    now = datetime.utcnow()
+    diff = now - created_at
+    
+    if diff.days > 0:
+        if diff.days == 1:
+            return "منذ يوم واحد"
+        elif diff.days < 7:
+            return f"منذ {diff.days} أيام"
+        elif diff.days < 30:
+            weeks = diff.days // 7
+            return f"منذ {weeks} أسبوع" if weeks == 1 else f"منذ {weeks} أسابيع"
+        else:
+            months = diff.days // 30
+            return f"منذ {months} شهر" if months == 1 else f"منذ {months} شهور"
+    elif diff.seconds > 3600:
+        hours = diff.seconds // 3600
+        return f"منذ {hours} ساعة" if hours == 1 else f"منذ {hours} ساعات"
+    elif diff.seconds > 60:
+        minutes = diff.seconds // 60
+        return f"منذ {minutes} دقيقة" if minutes == 1 else f"منذ {minutes} دقائق"
+    else:
+        return "منذ لحظات"
+
+@api_router.post("/messages")
+async def create_message(message_data: MessageCreate, current_user: User = Depends(get_current_user)):
+    """Create new internal message"""
+    if current_user.role not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Only admins can create messages")
+    
+    # If to_user_ids is empty, send to all users
+    if not message_data.to_user_ids:
+        all_users = await db.users.find({"is_active": True}).to_list(1000)
+        message_data.to_user_ids = [user["id"] for user in all_users]
+    
+    # Create message
+    message = Message(
+        title=message_data.title,
+        content=message_data.content,
+        message_type=message_data.message_type,
+        from_user_id=current_user.id,
+        from_user_name=current_user.name,
+        to_user_ids=message_data.to_user_ids,
+        priority=message_data.priority,
+        expires_at=message_data.expires_at
+    )
+    
+    await db.messages.insert_one(message.dict())
+    
+    await log_activity(current_user.id, "message_created", f"Created message: {message.title}")
+    
+    return {"message": "Message created successfully", "id": message.id}
+
+@api_router.get("/messages")
+async def get_messages(current_user: User = Depends(get_current_user)):
+    """Get messages for current user"""
+    # Get messages where user is in to_user_ids or to_user_ids is empty (broadcast)
+    query = {
+        "$or": [
+            {"to_user_ids": {"$in": [current_user.id]}},
+            {"to_user_ids": {"$size": 0}},  # Broadcast messages
+            {"to_user_ids": []}  # Empty array means all users
+        ],
+        "is_active": True,
+        "$or": [
+            {"expires_at": None},
+            {"expires_at": {"$gt": datetime.utcnow()}}
+        ]
+    }
+    
+    messages = await db.messages.find(query).sort("created_at", -1).to_list(1000)
+    
+    # Convert to response format
+    response_messages = []
+    for message in messages:
+        is_read = current_user.id in message.get("is_read_by", [])
+        response_messages.append(MessageResponse(
+            id=message["id"],
+            title=message["title"],
+            content=message["content"],
+            message_type=message["message_type"],
+            from_user_id=message["from_user_id"],
+            from_user_name=message["from_user_name"],
+            to_user_ids=message["to_user_ids"],
+            is_read_by=message["is_read_by"],
+            priority=message["priority"],
+            created_at=message["created_at"],
+            expires_at=message.get("expires_at"),
+            is_active=message["is_active"],
+            is_read=is_read,
+            time_ago=get_time_ago(message["created_at"])
+        ))
+    
+    return response_messages
+
+@api_router.post("/messages/{message_id}/read")
+async def mark_message_as_read(message_id: str, current_user: User = Depends(get_current_user)):
+    """Mark message as read by current user"""
+    # Add user ID to is_read_by list if not already there
+    await db.messages.update_one(
+        {"id": message_id},
+        {"$addToSet": {"is_read_by": current_user.id}}
+    )
+    
+    return {"message": "Message marked as read"}
+
+@api_router.get("/messages/unread-count")
+async def get_unread_count(current_user: User = Depends(get_current_user)):
+    """Get count of unread messages for current user"""
+    query = {
+        "$or": [
+            {"to_user_ids": {"$in": [current_user.id]}},
+            {"to_user_ids": {"$size": 0}},
+            {"to_user_ids": []}
+        ],
+        "is_active": True,
+        "is_read_by": {"$ne": current_user.id},  # Not read by current user
+        "$or": [
+            {"expires_at": None},
+            {"expires_at": {"$gt": datetime.utcnow()}}
+        ]
+    }
+    
+    count = await db.messages.count_documents(query)
+    return {"unread_count": count}
+
+@api_router.post("/messages/friday-work")
+async def create_friday_work_message(current_user: User = Depends(get_current_user)):
+    """Create Friday work announcement (Super admin only)"""
+    if current_user.name != "Hatem Mohamed Ahmed":
+        raise HTTPException(status_code=403, detail="Only Hatem can create Friday work announcements")
+    
+    # Get next Friday's date
+    today = get_uae_time().date()
+    days_until_friday = (4 - today.weekday()) % 7  # Friday is 4 (0=Monday)
+    if days_until_friday == 0:  # If today is Friday, get next Friday
+        days_until_friday = 7
+    
+    next_friday = today + timedelta(days=days_until_friday)
+    friday_formatted = next_friday.strftime("%d/%m/%Y")
+    
+    # Create the message content
+    title = "دوام يوم الجمعة الاستثنائي"
+    content = f"""السادة الزملاء الكرام،
+
+السلام عليكم ورحمة الله وبركاته،
+
+بناءً على توجيهات الإدارة، ونظراً لضغوط العمل الحالية وحرصاً على استمرارية سير الأعمال، نُعلمكم بأنه تم إلغاء إجازة يوم الجمعة المقبل، والعمل استثنائياً على النحو التالي:
+
+التاريخ: يوم الجمعة الموافق {friday_formatted}
+
+أوقات الدوام: من الساعة 08:00 صباحاً وحتى الساعة 12:00 ظهراً
+
+يرجى الالتزام التام بالحضور في ذلك اليوم، علماً بأنه في حال عدم الحضور سيتم خصم يومين من الراتب.
+
+نعتذر عن أي إزعاج قد يسببه هذا التعديل، ونقدر تعاونكم وتفهمكم.
+
+الإدارة العامة
+TANSEEQ TAX CONSULTANCY"""
+    
+    # Create message
+    message = Message(
+        title=title,
+        content=content,
+        message_type="friday_work",
+        from_user_id=current_user.id,
+        from_user_name=current_user.name,
+        to_user_ids=[],  # Send to all
+        priority="urgent",
+        expires_at=next_friday + timedelta(days=1)  # Expire day after Friday
+    )
+    
+    await db.messages.insert_one(message.dict())
+    
+    await log_activity(current_user.id, "friday_work_announced", f"Created Friday work announcement for {friday_formatted}")
+    
+    return {
+        "message": "Friday work announcement sent successfully", 
+        "id": message.id,
+        "friday_date": friday_formatted,
+        "recipients": "All employees"
+    }
+
+@api_router.get("/messages/{message_id}/stats")
+async def get_message_stats(message_id: str, current_user: User = Depends(get_current_user)):
+    """Get message read statistics (Admin only)"""
+    if current_user.role not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Only admins can view message statistics")
+    
+    message = await db.messages.find_one({"id": message_id})
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    # Get all active users
+    all_users = await db.users.find({"is_active": True}).to_list(1000)
+    total_users = len(all_users)
+    
+    # Get users who have read
+    read_by = message.get("is_read_by", [])
+    read_count = len(read_by)
+    
+    # Get users who haven't read
+    unread_users = []
+    for user in all_users:
+        if user["id"] not in read_by:
+            unread_users.append({
+                "id": user["id"],
+                "name": user["name"],
+                "email": user["email"]
+            })
+    
+    return {
+        "message_id": message_id,
+        "title": message["title"],
+        "total_recipients": total_users,
+        "read_count": read_count,
+        "unread_count": total_users - read_count,
+        "read_percentage": round((read_count / total_users) * 100, 1) if total_users > 0 else 0,
+        "unread_users": unread_users,
+        "created_at": message["created_at"],
+        "time_ago": get_time_ago(message["created_at"])
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
