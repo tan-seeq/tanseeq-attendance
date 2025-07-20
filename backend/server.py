@@ -3207,17 +3207,31 @@ async def create_message(message_data: MessageCreate, current_user: User = Depen
 @api_router.get("/messages")
 async def get_messages(current_user: User = Depends(get_current_user)):
     """Get messages for current user"""
-    # Get messages where user is in to_user_ids or to_user_ids is empty (broadcast)
+    # Get messages where user is specifically in to_user_ids, or general messages
+    # BUT exclude private messages (late_warning, absence_warning, penalty_notification)
     query = {
-        "$or": [
-            {"to_user_ids": {"$in": [current_user.id]}},
-            {"to_user_ids": {"$size": 0}},  # Broadcast messages
-            {"to_user_ids": []}  # Empty array means all users
-        ],
-        "is_active": True,
-        "$or": [
-            {"expires_at": None},
-            {"expires_at": {"$gt": datetime.utcnow()}}
+        "$and": [
+            {
+                "$or": [
+                    {"to_user_ids": {"$in": [current_user.id]}},
+                    {
+                        "$and": [
+                            {"$or": [
+                                {"to_user_ids": {"$size": 0}},  # Broadcast messages
+                                {"to_user_ids": []}  # Empty array means all users
+                            ]},
+                            {"message_type": {"$nin": ["late_warning", "absence_warning", "penalty_notification"]}}
+                        ]
+                    }
+                ]
+            },
+            {"is_active": True},
+            {
+                "$or": [
+                    {"expires_at": None},
+                    {"expires_at": {"$gt": datetime.utcnow()}}
+                ]
+            }
         ]
     }
     
