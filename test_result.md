@@ -117,15 +117,18 @@ backend:
         comment: "✅ AUTOMATED NOTIFICATION SYSTEM COMPREHENSIVE TESTING COMPLETED: All critical endpoints working perfectly: 1) POST /api/notifications/late-warning - Successfully finds late employees and sends Arabic notifications, prevents duplicates, returns proper structure with notifications_sent count and date 2) POST /api/notifications/absence-warning - Successfully identifies absent employees (excluding approved leaves/field exits), sends proper warnings, returns absent_employees count and notifications_sent 3) POST /api/notifications/penalty-applied/{user_id} - Successfully sends penalty notifications with amount and reason, proper Arabic content and structure 4) GET /api/automation/status - Working correctly for super_admin access, returns automation_scheduler_running status, scheduled_tasks details, recent_activity summary, and system_status. All notification endpoints tested across all user roles with 100% success rate. Automation system is fully operational and ready for production use."
   - task: "Super Admin request creation on behalf of employees"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added /admin/create-leave-request and /admin/create-field-exit-request endpoints. Allow super admin to create auto-approved requests for employees with file upload support and automatic notifications."
+      - working: true
+        agent: "testing"
+        comment: "✅ SUPER ADMIN REQUEST CREATION COMPREHENSIVE TESTING COMPLETED: Both critical endpoints working perfectly: 1) POST /api/admin/create-leave-request - Successfully tested with super_admin credentials (hatem@tanseeq.com), creates auto-approved leave requests on behalf of employees, supports file uploads, sends automatic notifications to employees, returns proper structure with leave_id and approved status, proper access control (403 for non-super_admin users) 2) POST /api/admin/create-field-exit-request - Successfully creates auto-approved field exit requests, handles expected_start_time and expected_end_time properly, sends notifications, returns field_exit_id and approved status, proper access control implemented. Both endpoints tested across all user roles with 100% success rate for functionality and security. Super admin request creation system is fully operational and ready for production use."
   - task: "Admin attachment viewing capability"
     implemented: true
     working: false
