@@ -2506,6 +2506,157 @@ async def update_payroll(user_id: str, month: str, payroll_data: dict, current_u
     
     return {"message": "Payroll override saved successfully"}
 
+# ============ AUTO BACKUP ENDPOINTS ============
+
+@api_router.get("/backup/stats")
+async def get_backup_stats(current_user: User = Depends(get_super_admin_user)):
+    """Get backup statistics (Super admin only)"""
+    try:
+        from pathlib import Path
+        import os
+        
+        BACKUP_DIR = "/app/backups"
+        Path(BACKUP_DIR).mkdir(exist_ok=True)
+        
+        # Count backup files
+        backup_files = list(Path(BACKUP_DIR).glob("backup_*.zip"))
+        total_files = len(backup_files)
+        
+        # Calculate total size
+        total_size = 0
+        latest_backup = None
+        latest_date = None
+        
+        if backup_files:
+            total_size = sum(f.stat().st_size for f in backup_files) / (1024 * 1024)  # MB
+            latest_backup = max(backup_files, key=lambda f: f.stat().st_mtime)
+            latest_date = datetime.fromtimestamp(latest_backup.stat().st_mtime)
+        
+        # Get backup logs from database
+        recent_logs = await db.backup_logs.find({}).sort("timestamp", -1).limit(10).to_list(10)
+        
+        # Format logs for frontend
+        formatted_logs = []
+        for log in recent_logs:
+            formatted_logs.append({
+                "id": log.get("id", ""),
+                "timestamp": log.get("timestamp"),
+                "status": log.get("status", "unknown"),
+                "file_size_mb": log.get("file_size_mb", 0),
+                "error": log.get("error", ""),
+                "time_ago": get_time_ago(log.get("timestamp", datetime.utcnow()))
+            })
+        
+        stats = {
+            "total_backups": total_files,
+            "total_size_mb": round(total_size, 2),
+            "latest_backup": latest_backup.name if latest_backup else None,
+            "latest_backup_date": latest_date.strftime("%Y-%m-%d %H:%M:%S") if latest_date else None,
+            "backup_directory": BACKUP_DIR,
+            "recent_logs": formatted_logs,
+            "auto_backup_enabled": True,
+            "backup_schedule": "Daily at 02:00 AM UAE Time"
+        }
+        
+        return stats
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting backup stats: {str(e)}")
+
+@api_router.post("/backup/manual")
+async def create_manual_backup(current_user: User = Depends(get_super_admin_user)):
+    """Create manual backup (Super admin only)"""
+    try:
+        import subprocess
+        from pathlib import Path
+        import zipfile
+        import shutil
+        
+        BACKUP_DIR = "/app/backups"
+        Path(BACKUP_DIR).mkdir(exist_ok=True)
+        
+        # Create timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_folder = f"{BACKUP_DIR}/manual_backup_{timestamp}"
+        
+        # Create backup folder
+        Path(backup_folder).mkdir(exist_ok=True)
+        
+        # Use mongodump to create backup
+        MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/tanseeq_hr")
+        
+        dump_command = [
+            "mongodump",
+            "--uri", MONGO_URL,
+            "--out", backup_folder
+        ]
+        
+        # Execute mongodump
+        result = subprocess.run(dump_command, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            # Create ZIP archive
+            zip_path = f"{backup_folder}.zip"
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(backup_folder):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, backup_folder)
+                        zipf.write(file_path, arcname)
+            
+            # Remove original folder, keep only ZIP
+            shutil.rmtree(backup_folder)
+            
+            # Get file size
+            file_size = os.path.getsize(zip_path) / (1024 * 1024)  # MB
+            
+            # Log backup to database
+            log_entry = {
+                "id": f"manual_backup_{timestamp}",
+                "timestamp": datetime.utcnow(),
+                "file_path": zip_path,
+                "file_size_mb": file_size,
+                "status": "success",
+                "error": "",
+                "created_by": current_user.id,
+                "backup_type": "manual",
+                "created_at": datetime.utcnow()
+            }
+            
+            await db.backup_logs.insert_one(log_entry)
+            
+            await log_activity(current_user.id, "manual_backup_created", f"Manual backup created: {file_size:.2f} MB")
+            
+            return {
+                "message": "Manual backup created successfully",
+                "backup_file": f"manual_backup_{timestamp}.zip",
+                "file_size_mb": round(file_size, 2),
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+        else:
+            error_msg = result.stderr
+            
+            # Log failed backup
+            log_entry = {
+                "id": f"manual_backup_failed_{timestamp}",
+                "timestamp": datetime.utcnow(),
+                "file_path": "",
+                "file_size_mb": 0,
+                "status": "failed",
+                "error": error_msg,
+                "created_by": current_user.id,
+                "backup_type": "manual",
+                "created_at": datetime.utcnow()
+            }
+            
+            await db.backup_logs.insert_one(log_entry)
+            
+            raise HTTPException(status_code=500, detail=f"Backup failed: {error_msg}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating manual backup: {str(e)}")
+
 # ============ INTERNAL MESSAGES ENDPOINTS ============
 
 def get_time_ago(created_at: datetime) -> str:
