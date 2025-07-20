@@ -2342,6 +2342,22 @@ class TanseeqAPITester:
             self.test_leaves_reject_with_notes(role)
             self.test_leaves_all_with_approved_by_and_notes(role)
             
+            # NEW: Backup System Tests (Arabic review request)
+            print(f"\n💾 Testing Backup System ({role.upper()}):")
+            self.test_backup_stats(role)
+            self.test_manual_backup_creation(role)
+            self.test_backup_security_access_control(role)
+            
+            # NEW: Internal Messaging System Tests (current focus)
+            print(f"\n📨 Testing Internal Messaging System ({role.upper()}):")
+            self.test_messages_creation_general(role)
+            self.test_messages_friday_work_creation(role)
+            self.test_messages_display(role)
+            self.test_messages_read_tracking(role)
+            self.test_messages_unread_count(role)
+            self.test_messages_statistics(role)
+            self.test_messages_security_access_control(role)
+            
             # Feature-specific tests
             self.test_weekend_blocking(role)
             
