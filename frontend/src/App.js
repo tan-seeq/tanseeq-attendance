@@ -856,6 +856,139 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Backup Section (Super Admin Only) */}
+      {user?.name === "Hatem Mohamed Ahmed" && (
+        <div className="mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <ShieldCheckIcon className="h-5 w-5 ml-2 text-green-600" />
+                النسخ الاحتياطي التلقائي
+              </h3>
+              <div className="flex space-x-2">
+                <button
+                  onClick={createManualBackup}
+                  disabled={backupLoading}
+                  className={`px-4 py-2 rounded-md text-sm text-white ${
+                    backupLoading 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-green-600 hover:bg-green-700'
+                  } flex items-center`}
+                >
+                  {backupLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      جاري الإنشاء...
+                    </>
+                  ) : (
+                    '💾 نسخة احتياطية يدوية'
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowBackupSection(!showBackupSection)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center"
+                >
+                  {showBackupSection ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}
+                  <ChevronDownIcon className={`h-4 w-4 mr-1 transition-transform ${showBackupSection ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Backup Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <div className="bg-blue-100 rounded-lg p-2">
+                    <FolderIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="mr-3">
+                    <p className="text-sm text-gray-600">إجمالي النسخ</p>
+                    <p className="text-xl font-bold text-blue-600">{backupStats?.total_backups || 0}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <div className="bg-green-100 rounded-lg p-2">
+                    <ServerIcon className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="mr-3">
+                    <p className="text-sm text-gray-600">الحجم الكلي</p>
+                    <p className="text-xl font-bold text-green-600">{backupStats?.total_size_mb || 0} MB</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <div className="bg-purple-100 rounded-lg p-2">
+                    <ClockIcon className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div className="mr-3">
+                    <p className="text-sm text-gray-600">آخر نسخة</p>
+                    <p className="text-sm font-bold text-purple-600">
+                      {backupStats?.latest_backup_date || 'لا يوجد'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <div className="bg-orange-100 rounded-lg p-2">
+                    <Cog6ToothIcon className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div className="mr-3">
+                    <p className="text-sm text-gray-600">التشغيل التلقائي</p>
+                    <p className="text-sm font-bold text-orange-600">2:00 ص يومياً</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {showBackupSection && backupStats && (
+              <div className="border-t pt-4">
+                <h4 className="font-semibold text-gray-800 mb-3">سجل النسخ الاحتياطي الأخير</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {backupStats.recent_logs?.length > 0 ? (
+                    backupStats.recent_logs.map((log, index) => (
+                      <div key={index} className={`p-3 rounded-lg ${
+                        log.status === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                      } border`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            {log.status === 'success' ? (
+                              <CheckCircleIcon className="h-4 w-4 text-green-600 ml-2" />
+                            ) : (
+                              <ExclamationTriangleIcon className="h-4 w-4 text-red-600 ml-2" />
+                            )}
+                            <span className="text-sm font-medium">
+                              {log.status === 'success' ? 'نجح' : 'فشل'}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {log.time_ago}
+                          </div>
+                        </div>
+                        <div className="mt-1 text-xs text-gray-600">
+                          {log.status === 'success' ? 
+                            `الحجم: ${log.file_size_mb} MB` : 
+                            `خطأ: ${log.error}`
+                          }
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm">لا يوجد سجل للنسخ الاحتياطي</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <div className="mt-8 text-center text-gray-500">
         <p className="text-sm">
