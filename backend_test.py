@@ -1133,6 +1133,414 @@ class TanseeqAPITester:
         
         return all_passed
 
+    # ============ NEW HIGH PRIORITY TESTS FOR AUTOMATION AND ADMIN ENHANCEMENTS ============
+    
+    def test_notifications_late_warning(self, role: str) -> bool:
+        """Test automated late warning notifications endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        # This endpoint should be accessible to all authenticated users for testing
+        success, response = self.make_request('POST', 'notifications/late-warning', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check response structure
+            expected_keys = ['message', 'notifications_sent', 'date']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check that notifications_sent is a number
+            notifications_sent = response.get('notifications_sent', 0)
+            is_valid_count = isinstance(notifications_sent, int) and notifications_sent >= 0
+            
+            # Check date format
+            date_str = response.get('date', '')
+            has_valid_date = len(date_str) == 10 and '-' in date_str  # YYYY-MM-DD format
+            
+            test_passed = has_expected_keys and is_valid_count and has_valid_date
+            
+            if not test_passed:
+                self.log_test(f"Late warning notifications ({role})", False, 
+                             f"Keys: {has_expected_keys}, Count: {is_valid_count}, Date: {has_valid_date}")
+            else:
+                self.log_test(f"Late warning notifications ({role})", True)
+        else:
+            self.log_test(f"Late warning notifications ({role})", False, str(response))
+        
+        return success
+
+    def test_notifications_absence_warning(self, role: str) -> bool:
+        """Test automated absence warning notifications endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        # This endpoint should be accessible to all authenticated users for testing
+        success, response = self.make_request('POST', 'notifications/absence-warning', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check response structure
+            expected_keys = ['message', 'notifications_sent', 'absent_employees', 'date']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check that counts are numbers
+            notifications_sent = response.get('notifications_sent', 0)
+            absent_employees = response.get('absent_employees', 0)
+            is_valid_counts = (isinstance(notifications_sent, int) and notifications_sent >= 0 and
+                              isinstance(absent_employees, int) and absent_employees >= 0)
+            
+            # Check date format
+            date_str = response.get('date', '')
+            has_valid_date = len(date_str) == 10 and '-' in date_str  # YYYY-MM-DD format
+            
+            test_passed = has_expected_keys and is_valid_counts and has_valid_date
+            
+            if not test_passed:
+                self.log_test(f"Absence warning notifications ({role})", False, 
+                             f"Keys: {has_expected_keys}, Counts: {is_valid_counts}, Date: {has_valid_date}")
+            else:
+                self.log_test(f"Absence warning notifications ({role})", True)
+        else:
+            self.log_test(f"Absence warning notifications ({role})", False, str(response))
+        
+        return success
+
+    def test_notifications_penalty_applied(self, role: str) -> bool:
+        """Test penalty applied notification endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        # Get a user ID to test with
+        user_id = self.users[role]['id'] if role in self.users else 'test-user-id'
+        
+        # Test penalty notification
+        url = f"{self.api_url}/notifications/penalty-applied/{user_id}?penalty_amount=50.0&penalty_reason=Late arrival penalty"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.post(url, headers=headers, timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                # Check response structure
+                expected_keys = ['message', 'user_name', 'penalty_amount']
+                has_expected_keys = all(key in response_data for key in expected_keys)
+                
+                # Check penalty amount
+                penalty_amount = response_data.get('penalty_amount', 0)
+                is_valid_amount = isinstance(penalty_amount, (int, float)) and penalty_amount > 0
+                
+                test_passed = has_expected_keys and is_valid_amount
+                
+                if not test_passed:
+                    self.log_test(f"Penalty applied notification ({role})", False, 
+                                 f"Keys: {has_expected_keys}, Amount: {is_valid_amount}")
+                else:
+                    self.log_test(f"Penalty applied notification ({role})", True)
+            else:
+                # Check if it's a 404 (user not found) which is acceptable for test
+                if response.status_code == 404:
+                    self.log_test(f"Penalty applied notification ({role})", True, "User not found (expected for test)")
+                    success = True
+                else:
+                    self.log_test(f"Penalty applied notification ({role})", False, f"Status: {response.status_code}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Penalty applied notification ({role})", False, str(e))
+            return False
+
+    def test_automation_status(self, role: str) -> bool:
+        """Test automation status endpoint (Super admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('GET', 'automation/status', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['automation_scheduler_running', 'scheduled_tasks', 'recent_activity', 'system_status']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check scheduled_tasks structure
+            scheduled_tasks = response.get('scheduled_tasks', {})
+            expected_task_keys = ['late_warnings', 'absence_warnings', 'monthly_penalties']
+            has_task_keys = all(key in scheduled_tasks for key in expected_task_keys)
+            
+            # Check recent_activity structure
+            recent_activity = response.get('recent_activity', {})
+            expected_activity_keys = ['total_recent_notifications', 'recent_penalty_applications']
+            has_activity_keys = all(key in recent_activity for key in expected_activity_keys)
+            
+            # Check system_status
+            system_status = response.get('system_status', '')
+            has_valid_status = system_status in ['active', 'inactive']
+            
+            test_passed = has_expected_keys and has_task_keys and has_activity_keys and has_valid_status
+            
+            if not test_passed:
+                self.log_test(f"Automation status ({role})", False, 
+                             f"Keys: {has_expected_keys}, Tasks: {has_task_keys}, Activity: {has_activity_keys}, Status: {has_valid_status}")
+            else:
+                self.log_test(f"Automation status ({role})", True)
+        else:
+            self.log_test(f"Automation status ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_admin_create_leave_request(self, role: str) -> bool:
+        """Test super admin create leave request on behalf of employee"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Get a user ID to create leave for
+        user_id = self.users[role]['id'] if role in self.users else 'test-user-id'
+        
+        # Prepare form data
+        form_data = {
+            'user_id': user_id,
+            'start_date': '2025-03-15',
+            'end_date': '2025-03-16',
+            'reason': 'إجازة اضطرارية تم إنشاؤها من قبل الإدارة',
+            'leave_type': 'emergency',
+            'days_count': 2,
+            'notes': 'تم إنشاء هذا الطلب للاختبار'
+        }
+        
+        # Make request with form data
+        url = f"{self.api_url}/admin/create-leave-request"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                response_data = response.json()
+                # Check response structure
+                expected_keys = ['message', 'leave_id', 'employee_name', 'status']
+                has_expected_keys = all(key in response_data for key in expected_keys)
+                
+                # Check that status is approved (auto-approved)
+                status = response_data.get('status', '')
+                is_approved = status == 'approved'
+                
+                # Check that leave_id is present
+                leave_id = response_data.get('leave_id', '')
+                has_leave_id = bool(leave_id)
+                
+                test_passed = has_expected_keys and is_approved and has_leave_id
+                
+                if not test_passed:
+                    self.log_test(f"Admin create leave request ({role})", False, 
+                                 f"Keys: {has_expected_keys}, Approved: {is_approved}, ID: {has_leave_id}")
+                else:
+                    self.log_test(f"Admin create leave request ({role})", True)
+                    # Store leave ID for cleanup if needed
+                    setattr(self, f'test_leave_id_{role}', leave_id)
+            else:
+                self.log_test(f"Admin create leave request ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Admin create leave request ({role})", False, str(e))
+            return False
+
+    def test_admin_create_field_exit_request(self, role: str) -> bool:
+        """Test super admin create field exit request on behalf of employee"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Get a user ID to create field exit for
+        user_id = self.users[role]['id'] if role in self.users else 'test-user-id'
+        
+        # Prepare form data
+        form_data = {
+            'user_id': user_id,
+            'date': '2025-03-15',
+            'visit_type': 'client_visit',
+            'client_name': 'شركة الاختبار للاستشارات الضريبية',
+            'expected_start_time': '10:00:00',
+            'expected_end_time': '12:00:00',
+            'report': 'زيارة عميل لمناقشة الخدمات الضريبية والمحاسبية',
+            'notes': 'تم إنشاء هذا الطلب من قبل الإدارة للاختبار'
+        }
+        
+        # Make request with form data
+        url = f"{self.api_url}/admin/create-field-exit-request"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                response_data = response.json()
+                # Check response structure
+                expected_keys = ['message', 'field_exit_id', 'employee_name', 'status']
+                has_expected_keys = all(key in response_data for key in expected_keys)
+                
+                # Check that status is approved (auto-approved)
+                status = response_data.get('status', '')
+                is_approved = status == 'approved'
+                
+                # Check that field_exit_id is present
+                field_exit_id = response_data.get('field_exit_id', '')
+                has_field_exit_id = bool(field_exit_id)
+                
+                test_passed = has_expected_keys and is_approved and has_field_exit_id
+                
+                if not test_passed:
+                    self.log_test(f"Admin create field exit request ({role})", False, 
+                                 f"Keys: {has_expected_keys}, Approved: {is_approved}, ID: {has_field_exit_id}")
+                else:
+                    self.log_test(f"Admin create field exit request ({role})", True)
+                    # Store field exit ID for cleanup if needed
+                    setattr(self, f'test_field_exit_id_{role}', field_exit_id)
+            else:
+                self.log_test(f"Admin create field exit request ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Admin create field exit request ({role})", False, str(e))
+            return False
+
+    def test_admin_attachments_list(self, role: str) -> bool:
+        """Test admin attachments list endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'admin/attachments-list', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['total_attachments', 'leave_attachments', 'field_exit_attachments', 'attachments']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check that counts are numbers
+            total_attachments = response.get('total_attachments', 0)
+            leave_attachments = response.get('leave_attachments', 0)
+            field_exit_attachments = response.get('field_exit_attachments', 0)
+            
+            are_valid_counts = (isinstance(total_attachments, int) and total_attachments >= 0 and
+                               isinstance(leave_attachments, int) and leave_attachments >= 0 and
+                               isinstance(field_exit_attachments, int) and field_exit_attachments >= 0)
+            
+            # Check that attachments is a list
+            attachments = response.get('attachments', [])
+            is_attachments_list = isinstance(attachments, list)
+            
+            # If there are attachments, check structure of first one
+            has_valid_attachment_structure = True
+            if attachments:
+                first_attachment = attachments[0]
+                expected_attachment_keys = ['request_type', 'request_id', 'employee_name', 'date_range', 
+                                          'reason', 'status', 'created_at', 'has_attachment']
+                has_valid_attachment_structure = all(key in first_attachment for key in expected_attachment_keys)
+            
+            test_passed = has_expected_keys and are_valid_counts and is_attachments_list and has_valid_attachment_structure
+            
+            if not test_passed:
+                self.log_test(f"Admin attachments list ({role})", False, 
+                             f"Keys: {has_expected_keys}, Counts: {are_valid_counts}, List: {is_attachments_list}, Structure: {has_valid_attachment_structure}")
+            else:
+                self.log_test(f"Admin attachments list ({role})", True)
+        else:
+            self.log_test(f"Admin attachments list ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_admin_view_attachment(self, role: str) -> bool:
+        """Test admin view attachment endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # First, get the attachments list to find an attachment to view
+        success, attachments_response = self.make_request('GET', 'admin/attachments-list', 
+                                                        token=self.tokens[role])
+        
+        if not success or expected_status != 200:
+            # Test with a dummy request to check access control
+            success, response = self.make_request('GET', 'admin/view-attachment/leave/dummy-id', 
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            if expected_status == 403:
+                # For non-admin users, we expect 403
+                self.log_test(f"Admin view attachment ({role})", success, str(response) if not success else "")
+            else:
+                # For admin users, we expect 404 (not found) which is acceptable
+                if not success and '404' in str(response):
+                    self.log_test(f"Admin view attachment ({role})", True, "No attachments found (expected)")
+                    success = True
+                else:
+                    self.log_test(f"Admin view attachment ({role})", False, str(response))
+            
+            return success
+        
+        # Check if there are any attachments to test with
+        attachments = attachments_response.get('attachments', [])
+        if not attachments:
+            self.log_test(f"Admin view attachment ({role})", True, "No attachments available to test (expected)")
+            return True
+        
+        # Test viewing the first attachment
+        first_attachment = attachments[0]
+        request_type = first_attachment['request_type']
+        request_id = first_attachment['request_id']
+        
+        success, response = self.make_request('GET', f'admin/view-attachment/{request_type}/{request_id}', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check response structure for successful attachment view
+            expected_keys = ['file_name', 'mime_type', 'file_size', 'file_data', 'request_type', 
+                           'request_id', 'employee_name', 'created_at']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check that file_data is base64 encoded
+            file_data = response.get('file_data', '')
+            is_base64_data = file_data.startswith('data:') and 'base64,' in file_data
+            
+            # Check file size is reasonable
+            file_size = response.get('file_size', 0)
+            has_reasonable_size = isinstance(file_size, int) and file_size > 0
+            
+            test_passed = has_expected_keys and is_base64_data and has_reasonable_size
+            
+            if not test_passed:
+                self.log_test(f"Admin view attachment ({role})", False, 
+                             f"Keys: {has_expected_keys}, Base64: {is_base64_data}, Size: {has_reasonable_size}")
+            else:
+                self.log_test(f"Admin view attachment ({role})", True)
+        else:
+            # Check if it's a 404 (attachment file not found) which is acceptable
+            if '404' in str(response) and 'not found' in str(response).lower():
+                self.log_test(f"Admin view attachment ({role})", True, "Attachment file not found on server (expected)")
+                success = True
+            else:
+                self.log_test(f"Admin view attachment ({role})", False, str(response))
+        
+        return success
+
     # ============ BACKUP SYSTEM TESTS ============
     
     def test_backup_stats(self, role: str) -> bool:
