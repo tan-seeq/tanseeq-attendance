@@ -465,10 +465,75 @@ const Dashboard = () => {
     todayAttendance: []
   });
   const [loading, setLoading] = useState(true);
+  
+  // Messages state
+  const [messages, setMessages] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showMessages, setShowMessages] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState(null);
 
   useEffect(() => {
     fetchDashboardStats();
+    fetchMessages();
+    fetchUnreadCount();
+    
+    // Refresh messages every 30 seconds
+    const interval = setInterval(() => {
+      fetchMessages();
+      fetchUnreadCount();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await axios.get(`${API}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await axios.get(`${API}/messages/unread-count`);
+      setUnreadCount(response.data.unread_count);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  const markAsRead = async (messageId) => {
+    try {
+      await axios.post(`${API}/messages/${messageId}/read`);
+      fetchMessages();
+      fetchUnreadCount();
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  };
+
+  const handleMessageClick = (message) => {
+    setSelectedMessage(message);
+    setShowMessageModal(true);
+    if (!message.is_read) {
+      markAsRead(message.id);
+    }
+  };
+
+  const sendFridayWorkMessage = async () => {
+    try {
+      const response = await axios.post(`${API}/messages/friday-work`);
+      alert(`تم إرسال إعلان دوام الجمعة بنجاح!\nالتاريخ: ${response.data.friday_date}\nتم الإرسال لجميع الموظفين`);
+      fetchMessages();
+      fetchUnreadCount();
+    } catch (error) {
+      console.error('Error sending Friday work message:', error);
+      alert('حدث خطأ في إرسال الإعلان');
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
