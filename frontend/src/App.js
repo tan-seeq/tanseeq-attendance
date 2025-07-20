@@ -543,6 +543,41 @@ const Dashboard = () => {
     }
   };
 
+  // Backup functions (Super Admin only)
+  const fetchBackupStats = async () => {
+    if (user?.name !== "Hatem Mohamed Ahmed") return;
+    
+    try {
+      const response = await axios.get(`${API}/backup/stats`);
+      setBackupStats(response.data);
+    } catch (error) {
+      console.error('Error fetching backup stats:', error);
+    }
+  };
+
+  const createManualBackup = async () => {
+    if (user?.name !== "Hatem Mohamed Ahmed") return;
+    
+    setBackupLoading(true);
+    try {
+      const response = await axios.post(`${API}/backup/manual`);
+      alert(`تم إنشاء النسخة الاحتياطية بنجاح!\nالحجم: ${response.data.file_size_mb} MB\nالوقت: ${response.data.created_at}`);
+      fetchBackupStats(); // Refresh stats
+    } catch (error) {
+      console.error('Error creating manual backup:', error);
+      alert('حدث خطأ في إنشاء النسخة الاحتياطية');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  // Fetch backup stats if super admin
+  useEffect(() => {
+    if (user?.name === "Hatem Mohamed Ahmed") {
+      fetchBackupStats();
+    }
+  }, [user]);
+
   const fetchDashboardStats = async () => {
     try {
       const [employeesRes, attendanceRes, leavesRes, fieldExitsRes] = await Promise.all([
