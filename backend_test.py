@@ -4269,6 +4269,290 @@ class TanseeqAPITester:
 
     # ============ ARABIC REVIEW REQUEST SPECIFIC TESTS ============
     
+    def test_message_privacy_late_warnings(self) -> bool:
+        """Test that late warning messages are private and only visible to the intended recipient"""
+        print("\n🔒 TESTING MESSAGE PRIVACY - LATE WARNINGS")
+        print("-" * 50)
+        
+        # Test with different user roles
+        test_results = []
+        
+        for role in ['user', 'admin', 'super_admin']:
+            if role not in self.tokens:
+                continue
+                
+            # Get messages for this user
+            success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            
+            if success and isinstance(messages, list):
+                # Check that late_warning messages are only visible to the intended recipient
+                late_warning_messages = [msg for msg in messages if msg.get('message_type') == 'late_warning']
+                
+                # For regular users, they should only see their own late warnings
+                if role == 'user':
+                    user_id = self.users[role]['id']
+                    for msg in late_warning_messages:
+                        # Check if this message is intended for this user
+                        to_user_ids = msg.get('to_user_ids', [])
+                        if to_user_ids and user_id not in to_user_ids:
+                            self.log_test(f"Late warning privacy ({role})", False, 
+                                         f"User can see late warning not intended for them: {msg.get('id')}")
+                            test_results.append(False)
+                            continue
+                    
+                    self.log_test(f"Late warning privacy ({role})", True, 
+                                 f"User only sees their own late warnings: {len(late_warning_messages)}")
+                    test_results.append(True)
+                
+                # For admins, they might see late warnings but should not see them as general messages
+                else:
+                    # Check that late warnings don't appear as general messages
+                    general_messages = [msg for msg in messages if msg.get('message_type') == 'general']
+                    late_in_general = any('late' in msg.get('content', '').lower() or 
+                                         'تأخير' in msg.get('content', '') for msg in general_messages)
+                    
+                    if late_in_general:
+                        self.log_test(f"Late warning privacy ({role})", False, 
+                                     "Late warnings appearing as general messages")
+                        test_results.append(False)
+                    else:
+                        self.log_test(f"Late warning privacy ({role})", True, 
+                                     "Late warnings not appearing as general messages")
+                        test_results.append(True)
+            else:
+                self.log_test(f"Late warning privacy ({role})", False, f"Could not get messages: {messages}")
+                test_results.append(False)
+        
+        return all(test_results) if test_results else False
+
+    def test_message_privacy_absence_warnings(self) -> bool:
+        """Test that absence warning messages are private and only visible to the intended recipient"""
+        print("\n🔒 TESTING MESSAGE PRIVACY - ABSENCE WARNINGS")
+        print("-" * 50)
+        
+        # Test with different user roles
+        test_results = []
+        
+        for role in ['user', 'admin', 'super_admin']:
+            if role not in self.tokens:
+                continue
+                
+            # Get messages for this user
+            success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            
+            if success and isinstance(messages, list):
+                # Check that absence_warning messages are only visible to the intended recipient
+                absence_warning_messages = [msg for msg in messages if msg.get('message_type') == 'absence_warning']
+                
+                # For regular users, they should only see their own absence warnings
+                if role == 'user':
+                    user_id = self.users[role]['id']
+                    for msg in absence_warning_messages:
+                        # Check if this message is intended for this user
+                        to_user_ids = msg.get('to_user_ids', [])
+                        if to_user_ids and user_id not in to_user_ids:
+                            self.log_test(f"Absence warning privacy ({role})", False, 
+                                         f"User can see absence warning not intended for them: {msg.get('id')}")
+                            test_results.append(False)
+                            continue
+                    
+                    self.log_test(f"Absence warning privacy ({role})", True, 
+                                 f"User only sees their own absence warnings: {len(absence_warning_messages)}")
+                    test_results.append(True)
+                
+                # For admins, they might see absence warnings but should not see them as general messages
+                else:
+                    # Check that absence warnings don't appear as general messages
+                    general_messages = [msg for msg in messages if msg.get('message_type') == 'general']
+                    absence_in_general = any('absent' in msg.get('content', '').lower() or 
+                                           'غياب' in msg.get('content', '') for msg in general_messages)
+                    
+                    if absence_in_general:
+                        self.log_test(f"Absence warning privacy ({role})", False, 
+                                     "Absence warnings appearing as general messages")
+                        test_results.append(False)
+                    else:
+                        self.log_test(f"Absence warning privacy ({role})", True, 
+                                     "Absence warnings not appearing as general messages")
+                        test_results.append(True)
+            else:
+                self.log_test(f"Absence warning privacy ({role})", False, f"Could not get messages: {messages}")
+                test_results.append(False)
+        
+        return all(test_results) if test_results else False
+
+    def test_message_privacy_penalty_notifications(self) -> bool:
+        """Test that penalty notification messages are private and only visible to the intended recipient"""
+        print("\n🔒 TESTING MESSAGE PRIVACY - PENALTY NOTIFICATIONS")
+        print("-" * 50)
+        
+        # Test with different user roles
+        test_results = []
+        
+        for role in ['user', 'admin', 'super_admin']:
+            if role not in self.tokens:
+                continue
+                
+            # Get messages for this user
+            success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            
+            if success and isinstance(messages, list):
+                # Check that penalty_notification messages are only visible to the intended recipient
+                penalty_messages = [msg for msg in messages if msg.get('message_type') == 'penalty_notification']
+                
+                # For regular users, they should only see their own penalty notifications
+                if role == 'user':
+                    user_id = self.users[role]['id']
+                    for msg in penalty_messages:
+                        # Check if this message is intended for this user
+                        to_user_ids = msg.get('to_user_ids', [])
+                        if to_user_ids and user_id not in to_user_ids:
+                            self.log_test(f"Penalty notification privacy ({role})", False, 
+                                         f"User can see penalty notification not intended for them: {msg.get('id')}")
+                            test_results.append(False)
+                            continue
+                    
+                    self.log_test(f"Penalty notification privacy ({role})", True, 
+                                 f"User only sees their own penalty notifications: {len(penalty_messages)}")
+                    test_results.append(True)
+                
+                # For admins, they might see penalty notifications but should not see them as general messages
+                else:
+                    # Check that penalty notifications don't appear as general messages
+                    general_messages = [msg for msg in messages if msg.get('message_type') == 'general']
+                    penalty_in_general = any('penalty' in msg.get('content', '').lower() or 
+                                           'خصم' in msg.get('content', '') or 
+                                           'غرامة' in msg.get('content', '') for msg in general_messages)
+                    
+                    if penalty_in_general:
+                        self.log_test(f"Penalty notification privacy ({role})", False, 
+                                     "Penalty notifications appearing as general messages")
+                        test_results.append(False)
+                    else:
+                        self.log_test(f"Penalty notification privacy ({role})", True, 
+                                     "Penalty notifications not appearing as general messages")
+                        test_results.append(True)
+            else:
+                self.log_test(f"Penalty notification privacy ({role})", False, f"Could not get messages: {messages}")
+                test_results.append(False)
+        
+        return all(test_results) if test_results else False
+
+    def test_unread_count_privacy(self) -> bool:
+        """Test that unread count doesn't include other people's private messages"""
+        print("\n🔒 TESTING UNREAD COUNT PRIVACY")
+        print("-" * 50)
+        
+        test_results = []
+        
+        for role in ['user', 'admin', 'super_admin']:
+            if role not in self.tokens:
+                continue
+                
+            # Get unread count
+            success, response = self.make_request('GET', 'messages/unread-count', token=self.tokens[role])
+            
+            if success and 'unread_count' in response:
+                unread_count = response['unread_count']
+                
+                # Get all messages for this user
+                msg_success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+                
+                if msg_success and isinstance(messages, list):
+                    # Count unread messages manually
+                    user_id = self.users[role]['id']
+                    actual_unread = 0
+                    
+                    for msg in messages:
+                        is_read_by = msg.get('is_read_by', [])
+                        to_user_ids = msg.get('to_user_ids', [])
+                        
+                        # Message is unread if user is not in is_read_by list
+                        # and either to_user_ids is empty (general message) or user is in to_user_ids
+                        if user_id not in is_read_by:
+                            if not to_user_ids or user_id in to_user_ids:
+                                actual_unread += 1
+                    
+                    # The API count should match our manual count
+                    if unread_count == actual_unread:
+                        self.log_test(f"Unread count privacy ({role})", True, 
+                                     f"Count matches: {unread_count}")
+                        test_results.append(True)
+                    else:
+                        self.log_test(f"Unread count privacy ({role})", False, 
+                                     f"Count mismatch - API: {unread_count}, Actual: {actual_unread}")
+                        test_results.append(False)
+                else:
+                    self.log_test(f"Unread count privacy ({role})", False, "Could not get messages for verification")
+                    test_results.append(False)
+            else:
+                self.log_test(f"Unread count privacy ({role})", False, f"Could not get unread count: {response}")
+                test_results.append(False)
+        
+        return all(test_results) if test_results else False
+
+    def test_general_messages_visibility(self) -> bool:
+        """Test that general messages (like Friday announcements) are visible to everyone"""
+        print("\n📢 TESTING GENERAL MESSAGES VISIBILITY")
+        print("-" * 50)
+        
+        test_results = []
+        
+        # Get messages for each role
+        role_messages = {}
+        for role in ['user', 'admin', 'super_admin']:
+            if role not in self.tokens:
+                continue
+                
+            success, messages = self.make_request('GET', 'messages', token=self.tokens[role])
+            if success and isinstance(messages, list):
+                role_messages[role] = messages
+            else:
+                self.log_test(f"General messages visibility ({role})", False, f"Could not get messages: {messages}")
+                test_results.append(False)
+                continue
+        
+        if len(role_messages) < 2:
+            self.log_test("General messages visibility", False, "Not enough roles to compare")
+            return False
+        
+        # Find general messages (like Friday work announcements)
+        general_message_types = ['general', 'friday_work', 'announcement', 'urgent']
+        
+        for role, messages in role_messages.items():
+            general_messages = [msg for msg in messages if msg.get('message_type') in general_message_types]
+            
+            # Check that general messages have empty to_user_ids (sent to all)
+            for msg in general_messages:
+                to_user_ids = msg.get('to_user_ids', [])
+                if to_user_ids:  # If to_user_ids is not empty, it's not a general message
+                    continue
+                
+                # This is a true general message - check if other roles can see it too
+                msg_id = msg.get('id')
+                found_in_other_roles = 0
+                
+                for other_role, other_messages in role_messages.items():
+                    if other_role == role:
+                        continue
+                    
+                    if any(other_msg.get('id') == msg_id for other_msg in other_messages):
+                        found_in_other_roles += 1
+                
+                # General message should be visible to all roles
+                if found_in_other_roles == len(role_messages) - 1:
+                    self.log_test(f"General message visibility ({role})", True, 
+                                 f"Message {msg_id[:8]}... visible to all roles")
+                    test_results.append(True)
+                else:
+                    self.log_test(f"General message visibility ({role})", False, 
+                                 f"Message {msg_id[:8]}... not visible to all roles")
+                    test_results.append(False)
+                
+                break  # Test one general message per role
+        
+        return all(test_results) if test_results else True  # Return True if no general messages to test
+
     def test_late_warning_excludes_admin_roles(self) -> bool:
         """Test that late warning notifications exclude admin and super_admin roles"""
         print("\n🔍 TESTING LATE WARNING ROLE EXCLUSIONS")
