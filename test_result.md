@@ -101,6 +101,39 @@
 user_problem_statement: "ممكن نضيف في الزيارات و الأجازات مين الي وافق علي الطلب وكمان لو في أي ملحوظة تم وضعها علي الطلب من قبل اللأدمن أو السوبر أدمن أو المديرين علي الحسابات وأيضا و بالزيارات الخارجية خلية يعمل طلب الخروج ويبقي في زر لإضافة وقت الذهاب و زر أخر للعودة للمكتب علي شان الوقت يبقي سليم بخصوص الذهاب للزيارة الخارجية ووقت العودة الفعلي علي شان انا ممكن أكتب رجوع الساعة 5 مثلا و الطريق يكون مذدحم و أرجع 6 فدة بيبين لي مدي مصداقية العمل من قبل الموظف فهمتني. وأيضا يوجد ببعض التقارير و تقايري الأكسب بدوناسم الشركة وشرح تفاصيل التقارير وشكل التقرير الخاص بالرواتب عايز أخلية بنفس طريقة و الوان تقريري الحضور و الإنصراف"
 
 backend:
+  - task: "Automated notification and penalty system implementation"
+    implemented: true
+    working: false
+    file: "automation_scheduler.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created automation_scheduler.py with scheduled tasks for late warnings (9:30 AM), absence warnings (11:00 AM), and monthly penalty application (2:00 AM on 1st of month). Uses aiohttp to call existing manual notification endpoints automatically."
+  - task: "Super Admin request creation on behalf of employees"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /admin/create-leave-request and /admin/create-field-exit-request endpoints. Allow super admin to create auto-approved requests for employees with file upload support and automatic notifications."
+  - task: "Admin attachment viewing capability"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /admin/view-attachment/{request_type}/{request_id} and /admin/attachments-list endpoints. Support base64 encoded file viewing for leave attachments with proper role-based access control."
   - task: "Fix API endpoints for admin management views"
     implemented: true
     working: true
