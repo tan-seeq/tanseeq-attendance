@@ -6035,6 +6035,70 @@ class TanseeqAPITester:
         
         return test_passed
 
+    def run_enhanced_payroll_tests(self):
+        """Run specific tests for enhanced payroll report system as requested in review"""
+        print("💰 STARTING ENHANCED PAYROLL REPORT SYSTEM TESTING")
+        print("Testing enhanced payroll calculation and export for 2025-07")
+        print("=" * 60)
+        
+        # Test root endpoint first
+        if not self.test_root_endpoint():
+            print("❌ Root endpoint failed - stopping tests")
+            return False
+        
+        # Login with super admin credentials as specified in review request
+        if not self.test_login('super_admin'):
+            print("❌ Super admin login failed - stopping tests")
+            return False
+        
+        print(f"\n🔍 Testing with super admin credentials: {self.test_users['super_admin']['email']}")
+        
+        # Run the specific enhanced payroll tests
+        test_results = []
+        
+        # 1. Enhanced Payroll Calculation Test
+        print("\n1️⃣ ENHANCED PAYROLL CALCULATION TEST:")
+        print("   - Testing GET /api/payroll/calculate/2025-07")
+        print("   - Verifying NEW deduction fields: late_deductions, absence_deductions, total_deductions, final_salary")
+        print("   - Checking complex deduction rules (15 mins x 4 times free, etc.)")
+        print("   - Verifying English translation of employee names")
+        test_results.append(self.test_enhanced_payroll_calculation_2025_07('super_admin'))
+        
+        # 2. Enhanced Excel Export Test
+        print("\n2️⃣ ENHANCED EXCEL EXPORT TEST:")
+        print("   - Testing GET /api/payroll/export/2025-07?format=excel")
+        print("   - Verifying file generation and content structure")
+        print("   - Checking new columns: Employee Name, Basic Salary, Late Deductions, Absence Deductions, Total Deductions")
+        print("   - Confirming Arabic/English bilingual headers")
+        test_results.append(self.test_enhanced_payroll_excel_export_2025_07('super_admin'))
+        
+        # 3. Enhanced PDF Export Test
+        print("\n3️⃣ ENHANCED PDF EXPORT TEST:")
+        print("   - Testing GET /api/payroll/export/2025-07?format=pdf")
+        print("   - Verifying enhanced styling and layout")
+        print("   - Checking for summary section with totals")
+        print("   - Confirming professional design improvements")
+        test_results.append(self.test_enhanced_payroll_pdf_export_2025_07('super_admin'))
+        
+        # Summary
+        passed_tests = sum(test_results)
+        total_tests = len(test_results)
+        
+        print(f"\n📊 ENHANCED PAYROLL TESTING SUMMARY:")
+        print(f"   ✅ Passed: {passed_tests}/{total_tests} tests")
+        print(f"   📈 Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+        
+        if passed_tests == total_tests:
+            print("   🎉 ALL ENHANCED PAYROLL TESTS PASSED!")
+            print("   💼 Enhanced 10-column layout vs old 7-column verified")
+            print("   🎨 Professional bilingual design confirmed")
+            print("   📋 Detailed deduction breakdown working")
+            print("   📊 Summary statistics functionality verified")
+        else:
+            print(f"   ⚠️  {total_tests - passed_tests} test(s) failed")
+        
+        return passed_tests == total_tests
+
     def run_message_privacy_tests(self):
         """Run specific tests for message privacy as requested in Arabic review"""
         print("🔒 STARTING MESSAGE PRIVACY TESTING")
