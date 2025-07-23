@@ -4599,16 +4599,35 @@ class TanseeqAPITester:
             
             # NEW ARABIC REVIEW REQUEST FEATURES FOR SUPER ADMIN
             print(f"\n🆕 Testing New Arabic Review Request Features (SUPER_ADMIN):")
+            
+            # Overtime Reports Testing
+            print(f"\n⏰ Testing Overtime Reports System (SUPER_ADMIN):")
+            self.test_overtime_report('super_admin')
+            self.test_overtime_report_excel_export('super_admin')
+            self.test_overtime_report_pdf_export('super_admin')
+            
+            # Enhanced Backup System Testing
+            print(f"\n💾 Testing Enhanced Backup System (SUPER_ADMIN):")
             self.test_backup_create_download('super_admin')
             self.test_backup_list_files('super_admin')
-            self.test_backup_download_file('super_admin')
+            self.test_backup_download('super_admin')
             self.test_backup_restore('super_admin')
-            self.test_attendance_daily_qr('super_admin')
-            self.test_attendance_check_in_with_qr('super_admin')
-            self.test_attendance_check_out_with_qr('super_admin')
-            self.test_qr_admin_exclusion('super_admin')
-            self.test_payroll_calculate_with_deductions('super_admin')
-            self.test_payroll_export_with_deductions_column('super_admin')
+            
+            # Enhanced Payroll with Deductions Testing
+            print(f"\n💰 Testing Enhanced Payroll with Deductions (SUPER_ADMIN):")
+            self.test_enhanced_payroll_with_deductions('super_admin')
+            
+            # Legacy tests (if they exist)
+            if hasattr(self, 'test_backup_download_file'):
+                self.test_backup_download_file('super_admin')
+            if hasattr(self, 'test_attendance_daily_qr'):
+                self.test_attendance_daily_qr('super_admin')
+                self.test_attendance_check_in_with_qr('super_admin')
+                self.test_attendance_check_out_with_qr('super_admin')
+                self.test_qr_admin_exclusion('super_admin')
+            if hasattr(self, 'test_payroll_calculate_with_deductions'):
+                self.test_payroll_calculate_with_deductions('super_admin')
+                self.test_payroll_export_with_deductions_column('super_admin')
             
             self.test_logout('super_admin')
         else:
