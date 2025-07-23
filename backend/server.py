@@ -4592,18 +4592,19 @@ async def export_overtime_report(month: str, format: str = "excel", current_user
         # Data rows
         row_num = 5
         for record in records:
-            row_data = [
-                record["employee_name"],
-                record["date"],
-                record["check_in_time"],
-                record["check_out_time"],
-                f"{record['total_working_hours']:.2f}h",
-                f"{record['standard_hours']:.1f}h",
-                f"{record['early_overtime_hours']:.2f}h",
-                f"{record['late_overtime_hours']:.2f}h",
-                f"{record['total_overtime_hours']:.2f}h",
-                record["overtime_type"]
-            ]
+            for detail in record["overtime_details"]:
+                row_data = [
+                    record["employee_name"],
+                    detail["date"],
+                    detail["check_in_time"],
+                    detail["check_out_time"],
+                    f"{detail['total_working_hours']:.2f}h",
+                    f"{detail['standard_hours']:.1f}h",
+                    f"{detail['early_overtime_hours']:.2f}h",
+                    f"{detail['late_overtime_hours']:.2f}h",
+                    f"{detail['total_overtime_hours']:.2f}h",
+                    detail["overtime_type"]
+                ]
             
             for col, value in enumerate(row_data, 1):
                 cell = ws.cell(row=row_num, column=col)
