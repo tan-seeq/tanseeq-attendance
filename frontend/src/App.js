@@ -21,6 +21,7 @@ import {
   UserGroupIcon,
   ExclamationCircleIcon,
   DocumentArrowDownIcon,
+  DocumentArrowUpIcon,
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   BellIcon,
