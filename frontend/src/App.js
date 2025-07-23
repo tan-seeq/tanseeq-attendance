@@ -37,7 +37,7 @@ import {
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const API = BACKEND_URL;
 
 // Auth Context
 const AuthContext = createContext();
