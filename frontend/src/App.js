@@ -2810,6 +2810,20 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/backup-management" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <BackupManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/overtime-report" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <OvertimeReport />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/admin-request-creation" element={
               <ProtectedRoute requiredRole="super_admin">
                 <Layout>
