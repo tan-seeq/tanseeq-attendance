@@ -364,6 +364,7 @@ const Layout = ({ children }) => {
       { name: t('leaves'), href: '/leave-management', icon: CalendarIcon },
       { name: t('field_exits'), href: '/field-exit-management', icon: DocumentTextIcon },
       { name: t('reports'), href: '/reports', icon: DocumentTextIcon },
+      { name: 'تقرير العمل الإضافي', href: '/overtime-report', icon: ClockIcon },
       { name: t('payroll'), href: '/payroll', icon: CurrencyDollarIcon },
       { name: 'عرض المرفقات', href: '/attachment-viewer', icon: FolderIcon },
     ] : []),
