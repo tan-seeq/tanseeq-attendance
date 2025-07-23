@@ -2788,6 +2788,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/overtime-report" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <OvertimeReport />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/activity-logs" element={
               <ProtectedRoute requiredRole="super_admin">
                 <Layout>
