@@ -1149,9 +1149,10 @@ class TanseeqAPITester:
         
         if expected_status == 200 and success:
             # Check response structure for overtime reports
-            if isinstance(response, list):
-                if response:
-                    first_record = response[0]
+            if isinstance(response, dict) and 'overtime_records' in response:
+                overtime_records = response['overtime_records']
+                if overtime_records:
+                    first_record = overtime_records[0]
                     # Check for required fields from review request
                     has_user_name_en = 'user_name_en' in first_record
                     has_overtime_details = 'overtime_details' in first_record
@@ -1177,7 +1178,7 @@ class TanseeqAPITester:
                     test_passed = True
             else:
                 test_passed = False
-                self.log_test(f"Overtime reports system ({role})", False, "Response is not a list")
+                self.log_test(f"Overtime reports system ({role})", False, "Response structure invalid - missing overtime_records")
         else:
             test_passed = success
             self.log_test(f"Overtime reports system ({role})", success, str(response) if not success else "")
