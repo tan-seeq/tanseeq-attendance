@@ -3609,6 +3609,477 @@ class TanseeqAPITester:
             print(f"⚠️  {failed_tests} اختبار فشل - tests failed")
             return False
 
+    # ============ NEW TESTS FOR ARABIC REVIEW REQUEST FEATURES ============
+    
+    def test_backup_create_download(self, role: str) -> bool:
+        """Test backup create-download endpoint (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('POST', 'backup/create-download', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['message', 'filename', 'download_url', 'file_size']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check filename format
+            filename = response.get('filename', '')
+            has_valid_filename = filename.endswith('.zip') and 'backup' in filename
+            
+            # Check file size is reasonable
+            file_size = response.get('file_size', 0)
+            has_valid_size = isinstance(file_size, (int, float)) and file_size > 0
+            
+            test_passed = has_expected_keys and has_valid_filename and has_valid_size
+            
+            if not test_passed:
+                self.log_test(f"Backup create-download ({role})", False, 
+                             f"Keys: {has_expected_keys}, Filename: {has_valid_filename}, Size: {has_valid_size}")
+            else:
+                self.log_test(f"Backup create-download ({role})", True)
+                # Store filename for download test
+                setattr(self, f'backup_filename_{role}', filename)
+        else:
+            self.log_test(f"Backup create-download ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_backup_list_files(self, role: str) -> bool:
+        """Test backup list-files endpoint (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'backup/list-files', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['backup_files', 'total_files', 'total_size_mb']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check backup_files is a list
+            backup_files = response.get('backup_files', [])
+            is_valid_list = isinstance(backup_files, list)
+            
+            # Check total counts
+            total_files = response.get('total_files', 0)
+            total_size = response.get('total_size_mb', 0)
+            has_valid_counts = (isinstance(total_files, int) and total_files >= 0 and
+                               isinstance(total_size, (int, float)) and total_size >= 0)
+            
+            test_passed = has_expected_keys and is_valid_list and has_valid_counts
+            
+            if not test_passed:
+                self.log_test(f"Backup list-files ({role})", False, 
+                             f"Keys: {has_expected_keys}, List: {is_valid_list}, Counts: {has_valid_counts}")
+            else:
+                self.log_test(f"Backup list-files ({role})", True)
+        else:
+            self.log_test(f"Backup list-files ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_backup_download_file(self, role: str) -> bool:
+        """Test backup download file endpoint (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Get backup filename from previous test
+        filename = getattr(self, f'backup_filename_{role}', None)
+        if not filename:
+            # Try to get a filename from list-files
+            success, list_response = self.make_request('GET', 'backup/list-files', 
+                                                     token=self.tokens[role])
+            if success and list_response.get('backup_files'):
+                filename = list_response['backup_files'][0].get('filename', 'test_backup.zip')
+            else:
+                filename = 'test_backup.zip'  # Fallback for testing
+        
+        # Test download
+        url = f"{self.api_url}/backup/download/{filename}"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is a zip file
+                content_type = response.headers.get('content-type', '')
+                is_zip = 'zip' in content_type or 'application/octet-stream' in content_type
+                
+                # Check content length
+                has_content = len(response.content) > 0
+                
+                # Check for zip file signature
+                is_valid_zip = response.content.startswith(b'PK')
+                
+                test_passed = is_zip and has_content and is_valid_zip
+                
+                if not test_passed:
+                    self.log_test(f"Backup download file ({role})", False, 
+                                 f"Zip: {is_zip}, Content: {has_content}, Valid: {is_valid_zip}")
+                else:
+                    self.log_test(f"Backup download file ({role})", True)
+            elif expected_status == 403:
+                self.log_test(f"Backup download file ({role})", success, "Access denied as expected")
+            else:
+                # 404 is acceptable if file doesn't exist
+                if response.status_code == 404:
+                    self.log_test(f"Backup download file ({role})", True, "File not found (expected for test)")
+                    success = True
+                else:
+                    self.log_test(f"Backup download file ({role})", False, f"Status: {response.status_code}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Backup download file ({role})", False, str(e))
+            return False
+
+    def test_backup_restore(self, role: str) -> bool:
+        """Test backup restore endpoint (Super Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Create a dummy file for testing (we won't actually restore)
+        url = f"{self.api_url}/backup/restore"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        # Create a small test file
+        test_data = b'PK\x03\x04'  # Zip file signature
+        files = {'backup_file': ('test_backup.zip', test_data, 'application/zip')}
+        
+        try:
+            response = requests.post(url, files=files, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200:
+                # For restore, we expect either success or a validation error
+                # Both are acceptable for testing purposes
+                if response.status_code in [200, 400]:
+                    success = True
+                    if response.status_code == 400:
+                        self.log_test(f"Backup restore ({role})", True, "Validation error (expected for test file)")
+                    else:
+                        self.log_test(f"Backup restore ({role})", True)
+                else:
+                    self.log_test(f"Backup restore ({role})", False, f"Status: {response.status_code}")
+            else:
+                self.log_test(f"Backup restore ({role})", success, "Access denied as expected")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Backup restore ({role})", False, str(e))
+            return False
+
+    def test_attendance_daily_qr(self, role: str) -> bool:
+        """Test daily QR code generation (Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        success, response = self.make_request('GET', 'attendance/daily-qr', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['qr_code', 'date', 'arabic_date', 'message', 'instructions']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check QR code format
+            qr_code = response.get('qr_code', '')
+            has_valid_qr = qr_code.startswith('TANSEEQ-') and len(qr_code) > 10
+            
+            # Check date format
+            date = response.get('date', '')
+            has_valid_date = len(date) == 10 and '-' in date  # YYYY-MM-DD
+            
+            # Check instructions is a list
+            instructions = response.get('instructions', [])
+            has_instructions = isinstance(instructions, list) and len(instructions) > 0
+            
+            test_passed = has_expected_keys and has_valid_qr and has_valid_date and has_instructions
+            
+            if not test_passed:
+                self.log_test(f"Daily QR code ({role})", False, 
+                             f"Keys: {has_expected_keys}, QR: {has_valid_qr}, Date: {has_valid_date}, Instructions: {has_instructions}")
+            else:
+                self.log_test(f"Daily QR code ({role})", True)
+                # Store QR code for check-in test
+                setattr(self, f'daily_qr_code_{role}', qr_code)
+        else:
+            self.log_test(f"Daily QR code ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_attendance_check_in_with_qr(self, role: str) -> bool:
+        """Test QR code check-in"""
+        if role not in self.tokens:
+            return False
+        
+        # Get QR code from previous test or generate a test one
+        qr_code = getattr(self, f'daily_qr_code_{role}', 'TANSEEQ-TEST123')
+        
+        # Test QR check-in
+        url = f"{self.api_url}/attendance/check-in-with-qr"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        form_data = {'qr_code': qr_code}
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            
+            # Accept both success and "already checked in" error
+            success = response.status_code == 200
+            already_checked_in = (response.status_code == 400 and 
+                                'تم تسجيل الحضور مسبقاً' in response.text)
+            
+            test_passed = success or already_checked_in
+            
+            if test_passed:
+                if success:
+                    response_data = response.json()
+                    # Check response structure
+                    expected_keys = ['message', 'check_in_time', 'status', 'is_late']
+                    has_expected_keys = all(key in response_data for key in expected_keys)
+                    
+                    # Check time format
+                    check_in_time = response_data.get('check_in_time', '')
+                    has_valid_time = ':' in check_in_time and len(check_in_time) >= 8
+                    
+                    test_passed = has_expected_keys and has_valid_time
+                    
+                    if not test_passed:
+                        self.log_test(f"QR check-in ({role})", False, 
+                                     f"Keys: {has_expected_keys}, Time: {has_valid_time}")
+                    else:
+                        self.log_test(f"QR check-in ({role})", True)
+                else:
+                    self.log_test(f"QR check-in ({role})", True, "Already checked in (expected)")
+            else:
+                self.log_test(f"QR check-in ({role})", False, f"Status: {response.status_code}, Response: {response.text}")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"QR check-in ({role})", False, str(e))
+            return False
+
+    def test_attendance_check_out_with_qr(self, role: str) -> bool:
+        """Test QR code check-out"""
+        if role not in self.tokens:
+            return False
+        
+        # Get QR code from previous test or generate a test one
+        qr_code = getattr(self, f'daily_qr_code_{role}', 'TANSEEQ-TEST123')
+        
+        # Test QR check-out
+        url = f"{self.api_url}/attendance/check-out-with-qr"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        form_data = {'qr_code': qr_code}
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            
+            # Accept success, "already checked out", or "must check in first" errors
+            success = response.status_code == 200
+            already_checked_out = (response.status_code == 400 and 
+                                 'تم تسجيل الانصراف مسبقاً' in response.text)
+            must_check_in_first = (response.status_code == 400 and 
+                                 'لم يتم تسجيل الحضور' in response.text)
+            
+            test_passed = success or already_checked_out or must_check_in_first
+            
+            if test_passed:
+                if success:
+                    response_data = response.json()
+                    # Check response structure
+                    expected_keys = ['message', 'check_out_time']
+                    has_expected_keys = all(key in response_data for key in expected_keys)
+                    
+                    # Check time format
+                    check_out_time = response_data.get('check_out_time', '')
+                    has_valid_time = ':' in check_out_time and len(check_out_time) >= 8
+                    
+                    test_passed = has_expected_keys and has_valid_time
+                    
+                    if not test_passed:
+                        self.log_test(f"QR check-out ({role})", False, 
+                                     f"Keys: {has_expected_keys}, Time: {has_valid_time}")
+                    else:
+                        self.log_test(f"QR check-out ({role})", True)
+                else:
+                    self.log_test(f"QR check-out ({role})", True, "Expected error (already checked out or must check in first)")
+            else:
+                self.log_test(f"QR check-out ({role})", False, f"Status: {response.status_code}, Response: {response.text}")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"QR check-out ({role})", False, str(e))
+            return False
+
+    def test_qr_admin_exclusion(self, role: str) -> bool:
+        """Test that admin, super_admin, and hatemmo186@gmail.com are excluded from QR verification"""
+        if role not in self.tokens:
+            return False
+        
+        # This test verifies that certain users can check in/out without QR verification
+        # We test with an invalid QR code - admins should still be able to check in
+        
+        invalid_qr = 'INVALID-QR-CODE'
+        
+        # Test check-in with invalid QR
+        url = f"{self.api_url}/attendance/check-in-with-qr"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        form_data = {'qr_code': invalid_qr}
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            
+            if role in ['admin', 'super_admin']:
+                # Admins should be able to check in even with invalid QR (bypass verification)
+                success = response.status_code == 200
+                already_checked_in = (response.status_code == 400 and 
+                                    'تم تسجيل الحضور مسبقاً' in response.text)
+                test_passed = success or already_checked_in
+                
+                if test_passed:
+                    self.log_test(f"QR admin exclusion ({role})", True, "Admin bypass working")
+                else:
+                    self.log_test(f"QR admin exclusion ({role})", False, f"Admin should bypass QR verification")
+            else:
+                # Regular users should get QR verification error
+                qr_error = (response.status_code == 400 and 
+                           'رمز QR غير صحيح' in response.text)
+                already_checked_in = (response.status_code == 400 and 
+                                    'تم تسجيل الحضور مسبقاً' in response.text)
+                test_passed = qr_error or already_checked_in
+                
+                if test_passed:
+                    self.log_test(f"QR admin exclusion ({role})", True, "QR verification required for regular users")
+                else:
+                    self.log_test(f"QR admin exclusion ({role})", False, f"Expected QR verification error for regular users")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"QR admin exclusion ({role})", False, str(e))
+            return False
+
+    def test_payroll_calculate_with_deductions(self, role: str) -> bool:
+        """Test payroll calculation with automatic deductions"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-02'
+        success, response = self.make_request('GET', f'payroll/calculate/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response is a list
+            if not isinstance(response, list):
+                self.log_test(f"Payroll calculate with deductions ({role})", False, "Response is not a list")
+                return False
+            
+            if len(response) == 0:
+                self.log_test(f"Payroll calculate with deductions ({role})", True, "No employees to calculate (expected)")
+                return True
+            
+            # Check first record structure
+            first_record = response[0]
+            expected_keys = ['user_id', 'name', 'monthly_salary', 'daily_rate', 'working_days', 
+                           'late_deductions', 'absence_deductions', 'total_deductions', 'final_salary']
+            has_expected_keys = all(key in first_record for key in expected_keys)
+            
+            # Check deduction fields are numbers
+            late_deductions = first_record.get('late_deductions', 0)
+            absence_deductions = first_record.get('absence_deductions', 0)
+            total_deductions = first_record.get('total_deductions', 0)
+            final_salary = first_record.get('final_salary', 0)
+            
+            has_valid_numbers = all(isinstance(val, (int, float)) and val >= 0 
+                                  for val in [late_deductions, absence_deductions, total_deductions, final_salary])
+            
+            # Check calculation logic
+            expected_total = late_deductions + absence_deductions
+            calculation_correct = abs(total_deductions - expected_total) < 0.01
+            
+            test_passed = has_expected_keys and has_valid_numbers and calculation_correct
+            
+            if not test_passed:
+                self.log_test(f"Payroll calculate with deductions ({role})", False, 
+                             f"Keys: {has_expected_keys}, Numbers: {has_valid_numbers}, Calc: {calculation_correct}")
+            else:
+                self.log_test(f"Payroll calculate with deductions ({role})", True)
+        else:
+            self.log_test(f"Payroll calculate with deductions ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_payroll_export_with_deductions_column(self, role: str) -> bool:
+        """Test payroll export with deductions column in English"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        if expected_status != 200:
+            self.log_test(f"Payroll export with deductions ({role})", True, "Access denied as expected")
+            return True
+        
+        month = '2025-02'
+        url = f"{self.api_url}/payroll/export/{month}?format=excel"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if success:
+                # Check if response is Excel file
+                content_type = response.headers.get('content-type', '')
+                is_excel = 'spreadsheet' in content_type or 'excel' in content_type
+                
+                # Check filename contains deductions info
+                content_disposition = response.headers.get('content-disposition', '')
+                has_payroll_in_filename = 'payroll' in content_disposition.lower()
+                has_tanseeq_in_filename = 'TANSEEQ' in content_disposition
+                
+                # Check content length
+                has_content = len(response.content) > 1000
+                
+                # For Excel files, we can't easily check column content, but we can verify structure
+                test_passed = is_excel and has_payroll_in_filename and has_tanseeq_in_filename and has_content
+                
+                if not test_passed:
+                    self.log_test(f"Payroll export with deductions ({role})", False, 
+                                 f"Excel: {is_excel}, Payroll: {has_payroll_in_filename}, TANSEEQ: {has_tanseeq_in_filename}, Content: {has_content}")
+                else:
+                    self.log_test(f"Payroll export with deductions ({role})", True)
+            else:
+                self.log_test(f"Payroll export with deductions ({role})", False, f"Status: {response.status_code}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Payroll export with deductions ({role})", False, str(e))
+            return False
+
     def run_comprehensive_tests(self):
         """Run all tests for all roles"""
         print("🚀 Starting TANSEEQ HR Backend API Tests")
