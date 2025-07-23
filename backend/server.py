@@ -2355,15 +2355,19 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
 
 @api_router.get("/payroll/calculate/{month}")
 async def calculate_payroll(month: str, current_user: User = Depends(get_admin_user)):
-    """Calculate payroll for a specific month (Admin only)"""
+    """Calculate payroll for a specific month with automatic deductions (Admin only)"""
     try:
         # Validate month format (YYYY-MM)
         datetime.strptime(month, "%Y-%m")
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid month format. Use YYYY-MM")
     
-    # Get all active users
-    users = await db.users.find({"is_active": True}).to_list(1000)
+    # Get all active users (exclude admin and super_admin)
+    users = await db.users.find({
+        "is_active": True,
+        "role": "user"  # Only regular employees get payroll
+    }).to_list(1000)
+    
     payroll_data = []
     
     for user in users:
@@ -2378,27 +2382,143 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
         total_hours = sum([a.get("working_hours", 0) for a in attendance_records if a.get("working_hours")])
         late_days = len([a for a in attendance_records if a.get("is_late")])
         
-        # Calculate salary based on daily rate
+        # Calculate basic salary based on daily rate
         calculated_salary = working_days * user["daily_rate"]
+        basic_salary = min(calculated_salary, user["monthly_salary"])
         
-        # Apply monthly salary cap
-        final_salary = min(calculated_salary, user["monthly_salary"])
+        # Calculate automatic deductions
+        total_deductions = 0.0
+        deduction_details = []
+        
+        # 1. Get late penalties for this month
+        late_penalties = await db.late_penalties.find({
+            "user_id": user["id"],
+            "month": month,
+            "status": "applied"
+        }).to_list(100)
+        
+        late_penalty_amount = sum(p.get("penalty_amount", 0) for p in late_penalties)
+        if late_penalty_amount > 0:
+            total_deductions += late_penalty_amount
+            deduction_details.append(f"Late Penalty: AED {late_penalty_amount:.2f}")
+        
+        # 2. Calculate absence deductions (2 days salary for each unauthorized absence)
+        total_days_in_month = 30  # Simplified
+        expected_working_days = total_days_in_month  # Assuming all days are working days
+        
+        # Get leaves for this month
+        month_start = f"{month}-01"
+        month_end = f"{month}-31"
+        leaves = await db.leaves.find({
+            "user_id": user["id"],
+            "status": "approved",
+            "start_date": {"$gte": month_start, "$lte": month_end}
+        }).to_list(100)
+        
+        approved_leave_days = sum(l.get("days_count", 0) for l in leaves)
+        
+        # Get field exits for this month  
+        field_exits = await db.field_exits.find({
+            "user_id": user["id"],
+            "status": "approved",
+            "date": {"$regex": f"^{month}"}
+        }).to_list(100)
+        
+        approved_field_exit_days = len(field_exits)
+        
+        # Calculate unauthorized absences
+        actual_absences = expected_working_days - working_days - approved_leave_days - approved_field_exit_days
+        if actual_absences > 0:
+            # Each unauthorized absence = 2 days salary deduction
+            absence_penalty = actual_absences * 2 * user["daily_rate"]
+            total_deductions += absence_penalty
+            deduction_details.append(f"Absence Penalty ({actual_absences} days × 2): AED {absence_penalty:.2f}")
+        
+        # Calculate final salary after deductions
+        final_salary = basic_salary - total_deductions
+        final_salary = max(final_salary, 0)  # Cannot be negative
+        
+        # Translation for English reports
+        english_name = translate_to_english(user["name"])
+        english_position = translate_to_english(user["position"])
         
         payroll_data.append({
             "user_id": user["id"],
-            "name": user["name"],
-            "position": user["position"],
+            "name": english_name,  # English translation
+            "arabic_name": user["name"],  # Keep original Arabic
+            "position": english_position,  # English translation
+            "arabic_position": user["position"],  # Keep original Arabic
             "monthly_salary": user["monthly_salary"],
             "daily_rate": user["daily_rate"],
             "working_days": working_days,
             "total_hours": round(total_hours, 2),
             "late_days": late_days,
-            "calculated_salary": round(calculated_salary, 2),
+            "approved_leaves": approved_leave_days,
+            "approved_field_exits": approved_field_exit_days,
+            "unauthorized_absences": max(actual_absences, 0),
+            "basic_salary": round(basic_salary, 2),
+            "total_deductions": round(total_deductions, 2),
+            "deduction_details": deduction_details,
             "final_salary": round(final_salary, 2),
             "month": month
         })
     
     return payroll_data
+
+def translate_to_english(arabic_text: str) -> str:
+    """Simple translation function for common Arabic names and positions"""
+    # Common Arabic to English translations
+    translations = {
+        # Names
+        "محمد": "Mohammed",
+        "أحمد": "Ahmed", 
+        "علي": "Ali",
+        "حسن": "Hassan",
+        "حسين": "Hussein",
+        "عبدالله": "Abdullah",
+        "عبدالرحمن": "Abdulrahman",
+        "خالد": "Khaled",
+        "محمود": "Mahmoud",
+        "حاتم": "Hatem",
+        "طارق": "Tarek",
+        "جهاد": "Jihad",
+        "سامي": "Sami",
+        "عمر": "Omar",
+        "يوسف": "Youssef",
+        
+        # Positions
+        "محاسب": "Accountant",
+        "مدير": "Manager",
+        "موظف": "Employee",
+        "سكرتير": "Secretary",
+        "مساعد": "Assistant",
+        "مستشار": "Consultant",
+        "محاسب ضرائب": "Tax Accountant",
+        "مدقق": "Auditor",
+        "مطور": "Developer",
+        "مصمم": "Designer",
+        "مهندس": "Engineer",
+        "مسؤول": "Officer",
+        
+        # Common words
+        "مالي": "Financial",
+        "إداري": "Administrative", 
+        "تقني": "Technical",
+        "خدمة عملاء": "Customer Service",
+        "موارد بشرية": "Human Resources",
+        "مبيعات": "Sales",
+        "تسويق": "Marketing"
+    }
+    
+    # Try to translate word by word
+    words = arabic_text.split()
+    translated_words = []
+    
+    for word in words:
+        translated_word = translations.get(word.strip(), word)
+        translated_words.append(translated_word)
+    
+    return " ".join(translated_words)
 
 @api_router.get("/payroll/export/{month}")
 async def export_payroll(month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
