@@ -4231,6 +4231,19 @@ class TanseeqAPITester:
             self.test_notifications_absence_warning('super_admin')
             self.test_notifications_penalty_applied('super_admin')
             
+            # NEW ARABIC REVIEW REQUEST FEATURES FOR SUPER ADMIN
+            print(f"\n🆕 Testing New Arabic Review Request Features (SUPER_ADMIN):")
+            self.test_backup_create_download('super_admin')
+            self.test_backup_list_files('super_admin')
+            self.test_backup_download_file('super_admin')
+            self.test_backup_restore('super_admin')
+            self.test_attendance_daily_qr('super_admin')
+            self.test_attendance_check_in_with_qr('super_admin')
+            self.test_attendance_check_out_with_qr('super_admin')
+            self.test_qr_admin_exclusion('super_admin')
+            self.test_payroll_calculate_with_deductions('super_admin')
+            self.test_payroll_export_with_deductions_column('super_admin')
+            
             self.test_logout('super_admin')
         else:
             print("⚠️  Super admin login failed - password may need to be reset by admin")
