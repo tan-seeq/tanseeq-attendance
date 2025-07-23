@@ -4532,8 +4532,25 @@ class TanseeqAPITester:
             
             # NEW: Enhanced Payroll System with Deductions Tests (Arabic review request)
             print(f"\n💰 Testing Enhanced Payroll System with Deductions ({role.upper()}):")
-            self.test_payroll_calculate_with_deductions(role)
-            self.test_payroll_export_with_deductions_column(role)
+            self.test_enhanced_payroll_with_deductions(role)
+            
+            # NEW: Overtime Reports Tests (Arabic review request)
+            print(f"\n⏰ Testing Overtime Reports System ({role.upper()}):")
+            self.test_overtime_report(role)
+            self.test_overtime_report_excel_export(role)
+            self.test_overtime_report_pdf_export(role)
+            
+            # NEW: Enhanced Backup System Tests (Arabic review request)
+            print(f"\n💾 Testing Enhanced Backup System ({role.upper()}):")
+            self.test_backup_create_download(role)
+            self.test_backup_list_files(role)
+            self.test_backup_download(role)
+            self.test_backup_restore(role)
+            
+            # Legacy tests (if they exist)
+            if hasattr(self, 'test_payroll_calculate_with_deductions'):
+                self.test_payroll_calculate_with_deductions(role)
+                self.test_payroll_export_with_deductions_column(role)
             
             # NEW: Late Penalty System Tests (Arabic review request)
             print(f"\n⏰ Testing Late Penalty System ({role.upper()}):")
