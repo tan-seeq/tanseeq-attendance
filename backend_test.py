@@ -4151,10 +4151,23 @@ class TanseeqAPITester:
             self.test_leaves_all_with_approved_by_and_notes(role)
             
             # NEW: Backup System Tests (Arabic review request)
-            print(f"\n💾 Testing Backup System ({role.upper()}):")
-            self.test_backup_stats(role)
-            self.test_manual_backup_creation(role)
-            self.test_backup_security_access_control(role)
+            print(f"\n💾 Testing Enhanced Backup System ({role.upper()}):")
+            self.test_backup_create_download(role)
+            self.test_backup_list_files(role)
+            self.test_backup_download_file(role)
+            self.test_backup_restore(role)
+            
+            # NEW: QR Code Attendance System Tests (Arabic review request)
+            print(f"\n📱 Testing QR Code Attendance System ({role.upper()}):")
+            self.test_attendance_daily_qr(role)
+            self.test_attendance_check_in_with_qr(role)
+            self.test_attendance_check_out_with_qr(role)
+            self.test_qr_admin_exclusion(role)
+            
+            # NEW: Enhanced Payroll System with Deductions Tests (Arabic review request)
+            print(f"\n💰 Testing Enhanced Payroll System with Deductions ({role.upper()}):")
+            self.test_payroll_calculate_with_deductions(role)
+            self.test_payroll_export_with_deductions_column(role)
             
             # NEW: Late Penalty System Tests (Arabic review request)
             print(f"\n⏰ Testing Late Penalty System ({role.upper()}):")
