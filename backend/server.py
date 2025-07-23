@@ -4496,10 +4496,7 @@ async def get_overtime_report(month: str, current_user: User = Depends(get_admin
             
             # Only include records with overtime
             if total_overtime > 0.1:  # More than 6 minutes
-                overtime_data.append({
-                    "employee_id": employee["id"],
-                    "employee_name": translate_to_english(employee["name"]),
-                    "arabic_name": employee["name"],
+                employee_overtime_records.append({
                     "date": date,
                     "check_in_time": check_in_str,
                     "check_out_time": check_out_str,
@@ -4510,11 +4507,24 @@ async def get_overtime_report(month: str, current_user: User = Depends(get_admin
                     "total_overtime_hours": round(total_overtime, 2),
                     "overtime_type": "Early Start" if early_hours > late_hours else "Late Finish" if late_hours > 0 else "Mixed"
                 })
+                total_overtime_for_employee += total_overtime
+        
+        # Add employee data if they have overtime
+        if employee_overtime_records:
+            overtime_data.append({
+                "employee_id": employee["id"],
+                "user_name_en": translate_to_english(employee["name"]),
+                "employee_name": translate_to_english(employee["name"]),
+                "arabic_name": employee["name"],
+                "total_overtime_hours": round(total_overtime_for_employee, 2),
+                "overtime_days": len(employee_overtime_records),
+                "overtime_details": employee_overtime_records
+            })
     
     return {
         "month": month,
         "total_records": len(overtime_data),
-        "total_employees": len(set(record["employee_id"] for record in overtime_data)),
+        "total_employees": len(overtime_data),
         "total_overtime_hours": round(sum(record["total_overtime_hours"] for record in overtime_data), 2),
         "overtime_records": overtime_data
     }
