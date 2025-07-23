@@ -4675,17 +4675,18 @@ async def export_overtime_report(month: str, format: str = "excel", current_user
         table_data = [["Employee", "Date", "Check In", "Check Out", "Total Hours", "Early OT", "Late OT", "Total OT", "Type"]]
         
         for record in records:
-            table_data.append([
-                record["employee_name"],
-                record["date"],
-                record["check_in_time"],
-                record["check_out_time"],
-                f"{record['total_working_hours']:.1f}h",
-                f"{record['early_overtime_hours']:.1f}h",
-                f"{record['late_overtime_hours']:.1f}h",
-                f"{record['total_overtime_hours']:.1f}h",
-                record["overtime_type"]
-            ])
+            for detail in record["overtime_details"]:
+                table_data.append([
+                    record["employee_name"],
+                    detail["date"],
+                    detail["check_in_time"],
+                    detail["check_out_time"],
+                    f"{detail['total_working_hours']:.1f}h",
+                    f"{detail['early_overtime_hours']:.1f}h",
+                    f"{detail['late_overtime_hours']:.1f}h",
+                    f"{detail['total_overtime_hours']:.1f}h",
+                    detail["overtime_type"]
+                ])
         
         # Create table
         table = Table(table_data)
