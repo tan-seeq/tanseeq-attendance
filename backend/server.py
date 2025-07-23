@@ -349,65 +349,9 @@ async def get_super_admin_user(current_user: User = Depends(get_current_user)):
         )
     return current_user
 
-# ============ QR CODE VERIFICATION SYSTEM ============
-
-def generate_daily_qr_code():
-    """Generate unique QR code for today"""
-    today = get_uae_time().date().strftime('%Y-%m-%d')
-    secret_key = "TANSEEQ_SECRET_2025"  # Change this to your own secret
-    import hashlib
-    
-    # Create unique daily code
-    qr_data = f"TANSEEQ_OFFICE_{today}_{secret_key}"
-    qr_hash = hashlib.md5(qr_data.encode()).hexdigest()[:8].upper()
-    
-    return f"TANSEEQ-{qr_hash}"
-
-def verify_daily_qr_code(provided_code: str) -> bool:
-    """Verify if provided QR code is valid for today"""
-    expected_code = generate_daily_qr_code()
-    return provided_code == expected_code
-
-@api_router.get("/attendance/daily-qr")
-async def get_daily_qr_code(current_user: User = Depends(get_admin_user)):
-    """Get today's QR code for printing (Admin only)"""
-    qr_code = generate_daily_qr_code()
-    today = get_uae_time().date().strftime('%Y-%m-%d')
-    
-    return {
-        "qr_code": qr_code,
-        "date": today,
-        "arabic_date": today.replace('-', '/'),
-        "message": "اطبع هذا الرمز وضعه في مدخل المكتب",
-        "instructions": [
-            "1. اطبع هذا الرمز على ورقة A4",
-            "2. ضعه في مدخل المكتب بمكان واضح",
-            "3. الموظفون يحتاجون مسح الرمز قبل البصم",
-            "4. الرمز يتغير كل يوم تلقائياً"
-        ]
-    }
-
-@api_router.post("/attendance/check-in-with-qr")
-async def check_in_with_qr(
-    qr_code: str = Form(...),
-    current_user: User = Depends(get_current_user)
-):
-    """Check in with QR code verification"""
-    
-    # Skip QR verification for admin, super_admin, and specific user
-    skip_verification = (
-        current_user.role in ["admin", "super_admin"] or 
-        current_user.email == "hatemmo186@gmail.com"
-    )
-    
-    if not skip_verification:
-        # Verify QR code for regular users
-        if not verify_daily_qr_code(qr_code):
-            raise HTTPException(
-                status_code=400,
-                detail="رمز QR غير صحيح أو منتهي الصلاحية. يرجى مسح الرمز الموجود في مدخل المكتب."
-            )
-    
+@api_router.post("/attendance/check-in")
+async def check_in(current_user: User = Depends(get_current_user)):
+    """Check in (Normal attendance without QR verification)"""
     # Check if already checked in today
     today = get_uae_time().date().strftime('%Y-%m-%d')
     existing_attendance = await db.attendance.find_one({
@@ -444,9 +388,7 @@ async def check_in_with_qr(
         "date": today,
         "check_in": check_in_time,
         "status": "late" if is_late else "present",
-        "is_late": is_late,
-        "qr_verified": not skip_verification,
-        "check_in_method": "qr_code" if not skip_verification else "admin_bypass"
+        "is_late": is_late
     }
     
     if existing_attendance:
@@ -463,7 +405,7 @@ async def check_in_with_qr(
             user_name=current_user.name,
             date=today,
             check_in=check_in_time,
-            status="late" if is_late else "present",
+            status="late" if is_late else "present",  
             is_late=is_late
         )
         attendance_data["id"] = attendance_record.id
@@ -472,43 +414,18 @@ async def check_in_with_qr(
         attendance_id = attendance_record.id
     
     # Log activity
-    verification_info = " (QR verified)" if not skip_verification else " (admin bypass)"
-    await log_activity(
-        current_user.id, 
-        "check_in", 
-        f"Checked in at {check_in_time}{verification_info}"
-    )
+    await log_activity(current_user.id, "check_in", f"Checked in at {check_in_time}")
     
     return {
         "message": "تم تسجيل الحضور بنجاح ✅",
         "check_in_time": check_in_time,
         "status": "متأخر" if is_late else "في الوقت",
-        "is_late": is_late,
-        "qr_verified": attendance_data.get("qr_verified", False),
-        "method": attendance_data.get("check_in_method", "standard")
+        "is_late": is_late
     }
 
-@api_router.post("/attendance/check-out-with-qr")
-async def check_out_with_qr(
-    qr_code: str = Form(...),
-    current_user: User = Depends(get_current_user)
-):
-    """Check out with QR code verification"""
-    
-    # Skip QR verification for admin, super_admin, and specific user
-    skip_verification = (
-        current_user.role in ["admin", "super_admin"] or 
-        current_user.email == "hatemmo186@gmail.com"
-    )
-    
-    if not skip_verification:
-        # Verify QR code for regular users
-        if not verify_daily_qr_code(qr_code):
-            raise HTTPException(
-                status_code=400,
-                detail="رمز QR غير صحيح أو منتهي الصلاحية. يرجى مسح الرمز الموجود في مدخل المكتب."
-            )
-    
+@api_router.post("/attendance/check-out")
+async def check_out(current_user: User = Depends(get_current_user)):
+    """Check out (Normal attendance without QR verification)"""
     # Check if checked in today
     today = get_uae_time().date().strftime('%Y-%m-%d')
     existing_attendance = await db.attendance.find_one({
@@ -526,31 +443,31 @@ async def check_out_with_qr(
     current_time = get_uae_time()
     check_out_time = current_time.strftime('%H:%M:%S')
     
-    # Update attendance record
-    attendance_update = {
-        "check_out": check_out_time,
-        "qr_verified_out": not skip_verification,
-        "check_out_method": "qr_code" if not skip_verification else "admin_bypass"
-    }
+    # Calculate working hours
+    check_in_str = existing_attendance.get("check_in")
+    if check_in_str:
+        check_in_time = datetime.strptime(f"{today} {check_in_str}", "%Y-%m-%d %H:%M:%S")
+        check_out_time_dt = datetime.strptime(f"{today} {check_out_time}", "%Y-%m-%d %H:%M:%S")
+        working_hours = (check_out_time_dt - check_in_time).total_seconds() / 3600
+    else:
+        working_hours = 0
     
+    # Update attendance record
     await db.attendance.update_one(
         {"user_id": current_user.id, "date": today},
-        {"$set": attendance_update}
+        {"$set": {
+            "check_out": check_out_time,
+            "working_hours": round(working_hours, 2)
+        }}
     )
     
     # Log activity
-    verification_info = " (QR verified)" if not skip_verification else " (admin bypass)"
-    await log_activity(
-        current_user.id, 
-        "check_out", 
-        f"Checked out at {check_out_time}{verification_info}"
-    )
+    await log_activity(current_user.id, "check_out", f"Checked out at {check_out_time}")
     
     return {
         "message": "تم تسجيل الانصراف بنجاح ✅",
         "check_out_time": check_out_time,
-        "qr_verified": attendance_update.get("qr_verified_out", False),
-        "method": attendance_update.get("check_out_method", "standard")
+        "working_hours": round(working_hours, 2)
     }
 
 @api_router.post("/auth/login", response_model=LoginResponse)
