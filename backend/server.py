@@ -2740,17 +2740,20 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             )
         ws.row_dimensions[header_row].height = 40
         
-        # Data rows
+        # Data rows with enhanced formatting
         for row_idx, employee in enumerate(payroll_data, header_row + 1):
-            row_color = "F2F2F2" if row_idx % 2 == 0 else "FFFFFF"
+            row_color = "F8F9FA" if row_idx % 2 == 0 else "FFFFFF"
             
             values = [
                 employee["name"],
                 f"AED {employee['monthly_salary']:.2f}",
-                f"AED {employee['daily_rate']:.2f}",
                 str(employee["working_days"]),
                 f"{employee.get('total_hours', 0):.1f}h",
                 str(employee.get("late_days", 0)),
+                f"AED {employee['basic_salary']:.2f}",
+                f"AED {employee.get('late_deductions', 0):.2f}",
+                f"AED {employee.get('absence_deductions', 0):.2f}",
+                f"AED {employee.get('total_deductions', 0):.2f}",
                 f"AED {employee['final_salary']:.2f}"
             ]
             
