@@ -30,7 +30,9 @@ import {
   FolderIcon,
   ServerIcon,
   ExclamationTriangleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  InformationCircleIcon,
+  CalculatorIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
