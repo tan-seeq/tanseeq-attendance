@@ -2539,13 +2539,13 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws = wb.active
         ws.title = f"payroll_{month}"
         
-        # Set column widths
-        column_widths = [20, 15, 12, 12, 12, 12, 15]
+        # Set column widths for enhanced payroll report
+        column_widths = [20, 15, 12, 12, 12, 15, 15, 15, 12]
         for i, width in enumerate(column_widths, 1):
             ws.column_dimensions[get_column_letter(i)].width = width
         
-        # Company header with logo styling
-        ws.merge_cells('A1:G1')
+        # Company header with logo styling  
+        ws.merge_cells('A1:I1')
         company_cell = ws['A1']
         company_cell.value = "TANSEEQ TAX CONSULTANCY"
         company_cell.font = Font(name="Arial", size=20, bold=True, color="FFFFFF")
@@ -2554,20 +2554,111 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[1].height = 40
         
         # Logo area (simulated with styling)
-        ws.merge_cells('A2:G2')
+        ws.merge_cells('A2:I2')
         logo_cell = ws['A2']
-        logo_cell.value = "مكتب استشارات ضريبية متخصص"
+        logo_cell.value = "Professional Tax Consultancy Services - خدمات استشارات ضريبية محترفة"
         logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
         logo_cell.fill = PatternFill(start_color="E6EFFF", end_color="E6EFFF", fill_type="solid")
         logo_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[2].height = 25
         
         # Report title with enhanced styling
-        ws.merge_cells('A3:G3')
+        ws.merge_cells('A3:I3')
         title_cell = ws['A3']
-        title_cell.value = f"Payroll Report - تقرير الرواتب"
+        title_cell.value = f"Payroll Report with Automatic Deductions - {month}"
         title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
         title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[3].height = 30
+        
+        # Date and generation info
+        ws.merge_cells('A4:I4')
+        date_cell = ws['A4']
+        date_cell.value = f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UAE Time"
+        date_cell.font = Font(name="Arial", size=10, color="666666")
+        date_cell.alignment = Alignment(horizontal="center")
+        ws.row_dimensions[4].height = 20
+        
+        # Headers with enhanced styling  
+        headers = [
+            "Employee Name", "Working Days", "Basic Salary", "Late Days", 
+            "Absence Days", "Total Deductions", "Deduction Details", "Final Salary", "Month"
+        ]
+        
+        header_style = Font(name="Arial", size=11, bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1B4477", end_color="1B4477", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=6, column=col)
+            cell.value = header
+            cell.font = header_style
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+        
+        ws.row_dimensions[6].height = 35
+        
+        # Data rows with enhanced styling
+        row_num = 7
+        for emp in payroll_data:
+            deduction_details_text = "; ".join(emp.get("deduction_details", []))
+            if not deduction_details_text:
+                deduction_details_text = "No deductions"
+                
+            row_data = [
+                emp["name"],  # English translated name
+                emp["working_days"],
+                f"AED {emp['basic_salary']:.2f}",
+                emp["late_days"],
+                emp.get("unauthorized_absences", 0),
+                f"AED {emp['total_deductions']:.2f}",
+                deduction_details_text,
+                f"AED {emp['final_salary']:.2f}",
+                emp["month"]
+            ]
+            
+            for col, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col)
+                cell.value = value
+                cell.font = Font(name="Arial", size=10)
+                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                
+                # Alternating row colors
+                if row_num % 2 == 0:
+                    cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
+                else:
+                    cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+            
+            ws.row_dimensions[row_num].height = 25
+            row_num += 1
+        
+        # Add borders to all cells
+        thin_border = Border(
+            left=Side(style='thin'), right=Side(style='thin'),
+            top=Side(style='thin'), bottom=Side(style='thin')
+        )
+        
+        for row in ws.iter_rows(min_row=6, max_row=row_num-1, min_col=1, max_col=9):
+            for cell in row:
+                cell.border = thin_border
+        
+        # Summary section
+        summary_row = row_num + 2
+        ws.merge_cells(f'A{summary_row}:I{summary_row}')
+        summary_cell = ws[f'A{summary_row}']
+        summary_cell.value = f"Total Employees: {len(payroll_data)} | Total Basic Salary: AED {sum(emp['basic_salary'] for emp in payroll_data):.2f} | Total Deductions: AED {sum(emp['total_deductions'] for emp in payroll_data):.2f} | Net Payroll: AED {sum(emp['final_salary'] for emp in payroll_data):.2f}"
+        summary_cell.font = Font(name="Arial", size=12, bold=True, color="1B4477")
+        summary_cell.fill = PatternFill(start_color="E8F4FD", end_color="E8F4FD", fill_type="solid")
+        summary_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[summary_row].height = 30
+        
+        # Footer
+        footer_row = summary_row + 2
+        ws.merge_cells(f'A{footer_row}:I{footer_row}')
+        footer_cell = ws[f'A{footer_row}']
+        footer_cell.value = "TANSEEQ TAX CONSULTANCY - Automated Payroll System with Deductions"
+        footer_cell.font = Font(name="Arial", size=10, color="666666", italic=True)
+        footer_cell.alignment = Alignment(horizontal="center")
         title_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[3].height = 30
         
