@@ -2626,7 +2626,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         # Headers with enhanced styling  
         headers = [
             "Employee Name", "Working Days", "Basic Salary", "Late Days", 
-            "Absence Days", "Total Deductions", "Deduction Details", "Final Salary", "Month"
+            "Absence Days", "Total Deductions", "Deduction Details", "Final Salary", "Month", "Status"
         ]
         
         header_style = Font(name="Arial", size=11, bold=True, color="FFFFFF")
@@ -2634,13 +2634,13 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         
         for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=6, column=col)
+            cell = ws.cell(row=7, column=col)
             cell.value = header
             cell.font = header_style
             cell.fill = header_fill
             cell.alignment = header_alignment
         
-        ws.row_dimensions[6].height = 35
+        ws.row_dimensions[7].height = 35
         
         # Data rows with enhanced styling
         row_num = 7
