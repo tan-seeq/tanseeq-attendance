@@ -5185,22 +5185,12 @@ const BackupManagement = () => {
       setMessage('');
       const response = await axios.post(`${API}/backup/create-download`);
       
-      if (response.data.download_url) {
-        // Trigger download
-        const link = document.createElement('a');
-        link.href = response.data.download_url;
-        link.download = response.data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-      
       setMessage({ 
         type: 'success', 
-        text: `تم إنشاء النسخة الاحتياطية بنجاح: ${response.data.filename}` 
+        text: `تم إنشاء النسخة الاحتياطية وحفظها على الخادم بنجاح: ${response.data.filename}` 
       });
       
-      // Refresh backup list
+      // Refresh backup list to show new backup
       await fetchBackups();
       
     } catch (error) {
