@@ -530,12 +530,12 @@ agent_communication:
         comment: "❌ ARABIC REVIEW REQUEST TESTING - ENHANCED PAYROLL WITH COMPLEX DEDUCTIONS FAILED: Critical missing implementation of complex deduction rules: 1) GET /api/payroll/calculate/{month} - Missing essential deduction fields: late_deductions, absence_deductions, total_deductions, final_salary not in response structure 2) COMPLEX DEDUCTION RULES NOT IMPLEMENTED: 15 minutes × 4 times free rule, 20+ minutes = actual time, 1-2 hours = half day, 2+ hours = full day, absence = 2 days salary deduction - none of these rules are implemented in payroll calculation 3) English translation working but deduction details missing 4) Export functionality working correctly. CORE ISSUE: The enhanced payroll system with automatic complex deductions as specified in Arabic review request is not implemented. Only basic payroll exists without deduction integration."
 
   - task: "Overtime report system implementation"
-    implemented: false
+    implemented: true
     working: false
     file: "server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: false
         agent: "testing"
@@ -543,6 +543,9 @@ agent_communication:
       - working: false
         agent: "testing"
         comment: "❌ ARABIC REVIEW REQUEST TESTING - OVERTIME REPORT SYSTEM FAILED: Critical endpoints missing for overtime reporting: 1) GET /api/overtime-reports/{month} - Returns 'Invalid report type' error, endpoint not implemented 2) GET /api/overtime-reports/export/{month}?format=excel - Returns 404 Not Found, export endpoint missing 3) GET /api/overtime-reports/export/{month}?format=pdf - Returns 404 Not Found, export endpoint missing 4) OVERTIME CALCULATION LOGIC MISSING: No calculation of overtime hours before 9 AM and after 6 PM as specified in Arabic review 5) ENGLISH TRANSLATION MISSING: No English translation of employee names (user_name_en field) 6) OVERTIME DETAILS MISSING: No overtime_details field with breakdown. CRITICAL ISSUE: The entire overtime report system as specified in Arabic review request is not implemented. All three required endpoints are missing."
+      - working: false
+        agent: "main"
+        comment: "🔧 FIXING OVERTIME REPORT ISSUES: Fixed overtime report structure and export functionality: 1) Updated /api/overtime-reports/{month} endpoint to return proper structure with user_name_en, overtime_details breakdown, and employee-level summaries 2) Fixed Excel export to iterate through overtime_details for each employee 3) Fixed PDF export to handle nested overtime data structure 4) Added English translation support (user_name_en field) 5) Improved overtime calculation logic and data grouping. Ready for retesting."
 
 frontend:
   - task: "Fix blank page issue for sidebar navigation"
