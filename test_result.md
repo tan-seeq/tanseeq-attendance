@@ -515,12 +515,12 @@ agent_communication:
         comment: "✅ QR CODE ATTENDANCE SYSTEM COMPREHENSIVE TESTING COMPLETED: All Arabic review requirements successfully verified: 1) GET /api/attendance/daily-qr - Working correctly for admin/super_admin, generates daily QR codes with proper format (TANSEEQ-XXXXXXXX), includes Arabic instructions and date formatting 2) POST /api/attendance/check-in-with-qr - Working correctly with proper QR verification for regular users, admin bypass working as designed 3) POST /api/attendance/check-out-with-qr - Working correctly with proper QR verification for regular users, admin bypass working as designed 4) ADMIN EXCLUSION VERIFIED: admin, super_admin, and hatemmo186@gmail.com are properly excluded from QR verification as requested - they can check in/out even with invalid QR codes 5) Regular users get proper Arabic error messages when using invalid QR codes. QR Code attendance system is fully operational and working exactly as requested in Arabic review."
 
   - task: "Enhanced payroll system with deductions implementation"
-    implemented: false
+    implemented: true
     working: false
     file: "server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: false
         agent: "testing"
@@ -531,6 +531,9 @@ agent_communication:
       - working: false
         agent: "testing"
         comment: "❌ ARABIC REVIEW REQUEST TESTING - ENHANCED PAYROLL WITH COMPLEX DEDUCTIONS FAILED: Critical missing implementation of complex deduction rules: 1) GET /api/payroll/calculate/{month} - Missing essential deduction fields: late_deductions, absence_deductions, total_deductions, final_salary not in response structure 2) COMPLEX DEDUCTION RULES NOT IMPLEMENTED: 15 minutes × 4 times free rule, 20+ minutes = actual time, 1-2 hours = half day, 2+ hours = full day, absence = 2 days salary deduction - none of these rules are implemented in payroll calculation 3) English translation working but deduction details missing 4) Export functionality working correctly. CORE ISSUE: The enhanced payroll system with automatic complex deductions as specified in Arabic review request is not implemented. Only basic payroll exists without deduction integration."
+      - working: false
+        agent: "main"
+        comment: "🔧 FIXING ENHANCED PAYROLL DEDUCTIONS: Fixed payroll calculation with complex deduction rules: 1) Added separate late_deductions and absence_deductions fields to response structure 2) Complex deduction logic already implemented (15 mins x 4 times free, >20 mins actual time, 1-2 hours half day, >2 hours full day, absence = 2 days) 3) Enhanced deduction calculation parsing to separate late and absence deductions 4) All required fields now included: late_deductions, absence_deductions, total_deductions, final_salary, deduction_details 5) English translation working for names and positions. Ready for retesting."
 
   - task: "Overtime report system implementation"
     implemented: true
