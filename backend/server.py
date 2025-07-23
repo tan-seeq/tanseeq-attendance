@@ -4250,7 +4250,288 @@ async def list_requests_with_attachments(current_user: User = Depends(get_admin_
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing attachments: {str(e)}")
 
-# ============ AUTOMATION STATUS AND CONTROL ============
+@api_router.get("/reports/overtime/{month}")
+async def get_overtime_report(month: str, current_user: User = Depends(get_admin_user)):
+    """Generate overtime report for specific month (Admin only)"""
+    try:
+        # Validate month format (YYYY-MM)
+        datetime.strptime(month, "%Y-%m")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid month format. Use YYYY-MM")
+    
+    # Get all active employees (exclude admin/super_admin)
+    employees = await db.users.find({
+        "is_active": True,
+        "role": "user"
+    }).to_list(1000)
+    
+    overtime_data = []
+    
+    for employee in employees:
+        # Get attendance records for the month
+        attendance_records = await db.attendance.find({
+            "user_id": employee["id"],
+            "date": {"$regex": f"^{month}"},
+            "check_in": {"$exists": True},
+            "check_out": {"$exists": True}
+        }).to_list(1000)
+        
+        for record in attendance_records:
+            check_in_str = record.get("check_in")
+            check_out_str = record.get("check_out")
+            date = record.get("date")
+            
+            if not check_in_str or not check_out_str:
+                continue
+            
+            # Parse times
+            try:
+                check_in_time = datetime.strptime(check_in_str, "%H:%M:%S").time()
+                check_out_time = datetime.strptime(check_out_str, "%H:%M:%S").time()
+            except:
+                continue
+            
+            # Standard work hours: 9:00 AM to 6:00 PM (9 hours)
+            standard_start = datetime.strptime("09:00:00", "%H:%M:%S").time()
+            standard_end = datetime.strptime("18:00:00", "%H:%M:%S").time()
+            
+            # Calculate actual working hours
+            check_in_dt = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), check_in_time)
+            check_out_dt = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), check_out_time)
+            
+            # Handle next day checkout
+            if check_out_time < check_in_time:
+                check_out_dt += timedelta(days=1)
+            
+            total_hours = (check_out_dt - check_in_dt).total_seconds() / 3600
+            
+            # Calculate overtime hours
+            early_hours = 0  # Before 9 AM
+            late_hours = 0   # After 6 PM
+            
+            # Early overtime (before 9 AM)
+            if check_in_time < standard_start:
+                early_start_dt = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), check_in_time)
+                standard_start_dt = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), standard_start)
+                early_hours = (standard_start_dt - early_start_dt).total_seconds() / 3600
+            
+            # Late overtime (after 6 PM)
+            if check_out_time > standard_end:
+                standard_end_dt = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), standard_end)
+                late_end_dt = datetime.combine(datetime.strptime(date, "%Y-%m-%d").date(), check_out_time)
+                # Handle next day
+                if check_out_time < standard_end:
+                    late_end_dt += timedelta(days=1)
+                late_hours = (late_end_dt - standard_end_dt).total_seconds() / 3600
+            
+            total_overtime = early_hours + late_hours
+            
+            # Only include records with overtime
+            if total_overtime > 0.1:  # More than 6 minutes
+                overtime_data.append({
+                    "employee_id": employee["id"],
+                    "employee_name": translate_to_english(employee["name"]),
+                    "arabic_name": employee["name"],
+                    "date": date,
+                    "check_in_time": check_in_str,
+                    "check_out_time": check_out_str,
+                    "total_working_hours": round(total_hours, 2),
+                    "standard_hours": 9.0,
+                    "early_overtime_hours": round(early_hours, 2),
+                    "late_overtime_hours": round(late_hours, 2),
+                    "total_overtime_hours": round(total_overtime, 2),
+                    "overtime_type": "Early Start" if early_hours > late_hours else "Late Finish" if late_hours > 0 else "Mixed"
+                })
+    
+    return {
+        "month": month,
+        "total_records": len(overtime_data),
+        "total_employees": len(set(record["employee_id"] for record in overtime_data)),
+        "total_overtime_hours": round(sum(record["total_overtime_hours"] for record in overtime_data), 2),
+        "overtime_records": overtime_data
+    }
+
+@api_router.get("/reports/overtime/export/{month}")
+async def export_overtime_report(month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
+    """Export overtime report with professional design"""
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+    
+    overtime_data = await get_overtime_report(month, current_user)
+    records = overtime_data["overtime_records"]
+    
+    if format == "excel":
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        
+        # Create workbook and worksheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = f"overtime_{month}"
+        
+        # Set column widths
+        column_widths = [20, 12, 12, 12, 15, 12, 12, 12, 15, 15]
+        for i, width in enumerate(column_widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+        
+        # Company header
+        ws.merge_cells('A1:J1')
+        company_cell = ws['A1']
+        company_cell.value = "TANSEEQ TAX CONSULTANCY - OVERTIME REPORT"
+        company_cell.font = Font(name="Arial", size=18, bold=True, color="FFFFFF")
+        company_cell.fill = PatternFill(start_color="1B4477", end_color="1B4477", fill_type="solid")
+        company_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 35
+        
+        # Report info
+        ws.merge_cells('A2:J2')
+        info_cell = ws['A2']
+        info_cell.value = f"Month: {month} | Total Overtime Hours: {overtime_data['total_overtime_hours']} | Employees: {overtime_data['total_employees']}"
+        info_cell.font = Font(name="Arial", size=12, color="4472C4")
+        info_cell.fill = PatternFill(start_color="E6EFFF", end_color="E6EFFF", fill_type="solid")
+        info_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[2].height = 25
+        
+        # Headers
+        headers = [
+            "Employee Name", "Date", "Check In", "Check Out", "Total Hours",
+            "Standard Hours", "Early OT", "Late OT", "Total OT", "OT Type"
+        ]
+        
+        header_style = Font(name="Arial", size=11, bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1B4477", end_color="1B4477", fill_type="solid")
+        
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=4, column=col)
+            cell.value = header
+            cell.font = header_style
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        ws.row_dimensions[4].height = 30
+        
+        # Data rows
+        row_num = 5
+        for record in records:
+            row_data = [
+                record["employee_name"],
+                record["date"],
+                record["check_in_time"],
+                record["check_out_time"],
+                f"{record['total_working_hours']:.2f}h",
+                f"{record['standard_hours']:.1f}h",
+                f"{record['early_overtime_hours']:.2f}h",
+                f"{record['late_overtime_hours']:.2f}h",
+                f"{record['total_overtime_hours']:.2f}h",
+                record["overtime_type"]
+            ]
+            
+            for col, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_num, column=col)
+                cell.value = value
+                cell.font = Font(name="Arial", size=10)
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                
+                # Alternating row colors
+                if row_num % 2 == 0:
+                    cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
+            
+            ws.row_dimensions[row_num].height = 25
+            row_num += 1
+        
+        # Add borders
+        thin_border = Border(
+            left=Side(style='thin'), right=Side(style='thin'),
+            top=Side(style='thin'), bottom=Side(style='thin')
+        )
+        
+        for row in ws.iter_rows(min_row=4, max_row=row_num-1, min_col=1, max_col=10):
+            for cell in row:
+                cell.border = thin_border
+        
+        # Summary
+        summary_row = row_num + 1
+        ws.merge_cells(f'A{summary_row}:J{summary_row}')
+        summary_cell = ws[f'A{summary_row}']
+        summary_cell.value = f"SUMMARY: {len(records)} overtime records | Total: {overtime_data['total_overtime_hours']:.2f} hours | Average per employee: {overtime_data['total_overtime_hours']/max(overtime_data['total_employees'],1):.2f} hours"
+        summary_cell.font = Font(name="Arial", size=12, bold=True, color="1B4477")
+        summary_cell.fill = PatternFill(start_color="E8F4FD", end_color="E8F4FD", fill_type="solid")
+        summary_cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        return StreamingResponse(
+            BytesIO(output.read()),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=TANSEEQ_overtime_report_{month}.xlsx"}
+        )
+    
+    else:  # PDF format
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        
+        output = BytesIO()
+        doc = SimpleDocTemplate(output, pagesize=landscape(A4))
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Title
+        title = Paragraph(f"<b>TANSEEQ TAX CONSULTANCY - OVERTIME REPORT</b><br/>Month: {month}", styles['Title'])
+        elements.append(title)
+        elements.append(Spacer(1, 20))
+        
+        # Summary
+        summary_text = f"Total Records: {len(records)} | Total Overtime Hours: {overtime_data['total_overtime_hours']:.2f} | Employees: {overtime_data['total_employees']}"
+        summary = Paragraph(summary_text, styles['Normal'])
+        elements.append(summary)
+        elements.append(Spacer(1, 20))
+        
+        # Table data
+        table_data = [["Employee", "Date", "Check In", "Check Out", "Total Hours", "Early OT", "Late OT", "Total OT", "Type"]]
+        
+        for record in records:
+            table_data.append([
+                record["employee_name"],
+                record["date"],
+                record["check_in_time"],
+                record["check_out_time"],
+                f"{record['total_working_hours']:.1f}h",
+                f"{record['early_overtime_hours']:.1f}h",
+                f"{record['late_overtime_hours']:.1f}h",
+                f"{record['total_overtime_hours']:.1f}h",
+                record["overtime_type"]
+            ])
+        
+        # Create table
+        table = Table(table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.navy),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(table)
+        doc.build(elements)
+        
+        output.seek(0)
+        return StreamingResponse(
+            BytesIO(output.read()),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=TANSEEQ_overtime_report_{month}.pdf"}
+        )
 
 @api_router.get("/automation/status")
 async def get_automation_status(current_user: User = Depends(get_super_admin_user)):
