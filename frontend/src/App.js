@@ -366,6 +366,7 @@ const Layout = ({ children }) => {
       { name: t('reports'), href: '/reports', icon: DocumentTextIcon },
       { name: 'تقرير العمل الإضافي', href: '/overtime-report', icon: ClockIcon },
       { name: t('payroll'), href: '/payroll', icon: CurrencyDollarIcon },
+      { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'عرض المرفقات', href: '/attachment-viewer', icon: FolderIcon },
     ] : []),
     ...(user?.role === 'super_admin' ? [
