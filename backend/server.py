@@ -2303,38 +2303,118 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
         calculated_salary = working_days * user["daily_rate"]
         basic_salary = min(calculated_salary, user["monthly_salary"])
         
-        # Calculate automatic deductions
+        # Calculate automatic deductions with complex rules
         total_deductions = 0.0
         deduction_details = []
+        late_penalty_details = []
+        absence_penalty_details = []
         
-        # 1. Get late penalties for this month
-        late_penalties = await db.late_penalties.find({
-            "user_id": user["id"],
-            "month": month,
-            "status": "applied"
-        }).to_list(100)
+        # 1. Late arrival penalties with complex rules
+        late_records = [a for a in attendance_records if a.get("is_late")]
         
-        late_penalty_amount = sum(p.get("penalty_amount", 0) for p in late_penalties)
-        if late_penalty_amount > 0:
-            total_deductions += late_penalty_amount
-            deduction_details.append(f"Late Penalty: AED {late_penalty_amount:.2f}")
+        if late_records:
+            # Group late records by minutes
+            late_minutes_list = []
+            for record in late_records:
+                check_in_str = record.get("check_in", "09:00:00")
+                try:
+                    check_in_time = datetime.strptime(check_in_str, "%H:%M:%S").time()
+                    if user.get("has_flexible_schedule"):
+                        # For flexible schedule, calculate against 11:00 AM (latest allowed start)
+                        standard_start = datetime.strptime("11:00:00", "%H:%M:%S").time()
+                    else:
+                        # For fixed schedule, use working_hours_start
+                        standard_start = datetime.strptime(user.get("working_hours_start", "09:00"), "%H:%M").time()
+                    
+                    # Calculate late minutes
+                    check_in_dt = datetime.combine(datetime.min, check_in_time)
+                    standard_dt = datetime.combine(datetime.min, standard_start)
+                    
+                    if check_in_dt > standard_dt:
+                        late_minutes = (check_in_dt - standard_dt).total_seconds() / 60
+                        late_minutes_list.append(late_minutes)
+                except:
+                    continue
+            
+            if late_minutes_list:
+                # Apply complex penalty rules
+                total_late_minutes = sum(late_minutes_list)
+                free_late_count = 0
+                penalty_minutes = 0
+                half_day_penalties = 0
+                full_day_penalties = 0
+                
+                for minutes in late_minutes_list:
+                    if minutes <= 15:
+                        # First 15 minutes x 4 times are free
+                        if free_late_count < 4:
+                            free_late_count += 1
+                        else:
+                            penalty_minutes += minutes
+                    elif minutes <= 20:
+                        # 15-20 minutes: accumulate for deduction
+                        penalty_minutes += minutes
+                    elif minutes <= 120:  # 20 minutes to 2 hours
+                        # More than 20 minutes but less than 2 hours: half day
+                        half_day_penalties += 1
+                        penalty_minutes += minutes  # Also accumulate the minutes
+                    else:  # More than 2 hours
+                        # More than 2 hours: full day
+                        full_day_penalties += 1
+                
+                # Calculate penalties
+                # 1. Accumulated minutes penalty (convert to daily rate fraction)
+                if penalty_minutes > 0:
+                    minutes_penalty = (penalty_minutes / (8 * 60)) * user["daily_rate"]  # 8 hours = full day
+                    total_deductions += minutes_penalty
+                    late_penalty_details.append(f"Late Minutes: {penalty_minutes:.0f} min = AED {minutes_penalty:.2f}")
+                
+                # 2. Half day penalties
+                if half_day_penalties > 0:
+                    half_day_penalty = half_day_penalties * (user["daily_rate"] / 2)
+                    total_deductions += half_day_penalty
+                    late_penalty_details.append(f"Half Day Penalties: {half_day_penalties} × AED {user['daily_rate']/2:.2f} = AED {half_day_penalty:.2f}")
+                
+                # 3. Full day penalties
+                if full_day_penalties > 0:
+                    full_day_penalty = full_day_penalties * user["daily_rate"]
+                    total_deductions += full_day_penalty
+                    late_penalty_details.append(f"Full Day Penalties: {full_day_penalties} × AED {user['daily_rate']:.2f} = AED {full_day_penalty:.2f}")
+                
+                # Summary for late penalties
+                if late_penalty_details:
+                    deduction_details.extend(late_penalty_details)
         
-        # 2. Calculate absence deductions (2 days salary for each unauthorized absence)
+        # 2. Absence penalties (2 days salary for each unauthorized absence)
         total_days_in_month = 30  # Simplified
         expected_working_days = total_days_in_month  # Assuming all days are working days
         
-        # Get leaves for this month
+        # Get approved leaves for this month
         month_start = f"{month}-01"
         month_end = f"{month}-31"
         leaves = await db.leaves.find({
             "user_id": user["id"],
             "status": "approved",
-            "start_date": {"$gte": month_start, "$lte": month_end}
+            "$or": [
+                {"start_date": {"$gte": month_start, "$lte": month_end}},
+                {"end_date": {"$gte": month_start, "$lte": month_end}},
+                {"start_date": {"$lte": month_start}, "end_date": {"$gte": month_end}}
+            ]
         }).to_list(100)
         
-        approved_leave_days = sum(l.get("days_count", 0) for l in leaves)
+        # Calculate approved leave days in this month
+        approved_leave_days = 0
+        for leave in leaves:
+            start_date = max(leave.get("start_date", month_start), month_start)
+            end_date = min(leave.get("end_date", month_end), month_end)
+            
+            if start_date <= end_date:
+                start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+                end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+                days_in_month = (end_dt - start_dt).days + 1
+                approved_leave_days += days_in_month
         
-        # Get field exits for this month  
+        # Get approved field exits for this month  
         field_exits = await db.field_exits.find({
             "user_id": user["id"],
             "status": "approved",
@@ -2344,16 +2424,29 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
         approved_field_exit_days = len(field_exits)
         
         # Calculate unauthorized absences
-        actual_absences = expected_working_days - working_days - approved_leave_days - approved_field_exit_days
+        actual_absences = max(0, expected_working_days - working_days - approved_leave_days - approved_field_exit_days)
+        
         if actual_absences > 0:
             # Each unauthorized absence = 2 days salary deduction
             absence_penalty = actual_absences * 2 * user["daily_rate"]
             total_deductions += absence_penalty
-            deduction_details.append(f"Absence Penalty ({actual_absences} days × 2): AED {absence_penalty:.2f}")
+            absence_penalty_details.append(f"Unauthorized Absences: {actual_absences} days × 2 × AED {user['daily_rate']:.2f} = AED {absence_penalty:.2f}")
+            deduction_details.extend(absence_penalty_details)
+        
+        # 3. Get existing penalty records from late_penalties collection
+        existing_penalties = await db.late_penalties.find({
+            "user_id": user["id"],
+            "month": month,
+            "status": "applied"
+        }).to_list(100)
+        
+        existing_penalty_amount = sum(p.get("penalty_amount", 0) for p in existing_penalties)
+        if existing_penalty_amount > 0:
+            total_deductions += existing_penalty_amount
+            deduction_details.append(f"Applied Penalties: AED {existing_penalty_amount:.2f}")
         
         # Calculate final salary after deductions
-        final_salary = basic_salary - total_deductions
-        final_salary = max(final_salary, 0)  # Cannot be negative
+        final_salary = max(0, basic_salary - total_deductions)  # Cannot be negative
         
         # Translation for English reports
         english_name = translate_to_english(user["name"])
