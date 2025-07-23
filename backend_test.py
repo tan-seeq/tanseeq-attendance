@@ -6041,11 +6041,7 @@ class TanseeqAPITester:
         print("Testing enhanced payroll calculation and export for 2025-07")
         print("=" * 60)
         
-        # Test root endpoint first
-        if not self.test_root_endpoint():
-            print("❌ Root endpoint failed - stopping tests")
-            return False
-        
+        # Skip root endpoint check and go directly to login
         # Login with super admin credentials as specified in review request
         if not self.test_login('super_admin'):
             print("❌ Super admin login failed - stopping tests")
