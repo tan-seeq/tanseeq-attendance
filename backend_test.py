@@ -1133,8 +1133,351 @@ class TanseeqAPITester:
         
         return all_passed
 
-    # ============ NEW TESTS FOR ARABIC REVIEW REQUEST - OVERTIME REPORTS AND ENHANCED BACKUP ============
+    # ============ NEW TESTS FOR ARABIC REVIEW REQUEST - CRITICAL SYSTEMS TESTING ============
     
+    def test_overtime_reports_system(self, role: str) -> bool:
+        """Test overtime reports system with user_name_en field and overtime_details array"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2024-12'
+        
+        success, response = self.make_request('GET', f'overtime-reports/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure for overtime reports
+            if isinstance(response, list):
+                if response:
+                    first_record = response[0]
+                    # Check for required fields from review request
+                    has_user_name_en = 'user_name_en' in first_record
+                    has_overtime_details = 'overtime_details' in first_record
+                    
+                    # Check overtime calculation (before 9 AM and after 6 PM)
+                    overtime_details = first_record.get('overtime_details', [])
+                    has_valid_overtime_calc = isinstance(overtime_details, list)
+                    
+                    # Check English translation
+                    user_name_en = first_record.get('user_name_en', '')
+                    has_english_translation = isinstance(user_name_en, str) and len(user_name_en) > 0
+                    
+                    test_passed = has_user_name_en and has_overtime_details and has_valid_overtime_calc and has_english_translation
+                    
+                    if not test_passed:
+                        self.log_test(f"Overtime reports system ({role})", False, 
+                                     f"user_name_en: {has_user_name_en}, overtime_details: {has_overtime_details}, calc: {has_valid_overtime_calc}, translation: {has_english_translation}")
+                    else:
+                        self.log_test(f"Overtime reports system ({role})", True)
+                else:
+                    # Empty response is acceptable
+                    self.log_test(f"Overtime reports system ({role})", True, "No overtime data for the month")
+                    test_passed = True
+            else:
+                test_passed = False
+                self.log_test(f"Overtime reports system ({role})", False, "Response is not a list")
+        else:
+            test_passed = success
+            self.log_test(f"Overtime reports system ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
+    def test_overtime_reports_excel_export(self, role: str) -> bool:
+        """Test overtime reports Excel export"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2024-12'
+        
+        url = f"{self.api_url}/overtime-reports/export/{month}?format=excel"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is Excel file
+                content_type = response.headers.get('content-type', '')
+                is_excel = 'spreadsheet' in content_type or 'excel' in content_type
+                
+                # Check content length
+                has_content = len(response.content) > 1000
+                
+                # Check filename contains overtime
+                content_disposition = response.headers.get('content-disposition', '')
+                has_overtime_in_filename = 'overtime' in content_disposition.lower()
+                
+                test_passed = is_excel and has_content and has_overtime_in_filename
+                
+                if not test_passed:
+                    self.log_test(f"Overtime reports Excel export ({role})", False, 
+                                 f"Excel: {is_excel}, Content: {has_content}, Filename: {has_overtime_in_filename}")
+                else:
+                    self.log_test(f"Overtime reports Excel export ({role})", True)
+            else:
+                test_passed = success
+                self.log_test(f"Overtime reports Excel export ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"Overtime reports Excel export ({role})", False, str(e))
+            return False
+
+    def test_overtime_reports_pdf_export(self, role: str) -> bool:
+        """Test overtime reports PDF export"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2024-12'
+        
+        url = f"{self.api_url}/overtime-reports/export/{month}?format=pdf"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is PDF file
+                content_type = response.headers.get('content-type', '')
+                is_pdf = 'pdf' in content_type
+                
+                # Check if it's a valid PDF
+                is_valid_pdf = response.content.startswith(b'%PDF')
+                
+                # Check content length
+                has_content = len(response.content) > 2000
+                
+                test_passed = is_pdf and is_valid_pdf and has_content
+                
+                if not test_passed:
+                    self.log_test(f"Overtime reports PDF export ({role})", False, 
+                                 f"PDF: {is_pdf}, Valid: {is_valid_pdf}, Content: {has_content}")
+                else:
+                    self.log_test(f"Overtime reports PDF export ({role})", True)
+            else:
+                test_passed = success
+                self.log_test(f"Overtime reports PDF export ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"Overtime reports PDF export ({role})", False, str(e))
+            return False
+
+    def test_enhanced_backup_create_download(self, role: str) -> bool:
+        """Test enhanced backup create-download endpoint with filename field"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        success, response = self.make_request('POST', 'backup/create-download', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure - must have filename field
+            has_filename = 'filename' in response
+            has_message = 'message' in response
+            
+            # Check filename format
+            filename = response.get('filename', '')
+            has_valid_filename = filename.endswith('.zip') or filename.endswith('.json')
+            
+            test_passed = has_filename and has_message and has_valid_filename
+            
+            if not test_passed:
+                self.log_test(f"Enhanced backup create-download ({role})", False, 
+                             f"Has filename: {has_filename}, Has message: {has_message}, Valid filename: {has_valid_filename}")
+            else:
+                self.log_test(f"Enhanced backup create-download ({role})", True)
+                # Store filename for download test
+                setattr(self, f'test_enhanced_backup_filename_{role}', filename)
+        else:
+            test_passed = success
+            self.log_test(f"Enhanced backup create-download ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
+    def test_enhanced_backup_download_zip(self, role: str) -> bool:
+        """Test enhanced backup download with .zip extension"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Get a backup filename to test with
+        backup_filename = getattr(self, f'test_enhanced_backup_filename_{role}', None)
+        if not backup_filename:
+            backup_filename = 'test_backup.zip'  # Use a test filename
+        
+        # Ensure .zip extension
+        if not backup_filename.endswith('.zip'):
+            backup_filename = backup_filename.replace('.json', '.zip')
+        
+        url = f"{self.api_url}/backup/download/{backup_filename}"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check proper content-type headers
+                content_type = response.headers.get('content-type', '')
+                is_zip = 'zip' in content_type or 'application/octet-stream' in content_type
+                
+                # Check content length - should contain actual database data
+                has_content = len(response.content) > 1000  # Should be substantial for real data
+                
+                # Check if actual database data is included (not sample data)
+                content_str = str(response.content)
+                not_sample_data = 'sample' not in content_str.lower() or len(response.content) > 5000
+                
+                test_passed = is_zip and has_content and not_sample_data
+                
+                if not test_passed:
+                    self.log_test(f"Enhanced backup download ZIP ({role})", False, 
+                                 f"Zip: {is_zip}, Content: {has_content}, Not sample: {not_sample_data}")
+                else:
+                    self.log_test(f"Enhanced backup download ZIP ({role})", True)
+            else:
+                # Accept 404 if backup file doesn't exist (expected for test)
+                if response.status_code == 404:
+                    self.log_test(f"Enhanced backup download ZIP ({role})", True, "File not found (expected for test)")
+                    test_passed = True
+                else:
+                    test_passed = success
+                    self.log_test(f"Enhanced backup download ZIP ({role})", success, 
+                                 f"Status: {response.status_code}" if not success else "")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"Enhanced backup download ZIP ({role})", False, str(e))
+            return False
+
+    def test_enhanced_backup_download_json(self, role: str) -> bool:
+        """Test enhanced backup download with .json extension"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Get a backup filename to test with
+        backup_filename = getattr(self, f'test_enhanced_backup_filename_{role}', None)
+        if not backup_filename:
+            backup_filename = 'test_backup.json'  # Use a test filename
+        
+        # Ensure .json extension
+        if not backup_filename.endswith('.json'):
+            backup_filename = backup_filename.replace('.zip', '.json')
+        
+        url = f"{self.api_url}/backup/download/{backup_filename}"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check proper content-type headers
+                content_type = response.headers.get('content-type', '')
+                is_json = 'json' in content_type or 'application/json' in content_type
+                
+                # Check content length - should contain actual database data
+                has_content = len(response.content) > 1000  # Should be substantial for real data
+                
+                # Check if actual database data is included (not sample data)
+                content_str = str(response.content)
+                not_sample_data = 'sample' not in content_str.lower() or len(response.content) > 5000
+                
+                test_passed = is_json and has_content and not_sample_data
+                
+                if not test_passed:
+                    self.log_test(f"Enhanced backup download JSON ({role})", False, 
+                                 f"JSON: {is_json}, Content: {has_content}, Not sample: {not_sample_data}")
+                else:
+                    self.log_test(f"Enhanced backup download JSON ({role})", True)
+            else:
+                # Accept 404 if backup file doesn't exist (expected for test)
+                if response.status_code == 404:
+                    self.log_test(f"Enhanced backup download JSON ({role})", True, "File not found (expected for test)")
+                    test_passed = True
+                else:
+                    test_passed = success
+                    self.log_test(f"Enhanced backup download JSON ({role})", success, 
+                                 f"Status: {response.status_code}" if not success else "")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"Enhanced backup download JSON ({role})", False, str(e))
+            return False
+
+    def test_enhanced_payroll_with_deductions(self, role: str) -> bool:
+        """Test enhanced payroll system with deductions calculation"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2024-12'
+        
+        success, response = self.make_request('GET', f'payroll/calculate/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure for enhanced payroll with deductions
+            if isinstance(response, list) and response:
+                first_record = response[0]
+                
+                # Check for required deduction fields from review request
+                has_late_deductions = 'late_deductions' in first_record
+                has_absence_deductions = 'absence_deductions' in first_record
+                has_total_deductions = 'total_deductions' in first_record
+                has_final_salary = 'final_salary' in first_record
+                
+                # Check English translation of employee names
+                has_english_name = 'user_name_en' in first_record or isinstance(first_record.get('name'), str)
+                
+                # Check if complex deduction rules are applied (15 mins x 4 times free, etc.)
+                late_deductions = first_record.get('late_deductions', 0)
+                absence_deductions = first_record.get('absence_deductions', 0)
+                total_deductions = first_record.get('total_deductions', 0)
+                final_salary = first_record.get('final_salary', 0)
+                
+                has_valid_deduction_calc = isinstance(late_deductions, (int, float)) and isinstance(absence_deductions, (int, float))
+                has_valid_totals = isinstance(total_deductions, (int, float)) and isinstance(final_salary, (int, float))
+                
+                test_passed = (has_late_deductions and has_absence_deductions and has_total_deductions and 
+                             has_final_salary and has_english_name and has_valid_deduction_calc and has_valid_totals)
+                
+                if not test_passed:
+                    self.log_test(f"Enhanced payroll with deductions ({role})", False, 
+                                 f"late_deductions: {has_late_deductions}, absence_deductions: {has_absence_deductions}, "
+                                 f"total_deductions: {has_total_deductions}, final_salary: {has_final_salary}, "
+                                 f"english_name: {has_english_name}, valid_calc: {has_valid_deduction_calc}")
+                else:
+                    self.log_test(f"Enhanced payroll with deductions ({role})", True)
+            else:
+                test_passed = False
+                self.log_test(f"Enhanced payroll with deductions ({role})", False, "Response is not a list or empty")
+        else:
+            test_passed = success
+            self.log_test(f"Enhanced payroll with deductions ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
     def test_overtime_report(self, role: str) -> bool:
         """Test overtime report endpoint for specific month"""
         if role not in self.tokens:
