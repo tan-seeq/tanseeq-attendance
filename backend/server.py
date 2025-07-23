@@ -2874,7 +2874,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         story.append(Spacer(1, 20))
         
         # Report title with enhanced styling
-        report_title_text = Paragraph("Payroll Report<br/>تقرير الرواتب", title_style)
+        report_title_text = Paragraph("Enhanced Payroll Report with Deductions<br/>تقرير الرواتب المحسن مع الخصومات التفصيلية", title_style)
         story.append(report_title_text)
         
         # Period info
