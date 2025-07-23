@@ -5459,13 +5459,29 @@ const BackupManagement = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => downloadBackup(backup.filename)}
-                          className="text-blue-600 hover:text-blue-900 flex items-center"
-                        >
-                          <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
-                          تحميل
-                        </button>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => downloadBackup(backup.filename)}
+                            className="text-blue-600 hover:text-blue-900 flex items-center"
+                          >
+                            <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
+                            تحميل JSON
+                          </button>
+                          <button
+                            onClick={() => downloadBackup(backup.filename.replace('.json', '.zip'))}
+                            className="text-green-600 hover:text-green-900 flex items-center"
+                          >
+                            <DocumentArrowDownIcon className="h-4 w-4 mr-1" />
+                            تحميل ZIP
+                          </button>
+                          <button
+                            onClick={() => deleteBackup(backup.filename)}
+                            className="text-red-600 hover:text-red-900 flex items-center"
+                          >
+                            <TrashIcon className="h-4 w-4 mr-1" />
+                            حذف
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
