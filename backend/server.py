@@ -4441,6 +4441,9 @@ async def get_overtime_report(month: str, current_user: User = Depends(get_admin
             "check_out": {"$exists": True}
         }).to_list(1000)
         
+        total_overtime_for_employee = 0
+        employee_overtime_records = []
+        
         for record in attendance_records:
             check_in_str = record.get("check_in")
             check_out_str = record.get("check_out")
