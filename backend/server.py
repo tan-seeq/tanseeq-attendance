@@ -3603,7 +3603,210 @@ async def get_message_stats(message_id: str, current_user: User = Depends(get_cu
         "time_ago": get_time_ago(message["created_at"])
     }
 
-# ============ SUPER ADMIN: CREATE REQUESTS ON BEHALF OF EMPLOYEES ============
+@api_router.post("/backup/create-download")
+async def create_backup_for_download(current_user: User = Depends(get_super_admin_user)):
+    """Create a backup file for download (Super admin only)"""
+    try:
+        import subprocess
+        import zipfile
+        import tempfile
+        from pathlib import Path
+        
+        # Create timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_name = f"tanseeq_backup_{timestamp}"
+        
+        # Create temporary directory for backup
+        with tempfile.TemporaryDirectory() as temp_dir:
+            backup_folder = Path(temp_dir) / backup_name
+            backup_folder.mkdir(exist_ok=True)
+            
+            # Get database name from environment
+            mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/tanseeq_hr')
+            
+            # Use mongodump to create backup
+            dump_command = [
+                "mongodump",
+                "--uri", mongo_url,
+                "--out", str(backup_folder)
+            ]
+            
+            result = subprocess.run(dump_command, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                raise HTTPException(status_code=500, detail=f"Database backup failed: {result.stderr}")
+            
+            # Create zip file
+            zip_path = Path(temp_dir) / f"{backup_name}.zip"
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, dirs, files in os.walk(backup_folder):
+                    for file in files:
+                        file_path = Path(root) / file
+                        arcname = file_path.relative_to(backup_folder)
+                        zipf.write(file_path, arcname)
+            
+            # Read zip file content
+            with open(zip_path, 'rb') as f:
+                zip_content = f.read()
+            
+            # Encode to base64 for download
+            import base64
+            zip_base64 = base64.b64encode(zip_content).decode()
+            
+            # Log activity
+            await log_activity(
+                current_user.id,
+                "backup_created_for_download",
+                f"Created downloadable backup: {backup_name}.zip ({len(zip_content)} bytes)"
+            )
+            
+            return {
+                "message": "تم إنشاء النسخة الاحتياطية بنجاح",
+                "backup_name": f"{backup_name}.zip",
+                "file_size": len(zip_content),
+                "created_at": datetime.now().isoformat(),
+                "download_data": f"data:application/zip;base64,{zip_base64}"
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating backup: {str(e)}")
+
+@api_router.post("/backup/restore")
+async def restore_backup(
+    backup_file: UploadFile = File(...),
+    current_user: User = Depends(get_super_admin_user)
+):
+    """Restore database from backup file (Super admin only)"""
+    try:
+        import subprocess
+        import zipfile
+        import tempfile
+        from pathlib import Path
+        
+        # Validate file type
+        if not backup_file.filename.endswith('.zip'):
+            raise HTTPException(status_code=400, detail="يجب أن يكون الملف من نوع ZIP")
+        
+        # Read uploaded file
+        backup_content = await backup_file.read()
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Save uploaded file
+            zip_path = Path(temp_dir) / backup_file.filename
+            with open(zip_path, 'wb') as f:
+                f.write(backup_content)
+            
+            # Extract zip file
+            extract_folder = Path(temp_dir) / "extracted"
+            with zipfile.ZipFile(zip_path, 'r') as zipf:
+                zipf.extractall(extract_folder)
+            
+            # Find the database folder (usually contains 'tanseeq_hr' folder)
+            db_folders = list(extract_folder.rglob("tanseeq_hr"))
+            if not db_folders:
+                raise HTTPException(status_code=400, detail="لا يحتوي الملف على نسخة احتياطية صحيحة")
+            
+            db_folder = db_folders[0]
+            
+            # Get MongoDB connection details
+            mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/tanseeq_hr')
+            
+            # Warning: This will drop existing database!
+            # Use mongorestore to restore
+            restore_command = [
+                "mongorestore",
+                "--uri", mongo_url,
+                "--drop",  # Drop existing collections
+                str(db_folder)
+            ]
+            
+            result = subprocess.run(restore_command, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                raise HTTPException(status_code=500, detail=f"Database restore failed: {result.stderr}")
+            
+            # Log activity
+            await log_activity(
+                current_user.id,
+                "backup_restored",
+                f"Restored database from backup: {backup_file.filename} ({len(backup_content)} bytes)"
+            )
+            
+            return {
+                "message": "تم استعادة النسخة الاحتياطية بنجاح ✅",
+                "restored_from": backup_file.filename,
+                "file_size": len(backup_content),
+                "restored_at": datetime.now().isoformat(),
+                "warning": "تم استبدال قاعدة البيانات الحالية بالكامل"
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error restoring backup: {str(e)}")
+
+@api_router.get("/backup/list-files")
+async def list_backup_files(current_user: User = Depends(get_super_admin_user)):
+    """List all backup files available for download (Super admin only)"""
+    try:
+        backup_dir = Path("/app/backups")
+        if not backup_dir.exists():
+            return {"backups": [], "total_backups": 0}
+        
+        backup_files = []
+        for backup_file in backup_dir.glob("*.zip"):
+            stat = backup_file.stat()
+            backup_files.append({
+                "filename": backup_file.name,
+                "size": stat.st_size,
+                "size_mb": round(stat.st_size / (1024 * 1024), 2),
+                "created_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+        
+        # Sort by creation time (newest first)
+        backup_files.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        return {
+            "backups": backup_files,
+            "total_backups": len(backup_files),
+            "backup_directory": str(backup_dir)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing backups: {str(e)}")
+
+@api_router.get("/backup/download/{filename}")
+async def download_backup_file(
+    filename: str,
+    current_user: User = Depends(get_super_admin_user)  
+):
+    """Download specific backup file (Super admin only)"""
+    try:
+        from fastapi.responses import FileResponse
+        
+        backup_dir = Path("/app/backups")
+        backup_file = backup_dir / filename
+        
+        if not backup_file.exists():
+            raise HTTPException(status_code=404, detail="الملف غير موجود")
+        
+        if not filename.endswith('.zip'):
+            raise HTTPException(status_code=400, detail="نوع الملف غير مدعوم")
+        
+        # Log download activity
+        await log_activity(
+            current_user.id,
+            "backup_downloaded",
+            f"Downloaded backup file: {filename}"
+        )
+        
+        return FileResponse(
+            path=str(backup_file),
+            filename=filename,
+            media_type='application/zip'
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error downloading backup: {str(e)}")
 
 @api_router.post("/admin/create-leave-request")
 async def create_leave_request_for_employee(
