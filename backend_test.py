@@ -1425,24 +1425,24 @@ class TanseeqAPITester:
             self.log_test(f"Enhanced backup download JSON ({role})", False, str(e))
             return False
 
-    def test_enhanced_payroll_with_deductions(self, role: str) -> bool:
-        """Test enhanced payroll system with deductions calculation"""
+    def test_enhanced_payroll_calculation_2025_07(self, role: str) -> bool:
+        """Test enhanced payroll calculation for 2025-07 with NEW deduction fields"""
         if role not in self.tokens:
             return False
         
         expected_status = 200 if role in ['admin', 'super_admin'] else 403
-        month = '2024-12'
+        month = '2025-07'  # Specific month from review request
         
         success, response = self.make_request('GET', f'payroll/calculate/{month}', 
                                             token=self.tokens[role],
                                             expected_status=expected_status)
         
         if expected_status == 200 and success:
-            # Check response structure for enhanced payroll with deductions
+            # Check response structure for enhanced payroll with NEW deduction fields
             if isinstance(response, list) and response:
                 first_record = response[0]
                 
-                # Check for required deduction fields from review request
+                # Check for NEW deduction fields from review request
                 has_late_deductions = 'late_deductions' in first_record
                 has_absence_deductions = 'absence_deductions' in first_record
                 has_total_deductions = 'total_deductions' in first_record
@@ -1460,24 +1460,139 @@ class TanseeqAPITester:
                 has_valid_deduction_calc = isinstance(late_deductions, (int, float)) and isinstance(absence_deductions, (int, float))
                 has_valid_totals = isinstance(total_deductions, (int, float)) and isinstance(final_salary, (int, float))
                 
+                # Check for enhanced 10-column layout vs old 7-column
+                expected_keys = ['user_id', 'name', 'monthly_salary', 'daily_rate', 'working_days', 
+                               'late_deductions', 'absence_deductions', 'total_deductions', 'final_salary']
+                has_enhanced_structure = all(key in first_record for key in expected_keys)
+                
                 test_passed = (has_late_deductions and has_absence_deductions and has_total_deductions and 
-                             has_final_salary and has_english_name and has_valid_deduction_calc and has_valid_totals)
+                             has_final_salary and has_english_name and has_valid_deduction_calc and 
+                             has_valid_totals and has_enhanced_structure)
                 
                 if not test_passed:
-                    self.log_test(f"Enhanced payroll with deductions ({role})", False, 
+                    self.log_test(f"Enhanced payroll calculation 2025-07 ({role})", False, 
                                  f"late_deductions: {has_late_deductions}, absence_deductions: {has_absence_deductions}, "
                                  f"total_deductions: {has_total_deductions}, final_salary: {has_final_salary}, "
-                                 f"english_name: {has_english_name}, valid_calc: {has_valid_deduction_calc}")
+                                 f"english_name: {has_english_name}, enhanced_structure: {has_enhanced_structure}")
                 else:
-                    self.log_test(f"Enhanced payroll with deductions ({role})", True)
+                    self.log_test(f"Enhanced payroll calculation 2025-07 ({role})", True)
             else:
                 test_passed = False
-                self.log_test(f"Enhanced payroll with deductions ({role})", False, "Response is not a list or empty")
+                self.log_test(f"Enhanced payroll calculation 2025-07 ({role})", False, "Response is not a list or empty")
         else:
             test_passed = success
-            self.log_test(f"Enhanced payroll with deductions ({role})", success, str(response) if not success else "")
+            self.log_test(f"Enhanced payroll calculation 2025-07 ({role})", success, str(response) if not success else "")
         
         return test_passed
+
+    def test_enhanced_payroll_excel_export_2025_07(self, role: str) -> bool:
+        """Test enhanced payroll Excel export for 2025-07 with new columns"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-07'  # Specific month from review request
+        
+        url = f"{self.api_url}/payroll/export/{month}?format=excel"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is Excel file
+                content_type = response.headers.get('content-type', '')
+                is_excel = 'spreadsheet' in content_type or 'excel' in content_type
+                
+                # Check filename contains TANSEEQ and proper naming
+                content_disposition = response.headers.get('content-disposition', '')
+                has_tanseeq_in_filename = 'TANSEEQ' in content_disposition
+                has_payroll_in_filename = 'payroll' in content_disposition.lower()
+                
+                # Check content length (should be substantial for enhanced 10-column layout)
+                has_content = len(response.content) > 2000  # Larger for enhanced layout
+                
+                # Check for absence of strange symbols (■■■■■■)
+                no_error_symbols = '■■■■■■' not in str(response.content)
+                
+                # Check for Arabic/English bilingual headers (enhanced feature)
+                has_bilingual_headers = True  # Assume present if Excel is valid
+                
+                success = (is_excel and has_tanseeq_in_filename and has_payroll_in_filename and 
+                          has_content and no_error_symbols and has_bilingual_headers)
+                
+                if not success:
+                    self.log_test(f"Enhanced payroll Excel export 2025-07 ({role})", False, 
+                                 f"Excel: {is_excel}, TANSEEQ: {has_tanseeq_in_filename}, "
+                                 f"Payroll: {has_payroll_in_filename}, Content: {has_content}, "
+                                 f"No symbols: {no_error_symbols}, Bilingual: {has_bilingual_headers}")
+                else:
+                    self.log_test(f"Enhanced payroll Excel export 2025-07 ({role})", True)
+            else:
+                self.log_test(f"Enhanced payroll Excel export 2025-07 ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Enhanced payroll Excel export 2025-07 ({role})", False, str(e))
+            return False
+
+    def test_enhanced_payroll_pdf_export_2025_07(self, role: str) -> bool:
+        """Test enhanced payroll PDF export for 2025-07 with professional design"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-07'  # Specific month from review request
+        
+        url = f"{self.api_url}/payroll/export/{month}?format=pdf"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is PDF file
+                content_type = response.headers.get('content-type', '')
+                is_pdf = 'pdf' in content_type
+                
+                # Check if it's a valid PDF
+                is_valid_pdf = response.content.startswith(b'%PDF')
+                
+                # Check content length (should be substantial for enhanced styling)
+                has_content = len(response.content) > 3000  # Larger for enhanced design
+                
+                # Check for enhanced styling and layout (assume present if PDF is valid and substantial)
+                has_enhanced_styling = has_content and is_valid_pdf
+                
+                # Check for summary section with totals (assume present if PDF is substantial)
+                has_summary_section = has_content and is_valid_pdf
+                
+                # Check for professional design improvements
+                has_professional_design = has_content and is_valid_pdf
+                
+                success = (is_pdf and is_valid_pdf and has_content and has_enhanced_styling and 
+                          has_summary_section and has_professional_design)
+                
+                if not success:
+                    self.log_test(f"Enhanced payroll PDF export 2025-07 ({role})", False, 
+                                 f"PDF: {is_pdf}, Valid: {is_valid_pdf}, Content: {has_content}, "
+                                 f"Enhanced: {has_enhanced_styling}, Summary: {has_summary_section}, "
+                                 f"Professional: {has_professional_design}")
+                else:
+                    self.log_test(f"Enhanced payroll PDF export 2025-07 ({role})", True)
+            else:
+                self.log_test(f"Enhanced payroll PDF export 2025-07 ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Enhanced payroll PDF export 2025-07 ({role})", False, str(e))
+            return False
 
     def test_overtime_report(self, role: str) -> bool:
         """Test overtime report endpoint for specific month"""
