@@ -13,7 +13,11 @@ from typing import Dict, Any, Optional
 class TanseeqAPITester:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip('/')
-        self.api_url = f"{self.base_url}/api"
+        # Check if base_url already ends with /api
+        if self.base_url.endswith('/api'):
+            self.api_url = self.base_url
+        else:
+            self.api_url = f"{self.base_url}/api"
         self.tokens = {}
         self.users = {}
         self.tests_run = 0
