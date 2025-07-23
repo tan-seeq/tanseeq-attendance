@@ -6241,7 +6241,9 @@ def main():
     
     # Check if we should run focused tests or comprehensive tests
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '--backup-system':
+    if len(sys.argv) > 1 and sys.argv[1] == '--enhanced-payroll':
+        success = tester.run_enhanced_payroll_tests()
+    elif len(sys.argv) > 1 and sys.argv[1] == '--backup-system':
         success = tester.run_backup_system_tests()
     elif len(sys.argv) > 1 and sys.argv[1] == '--flexible-schedule':
         success = tester.run_flexible_schedule_tests()
