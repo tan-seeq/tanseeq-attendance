@@ -2576,12 +2576,12 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.title = f"payroll_{month}"
         
         # Set column widths for enhanced payroll report
-        column_widths = [20, 15, 12, 12, 12, 15, 15, 15, 12]
+        column_widths = [18, 14, 12, 12, 10, 14, 14, 14, 14, 14]
         for i, width in enumerate(column_widths, 1):
             ws.column_dimensions[get_column_letter(i)].width = width
         
         # Company header with logo styling  
-        ws.merge_cells('A1:I1')
+        ws.merge_cells('A1:J1')
         company_cell = ws['A1']
         company_cell.value = "TANSEEQ TAX CONSULTANCY"
         company_cell.font = Font(name="Arial", size=20, bold=True, color="FFFFFF")
@@ -2590,7 +2590,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[1].height = 40
         
         # Logo area (simulated with styling)
-        ws.merge_cells('A2:I2')
+        ws.merge_cells('A2:J2')
         logo_cell = ws['A2']
         logo_cell.value = "Professional Tax Consultancy Services - خدمات استشارات ضريبية محترفة"
         logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
@@ -2599,21 +2599,29 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[2].height = 25
         
         # Report title with enhanced styling
-        ws.merge_cells('A3:I3')
+        ws.merge_cells('A3:J3')
         title_cell = ws['A3']
-        title_cell.value = f"Payroll Report with Automatic Deductions - {month}"
-        title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
+        title_cell.value = f"Enhanced Payroll Report with Automatic Deductions - تقرير الرواتب المحسن مع الخصومات التلقائية - {month}"
+        title_cell.font = Font(name="Arial", size=14, bold=True, color="1F4E79")
         title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
         title_cell.alignment = Alignment(horizontal="center", vertical="center")
-        ws.row_dimensions[3].height = 30
+        ws.row_dimensions[3].height = 35
         
         # Date and generation info
-        ws.merge_cells('A4:I4')
+        ws.merge_cells('A4:J4')
         date_cell = ws['A4']
-        date_cell.value = f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UAE Time"
+        date_cell.value = f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UAE Time - تم الإنشاء في الوقت الإماراتي"
         date_cell.font = Font(name="Arial", size=10, color="666666")
         date_cell.alignment = Alignment(horizontal="center")
         ws.row_dimensions[4].height = 20
+        
+        # Separator row for enhanced design
+        ws.merge_cells('A5:J5')
+        separator_cell = ws['A5']
+        separator_cell.value = "────────────────────────────────────────────────────────────────"
+        separator_cell.font = Font(name="Arial", size=8, color="CCCCCC")
+        separator_cell.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[5].height = 10
         
         # Headers with enhanced styling  
         headers = [
