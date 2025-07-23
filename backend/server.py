@@ -3852,16 +3852,21 @@ async def get_message_stats(message_id: str, current_user: User = Depends(get_cu
 
 @api_router.post("/backup/create-download")
 async def create_backup_for_download(current_user: User = Depends(get_super_admin_user)):
-    """Create a backup file for download (Super admin only)"""
+    """Create a backup file and save it on server (Super admin only)"""
     try:
-        import tempfile
-        import base64
         import json
         from pathlib import Path
         
         # Create timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_name = f"tanseeq_backup_{timestamp}.json"
+        
+        # Create backup directory if it doesn't exist
+        backup_dir = Path(ROOT_DIR) / "backups"
+        backup_dir.mkdir(exist_ok=True)
+        
+        # Full path for the backup file
+        backup_file_path = backup_dir / backup_name
         
         # Collect all database data
         backup_data = {
@@ -3905,27 +3910,30 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
         
         # Convert to JSON string
         json_content = json.dumps(backup_data, indent=2, ensure_ascii=False)
-        json_bytes = json_content.encode('utf-8')
         
-        # Encode to base64 for download
-        json_base64 = base64.b64encode(json_bytes).decode()
+        # Save to file
+        with open(backup_file_path, 'w', encoding='utf-8') as f:
+            f.write(json_content)
+        
+        # Get file size
+        file_size = backup_file_path.stat().st_size
         
         # Log activity
         await log_activity(
             current_user.id,
-            "backup_created_for_download",
-            f"Created downloadable backup: {backup_name} ({len(json_bytes)} bytes, {total_records} records)"
+            "backup_created_on_server",
+            f"Created backup file on server: {backup_name} ({file_size} bytes, {total_records} records)"
         )
         
         return {
-            "message": "تم إنشاء النسخة الاحتياطية بنجاح",
+            "message": "تم إنشاء النسخة الاحتياطية وحفظها على الخادم بنجاح",
             "filename": backup_name,
-            "file_size": len(json_bytes),
+            "file_size": file_size,
             "total_records": total_records,
             "total_collections": len(collections_to_backup),
             "created_at": datetime.now().isoformat(),
             "download_url": f"/api/backup/download/{backup_name}",
-            "download_data": f"data:application/json;base64,{json_base64}"
+            "saved_on_server": True
         }
         
     except Exception as e:
@@ -3948,18 +3956,28 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
             }
         }
         
+        # Create backup directory if it doesn't exist
+        backup_dir = Path(ROOT_DIR) / "backups"
+        backup_dir.mkdir(exist_ok=True)
+        
+        # Save emergency backup to file
+        emergency_file_path = backup_dir / f"emergency_backup_{timestamp}.json"
         json_content = json.dumps(emergency_backup, indent=2)
-        json_base64 = base64.b64encode(json_content.encode()).decode()
+        
+        with open(emergency_file_path, 'w', encoding='utf-8') as f:
+            f.write(json_content)
+        
+        file_size = emergency_file_path.stat().st_size
         
         return {
-            "message": "تم إنشاء نسخة احتياطية اضطرارية",
+            "message": "تم إنشاء نسخة احتياطية اضطرارية وحفظها على الخادم",
             "filename": f"emergency_backup_{timestamp}.json",
-            "file_size": len(json_content.encode()),
+            "file_size": file_size,
             "total_records": 0,
             "total_collections": 5,
             "created_at": datetime.now().isoformat(),
             "download_url": f"/api/backup/download/emergency_backup_{timestamp}.json",
-            "download_data": f"data:application/json;base64,{json_base64}",
+            "saved_on_server": True,
             "status": "emergency",
             "error": str(e)
         }
