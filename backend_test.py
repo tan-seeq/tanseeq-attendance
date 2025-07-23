@@ -4879,16 +4879,15 @@ class TanseeqAPITester:
             
             # NEW: Overtime Reports Tests (Arabic review request)
             print(f"\n⏰ Testing Overtime Reports System ({role.upper()}):")
-            self.test_overtime_report(role)
-            self.test_overtime_report_excel_export(role)
-            self.test_overtime_report_pdf_export(role)
+            self.test_overtime_reports_system(role)
+            self.test_overtime_reports_excel_export(role)
+            self.test_overtime_reports_pdf_export(role)
             
             # NEW: Enhanced Backup System Tests (Arabic review request)
             print(f"\n💾 Testing Enhanced Backup System ({role.upper()}):")
-            self.test_backup_create_download(role)
-            self.test_backup_list_files(role)
-            self.test_backup_download(role)
-            self.test_backup_restore(role)
+            self.test_enhanced_backup_create_download(role)
+            self.test_enhanced_backup_download_zip(role)
+            self.test_enhanced_backup_download_json(role)
             
             # Legacy tests (if they exist)
             if hasattr(self, 'test_payroll_calculate_with_deductions'):
