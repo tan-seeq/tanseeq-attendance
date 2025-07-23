@@ -4605,19 +4605,19 @@ async def export_overtime_report(month: str, format: str = "excel", current_user
                     f"{detail['total_overtime_hours']:.2f}h",
                     detail["overtime_type"]
                 ]
-            
-            for col, value in enumerate(row_data, 1):
-                cell = ws.cell(row=row_num, column=col)
-                cell.value = value
-                cell.font = Font(name="Arial", size=10)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
                 
-                # Alternating row colors
-                if row_num % 2 == 0:
-                    cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
-            
-            ws.row_dimensions[row_num].height = 25
-            row_num += 1
+                for col, value in enumerate(row_data, 1):
+                    cell = ws.cell(row=row_num, column=col)
+                    cell.value = value
+                    cell.font = Font(name="Arial", size=10)
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    
+                    # Alternating row colors
+                    if row_num % 2 == 0:
+                        cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
+                
+                ws.row_dimensions[row_num].height = 25
+                row_num += 1
         
         # Add borders
         thin_border = Border(
