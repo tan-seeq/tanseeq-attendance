@@ -2643,7 +2643,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ws.row_dimensions[7].height = 35
         
         # Data rows with enhanced styling
-        row_num = 7
+        row_num = 8
         for emp in payroll_data:
             deduction_details_text = "; ".join(emp.get("deduction_details", []))
             if not deduction_details_text:
@@ -2658,7 +2658,8 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
                 f"AED {emp['total_deductions']:.2f}",
                 deduction_details_text,
                 f"AED {emp['final_salary']:.2f}",
-                emp["month"]
+                emp["month"],
+                "Active"  # New Status column
             ]
             
             for col, value in enumerate(row_data, 1):
