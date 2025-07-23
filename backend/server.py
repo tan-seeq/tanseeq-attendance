@@ -3988,47 +3988,97 @@ async def download_backup_file(
 ):
     """Download specific backup file (Super admin only)"""
     try:
-        from fastapi.responses import Response
+        import json
+        import zipfile
+        import tempfile
+        from pathlib import Path
+        from fastapi.responses import StreamingResponse
         
         # Validate filename
-        if not filename.endswith('.json'):
-            raise HTTPException(status_code=400, detail="نوع الملف غير مدعوم. يجب أن يكون JSON")
+        if not (filename.endswith('.json') or filename.endswith('.zip')):
+            raise HTTPException(status_code=400, detail="نوع الملف غير مدعوم. يجب أن يكون JSON أو ZIP")
         
-        # Generate sample backup content based on current data
-        backup_content = {
+        # Generate actual backup content from database
+        backup_data = {
             "backup_info": {
                 "filename": filename,
                 "created_at": datetime.now().isoformat(),
                 "version": "1.0",
-                "database": "tanseeq_hr"
+                "database": "tanseeq_hr",
+                "total_collections": 0,
+                "total_records": 0
             },
-            "collections": {
-                "users": [{"sample": "user data"}],
-                "attendance": [{"sample": "attendance data"}],
-                "leaves": [{"sample": "leave data"}],
-                "field_exits": [{"sample": "field exit data"}],
-                "messages": [{"sample": "message data"}]
-            }
+            "collections": {}
         }
         
-        import json
-        content = json.dumps(backup_content, indent=2, ensure_ascii=False)
+        # Get all collections with real data
+        collections_to_backup = ["users", "attendance", "leaves", "field_exits", "messages", "late_penalties", "activity_logs"]
+        
+        total_records = 0
+        for collection_name in collections_to_backup:
+            collection = getattr(db, collection_name)
+            records = await collection.find({}).to_list(None)
+            
+            # Convert ObjectId and datetime to strings for JSON serialization
+            serialized_records = []
+            for record in records:
+                serialized_record = {}
+                for key, value in record.items():
+                    if key == "_id":
+                        continue  # Skip MongoDB _id
+                    elif isinstance(value, datetime):
+                        serialized_record[key] = value.isoformat()
+                    else:
+                        serialized_record[key] = value
+                serialized_records.append(serialized_record)
+            
+            backup_data["collections"][collection_name] = serialized_records
+            total_records += len(serialized_records)
+        
+        backup_data["backup_info"]["total_collections"] = len(collections_to_backup)
+        backup_data["backup_info"]["total_records"] = total_records
+        
+        # Convert to JSON
+        json_content = json.dumps(backup_data, indent=2, ensure_ascii=False)
         
         # Log download activity
         await log_activity(
             current_user.id,
             "backup_downloaded",
-            f"Downloaded backup file: {filename}"
+            f"Downloaded backup file: {filename} ({len(json_content)} bytes, {total_records} records)"
         )
         
-        return Response(
-            content=content.encode('utf-8'),
-            media_type='application/json',
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}",
-                "Content-Type": "application/json; charset=utf-8"
-            }
-        )
+        if filename.endswith('.zip'):
+            # Create ZIP file
+            from io import BytesIO
+            zip_buffer = BytesIO()
+            
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                json_filename = filename.replace('.zip', '.json')
+                zip_file.writestr(json_filename, json_content.encode('utf-8'))
+            
+            zip_buffer.seek(0)
+            
+            return StreamingResponse(
+                BytesIO(zip_buffer.read()),
+                media_type='application/zip',
+                headers={
+                    "Content-Disposition": f"attachment; filename={filename}",
+                    "Content-Type": "application/zip"
+                }
+            )
+        else:
+            # Return JSON file
+            from io import BytesIO
+            
+            return StreamingResponse(
+                BytesIO(json_content.encode('utf-8')),
+                media_type='application/json',
+                headers={
+                    "Content-Disposition": f"attachment; filename={filename}",
+                    "Content-Type": "application/json; charset=utf-8"
+                }
+            )
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error downloading backup: {str(e)}")
