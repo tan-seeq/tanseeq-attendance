@@ -2925,7 +2925,37 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ]))
         
         story.append(table)
-        story.append(Spacer(1, 30))
+        story.append(Spacer(1, 20))
+        
+        # Add summary section
+        summary_style = ParagraphStyle(
+            'SummaryStyle',
+            parent=styles['Normal'],
+            fontSize=12,
+            spaceAfter=10,
+            alignment=1,
+            textColor=colors.Color(0.2, 0.2, 0.2),
+            fontName='Helvetica-Bold'
+        )
+        
+        # Calculate totals
+        total_monthly_salary = sum(emp['monthly_salary'] for emp in payroll_data)
+        total_basic_salary = sum(emp['basic_salary'] for emp in payroll_data)
+        total_deductions = sum(emp.get('total_deductions', 0) for emp in payroll_data)
+        total_final_salary = sum(emp['final_salary'] for emp in payroll_data)
+        
+        summary_text = f"""
+        <b>Summary | الملخص</b><br/>
+        Total Employees: {len(payroll_data)} | إجمالي الموظفين<br/>
+        Total Monthly Salaries: AED {total_monthly_salary:.2f} | إجمالي الرواتب الشهرية<br/>
+        Total Basic Salaries: AED {total_basic_salary:.2f} | إجمالي الرواتب الأساسية<br/>
+        Total Deductions: AED {total_deductions:.2f} | إجمالي الخصومات<br/>
+        Total Final Salaries: AED {total_final_salary:.2f} | إجمالي الرواتب النهائية
+        """
+        
+        summary_paragraph = Paragraph(summary_text, summary_style)
+        story.append(summary_paragraph)
+        story.append(Spacer(1, 20))
         
         # Professional footer
         footer_style = ParagraphStyle(
@@ -2936,7 +2966,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             textColor=colors.Color(0.4, 0.4, 0.4),
             fontName='Helvetica-Oblique'
         )
-        footer_text = Paragraph("TANSEEQ TAX CONSULTANCY - Employee Management System", footer_style)
+        footer_text = Paragraph("TANSEEQ TAX CONSULTANCY - Comprehensive HR Management System", footer_style)
         story.append(footer_text)
         
         # Build PDF
