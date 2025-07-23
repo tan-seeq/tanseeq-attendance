@@ -2491,6 +2491,8 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
             "approved_field_exits": approved_field_exit_days,
             "unauthorized_absences": max(actual_absences, 0),
             "basic_salary": round(basic_salary, 2),
+            "late_deductions": round(late_deductions, 2),
+            "absence_deductions": round(absence_deductions, 2),
             "total_deductions": round(total_deductions, 2),
             "deduction_details": deduction_details,
             "final_salary": round(final_salary, 2),
