@@ -1,72 +1,94 @@
 <analysis>
-The previous AI engineer successfully transformed the TANSEEQ HR management system from an MVP to a robust, near-production application. The trajectory highlights an iterative development process, addressing critical issues like frontend routing, refining user permissions, implementing flexible working hours, and enhancing report generation (PDF/Excel). Core technologies include FastAPI, React, and MongoDB, with strict adherence to environment variable management and Kubernetes ingress rules. The engineer demonstrated strong debugging skills, particularly with UI and data serialization issues, and incrementally added complex features such as detailed attendance, leave/field exit management, and advanced reporting. Recent efforts focused on automating key HR processes, including notifications, payroll deductions, and enabling administrative actions on behalf of employees, indicating a shift towards a more intelligent and autonomous system.
+The previous AI engineer focused on enhancing the TANSEEQ HR management system from MVP to a production-ready state. Key efforts included refactoring frontend routing, strengthening user permissions, implementing flexible work schedules, and improving report generation (PDF/Excel). Core technologies involved FastAPI, React, and MongoDB, adhering to strict environment variable and Kubernetes ingress rules. The iterative process involved debugging UI and data serialization, incrementally adding complex features like detailed attendance, leave/field exit management, internal messaging, automated backups, and an advanced penalty system. Recent work addressed user-specific feedback, correcting logic for admin notifications and message privacy. The engineer then tackled manual backup/restore, advanced payroll deductions, and an overtime report. The current state is mid-fix on critical backend issues related to these latest features, particularly route conflicts and data structuring, following a comprehensive re-test.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR management system aims to provide comprehensive HR functionalities for TANSEEQ TAX CONSULTANCY, supporting Arabic/English and UAE timezone (UTC+4).
-Initial MVP scope included full-stack development (React, FastAPI, MongoDB), JWT auth, user management (Super Admin, Admin, User), attendance, leave, field exit, reports, payroll, activity logs, secure login, check-in/out, request/approval flows, and Arabic RTL UI.
-Implemented features now include robust employee management with role-based access, flexible attendance rules (e.g., Hatem has no restriction, Tarek from 8 AM, others 9 AM-6 PM), and Free Exit During Working Hours with time tracking. Leave management includes reasons, dates, and file uploads. A payroll system calculates salaries based on attendance with Excel/PDF export. Admin panels allow extensive management. Reports offer advanced filtering, professional design, company logo, and removal of problematic characters. Core fixes addressed blank pages, late status, quick action links, and character issues in reports. Recent additions include who approved and notes for leaves/field exits, and separate departure and return times for field exits.
+The TANSEEQ HR management system provides comprehensive HR functionalities for TANSEEQ TAX CONSULTANCY, supporting Arabic/English and UAE timezone (UTC+4). The initial MVP included full-stack development (React, FastAPI, MongoDB), JWT authentication, role-based user management (Super Admin, Admin, User), attendance tracking, leave and field exit management with request/approval flows, and basic reports, payroll, and activity logs, with Arabic RTL UI.
+
+Implemented features include robust employee management, flexible attendance rules (e.g., Hatem has no restriction, Tarek from 8 AM, others 9 AM-6 PM), and Free Exit During Working Hours with time tracking. Leave management features reasons, dates, and file uploads. A payroll system calculates salaries based on attendance with Excel/PDF export. Admin panels allow extensive management. Reports offer advanced filtering, professional design with company logo, and removal of problematic characters. Core fixes addressed blank pages, late status, quick action links, and character issues in reports. Recent additions included who approved and notes for leaves/field exits, and separate departure and return times for field exits. Automated daily notifications and payroll deductions were requested, alongside Super Admin capabilities to create requests for others and view attachments. Later requests included manual backup/restore, all reports in English (translated), a detailed deduction column in payroll, and a new Overtime Report.
 </product_requirements>
 
 <key_technical_concepts>
--   **Backend:** FastAPI (Python), MongoDB, JWT, bcrypt, pytz, python-multipart, openpyxl/reportlab.
+-   **Backend:** FastAPI (Python), MongoDB, JWT, bcrypt, pytz, python-multipart, openpyxl, reportlab.
 -   **Frontend:** React.js, Tailwind CSS, React Query, React Router, Heroicons, .
 -   **Environment:** Kubernetes, Supervisor.
 -   **Database:** UUIDs for IDs.
--   **Localization:** Arabic RTL support.
--   **Automation:** Cron jobs (implied for future automation).
+-   **Localization:** Arabic RTL support, automatic English translation for reports.
+-   **Automation:** Python  library for scheduled tasks.
 </key_technical_concepts>
 
 <code_architecture>
 The application follows a full-stack architecture with React frontend, FastAPI backend, and MongoDB database.
 
 
--   ****: This file contains the main FastAPI application logic.
-    -   **Changes Made**: Extensive modifications to support new features like flexible working hours, who approved and notes for leaves/field exits, separate  and  for field exits, internal messaging system, penalty system, and improved report generation (fixing character issues, unifying payroll report design, removing Position column). New endpoints were added for messages, automated backups, and penalty calculations.
--   ****: The main React component handling global state and routing.
-    -   **Changes Made**: Refactored to integrate new UI elements and logic for who approved and notes for leaves/field exits, separate departure/return buttons, internal messaging system, backup management UI, penalty system UI, and custom message sending. Dashboard quick action links were fixed to use  instead of . Activity logs page imports were corrected.
--   ****: Used for seeding initial user data.
-    -   **Changes Made**: Updated to ensure 9 TANSEEQ employees with specific roles and salaries are present.
--   ****: Newly created script for managing database backups.
-    -   **Summary**: Handles manual and potentially automated database backups. Requires  library.
--   ****: Newly created script.
-    -   **Summary**: Updates existing employee records in MongoDB to enable the  flag for all users.
--   ****: Manages frontend dependencies.
-    -   **Changes Made**: Updated to include libraries for new features as needed.
--   ****: Manages backend dependencies.
-    -   **Changes Made**: Updated to include new libraries like .
-
-The architecture maintains clear separation of concerns, strict use of environment variables, and adherence to Kubernetes ingress rules (all backend APIs prefixed with ).
+-   ****: This is the core backend file.
+    -   **Importance**: Contains all FastAPI routes, database interactions, business logic, and Pydantic models.
+    -   **Changes Made**: Extensive additions and modifications for:
+        *   New endpoints for Admin/Super Admin to create leave/field exit requests on behalf of employees.
+        *   Attachment viewing endpoints.
+        *   Logic for automated daily notifications (late, absent) and monthly payroll deductions.
+        *   Refinements to exclude admin/super_admin from attendance-based warnings and penalties.
+        *   Adjustments to message visibility (private vs. general).
+        *   QR code based attendance (later removed).
+        *   Manual backup/restore endpoints.
+        *   Enhanced payroll calculation logic to include detailed deductions (late, absence) with complex rules.
+        *   English translation logic for reports.
+        *   Overtime report calculation and export endpoints.
+        *   Numerous fixes for route conflicts and response structures.
+-   ****: The main React component.
+    -   **Importance**: Handles routing, global state, and integrates all major UI components.
+    -   **Changes Made**:
+        *   Integrated new UI components: , , , , .
+        *   Updated React Router configurations to include new paths for these components.
+        *   Modified sidebar navigation to include links to new admin-specific pages.
+        *   Removed QR code related UI components and routing.
+-   ****: Script for database seeding.
+    -   **Importance**: Initializes user data in MongoDB.
+    -   **Changes Made**: Updated to ensure specific TANSEEQ employees with roles/salaries are present, and user  was added and fixed to resolve login issues (missing fields, bcrypt password).
+-   ****: Script for automated database backups.
+    -   **Importance**: Handles scheduled database backups.
+    -   **Changes Made**: No explicit changes mentioned in the trajectory, but it serves as a reference for scheduling.
+-   ****: Script to update employee schedules.
+    -   **Importance**: Enables  flag for all users.
+    -   **Changes Made**: No explicit changes mentioned.
+-   ****: *New file created.*
+    -   **Importance**: Intended to house the logic for the automated daily notifications and monthly payroll deductions using the  library.
+    -   **Changes Made**: Created, but its full implementation details for automation within the  library are not detailed in the trajectory.
+-   ** & **: Dependency managers.
+    -   **Importance**: List frontend (yarn) and backend (pip) dependencies.
+    -   **Changes Made**: Updated to include new libraries like  (backend).
+-   ****: Testing protocol and results.
+    -   **Importance**: Documents the user's problem statement, testing instructions, and records test outcomes.
+    -   **Changes Made**: Frequently updated to reflect testing progress, new tasks, and results.
 </code_architecture>
 
 <pending_tasks>
--   Frontend integration for who approved and notes on leave/field exit requests (partially done, core logic is backend-complete).
--   Frontend integration for separate departure time and return time buttons for field exit requests (partially done).
--   File preview for leave attachments (full-screen image preview in admin panel) - not explicitly confirmed as implemented.
--   Automation of daily/monthly alerts (late, absent, deductions).
--   Automation of payroll deductions based on attendance/penalties.
--   Super Admin ability to create field exit/leave requests on behalf of employees.
--   Admin/Super Admin ability to view attachments from reports/leave/field exit requests.
+The AI engineer's most recent comprehensive test failed, indicating critical issues remain for the newly implemented features.
+-   **Overtime Report**:  endpoint gives Invalid report type and export fails. Overtime calculation and English translation are not working.
+-   **Backup System**: Creating backups doesn't return a correct filename. Downloading files in ZIP format is not working.
+-   **Enhanced Payroll Report**: Missing deduction fields (, ). Complex deduction rules (e.g., 15 mins x 4 times free, >20 mins late is half-day, 1-2 hours late is half-day, >2 hours late is full-day, absence is two-day deduction) are not fully applied.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was tasked with making the notification and deduction systems fully automatic, and adding administrative capabilities for creating requests on behalf of employees and viewing attachments.
+Immediately before this summary request, the AI engineer had implemented several significant features and was in the process of debugging them after a comprehensive test run.
 
-The current state of the application includes:
--   **Internal Messaging System**: Allows Super Admins/Admins to send general or custom messages to all employees, displayed on the Dashboard. This includes a special Exceptional Friday Workday announcement button for Hatem (Super Admin), which automatically calculates the next Friday's date and sends a predefined message. Messages track read/unread status and provide admin statistics on who has read them.
--   **Daily Auto-Backup System**: A backend script  handles automatic daily database backups (at 2 AM) and allows Hatem to trigger manual backups, view backup statistics, and automatically clean old backups (older than 30 days).
--   **Advanced Penalty System**: Implements complex rules for late arrivals and absences: 15 mins x 4 times are free, then accumulated minutes are deducted; >20 mins late incurs actual time deduction; 1-2 hours late is half-day deduction; >2 hours late is a full-day deduction. These penalties can be calculated and applied by Hatem, impacting payroll.
--   **Activity Logs**: The Activity Log page functions correctly, displaying 391 activity records, filtering by date, and is accessible only by Hatem.
--   **Flexible Work Schedule**: All employees are now configured with , allowing flexible check-in (7-11 AM) and check-out (no strict time), and working 8-13 hours daily.
--   **Enhanced Field Exit/Leave Management**: Backend supports who approved and notes for requests, and separate actual departure/return times for field exits. Frontend UI changes were made to reflect this.
--   **Improved Reports**: All reports (Excel/PDF) now include TANSEEQ company name and logo, are free from problematic Unicode characters (■■■■■■), and the Payroll report's design matches Attendance reports, with the Position column removed.
--   **Dashboard Quick Actions Fix**: Buttons for Check-in, Request Leave, Field Exit on the dashboard now correctly navigate without logging out the user.
+The application currently includes:
+-   **Internal Messaging System**: Allows Super Admins/Admins to send messages. Late, absence, and penalty notifications are now private, visible only to the concerned employee. Admins/Super Admins are excluded from receiving late/absence warnings and penalty calculations.
+-   **Daily Auto-Backup System**: A backend script for automatic daily database backups and manual trigger.
+-   **Advanced Penalty System**: Rules for late arrivals and absences are implemented (15 mins x 4 times free, then accumulated minutes deducted; >20 mins late actual time deduction; 1-2 hours late is half-day deduction; >2 hours late is full-day deduction; absence is two-day deduction). However, the complex rules are reported as not fully applied in the payroll report.
+-   **Activity Logs**: Functional for Super Admin.
+-   **Flexible Work Schedule**: All employees configured with flexible schedules.
+-   **Enhanced Field Exit/Leave Management**: Backend supports who approved and notes, and separate actual departure/return times for field exits. Frontend UI changes were made.
+-   **Improved Reports**: All reports (Excel/PDF) include TANSEEQ company name and logo, are free from problematic Unicode characters, and the Payroll report's design matches Attendance reports, with the Position column removed. Reports are intended to display all text in English, with a translation dictionary implemented.
+-   **Dashboard Quick Actions Fix**: Buttons now navigate correctly.
+-   **Super Admin Request Creation**: Super Admins can create leave/field exit requests on behalf of employees.
+-   **Attachment Viewing**: Admins/Super Admins can view attachments from requests.
+-   **Manual Backup/Restore**: Implemented on the backend, intended for JSON downloads and uploads.
+-   **Overtime Report**: A new report intended to calculate extra working hours.
 
-However, the user explicitly clarified that the Automated Late Warnings, Absent Warnings, and Automatic Payroll Deductions are *not yet fully automatic*; they currently require a manager/Super Admin to manually trigger them via a button. The Super Admin also cannot yet create field exit/leave requests on behalf of other employees, nor can admins/Super Admins view attachments associated with leave/field exit requests directly from reports or request pages.
-
-The AI engineer's last action was to confirm these missing automations and features, and has begun implementing them.
+The AI engineer's last actions involved attempting to fix critical issues identified during comprehensive testing: the Overtime Report (route conflict, calculation, export, translation), Backup System (filename, ZIP download), and the full application of complex deduction rules in the Enhanced Payroll Report. The trajectory concludes with the AI engineer acknowledging the persistent route conflict for the Overtime Report and preparing to address these issues.
 </current_work>
 
 <optional_next_step>
-The next step is to implement the automated system for warnings and deductions, Super Admin's ability to create requests for employees, and the ability for Admins/Super Admins to view attachments.
+The next step is to fix the critical issues with the Overtime Report, Backup System, and the complex deduction rules for the Enhanced Payroll Report.
 </optional_next_step>
