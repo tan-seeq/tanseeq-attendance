@@ -2894,19 +2894,21 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         decorative_line = Paragraph("=" * 60, line_style)
         story.append(decorative_line)
         
-        # Create table data
-        table_data = [["Name", "Monthly Salary", "Daily Rate", "Working Days", "Final Salary"]]
+        # Create enhanced table data with deductions
+        table_data = [["Employee", "Monthly\nSalary", "Basic\nSalary", "Late\nDeductions", "Absence\nDeductions", "Total\nDeductions", "Final\nSalary"]]
         for employee in payroll_data:
             table_data.append([
-                employee["name"][:20],  # Truncate long names
-                f"AED {employee['monthly_salary']:.2f}",
-                f"AED {employee['daily_rate']:.2f}",
-                str(employee["working_days"]),
-                f"AED {employee['final_salary']:.2f}"
+                employee["name"][:15],  # Truncate long names for better fit
+                f"AED\n{employee['monthly_salary']:.0f}",
+                f"AED\n{employee['basic_salary']:.0f}",
+                f"AED\n{employee.get('late_deductions', 0):.0f}",
+                f"AED\n{employee.get('absence_deductions', 0):.0f}",
+                f"AED\n{employee.get('total_deductions', 0):.0f}",
+                f"AED\n{employee['final_salary']:.0f}"
             ])
         
-        # Create table with enhanced styling
-        table = Table(table_data, colWidths=[2.5*inch, 1.5*inch, 1.5*inch, 1.2*inch, 1.5*inch])
+        # Create table with enhanced styling and proper column widths
+        table = Table(table_data, colWidths=[1.8*inch, 1.0*inch, 1.0*inch, 0.9*inch, 0.9*inch, 1.0*inch, 1.0*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0.17, 0.34, 0.59)),  # Dark blue header
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
