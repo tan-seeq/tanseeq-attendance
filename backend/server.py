@@ -4055,76 +4055,39 @@ async def download_backup_file(
     filename: str,
     current_user: User = Depends(get_super_admin_user)  
 ):
-    """Download specific backup file (Super admin only)"""
+    """Download specific backup file from server (Super admin only)"""
     try:
-        import json
-        import zipfile
-        import tempfile
         from pathlib import Path
         from fastapi.responses import StreamingResponse
+        import zipfile
+        from io import BytesIO
         
         # Validate filename
         if not (filename.endswith('.json') or filename.endswith('.zip')):
             raise HTTPException(status_code=400, detail="نوع الملف غير مدعوم. يجب أن يكون JSON أو ZIP")
         
-        # Generate actual backup content from database
-        backup_data = {
-            "backup_info": {
-                "filename": filename,
-                "created_at": datetime.now().isoformat(),
-                "version": "1.0",
-                "database": "tanseeq_hr",
-                "total_collections": 0,
-                "total_records": 0
-            },
-            "collections": {}
-        }
+        # Get backup directory and file path
+        backup_dir = Path(ROOT_DIR) / "backups"
+        json_filename = filename.replace('.zip', '.json') if filename.endswith('.zip') else filename
+        backup_file_path = backup_dir / json_filename
         
-        # Get all collections with real data
-        collections_to_backup = ["users", "attendance", "leaves", "field_exits", "messages", "late_penalties", "activity_logs"]
-        
-        total_records = 0
-        for collection_name in collections_to_backup:
-            collection = getattr(db, collection_name)
-            records = await collection.find({}).to_list(None)
-            
-            # Convert ObjectId and datetime to strings for JSON serialization
-            serialized_records = []
-            for record in records:
-                serialized_record = {}
-                for key, value in record.items():
-                    if key == "_id":
-                        continue  # Skip MongoDB _id
-                    elif isinstance(value, datetime):
-                        serialized_record[key] = value.isoformat()
-                    else:
-                        serialized_record[key] = value
-                serialized_records.append(serialized_record)
-            
-            backup_data["collections"][collection_name] = serialized_records
-            total_records += len(serialized_records)
-        
-        backup_data["backup_info"]["total_collections"] = len(collections_to_backup)
-        backup_data["backup_info"]["total_records"] = total_records
-        
-        # Convert to JSON
-        json_content = json.dumps(backup_data, indent=2, ensure_ascii=False)
+        # Check if file exists
+        if not backup_file_path.exists():
+            raise HTTPException(status_code=404, detail="الملف غير موجود")
         
         # Log download activity
         await log_activity(
             current_user.id,
             "backup_downloaded",
-            f"Downloaded backup file: {filename} ({len(json_content)} bytes, {total_records} records)"
+            f"Downloaded backup file: {filename}"
         )
         
         if filename.endswith('.zip'):
-            # Create ZIP file
-            from io import BytesIO
+            # Create ZIP file containing the JSON backup
             zip_buffer = BytesIO()
             
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                json_filename = filename.replace('.zip', '.json')
-                zip_file.writestr(json_filename, json_content.encode('utf-8'))
+                zip_file.write(backup_file_path, json_filename)
             
             zip_buffer.seek(0)
             
@@ -4137,11 +4100,9 @@ async def download_backup_file(
                 }
             )
         else:
-            # Return JSON file
-            from io import BytesIO
-            
+            # Return JSON file directly
             return StreamingResponse(
-                BytesIO(json_content.encode('utf-8')),
+                open(backup_file_path, 'rb'),
                 media_type='application/json',
                 headers={
                     "Content-Disposition": f"attachment; filename={filename}",
