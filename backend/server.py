@@ -3984,24 +3984,49 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
 
 @api_router.get("/backup/list-files")
 async def list_backup_files(current_user: User = Depends(get_super_admin_user)):
-    """List all backup files available (Super admin only)"""
+    """List all backup files from server directory (Super admin only)"""
     try:
-        # Simulate backup files list with realistic data
-        current_time = datetime.now()
+        from pathlib import Path
+        import json
+        
+        # Get backup directory
+        backup_dir = Path(ROOT_DIR) / "backups"
         backup_files = []
         
-        for i in range(5):
-            backup_time = current_time - timedelta(days=i)
-            file_size = 1024 * 50 * (i + 1)  # Realistic file sizes
-            backup_files.append({
-                "filename": f"tanseeq_backup_{backup_time.strftime('%Y%m%d_%H%M%S')}.json",
-                "size": file_size,
-                "size_mb": round(file_size / (1024 * 1024), 2),
-                "created_at": backup_time.isoformat(),
-                "status": "available",
-                "records": 100 + (i * 20),
-                "collections": 7
-            })
+        if backup_dir.exists():
+            # Get all JSON files in backup directory
+            for backup_file in backup_dir.glob("*.json"):
+                try:
+                    # Get file stats
+                    file_stats = backup_file.stat()
+                    file_size = file_stats.st_size
+                    
+                    # Try to read backup info from file
+                    records_count = 0
+                    collections_count = 0
+                    try:
+                        with open(backup_file, 'r', encoding='utf-8') as f:
+                            backup_data = json.load(f)
+                            records_count = backup_data.get("backup_info", {}).get("total_records", 0)
+                            collections_count = backup_data.get("backup_info", {}).get("total_collections", 0)
+                    except:
+                        pass  # If can't read file content, use defaults
+                    
+                    backup_files.append({
+                        "filename": backup_file.name,
+                        "size": file_size,
+                        "size_mb": round(file_size / (1024 * 1024), 2),
+                        "created_at": datetime.fromtimestamp(file_stats.st_mtime).isoformat(),
+                        "status": "available",
+                        "records": records_count,
+                        "collections": collections_count
+                    })
+                except Exception as e:
+                    # Skip files that can't be processed
+                    continue
+        
+        # Sort by creation time (newest first)
+        backup_files.sort(key=lambda x: x["created_at"], reverse=True)
         
         total_size = sum(f["size"] for f in backup_files)
         
@@ -4010,7 +4035,7 @@ async def list_backup_files(current_user: User = Depends(get_super_admin_user)):
             "total_files": len(backup_files),
             "total_size": total_size,
             "total_size_mb": round(total_size / (1024 * 1024), 2),
-            "backup_directory": "/app/backups",
+            "backup_directory": str(backup_dir),
             "status": "available"
         }
         
