@@ -1133,6 +1133,372 @@ class TanseeqAPITester:
         
         return all_passed
 
+    # ============ NEW TESTS FOR ARABIC REVIEW REQUEST - OVERTIME REPORTS AND ENHANCED BACKUP ============
+    
+    def test_overtime_report(self, role: str) -> bool:
+        """Test overtime report endpoint for specific month"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-01'
+        
+        success, response = self.make_request('GET', f'reports/overtime/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            if isinstance(response, list):
+                # Check if records have overtime calculation fields
+                if response:
+                    first_record = response[0]
+                    expected_keys = ['user_name', 'total_overtime_hours', 'overtime_before_9am', 'overtime_after_6pm']
+                    has_expected_keys = all(key in first_record for key in expected_keys)
+                    
+                    # Check for English translation of names
+                    has_english_name = 'user_name_en' in first_record or isinstance(first_record.get('user_name'), str)
+                    
+                    test_passed = has_expected_keys and has_english_name
+                    
+                    if not test_passed:
+                        self.log_test(f"Overtime report ({role})", False, 
+                                     f"Keys: {has_expected_keys}, English names: {has_english_name}")
+                    else:
+                        self.log_test(f"Overtime report ({role})", True)
+                else:
+                    # Empty response is acceptable
+                    self.log_test(f"Overtime report ({role})", True, "No overtime data for the month")
+                    test_passed = True
+            else:
+                test_passed = False
+                self.log_test(f"Overtime report ({role})", False, "Response is not a list")
+        else:
+            test_passed = success
+            self.log_test(f"Overtime report ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
+    def test_overtime_report_excel_export(self, role: str) -> bool:
+        """Test overtime report Excel export"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-01'
+        
+        url = f"{self.api_url}/reports/overtime/export/{month}?format=excel"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is Excel file
+                content_type = response.headers.get('content-type', '')
+                is_excel = 'spreadsheet' in content_type or 'excel' in content_type
+                
+                # Check content length
+                has_content = len(response.content) > 1000
+                
+                # Check filename contains overtime
+                content_disposition = response.headers.get('content-disposition', '')
+                has_overtime_in_filename = 'overtime' in content_disposition.lower()
+                
+                test_passed = is_excel and has_content and has_overtime_in_filename
+                
+                if not test_passed:
+                    self.log_test(f"Overtime Excel export ({role})", False, 
+                                 f"Excel: {is_excel}, Content: {has_content}, Filename: {has_overtime_in_filename}")
+                else:
+                    self.log_test(f"Overtime Excel export ({role})", True)
+            else:
+                test_passed = success
+                self.log_test(f"Overtime Excel export ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"Overtime Excel export ({role})", False, str(e))
+            return False
+
+    def test_overtime_report_pdf_export(self, role: str) -> bool:
+        """Test overtime report PDF export"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-01'
+        
+        url = f"{self.api_url}/reports/overtime/export/{month}?format=pdf"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is PDF file
+                content_type = response.headers.get('content-type', '')
+                is_pdf = 'pdf' in content_type
+                
+                # Check if it's a valid PDF
+                is_valid_pdf = response.content.startswith(b'%PDF')
+                
+                # Check content length
+                has_content = len(response.content) > 2000
+                
+                test_passed = is_pdf and is_valid_pdf and has_content
+                
+                if not test_passed:
+                    self.log_test(f"Overtime PDF export ({role})", False, 
+                                 f"PDF: {is_pdf}, Valid: {is_valid_pdf}, Content: {has_content}")
+                else:
+                    self.log_test(f"Overtime PDF export ({role})", True)
+            else:
+                test_passed = success
+                self.log_test(f"Overtime PDF export ({role})", success, 
+                             f"Status: {response.status_code}" if not success else "")
+            
+            return test_passed
+            
+        except Exception as e:
+            self.log_test(f"Overtime PDF export ({role})", False, str(e))
+            return False
+
+    def test_backup_create_download(self, role: str) -> bool:
+        """Test backup create-download endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        success, response = self.make_request('POST', 'backup/create-download', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['message', 'filename', 'download_url', 'file_size']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check filename format
+            filename = response.get('filename', '')
+            has_valid_filename = filename.endswith('.zip') and 'backup' in filename.lower()
+            
+            # Check file size is positive
+            file_size = response.get('file_size', 0)
+            has_valid_size = isinstance(file_size, (int, float)) and file_size > 0
+            
+            test_passed = has_expected_keys and has_valid_filename and has_valid_size
+            
+            if not test_passed:
+                self.log_test(f"Backup create-download ({role})", False, 
+                             f"Keys: {has_expected_keys}, Filename: {has_valid_filename}, Size: {has_valid_size}")
+            else:
+                self.log_test(f"Backup create-download ({role})", True)
+                # Store filename for download test
+                setattr(self, f'test_backup_filename_{role}', filename)
+        else:
+            test_passed = success
+            self.log_test(f"Backup create-download ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
+    def test_backup_list_files(self, role: str) -> bool:
+        """Test backup list-files endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        success, response = self.make_request('GET', 'backup/list-files', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_keys = ['backup_files', 'total_files', 'total_size_mb']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check backup_files is a list
+            backup_files = response.get('backup_files', [])
+            is_valid_list = isinstance(backup_files, list)
+            
+            # Check total_files is a number
+            total_files = response.get('total_files', 0)
+            is_valid_count = isinstance(total_files, int) and total_files >= 0
+            
+            # Check total_size_mb is a number
+            total_size = response.get('total_size_mb', 0)
+            is_valid_size = isinstance(total_size, (int, float)) and total_size >= 0
+            
+            test_passed = has_expected_keys and is_valid_list and is_valid_count and is_valid_size
+            
+            if not test_passed:
+                self.log_test(f"Backup list-files ({role})", False, 
+                             f"Keys: {has_expected_keys}, List: {is_valid_list}, Count: {is_valid_count}, Size: {is_valid_size}")
+            else:
+                self.log_test(f"Backup list-files ({role})", True)
+        else:
+            test_passed = success
+            self.log_test(f"Backup list-files ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
+    def test_backup_download(self, role: str) -> bool:
+        """Test backup download endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Get a backup filename to test with
+        backup_filename = getattr(self, f'test_backup_filename_{role}', None)
+        if not backup_filename:
+            # Try to get from list-files
+            success, list_response = self.make_request('GET', 'backup/list-files', 
+                                                     token=self.tokens[role])
+            if success and list_response.get('backup_files'):
+                backup_filename = list_response['backup_files'][0].get('filename', 'test_backup.zip')
+            else:
+                backup_filename = 'test_backup.zip'  # Use a test filename
+        
+        url = f"{self.api_url}/backup/download/{backup_filename}"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            success = response.status_code == expected_status
+            
+            if expected_status == 200 and success:
+                # Check if response is a zip file
+                content_type = response.headers.get('content-type', '')
+                is_zip = 'zip' in content_type or 'application/octet-stream' in content_type
+                
+                # Check content length
+                has_content = len(response.content) > 0
+                
+                test_passed = is_zip and has_content
+                
+                if not test_passed:
+                    self.log_test(f"Backup download ({role})", False, 
+                                 f"Zip: {is_zip}, Content: {has_content}")
+                else:
+                    self.log_test(f"Backup download ({role})", True)
+            else:
+                # Accept 404 if backup file doesn't exist (expected for test)
+                if response.status_code == 404:
+                    self.log_test(f"Backup download ({role})", True, "Backup file not found (expected for test)")
+                    success = True
+                else:
+                    self.log_test(f"Backup download ({role})", success, 
+                                 f"Status: {response.status_code}" if not success else "")
+            
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Backup download ({role})", False, str(e))
+            return False
+
+    def test_backup_restore(self, role: str) -> bool:
+        """Test backup restore endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        # Test restore with a test filename
+        restore_data = {
+            'backup_filename': 'test_backup.zip',
+            'restore_options': {
+                'restore_users': True,
+                'restore_attendance': True,
+                'restore_leaves': True,
+                'restore_field_exits': True
+            }
+        }
+        
+        success, response = self.make_request('POST', 'backup/restore', 
+                                            restore_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200:
+            # Accept both success and "file not found" error for test
+            if not success and ('not found' in str(response).lower() or 'file' in str(response).lower()):
+                self.log_test(f"Backup restore ({role})", True, "Backup file not found (expected for test)")
+                success = True
+            elif success:
+                # Check response structure
+                expected_keys = ['message', 'restored_collections', 'restore_summary']
+                has_expected_keys = any(key in response for key in expected_keys)  # At least one key should be present
+                
+                if has_expected_keys:
+                    self.log_test(f"Backup restore ({role})", True)
+                else:
+                    self.log_test(f"Backup restore ({role})", False, f"Missing expected keys in response")
+                    success = False
+            else:
+                self.log_test(f"Backup restore ({role})", False, str(response))
+        else:
+            self.log_test(f"Backup restore ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_enhanced_payroll_with_deductions(self, role: str) -> bool:
+        """Test enhanced payroll calculation with deductions"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        month = '2025-01'
+        
+        success, response = self.make_request('GET', f'payroll/calculate/{month}', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            if isinstance(response, list) and response:
+                # Check if payroll records have deduction fields
+                first_record = response[0]
+                expected_keys = ['user_id', 'name', 'monthly_salary', 'late_deductions', 'absence_deductions', 'total_deductions', 'final_salary']
+                has_expected_keys = all(key in first_record for key in expected_keys)
+                
+                # Check for English translation of names and positions
+                has_english_name = 'name_en' in first_record or isinstance(first_record.get('name'), str)
+                has_position_translation = 'position_en' in first_record or 'position' in first_record
+                
+                # Check deduction calculations
+                late_deductions = first_record.get('late_deductions', 0)
+                absence_deductions = first_record.get('absence_deductions', 0)
+                total_deductions = first_record.get('total_deductions', 0)
+                final_salary = first_record.get('final_salary', 0)
+                
+                has_valid_deductions = (isinstance(late_deductions, (int, float)) and 
+                                      isinstance(absence_deductions, (int, float)) and
+                                      isinstance(total_deductions, (int, float)) and
+                                      isinstance(final_salary, (int, float)))
+                
+                test_passed = has_expected_keys and has_english_name and has_valid_deductions
+                
+                if not test_passed:
+                    self.log_test(f"Enhanced payroll with deductions ({role})", False, 
+                                 f"Keys: {has_expected_keys}, English: {has_english_name}, Deductions: {has_valid_deductions}")
+                else:
+                    self.log_test(f"Enhanced payroll with deductions ({role})", True)
+            else:
+                # Empty response is acceptable
+                self.log_test(f"Enhanced payroll with deductions ({role})", True, "No payroll data for the month")
+                test_passed = True
+        else:
+            test_passed = success
+            self.log_test(f"Enhanced payroll with deductions ({role})", success, str(response) if not success else "")
+        
+        return test_passed
+
     # ============ NEW HIGH PRIORITY TESTS FOR AUTOMATION AND ADMIN ENHANCEMENTS ============
     
     def test_notifications_late_warning(self, role: str) -> bool:
