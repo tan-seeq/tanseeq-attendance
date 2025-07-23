@@ -17,8 +17,8 @@ class CriticalSystemsTester:
         self.tests_run = 0
         self.tests_passed = 0
         
-        # Super admin credentials from review request
-        self.super_admin = {'email': 'hatem@tanseeq.com', 'password': 'hatem123'}
+        # Admin credentials that work
+        self.admin_user = {'email': 'mahmoud@tanseeq.com', 'password': 'mahmoud123'}
 
     def log_test(self, name: str, success: bool, details: str = ""):
         """Log test result"""
