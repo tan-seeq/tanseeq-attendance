@@ -5506,7 +5506,7 @@ const OvertimeReport = () => {
     try {
       setLoading(true);
       setMessage('');
-      const response = await axios.get(`${API}/reports/overtime/${selectedMonth}`);
+      const response = await axios.get(`${API}/overtime-reports/${selectedMonth}`);
       setOvertimeData(response.data);
       
       if (response.data.total_records === 0) {
@@ -5529,7 +5529,7 @@ const OvertimeReport = () => {
   const exportReport = async (format) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/reports/overtime/export/${selectedMonth}?format=${format}`, {
+      const response = await axios.get(`${API}/overtime-reports/export/${selectedMonth}?format=${format}`, {
         responseType: 'blob'
       });
 
