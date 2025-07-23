@@ -2448,6 +2448,30 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
         # Calculate final salary after deductions
         final_salary = max(0, basic_salary - total_deductions)  # Cannot be negative
         
+        # Separate late and absence deductions for reporting
+        late_deductions = 0.0
+        absence_deductions = 0.0
+        
+        # Calculate late deductions total
+        for detail in late_penalty_details:
+            if "Late Minutes:" in detail or "Half Day Penalties:" in detail or "Full Day Penalties:" in detail:
+                try:
+                    # Extract AED amount from detail string
+                    amount_str = detail.split("AED ")[1].split()[0]
+                    late_deductions += float(amount_str)
+                except:
+                    pass
+        
+        # Calculate absence deductions total  
+        for detail in absence_penalty_details:
+            if "Unauthorized Absences:" in detail:
+                try:
+                    # Extract AED amount from detail string
+                    amount_str = detail.split("AED ")[1].split()[0]
+                    absence_deductions += float(amount_str)
+                except:
+                    pass
+        
         # Translation for English reports
         english_name = translate_to_english(user["name"])
         english_position = translate_to_english(user["position"])
