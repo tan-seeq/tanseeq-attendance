@@ -4113,6 +4113,46 @@ async def download_backup_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error downloading backup: {str(e)}")
 
+@api_router.delete("/backup/delete/{filename}")
+async def delete_backup_file(
+    filename: str,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """Delete specific backup file from server (Super admin only)"""
+    try:
+        from pathlib import Path
+        
+        # Validate filename
+        if not filename.endswith('.json'):
+            raise HTTPException(status_code=400, detail="يمكن حذف ملفات JSON فقط")
+        
+        # Get backup directory and file path
+        backup_dir = Path(ROOT_DIR) / "backups"
+        backup_file_path = backup_dir / filename
+        
+        # Check if file exists
+        if not backup_file_path.exists():
+            raise HTTPException(status_code=404, detail="الملف غير موجود")
+        
+        # Delete file
+        backup_file_path.unlink()
+        
+        # Log activity
+        await log_activity(
+            current_user.id,
+            "backup_deleted",
+            f"Deleted backup file: {filename}"
+        )
+        
+        return {
+            "message": f"تم حذف الملف {filename} بنجاح",
+            "filename": filename,
+            "status": "deleted"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في حذف الملف: {str(e)}")
+
 @api_router.post("/backup/restore")
 async def restore_backup(
     backup_file: UploadFile = File(...),
