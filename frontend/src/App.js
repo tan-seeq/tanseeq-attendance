@@ -5217,13 +5217,43 @@ const BackupManagement = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
       
       setMessage({ type: 'success', text: `تم تحميل ${filename} بنجاح` });
       
     } catch (error) {
+      console.error('Download error:', error);
       setMessage({ 
         type: 'error', 
         text: error.response?.data?.detail || 'حدث خطأ في تحميل الملف' 
+      });
+    }
+  };
+
+  const deleteBackup = async (filename) => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `هل أنت متأكد من حذف النسخة الاحتياطية؟\n\n${filename}\n\nلا يمكن التراجع عن هذا الإجراء!`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${API}/backup/delete/${filename}`);
+      
+      setMessage({ 
+        type: 'success', 
+        text: `تم حذف ${filename} بنجاح` 
+      });
+      
+      // Refresh backup list
+      fetchBackups();
+      
+    } catch (error) {
+      console.error('Delete error:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.detail || 'حدث خطأ في حذف الملف' 
       });
     }
   };
