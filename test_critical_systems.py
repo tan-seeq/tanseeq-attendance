@@ -59,16 +59,25 @@ class CriticalSystemsTester:
             return False, {"error": str(e)}
 
     def login(self):
-        """Login as admin"""
-        success, response = self.make_request('POST', 'auth/login', self.admin_user)
+        """Login as super admin for backup tests, admin for others"""
+        success, response = self.make_request('POST', 'auth/login', self.super_admin)
         
         if success and 'access_token' in response:
             self.token = response['access_token']
-            self.log_test("Admin Login", True)
+            self.user_role = 'super_admin'
+            self.log_test("Super Admin Login", True)
             return True
         else:
-            self.log_test("Admin Login", False, str(response))
-            return False
+            # Fallback to admin
+            success, response = self.make_request('POST', 'auth/login', self.admin_user)
+            if success and 'access_token' in response:
+                self.token = response['access_token']
+                self.user_role = 'admin'
+                self.log_test("Admin Login (fallback)", True)
+                return True
+            else:
+                self.log_test("Login", False, str(response))
+                return False
 
     def test_overtime_report_system(self):
         """Test overtime report system implementation"""
