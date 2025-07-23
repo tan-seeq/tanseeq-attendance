@@ -7,6 +7,7 @@ import {
   ClockIcon, 
   CalendarDaysIcon as CalendarIcon, 
   DocumentTextIcon, 
+  DocumentIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon as LogoutIcon,
