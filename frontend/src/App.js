@@ -5361,7 +5361,7 @@ const BackupManagement = () => {
             ) : (
               <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
             )}
-            📥 إنشاء وتحميل نسخة احتياطية
+            📥 إنشاء نسخة احتياطية
           </button>
 
           <label className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 cursor-pointer flex items-center">
