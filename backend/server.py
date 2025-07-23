@@ -4250,7 +4250,7 @@ async def list_requests_with_attachments(current_user: User = Depends(get_admin_
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing attachments: {str(e)}")
 
-@api_router.get("/reports/overtime/{month}")
+@api_router.get("/overtime-reports/{month}")
 async def get_overtime_report(month: str, current_user: User = Depends(get_admin_user)):
     """Generate overtime report for specific month (Admin only)"""
     try:
@@ -4351,7 +4351,7 @@ async def get_overtime_report(month: str, current_user: User = Depends(get_admin
         "overtime_records": overtime_data
     }
 
-@api_router.get("/reports/overtime/export/{month}")
+@api_router.get("/overtime-reports/export/{month}")
 async def export_overtime_report(month: str, format: str = "excel", current_user: User = Depends(get_admin_user)):
     """Export overtime report with professional design"""
     from io import BytesIO
