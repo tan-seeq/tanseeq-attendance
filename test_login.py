@@ -37,7 +37,7 @@ def test_login(email, password, base_url):
         return False, None
 
 if __name__ == "__main__":
-    backend_url = "https://3646cc77-f794-451c-bd8c-357b80d828e9.preview.emergentagent.com"
+    backend_url = "https://73054ad2-88a8-4e83-bbd6-799c0f57cc6a.preview.emergentagent.com"
     
     print("🔍 Testing different login credentials...")
     print("=" * 50)
