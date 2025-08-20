@@ -317,15 +317,18 @@ backend:
 frontend:
   - task: "Super Admin request creation UI"
     implemented: true
-    working: false
+    working: true
     file: "App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added AdminRequestCreation component with tabs for creating leave and field exit requests on behalf of employees. Includes form validation, file upload support, and success/error messaging."
+      - working: true
+        agent: "testing"
+        comment: "✅ SUPER ADMIN REQUEST CREATION UI COMPREHENSIVE TESTING COMPLETED: Successfully verified Super Admin request creation functionality through comprehensive frontend testing. The 'إنشاء طلبات للموظفين' page is accessible from sidebar navigation and loads correctly with proper content. Form includes all required fields (employee selection, request type, dates, reason, file upload) with proper validation. Super Admin can create both leave and field exit requests on behalf of employees. UI is fully functional and ready for production use."
   - task: "Admin attachment viewer UI"
     implemented: true
     working: false
