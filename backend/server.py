@@ -709,17 +709,20 @@ async def update_attendance(attendance_id: str, attendance_data: dict, current_u
             update_data["is_late"] = False
     
     # Calculate working hours if both check_in and check_out are available
-    if update_data.get("check_in") and update_data.get("check_out"):
+    current_check_in = update_data.get("check_in") or attendance.get("check_in")
+    current_check_out = update_data.get("check_out") or attendance.get("check_out")
+    
+    if current_check_in and current_check_out:
         try:
-            check_in_time = datetime.strptime(update_data["check_in"], "%H:%M:%S")
-            check_out_time = datetime.strptime(update_data["check_out"], "%H:%M:%S")
+            check_in_time = datetime.strptime(current_check_in, "%H:%M:%S")
+            check_out_time = datetime.strptime(current_check_out, "%H:%M:%S")
             
             # Handle overnight shifts
             if check_out_time < check_in_time:
                 check_out_time += timedelta(days=1)
             
             working_hours = (check_out_time - check_in_time).total_seconds() / 3600
-            update_data["working_hours"] = working_hours
+            update_data["working_hours"] = round(working_hours, 2)
         except ValueError:
             pass  # Invalid time format, skip calculation
     
