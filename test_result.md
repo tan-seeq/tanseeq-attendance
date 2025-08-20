@@ -100,6 +100,49 @@
 
 user_problem_statement: "من فضلك محتاج أعدل أن الغياب يظهر في كشف الحضور و الغياب غياب و أني أقدر أعدل وألغي الغياب و أحط ميعاد حضور و أنصراف ك سوبر أدمن فقط ولا يظهر عند أي أدمن التعديل الي تم ومحتاج تراجع كل الروابط وتستدعي وكيل مختص يفحص النظام كامل من البداية للنهاية فرانت و باك وجميع الروابط و الوجهات و القوائم والتأكد 100 % انها تعمل دون أي أخطأ. بخلاف أن في مشاكل للموظفين مش عارفين يعملوا طلبات أجازة أفحص النظام كامل و طلع المشاكل الموجودوة وحلها من خلال وكيل معتمد متطور"
 
+  - task: "Enhanced attendance absence tracking with Super Admin edit capabilities"
+    implemented: false
+    working: false
+    file: "server.py, App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported that absences should show in attendance reports and Super Admin should be able to edit/cancel absences and add attendance times for absent days. Only Super Admin should see edit capabilities, not regular admins."
+      - working: "NA"
+        agent: "main"
+        comment: "Need to implement: 1) Show absences in attendance reports 2) Super Admin can edit/cancel absences 3) Super Admin can add check-in/out times for absent employees 4) Hide edit capabilities from regular admins"
+  - task: "Leave request creation functionality fix"
+    implemented: true
+    working: false
+    file: "server.py, App.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported employees cannot create leave requests - there are problems with the leave request system that need investigation and fixing"
+      - working: "NA"
+        agent: "main"
+        comment: "Need to investigate and fix leave request creation issues. Previous testing noted form parameter parsing issues in leave creation endpoint."
+  - task: "Comprehensive system testing and link verification"
+    implemented: false
+    working: false
+    file: "All system files"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User requested comprehensive system review with specialized testing agent to check all links, routes, menus, and ensure 100% functionality across frontend and backend"
+      - working: "NA"
+        agent: "main"
+        comment: "Need to conduct comprehensive system testing using specialized testing agent to verify all functionality, links, routes, menus work without errors"
+
 backend:
   - task: "Automated notification and penalty system implementation"
     implemented: true
