@@ -2077,7 +2077,8 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
                     record["check_out"],
                     f"{record['working_hours']:.1f}h" if record['working_hours'] else "0.0h",
                     record["status"],  # Now using the processed status_display
-                    "Yes" if record["is_late"] else "No"
+                    "Yes" if record["is_late"] else "No",
+                    record.get("absence_reason", "")  # Add absence reason
                 ])
             elif report_type == "leaves":
                 table_data.append([
