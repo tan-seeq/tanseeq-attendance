@@ -2203,14 +2203,23 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         
         report_data = []
         for record in records:
+            status_display = "Present"
+            if record.get("status") == "late":
+                status_display = "Late"
+            elif record.get("status") == "absent":
+                status_display = "Absent"
+                
             report_data.append({
                 "user_name": record.get("user_name", ""),
                 "date": record.get("date", ""),
-                "check_in": record.get("check_in", ""),
-                "check_out": record.get("check_out", ""),
+                "check_in": record.get("check_in", "N/A" if record.get("status") == "absent" else ""),
+                "check_out": record.get("check_out", "N/A" if record.get("status") == "absent" else ""),
                 "working_hours": record.get("working_hours", 0),
-                "status": record.get("status", ""),
-                "is_late": record.get("is_late", False)
+                "status": status_display,
+                "is_late": record.get("is_late", False),
+                "absence_reason": record.get("absence_reason", ""),
+                "is_manual_entry": record.get("is_manual_entry", False),
+                "is_manually_edited": record.get("is_manually_edited", False)
             })
         
         headers = ["Employee", "Date", "Check In", "Check Out", "Working Hours", "Status", "Late"]
