@@ -3046,6 +3046,8 @@ const AttendanceManagement = () => {
   const [loading, setLoading] = useState(true);
   const [editingRecord, setEditingRecord] = useState(null);
   const [editData, setEditData] = useState({});
+  const [showAbsenceModal, setShowAbsenceModal] = useState(false);
+  const [absenceData, setAbsenceData] = useState({});
   const { user } = useAuth();
   const { t } = useLanguage();
 
@@ -3055,7 +3057,8 @@ const AttendanceManagement = () => {
 
   const fetchAllAttendance = async () => {
     try {
-      const response = await axios.get(`${API}/attendance/all`);
+      // Use the enhanced endpoint that shows absences
+      const response = await axios.get(`${API}/attendance/with-absences`);
       setAttendance(response.data);
     } catch (error) {
       console.error('Error fetching attendance:', error);
@@ -3067,25 +3070,59 @@ const AttendanceManagement = () => {
   const handleEdit = (record) => {
     setEditingRecord(record.id);
     setEditData({
-      check_in: record.check_in,
-      check_out: record.check_out,
-      status: record.status
+      check_in: record.check_in || '',
+      check_out: record.check_out || '',
+      status: record.status,
+      reason: record.absence_reason || ''
     });
   };
 
   const handleSave = async (id) => {
     try {
-      await axios.put(`${API}/attendance/${id}`, editData);
+      if (editData.status === 'absent') {
+        // Use the absence editing endpoint for converting or updating absences
+        await axios.put(`${API}/attendance/edit-absence/${id}`, editData);
+      } else {
+        // Use regular attendance update for present/late records
+        await axios.put(`${API}/attendance/${id}`, editData);
+      }
       setEditingRecord(null);
       fetchAllAttendance();
     } catch (error) {
       console.error('Error updating attendance:', error);
+      alert('حدث خطأ في تحديث سجل الحضور');
     }
   };
 
   const handleCancel = () => {
     setEditingRecord(null);
     setEditData({});
+  };
+
+  const handleCreateAbsence = async () => {
+    try {
+      await axios.post(`${API}/attendance/create-absence`, absenceData);
+      setShowAbsenceModal(false);
+      setAbsenceData({});
+      fetchAllAttendance();
+      alert('تم إنشاء سجل الغياب بنجاح');
+    } catch (error) {
+      console.error('Error creating absence:', error);
+      alert('حدث خطأ في إنشاء سجل الغياب');
+    }
+  };
+
+  const handleDeleteAbsence = async (id) => {
+    if (window.confirm('هل أنت متأكد من حذف سجل الغياب؟')) {
+      try {
+        await axios.delete(`${API}/attendance/delete-absence/${id}`);
+        fetchAllAttendance();
+        alert('تم حذف سجل الغياب بنجاح');
+      } catch (error) {
+        console.error('Error deleting absence:', error);
+        alert('حدث خطأ في حذف سجل الغياب');
+      }
+    }
   };
 
   if (loading) {
@@ -3095,7 +3132,17 @@ const AttendanceManagement = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">إدارة الحضور - TANSEEQ Tax Consultancy</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">إدارة الحضور - TANSEEQ Tax Consultancy</h2>
+          {user?.role === 'super_admin' && (
+            <button
+              onClick={() => setShowAbsenceModal(true)}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+            >
+              إنشاء سجل غياب
+            </button>
+          )}
+        </div>
         
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -3119,7 +3166,10 @@ const AttendanceManagement = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الحالة
                 </th>
-                {user?.name === "Hatem Mohamed Ahmed" && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  سبب الغياب
+                </th>
+                {(user?.role === 'super_admin' || user?.name === "Hatem Mohamed Ahmed") && (
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الإجراءات
                   </th>
@@ -3144,7 +3194,7 @@ const AttendanceManagement = () => {
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     ) : (
-                      record.check_in || '--'
+                      record.check_in || (record.status === 'Absent' ? 'N/A' : '--')
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -3156,46 +3206,85 @@ const AttendanceManagement = () => {
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     ) : (
-                      record.check_out || '--'
+                      record.check_out || (record.status === 'Absent' ? 'N/A' : '--')
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {record.working_hours ? `${record.working_hours.toFixed(1)} ساعة` : '--'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      record.status === 'present' ? 'bg-green-100 text-green-800' :
-                      record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {record.status === 'present' ? 'حاضر' : 
-                       record.status === 'late' ? 'متأخر' : 'غائب'}
-                    </span>
+                    {editingRecord === record.id ? (
+                      <select
+                        value={editData.status}
+                        onChange={(e) => setEditData({...editData, status: e.target.value})}
+                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      >
+                        <option value="present">حاضر</option>
+                        <option value="late">متأخر</option>
+                        <option value="absent">غائب</option>
+                      </select>
+                    ) : (
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        record.status === 'Present' || record.status === 'present' ? 'bg-green-100 text-green-800' :
+                        record.status === 'Late' || record.status === 'late' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {record.status === 'Present' || record.status === 'present' ? 'حاضر' : 
+                         record.status === 'Late' || record.status === 'late' ? 'متأخر' : 'غائب'}
+                      </span>
+                    )}
                   </td>
-                  {user?.name === "Hatem Mohamed Ahmed" && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingRecord === record.id && editData.status === 'absent' ? (
+                      <input
+                        type="text"
+                        value={editData.reason || ''}
+                        onChange={(e) => setEditData({...editData, reason: e.target.value})}
+                        placeholder="سبب الغياب"
+                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      />
+                    ) : (
+                      record.absence_reason || '--'
+                    )}
+                  </td>
+                  {(user?.role === 'super_admin' || user?.name === "Hatem Mohamed Ahmed") && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {editingRecord === record.id ? (
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleSave(record.id)}
                             className="text-green-600 hover:text-green-900"
+                            title="حفظ"
                           >
                             <CheckCircleIcon className="h-4 w-4" />
                           </button>
                           <button
                             onClick={handleCancel}
                             className="text-red-600 hover:text-red-900"
+                            title="إلغاء"
                           >
                             <XCircleIcon className="h-4 w-4" />
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleEdit(record)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEdit(record)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="تعديل"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+                          {record.is_manual_entry && user?.role === 'super_admin' && (
+                            <button
+                              onClick={() => handleDeleteAbsence(record.id)}
+                              className="text-red-600 hover:text-red-900"
+                              title="حذف سجل الغياب"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
                       )}
                     </td>
                   )}
@@ -3205,6 +3294,60 @@ const AttendanceManagement = () => {
           </table>
         </div>
       </div>
+
+      {/* Create Absence Modal */}
+      {showAbsenceModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">إنشاء سجل غياب</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">ID الموظف</label>
+                <input
+                  type="text"
+                  value={absenceData.user_id || ''}
+                  onChange={(e) => setAbsenceData({...absenceData, user_id: e.target.value})}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="أدخل ID الموظف"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">التاريخ</label>
+                <input
+                  type="date"
+                  value={absenceData.date || ''}
+                  onChange={(e) => setAbsenceData({...absenceData, date: e.target.value})}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">سبب الغياب</label>
+                <input
+                  type="text"
+                  value={absenceData.reason || ''}
+                  onChange={(e) => setAbsenceData({...absenceData, reason: e.target.value})}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="مثال: مرض، ظروف شخصية"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button
+                onClick={() => setShowAbsenceModal(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleCreateAbsence}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                إنشاء سجل غياب
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
