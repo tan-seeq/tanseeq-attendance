@@ -2471,7 +2471,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
                     record["check_in"], 
                     record["check_out"],
                     f"{record['working_hours']:.1f}h" if record['working_hours'] else "0.0h",
-                    "Present" if record["status"] == "present" else "Late" if record["status"] == "late" else "Absent",
+                    record["status"],  # Now using the processed status_display
                     "Yes" if record["is_late"] else "No"
                 ])
             elif report_type == "leaves":
