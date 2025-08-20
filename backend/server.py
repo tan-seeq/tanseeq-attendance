@@ -1119,50 +1119,115 @@ async def get_all_leaves(current_user: User = Depends(get_current_user)):
     
     return leaves_list
 
-@api_router.post("/leaves", response_model=Leave)
+@api_router.post("/leaves")
 async def create_leave_request(
-    user_id: str = None,
-    user_name: str = None,
-    start_date: str = None,
-    end_date: str = None,
-    reason: str = None,
-    days_count: int = None,
+    user_id: str = Form(None),
+    user_name: str = Form(None),
+    start_date: str = Form(...),
+    end_date: str = Form(...),
+    reason: str = Form(...),
+    days_count: int = Form(...),
     file: UploadFile = File(None),
     current_user: User = Depends(get_current_user)
 ):
     """Create leave request with optional file attachment"""
     
+    # Validate required fields
+    if not start_date or not end_date or not reason or days_count is None:
+        raise HTTPException(status_code=400, detail="All fields are required: start_date, end_date, reason, days_count")
+    
     # Handle file upload
     attachment_url = None
-    if file:
-        # Generate unique filename
-        file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
-        filename = f"{uuid.uuid4()}.{file_extension}"
-        file_path = uploads_dir / filename
-        
-        # Save file
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        attachment_url = f"/uploads/{filename}"
+    if file and file.filename:
+        try:
+            # Generate unique filename
+            file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+            filename = f"{uuid.uuid4()}.{file_extension}"
+            file_path = uploads_dir / filename
+            
+            # Save file
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            
+            attachment_url = f"/uploads/{filename}"
+        except Exception as e:
+            logger.error(f"File upload error: {str(e)}")
+            # Continue without file attachment if upload fails
+            pass
     
+    # Create leave request
     leave_dict = {
+        "id": str(uuid.uuid4()),
         "user_id": user_id or current_user.id,
         "user_name": user_name or current_user.name,
         "start_date": start_date,
         "end_date": end_date,
         "reason": reason,
-        "days_count": days_count,
-        "attachment_url": attachment_url
+        "days_count": int(days_count),
+        "status": "pending",
+        "attachment_url": attachment_url,
+        "created_at": datetime.utcnow(),
+        "approved_by": None,
+        "approved_by_id": None,
+        "admin_notes": ""
     }
     
-    leave = Leave(**leave_dict)
-    await db.leaves.insert_one(leave.dict())
+    await db.leaves.insert_one(leave_dict)
     
     await log_activity(current_user.id, "leave_requested", 
-                      f"Requested leave from {start_date} to {end_date}")
+                      f"Requested leave from {start_date} to {end_date} ({days_count} days)")
     
-    return leave
+    return {
+        "message": "Leave request created successfully",
+        "id": leave_dict["id"],
+        "status": "pending"
+    }
+
+# Alternative JSON-based endpoint for frontend compatibility
+@api_router.post("/leaves/json")
+async def create_leave_request_json(
+    leave_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Create leave request with JSON data (Frontend compatible)"""
+    
+    # Extract required fields
+    start_date = leave_data.get("start_date")
+    end_date = leave_data.get("end_date")
+    reason = leave_data.get("reason")
+    days_count = leave_data.get("days_count")
+    
+    # Validate required fields
+    if not start_date or not end_date or not reason or days_count is None:
+        raise HTTPException(status_code=400, detail="All fields are required: start_date, end_date, reason, days_count")
+    
+    # Create leave request
+    leave_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": leave_data.get("user_id") or current_user.id,
+        "user_name": leave_data.get("user_name") or current_user.name,
+        "start_date": start_date,
+        "end_date": end_date,
+        "reason": reason,
+        "days_count": int(days_count),
+        "status": "pending",
+        "attachment_url": leave_data.get("attachment_url"),
+        "created_at": datetime.utcnow(),
+        "approved_by": None,
+        "approved_by_id": None,
+        "admin_notes": ""
+    }
+    
+    await db.leaves.insert_one(leave_dict)
+    
+    await log_activity(current_user.id, "leave_requested", 
+                      f"Requested leave from {start_date} to {end_date} ({days_count} days)")
+    
+    return {
+        "message": "Leave request created successfully",
+        "id": leave_dict["id"],
+        "status": "pending"
+    }
 
 @api_router.post("/leaves/{leave_id}/approve")
 async def approve_leave(leave_id: str, approval_data: dict = None, current_user: User = Depends(get_admin_user)):
