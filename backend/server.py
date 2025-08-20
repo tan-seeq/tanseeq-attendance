@@ -2228,8 +2228,8 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
                 "is_manually_edited": record.get("is_manually_edited", False)
             })
         
-        headers = ["Employee", "Date", "Check In", "Check Out", "Working Hours", "Status", "Late"]
-        headers_ar = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة", "متأخر"]
+        headers = ["Employee", "Date", "Check In", "Check Out", "Working Hours", "Status", "Late", "Absence Reason"]
+        headers_ar = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة", "متأخر", "سبب الغياب"]
         report_title = "Attendance Report"
         report_title_ar = "تقرير الحضور"
         
