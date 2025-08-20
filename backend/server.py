@@ -1038,15 +1038,21 @@ async def get_attendance_with_absences(current_user: User = Depends(get_current_
     # Convert to enhanced format
     attendance_list = []
     for record in attendance_records:
+        status_display = "Present"
+        if record.get("status") == "late":
+            status_display = "Late"
+        elif record.get("status") == "absent":
+            status_display = "Absent"
+            
         attendance_item = {
             "id": record.get("id", str(record.get("_id", ""))),
             "user_id": record.get("user_id", ""),
             "user_name": record.get("user_name", ""),
             "date": record.get("date", ""),
-            "check_in": record.get("check_in"),
-            "check_out": record.get("check_out"),
+            "check_in": record.get("check_in", "N/A" if record.get("status") == "absent" else record.get("check_in")),
+            "check_out": record.get("check_out", "N/A" if record.get("status") == "absent" else record.get("check_out")),
             "working_hours": record.get("working_hours", 0),
-            "status": record.get("status", ""),
+            "status": status_display,
             "is_late": record.get("is_late", False),
             "absence_reason": record.get("absence_reason"),
             "is_manual_entry": record.get("is_manual_entry", False),
