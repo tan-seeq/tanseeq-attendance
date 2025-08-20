@@ -2777,6 +2777,344 @@ class TanseeqAPITester:
             self.log_test(f"Penalty daily salary calculation ({role})", False, str(response))
             return False
 
+    # ============ ARABIC REVIEW REQUEST SPECIFIC TESTS ============
+    
+    def test_attendance_absence_creation(self, role: str) -> bool:
+        """Test Super Admin ability to create absence records"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Get a user to create absence for
+        if role == 'super_admin':
+            success, users = self.make_request('GET', 'users', token=self.tokens[role])
+            if not success or not users:
+                self.log_test(f"Attendance absence creation setup ({role})", False, "No users found")
+                return False
+            
+            test_user = users[0]  # Use first user
+            absence_data = {
+                "user_id": test_user['id'],
+                "date": "2025-02-15",
+                "reason": "غياب بعذر طبي"
+            }
+            
+            success, response = self.make_request('POST', 'attendance/create-absence', 
+                                                absence_data,
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            if success:
+                has_id = 'id' in response
+                has_message = 'message' in response
+                success = success and has_id and has_message
+                
+                # Store absence ID for further testing
+                if has_id:
+                    setattr(self, f'test_absence_id_{role}', response['id'])
+        else:
+            # Test that non-super-admin gets 403
+            success, response = self.make_request('POST', 'attendance/create-absence', 
+                                                {"user_id": "test", "date": "2025-02-15"},
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+        
+        self.log_test(f"Attendance absence creation ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_attendance_absence_editing(self, role: str) -> bool:
+        """Test Super Admin ability to edit absence records and convert to present"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Get an absence ID to edit
+        absence_id = getattr(self, f'test_absence_id_{role}', None)
+        if not absence_id and role == 'super_admin':
+            # Try to get existing attendance records
+            success, attendance = self.make_request('GET', 'attendance/with-absences', token=self.tokens[role])
+            if success and attendance:
+                for record in attendance:
+                    if record.get('status') == 'Absent':
+                        absence_id = record.get('id')
+                        break
+        
+        if not absence_id:
+            self.log_test(f"Attendance absence editing ({role})", True, "No absence records to edit (expected)")
+            return True
+        
+        if role == 'super_admin':
+            # Test editing absence to present with times
+            edit_data = {
+                "status": "present",
+                "check_in": "09:00:00",
+                "check_out": "17:00:00",
+                "reason": "تم تصحيح الحضور"
+            }
+            
+            success, response = self.make_request('PUT', f'attendance/edit-absence/{absence_id}', 
+                                                edit_data,
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+        else:
+            # Test that non-super-admin gets 403
+            success, response = self.make_request('PUT', f'attendance/edit-absence/{absence_id}', 
+                                                {"status": "present"},
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+        
+        self.log_test(f"Attendance absence editing ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_attendance_absence_deletion(self, role: str) -> bool:
+        """Test Super Admin ability to delete absence records"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Create a test absence to delete
+        if role == 'super_admin':
+            success, users = self.make_request('GET', 'users', token=self.tokens[role])
+            if success and users:
+                test_user = users[0]
+                absence_data = {
+                    "user_id": test_user['id'],
+                    "date": "2025-02-20",
+                    "reason": "اختبار حذف الغياب"
+                }
+                
+                create_success, create_response = self.make_request('POST', 'attendance/create-absence', 
+                                                                  absence_data,
+                                                                  token=self.tokens[role])
+                
+                if create_success and 'id' in create_response:
+                    absence_id = create_response['id']
+                    
+                    # Now test deletion
+                    success, response = self.make_request('DELETE', f'attendance/delete-absence/{absence_id}', 
+                                                        token=self.tokens[role],
+                                                        expected_status=expected_status)
+                else:
+                    self.log_test(f"Attendance absence deletion setup ({role})", False, "Could not create absence for deletion test")
+                    return False
+            else:
+                self.log_test(f"Attendance absence deletion setup ({role})", False, "No users found")
+                return False
+        else:
+            # Test that non-super-admin gets 403
+            success, response = self.make_request('DELETE', 'attendance/delete-absence/test-id', 
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+        
+        self.log_test(f"Attendance absence deletion ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_attendance_with_absences_endpoint(self, role: str) -> bool:
+        """Test enhanced attendance view with absences"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'attendance/with-absences', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Check if response includes absence information
+            has_absence_fields = True
+            if response:
+                first_record = response[0]
+                expected_fields = ['status', 'absence_reason', 'can_edit']
+                has_absence_fields = all(field in first_record for field in expected_fields)
+                
+                # Check that Super Admin has edit capabilities
+                if role == 'super_admin':
+                    can_edit = first_record.get('can_edit', False)
+                    has_absence_fields = has_absence_fields and can_edit
+                elif role != 'super_admin':
+                    can_edit = first_record.get('can_edit', True)  # Should be False for non-super-admin
+                    has_absence_fields = has_absence_fields and not can_edit
+            
+            success = success and has_absence_fields
+            
+            self.log_test(f"Attendance with absences endpoint ({role})", success, 
+                         f"Missing absence fields or incorrect edit permissions" if not success else "")
+        else:
+            self.log_test(f"Attendance with absences endpoint ({role})", False, str(response))
+        
+        return success
+
+    def test_leave_creation_json_endpoint(self, role: str) -> bool:
+        """Test leave creation using JSON endpoint (frontend compatible)"""
+        if role not in self.tokens:
+            return False
+        
+        leave_data = {
+            "start_date": "2025-03-10",
+            "end_date": "2025-03-12",
+            "reason": "إجازة شخصية للاختبار",
+            "days_count": 3
+        }
+        
+        success, response = self.make_request('POST', 'leaves/json', 
+                                            leave_data,
+                                            token=self.tokens[role])
+        
+        if success:
+            has_id = 'id' in response
+            has_message = 'message' in response
+            has_status = 'status' in response
+            success = success and has_id and has_message and has_status
+            
+            # Store leave ID for admin testing
+            if has_id:
+                setattr(self, f'test_leave_id_{role}', response['id'])
+        
+        self.log_test(f"Leave creation JSON endpoint ({role})", success, str(response) if not success else "")
+        return success
+
+    def test_leave_creation_form_endpoint(self, role: str) -> bool:
+        """Test leave creation using Form endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        # Use form data as the endpoint expects Form parameters
+        url = f"{self.api_url}/leaves"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        form_data = {
+            'start_date': '2025-03-15',
+            'end_date': '2025-03-17',
+            'reason': 'إجازة مرضية للاختبار',
+            'days_count': '3'
+        }
+        
+        try:
+            response = requests.post(url, data=form_data, headers=headers, timeout=30)
+            success = response.status_code == 200
+            
+            if success:
+                response_data = response.json()
+                has_id = 'id' in response_data
+                has_message = 'message' in response_data
+                success = success and has_id and has_message
+            
+            self.log_test(f"Leave creation Form endpoint ({role})", success, 
+                         f"Status: {response.status_code}, Response: {response.text}" if not success else "")
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Leave creation Form endpoint ({role})", False, str(e))
+            return False
+
+    def test_comprehensive_system_endpoints(self, role: str) -> bool:
+        """Test comprehensive system endpoints for full functionality"""
+        if role not in self.tokens:
+            return False
+        
+        # List of critical endpoints to test
+        endpoints_to_test = [
+            ('GET', 'dashboard/stats', 200),
+            ('GET', 'attendance', 200),
+            ('GET', 'leaves', 200),
+            ('GET', 'field-exits', 200),
+        ]
+        
+        # Add admin-only endpoints
+        if role in ['admin', 'super_admin']:
+            endpoints_to_test.extend([
+                ('GET', 'users', 200),
+                ('GET', 'attendance/all', 200),
+                ('GET', 'leaves/all', 200),
+                ('GET', 'field-exits/all', 200),
+                ('GET', 'reports/attendance/2025-02', 200),
+                ('GET', 'payroll/calculate/2025-02', 200),
+            ])
+        
+        # Add super admin only endpoints
+        if role == 'super_admin':
+            endpoints_to_test.extend([
+                ('GET', 'activity-logs', 200),
+                ('GET', 'attendance/with-absences', 200),
+            ])
+        
+        all_passed = True
+        for method, endpoint, expected_status in endpoints_to_test:
+            success, response = self.make_request(method, endpoint, 
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            if not success:
+                self.log_test(f"System endpoint {endpoint} ({role})", False, str(response))
+                all_passed = False
+            else:
+                self.log_test(f"System endpoint {endpoint} ({role})", True)
+        
+        return all_passed
+
+    def run_arabic_review_tests(self):
+        """Run specific tests for Arabic review request requirements"""
+        print("🔍 ARABIC REVIEW REQUEST SPECIFIC TESTING")
+        print("=" * 80)
+        print("Testing specific requirements from the Arabic review request:")
+        print("1. Enhanced attendance absence tracking with Super Admin capabilities")
+        print("2. Leave request creation functionality fixes")
+        print("3. Comprehensive system testing")
+        print("=" * 80)
+        
+        # Test login for all roles
+        roles_to_test = ['user', 'admin', 'super_admin']
+        successful_logins = []
+        
+        for role in roles_to_test:
+            if self.test_login(role):
+                successful_logins.append(role)
+        
+        if not successful_logins:
+            print("❌ No successful logins - stopping tests")
+            return
+        
+        print(f"\n✅ Successful logins: {', '.join(successful_logins)}")
+        
+        # Run Arabic review specific tests
+        for role in successful_logins:
+            print(f"\n🔍 Testing Arabic Review Requirements with {role.upper()} role:")
+            print("-" * 60)
+            
+            # 1. Enhanced Attendance Absence System Tests
+            print(f"\n📋 1. ENHANCED ATTENDANCE ABSENCE SYSTEM ({role.upper()}):")
+            self.test_attendance_absence_creation(role)
+            self.test_attendance_absence_editing(role)
+            self.test_attendance_absence_deletion(role)
+            self.test_attendance_with_absences_endpoint(role)
+            
+            # 2. Leave Request System Tests
+            print(f"\n📝 2. LEAVE REQUEST SYSTEM FIXES ({role.upper()}):")
+            self.test_leave_creation_json_endpoint(role)
+            self.test_leave_creation_form_endpoint(role)
+            self.test_leaves_endpoint(role)
+            
+            # 3. Comprehensive System Tests
+            print(f"\n🔧 3. COMPREHENSIVE SYSTEM TESTING ({role.upper()}):")
+            self.test_comprehensive_system_endpoints(role)
+            self.test_dashboard_stats(role)
+            
+            # Additional tests for admin roles
+            if role in ['admin', 'super_admin']:
+                print(f"\n👨‍💼 ADMIN SPECIFIC TESTS ({role.upper()}):")
+                self.test_reports_endpoint(role)
+                self.test_reports_export_excel(role)
+                self.test_reports_export_pdf(role)
+                self.test_field_exit_approve_with_notes(role)
+                self.test_leaves_approve_with_notes(role)
+            
+            # Super Admin specific tests
+            if role == 'super_admin':
+                print(f"\n🔐 SUPER ADMIN SPECIFIC TESTS:")
+                self.test_activity_logs(role)
+                self.test_attendance_update_endpoint(role)
+
     # ============ INTERNAL MESSAGING SYSTEM TESTS ============
     
     def test_messages_creation_general(self, role: str) -> bool:
