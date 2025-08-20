@@ -887,6 +887,181 @@ async def check_out(current_user: User = Depends(get_current_user)):
         "flexible_schedule": True
     }
 
+# ============ ENHANCED ATTENDANCE ABSENCE MANAGEMENT ============
+
+@api_router.post("/attendance/create-absence")
+async def create_absence_record(attendance_data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Create absence record for employee (Super Admin only)"""
+    user_id = attendance_data.get("user_id")
+    date = attendance_data.get("date")
+    reason = attendance_data.get("reason", "غياب")
+    
+    if not user_id or not date:
+        raise HTTPException(status_code=400, detail="User ID and date are required")
+    
+    # Check if user exists
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if attendance record already exists
+    existing_attendance = await db.attendance.find_one({"user_id": user_id, "date": date})
+    if existing_attendance:
+        raise HTTPException(status_code=400, detail="Attendance record already exists for this date")
+    
+    # Create absence record
+    absence_record = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "user_name": user.get("name", ""),
+        "date": date,
+        "check_in": None,
+        "check_out": None,
+        "working_hours": 0,
+        "status": "absent",
+        "is_late": False,
+        "absence_reason": reason,
+        "created_by": current_user.id,
+        "created_by_name": current_user.name,
+        "is_manual_entry": True,
+        "created_at": datetime.utcnow()
+    }
+    
+    await db.attendance.insert_one(absence_record)
+    
+    await log_activity(
+        current_user.id, 
+        "absence_created", 
+        f"Created absence record for {user.get('name')} on {date} - Reason: {reason}"
+    )
+    
+    return {"message": "Absence record created successfully", "id": absence_record["id"]}
+
+@api_router.put("/attendance/edit-absence/{attendance_id}")
+async def edit_absence_record(attendance_id: str, attendance_data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Edit absence record and convert to present with check-in/out times (Super Admin only)"""
+    attendance = await db.attendance.find_one({"id": attendance_id})
+    if not attendance:
+        raise HTTPException(status_code=404, detail="Attendance record not found")
+    
+    # Store original values for logging
+    original_status = attendance.get("status")
+    
+    # Extract data from request
+    new_status = attendance_data.get("status", "present")
+    check_in = attendance_data.get("check_in")
+    check_out = attendance_data.get("check_out")
+    reason = attendance_data.get("reason", "")
+    
+    update_data = {
+        "status": new_status,
+        "modified_by": current_user.id,
+        "modified_by_name": current_user.name,
+        "modified_at": datetime.utcnow(),
+        "is_manually_edited": True
+    }
+    
+    # If converting from absent to present, add check-in/out times
+    if new_status == "present" and check_in and check_out:
+        update_data["check_in"] = check_in
+        update_data["check_out"] = check_out
+        update_data["is_late"] = False
+        update_data["absence_reason"] = None
+        
+        # Calculate working hours
+        try:
+            check_in_time = datetime.strptime(check_in, "%H:%M:%S")
+            check_out_time = datetime.strptime(check_out, "%H:%M:%S")
+            
+            if check_out_time < check_in_time:
+                check_out_time += timedelta(days=1)
+            
+            working_hours = (check_out_time - check_in_time).total_seconds() / 3600
+            update_data["working_hours"] = working_hours
+        except ValueError:
+            pass
+    
+    # If editing absence reason
+    if reason and new_status == "absent":
+        update_data["absence_reason"] = reason
+    
+    # Update the record
+    await db.attendance.update_one({"id": attendance_id}, {"$set": update_data})
+    
+    # Log the activity
+    action_detail = f"Edited attendance for {attendance.get('user_name')} on {attendance.get('date')}: {original_status} -> {new_status}"
+    if check_in and check_out:
+        action_detail += f" (Added times: {check_in} - {check_out})"
+    
+    await log_activity(
+        current_user.id, 
+        "attendance_edited", 
+        action_detail
+    )
+    
+    return {"message": "Attendance record updated successfully"}
+
+@api_router.delete("/attendance/delete-absence/{attendance_id}")
+async def delete_absence_record(attendance_id: str, current_user: User = Depends(get_super_admin_user)):
+    """Delete absence record (Super Admin only)"""
+    attendance = await db.attendance.find_one({"id": attendance_id})
+    if not attendance:
+        raise HTTPException(status_code=404, detail="Attendance record not found")
+    
+    # Only allow deletion of absent records or manually created entries
+    if attendance.get("status") != "absent" and not attendance.get("is_manual_entry"):
+        raise HTTPException(status_code=400, detail="Can only delete absence records or manually created entries")
+    
+    # Delete the record
+    await db.attendance.delete_one({"id": attendance_id})
+    
+    await log_activity(
+        current_user.id, 
+        "absence_deleted", 
+        f"Deleted absence record for {attendance.get('user_name')} on {attendance.get('date')}"
+    )
+    
+    return {"message": "Absence record deleted successfully"}
+
+@api_router.get("/attendance/with-absences")
+async def get_attendance_with_absences(current_user: User = Depends(get_current_user)):
+    """Get attendance records including absences (Enhanced view)"""
+    if current_user.role == "user":
+        # For regular users, only show their own records
+        query = {"user_id": current_user.id}
+    else:
+        # For admins, show all records
+        query = {}
+    
+    attendance_records = await db.attendance.find(query).sort("date", -1).to_list(1000)
+    
+    # Convert to enhanced format
+    attendance_list = []
+    for record in attendance_records:
+        attendance_item = {
+            "id": record.get("id", str(record.get("_id", ""))),
+            "user_id": record.get("user_id", ""),
+            "user_name": record.get("user_name", ""),
+            "date": record.get("date", ""),
+            "check_in": record.get("check_in"),
+            "check_out": record.get("check_out"),
+            "working_hours": record.get("working_hours", 0),
+            "status": record.get("status", ""),
+            "is_late": record.get("is_late", False),
+            "absence_reason": record.get("absence_reason"),
+            "is_manual_entry": record.get("is_manual_entry", False),
+            "is_manually_edited": record.get("is_manually_edited", False),
+            "created_by": record.get("created_by"),
+            "created_by_name": record.get("created_by_name"),
+            "modified_by": record.get("modified_by"),
+            "modified_by_name": record.get("modified_by_name"),
+            "can_edit": current_user.role == "super_admin",  # Only super admin can edit
+            "created_at": record.get("created_at")
+        }
+        attendance_list.append(attendance_item)
+    
+    return attendance_list
+
 # ============ LEAVE ENDPOINTS ============
 
 @api_router.get("/leaves")
