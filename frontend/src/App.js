@@ -3081,18 +3081,26 @@ const AttendanceManagement = () => {
 
   const handleSave = async (id) => {
     try {
-      if (editData.status === 'absent') {
-        // Use the absence editing endpoint for converting or updating absences
-        await axios.put(`${API}/attendance/edit-absence/${id}`, editData);
-      } else {
-        // Use regular attendance update for present/late records
-        await axios.put(`${API}/attendance/${id}`, editData);
-      }
+      // Always use the regular attendance update endpoint
+      // It will handle all status changes properly
+      const updateData = {
+        check_in: editData.check_in || null,
+        check_out: editData.check_out || null,
+        status: editData.status,
+        reason: editData.reason || null
+      };
+
+      await axios.put(`${API}/attendance/${id}`, updateData);
+      
       setEditingRecord(null);
+      setEditData({});
       fetchAllAttendance();
+      
+      // Show success message
+      alert('تم تحديث سجل الحضور بنجاح');
     } catch (error) {
       console.error('Error updating attendance:', error);
-      alert('حدث خطأ في تحديث سجل الحضور');
+      alert('حدث خطأ في تحديث سجل الحضور: ' + (error.response?.data?.detail || error.message));
     }
   };
 
