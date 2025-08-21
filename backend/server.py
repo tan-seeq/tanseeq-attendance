@@ -1678,7 +1678,10 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
             # Admin stats
             total_users = await db.users.count_documents({})
             today = get_uae_time().strftime("%Y-%m-%d")
-            present_today = await db.attendance.count_documents({"date": today, "status": {"$in": ["present", "late"]}})
+            present_today = await db.attendance.count_documents({
+                "date": today, 
+                "status": {"$in": ["present", "late", "Present", "Late"]}
+            })
             pending_leaves = await db.leaves.count_documents({"status": "pending"})
             pending_field_exits = await db.field_exits.count_documents({"status": "pending"})
             
