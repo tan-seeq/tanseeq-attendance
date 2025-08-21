@@ -732,6 +732,11 @@ async def update_attendance(attendance_id: str, attendance_data: dict, current_u
         if "status" not in update_data:
             update_data["status"] = "present"
         
+        # Clear absence-related fields when converting to present
+        if update_data.get("status") == "present":
+            update_data["absence_reason"] = None
+            update_data["is_auto_absence"] = False
+        
         # Add edited timestamp and editor info
         update_data["is_manually_edited"] = True
         update_data["modified_by"] = current_user.id
