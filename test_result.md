@@ -428,6 +428,8 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  arabic_review_completed: true
+  final_testing_status: "COMPLETED_SUCCESSFULLY"
 
 agent_communication:
   - agent: "main"
