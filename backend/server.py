@@ -682,35 +682,54 @@ async def get_all_attendance(current_user: User = Depends(get_current_user)):
     return attendance_list
 
 @api_router.put("/attendance/{attendance_id}")
-async def update_attendance(attendance_id: str, attendance_data: dict, current_user: User = Depends(get_super_admin_user)):
-    """Update attendance record (Super admin only)"""
+async def update_attendance(attendance_id: str, update_data: dict, current_user: User = Depends(get_admin_user)):
+    """Update attendance record with comprehensive status and time handling"""
+    
+    # Find the attendance record
     attendance = await db.attendance.find_one({"id": attendance_id})
     if not attendance:
         raise HTTPException(status_code=404, detail="Attendance record not found")
     
-    # Store original values for logging
-    original_values = {
-        "check_in": attendance.get("check_in"),
-        "check_out": attendance.get("check_out"),
-        "status": attendance.get("status"),
-        "is_late": attendance.get("is_late")
-    }
+    # Prepare update fields
+    update_fields = {}
+    changes = []
     
-    # Update values
-    update_data = {}
-    if "check_in" in attendance_data:
-        update_data["check_in"] = attendance_data["check_in"]
-    if "check_out" in attendance_data:
-        update_data["check_out"] = attendance_data["check_out"]
-    if "status" in attendance_data:
-        update_data["status"] = attendance_data["status"]
-        # If status is manually set to present, remove late flag
-        if attendance_data["status"] == "present":
-            update_data["is_late"] = False
+    # Handle status change
+    new_status = update_data.get("status")
+    if new_status:
+        update_fields["status"] = new_status
+        changes.append(f"status: {attendance.get('status', 'unknown')} -> {new_status}")
+        
+        # Clear absence-related fields when changing to present/late
+        if new_status in ["present", "late"]:
+            update_fields["absence_reason"] = None
+            update_fields["is_auto_absence"] = False
+            changes.append("cleared absence reason")
+        
+        # Set absence reason when changing to absent
+        elif new_status == "absent":
+            reason = update_data.get("reason", "غياب")
+            update_fields["absence_reason"] = reason
+            update_fields["check_in"] = None
+            update_fields["check_out"] = None
+            update_fields["working_hours"] = 0
+            changes.append(f"set absence reason: {reason}")
     
-    # Calculate working hours if both check_in and check_out are available
-    current_check_in = update_data.get("check_in") or attendance.get("check_in")
-    current_check_out = update_data.get("check_out") or attendance.get("check_out")
+    # Handle time updates
+    check_in_updated = "check_in" in update_data
+    check_out_updated = "check_out" in update_data
+    
+    if check_in_updated:
+        update_fields["check_in"] = update_data["check_in"]
+        changes.append(f"check_in: {update_data['check_in']}")
+    
+    if check_out_updated:
+        update_fields["check_out"] = update_data["check_out"]
+        changes.append(f"check_out: {update_data['check_out']}")
+    
+    # Calculate working hours if both times are available
+    current_check_in = update_fields.get("check_in") or attendance.get("check_in")
+    current_check_out = update_fields.get("check_out") or attendance.get("check_out")
     
     if current_check_in and current_check_out:
         try:
@@ -722,45 +741,40 @@ async def update_attendance(attendance_id: str, attendance_data: dict, current_u
                 check_out_time += timedelta(days=1)
             
             working_hours = (check_out_time - check_in_time).total_seconds() / 3600
-            update_data["working_hours"] = round(working_hours, 2)
-        except ValueError:
-            pass  # Invalid time format, skip calculation
+            update_fields["working_hours"] = round(working_hours, 2)
+            changes.append(f"working_hours: {working_hours:.2f}")
+            
+            # Auto-correct status when times are provided
+            if not new_status or new_status == "absent":
+                update_fields["status"] = "present"
+                update_fields["absence_reason"] = None
+                update_fields["is_auto_absence"] = False
+                changes.append("auto-corrected status to present")
+                
+        except ValueError as e:
+            logger.error(f"Time parsing error: {e}")
     
-    # When admin edits the attendance, assume it's correct and not late
-    if "check_in" in update_data or "check_out" in update_data:
-        update_data["is_late"] = False
-        if "status" not in update_data:
-            update_data["status"] = "present"
+    # When admin edits attendance, mark as manually edited
+    if check_in_updated or check_out_updated or new_status:
+        update_fields["is_late"] = False  # Assume admin correction is valid
+        update_fields["is_manually_edited"] = True
+        update_fields["modified_by"] = current_user.id
+        update_fields["modified_by_name"] = current_user.name
+        update_fields["modified_at"] = datetime.utcnow()
+    
+    # Apply updates
+    if update_fields:
+        await db.attendance.update_one({"id": attendance_id}, {"$set": update_fields})
         
-        # Clear absence-related fields when converting to present
-        if update_data.get("status") == "present":
-            update_data["absence_reason"] = None
-            update_data["is_auto_absence"] = False
-        
-        # Add edited timestamp and editor info
-        update_data["is_manually_edited"] = True
-        update_data["modified_by"] = current_user.id
-        update_data["modified_by_name"] = current_user.name
-        update_data["modified_at"] = datetime.utcnow()
-    
-    # Update the record
-    await db.attendance.update_one({"id": attendance_id}, {"$set": update_data})
-    
-    # Log the activity
-    changes = []
-    for key, new_value in update_data.items():
-        old_value = original_values.get(key, attendance.get(key))
-        if old_value != new_value:
-            changes.append(f"{key}: {old_value} -> {new_value}")
-    
-    if changes:
+        # Log the activity
+        change_summary = ", ".join(changes)
         await log_activity(
             current_user.id, 
             "attendance_updated", 
-            f"Updated attendance for {attendance.get('user_name', 'Unknown')}: {', '.join(changes)}"
+            f"Updated attendance for {attendance.get('user_name', 'Unknown')}: {change_summary}"
         )
     
-    return {"message": "Attendance updated successfully"}
+    return {"message": "Attendance updated successfully", "changes": changes}
 
 @api_router.post("/attendance/check-in")
 async def check_in(current_user: User = Depends(get_current_user)):
