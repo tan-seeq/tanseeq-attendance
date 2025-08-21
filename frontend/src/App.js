@@ -3163,12 +3163,20 @@ const AttendanceManagement = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">إدارة الحضور - TANSEEQ Tax Consultancy</h2>
           {user?.role === 'super_admin' && (
-            <button
-              onClick={() => setShowAbsenceModal(true)}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-            >
-              إنشاء سجل غياب
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={handleCheckMissingEmployees}
+                className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+              >
+                فحص الغائبين اليوم
+              </button>
+              <button
+                onClick={() => setShowAbsenceModal(true)}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                إنشاء سجل غياب
+              </button>
+            </div>
           )}
         </div>
         
