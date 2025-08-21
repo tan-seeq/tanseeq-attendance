@@ -3048,6 +3048,8 @@ const AttendanceManagement = () => {
   const [editData, setEditData] = useState({});
   const [showAbsenceModal, setShowAbsenceModal] = useState(false);
   const [absenceData, setAbsenceData] = useState({});
+  const [missingEmployees, setMissingEmployees] = useState([]);
+  const [showMissingModal, setShowMissingModal] = useState(false);
   const { user } = useAuth();
   const { t } = useLanguage();
 
