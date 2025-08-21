@@ -3071,10 +3071,17 @@ const AttendanceManagement = () => {
 
   const handleEdit = (record) => {
     setEditingRecord(record.id);
+    
+    // Convert display status to backend format
+    let backendStatus = record.status;
+    if (record.status === 'Present') backendStatus = 'present';
+    else if (record.status === 'Late') backendStatus = 'late';  
+    else if (record.status === 'Absent') backendStatus = 'absent';
+    
     setEditData({
       check_in: record.check_in || '',
       check_out: record.check_out || '',
-      status: record.status,
+      status: backendStatus,
       reason: record.absence_reason || ''
     });
   };
