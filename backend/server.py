@@ -733,8 +733,18 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
     
     if current_check_in and current_check_out:
         try:
-            check_in_time = datetime.strptime(current_check_in, "%H:%M:%S")
-            check_out_time = datetime.strptime(current_check_out, "%H:%M:%S")
+            # Handle both HH:MM and HH:MM:SS formats from frontend
+            check_in_str = current_check_in
+            check_out_str = current_check_out
+            
+            # Add seconds if not present (frontend sends HH:MM, we need HH:MM:SS)
+            if len(check_in_str) == 5:  # HH:MM format
+                check_in_str += ":00"
+            if len(check_out_str) == 5:  # HH:MM format  
+                check_out_str += ":00"
+            
+            check_in_time = datetime.strptime(check_in_str, "%H:%M:%S")
+            check_out_time = datetime.strptime(check_out_str, "%H:%M:%S")
             
             # Handle overnight shifts
             if check_out_time < check_in_time:
@@ -752,7 +762,9 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
                 changes.append("auto-corrected status to present")
                 
         except ValueError as e:
-            logger.error(f"Time parsing error: {e}")
+            logger.error(f"Time parsing error for {attendance.get('user_name', 'Unknown')}: {e}")
+            # Return error instead of silent failure
+            raise HTTPException(status_code=400, detail=f"Invalid time format: {str(e)}")
     
     # When admin edits attendance, mark as manually edited
     if check_in_updated or check_out_updated or new_status:
