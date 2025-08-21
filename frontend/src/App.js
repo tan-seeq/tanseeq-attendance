@@ -3384,6 +3384,83 @@ const AttendanceManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Missing Employees Modal */}
+      {showMissingModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-5 border w-2/3 max-w-4xl shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">الموظفون الغائبون اليوم</h3>
+            
+            {missingEmployees.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-green-600 text-lg">✅ جميع الموظفين سجلوا حضورهم اليوم!</p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-red-600 mb-4">
+                  عدد الموظفين الغائبين: {missingEmployees.length}
+                </p>
+                
+                <div className="max-h-60 overflow-y-auto mb-4">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          اسم الموظف
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          البريد الإلكتروني
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          ID
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {missingEmployees.map((employee) => (
+                        <tr key={employee.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {employee.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {employee.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {employee.id}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+                  <p className="text-yellow-800 text-sm">
+                    💡 يمكنك إنشاء سجلات غياب تلقائية لجميع هؤلاء الموظفين بضغطة واحدة
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowMissingModal(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                إغلاق
+              </button>
+              {missingEmployees.length > 0 && (
+                <button
+                  onClick={() => handleProcessDailyAbsences()}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  إنشاء سجلات غياب تلقائية ({missingEmployees.length})
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
