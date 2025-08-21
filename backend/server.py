@@ -1071,6 +1071,93 @@ async def get_attendance_with_absences(current_user: User = Depends(get_current_
     
     return attendance_list
 
+# ============ AUTO ABSENCE SYSTEM ============
+
+@api_router.post("/attendance/process-daily-absences")
+async def process_daily_absences(date_data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Process daily absences - create absence records for employees who didn't check in (Super Admin only)"""
+    target_date = date_data.get("date")
+    if not target_date:
+        target_date = datetime.now().strftime("%Y-%m-%d")
+    
+    # Get all active employees
+    all_employees = await db.users.find({"role": "user", "is_active": True}).to_list(1000)
+    
+    # Get employees who already have attendance records for this date
+    existing_attendance = await db.attendance.find({"date": target_date}).to_list(1000)
+    employees_with_records = {record["user_id"] for record in existing_attendance}
+    
+    # Find employees without attendance records
+    absent_employees = [emp for emp in all_employees if emp["id"] not in employees_with_records]
+    
+    created_absences = []
+    for employee in absent_employees:
+        absence_record = {
+            "id": str(uuid.uuid4()),
+            "user_id": employee["id"],
+            "user_name": employee["name"],
+            "date": target_date,
+            "check_in": None,
+            "check_out": None,
+            "working_hours": 0,
+            "status": "absent",
+            "is_late": False,
+            "absence_reason": "غياب تلقائي - لم يسجل حضور",
+            "created_by": current_user.id,
+            "created_by_name": current_user.name,
+            "is_manual_entry": True,
+            "is_auto_absence": True,  # Flag to identify auto-generated absences
+            "created_at": datetime.utcnow()
+        }
+        
+        await db.attendance.insert_one(absence_record)
+        created_absences.append(absence_record)
+        
+        # Log the activity
+        await log_activity(
+            current_user.id, 
+            "auto_absence_created", 
+            f"Auto-created absence record for {employee['name']} on {target_date}"
+        )
+    
+    return {
+        "message": f"Processed daily absences for {target_date}",
+        "total_employees": len(all_employees),
+        "employees_with_records": len(employees_with_records),
+        "absences_created": len(created_absences),
+        "absent_employees": [{"name": emp["user_name"], "reason": emp["absence_reason"]} for emp in created_absences]
+    }
+
+@api_router.get("/attendance/missing-today")
+async def get_missing_employees_today(current_user: User = Depends(get_admin_user)):
+    """Get employees who haven't checked in today"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Get all active employees
+    all_employees = await db.users.find({"role": "user", "is_active": True}).to_list(1000)
+    
+    # Get employees who already have attendance records for today
+    existing_attendance = await db.attendance.find({"date": today}).to_list(1000)
+    employees_with_records = {record["user_id"] for record in existing_attendance}
+    
+    # Find employees without attendance records
+    missing_employees = []
+    for employee in all_employees:
+        if employee["id"] not in employees_with_records:
+            missing_employees.append({
+                "id": employee["id"],
+                "name": employee["name"],
+                "email": employee["email"]
+            })
+    
+    return {
+        "date": today,
+        "total_employees": len(all_employees),
+        "employees_present": len(employees_with_records),
+        "employees_missing": len(missing_employees),
+        "missing_employees": missing_employees
+    }
+
 # ============ LEAVE ENDPOINTS ============
 
 @api_router.get("/leaves")
