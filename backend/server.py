@@ -731,6 +731,12 @@ async def update_attendance(attendance_id: str, attendance_data: dict, current_u
         update_data["is_late"] = False
         if "status" not in update_data:
             update_data["status"] = "present"
+        
+        # Add edited timestamp and editor info
+        update_data["is_manually_edited"] = True
+        update_data["modified_by"] = current_user.id
+        update_data["modified_by_name"] = current_user.name
+        update_data["modified_at"] = datetime.utcnow()
     
     # Update the record
     await db.attendance.update_one({"id": attendance_id}, {"$set": update_data})
