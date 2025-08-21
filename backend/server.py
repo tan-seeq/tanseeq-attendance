@@ -975,7 +975,8 @@ async def edit_absence_record(attendance_id: str, attendance_data: dict, current
         update_data["check_in"] = check_in
         update_data["check_out"] = check_out
         update_data["is_late"] = False
-        update_data["absence_reason"] = None
+        update_data["absence_reason"] = None  # Clear absence reason when converting to present
+        update_data["is_auto_absence"] = False  # Clear auto absence flag
         
         # Calculate working hours
         try:
