@@ -3114,6 +3114,32 @@ const AttendanceManagement = () => {
     }
   };
 
+  const handleCheckMissingEmployees = async () => {
+    try {
+      const response = await axios.get(`${API}/attendance/missing-today`);
+      setMissingEmployees(response.data.missing_employees);
+      setShowMissingModal(true);
+    } catch (error) {
+      console.error('Error fetching missing employees:', error);
+      alert('حدث خطأ في جلب بيانات الموظفين الغائبين');
+    }
+  };
+
+  const handleProcessDailyAbsences = async (date = null) => {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    if (window.confirm(`هل أنت متأكد من معالجة الغياب التلقائي لتاريخ ${targetDate}؟`)) {
+      try {
+        const response = await axios.post(`${API}/attendance/process-daily-absences`, { date: targetDate });
+        alert(`تم إنشاء ${response.data.absences_created} سجل غياب تلقائي من أصل ${response.data.total_employees} موظف`);
+        fetchAllAttendance();
+        setShowMissingModal(false);
+      } catch (error) {
+        console.error('Error processing daily absences:', error);
+        alert('حدث خطأ في معالجة الغياب التلقائي');
+      }
+    }
+  };
+
   const handleDeleteAbsence = async (id) => {
     if (window.confirm('هل أنت متأكد من حذف سجل الغياب؟')) {
       try {
