@@ -685,6 +685,8 @@ async def get_all_attendance(current_user: User = Depends(get_current_user)):
 async def update_attendance(attendance_id: str, update_data: dict, current_user: User = Depends(get_admin_user)):
     """Update attendance record with comprehensive status and time handling"""
     
+    logger.info(f"Updating attendance {attendance_id} with data: {update_data}")
+    
     # Find the attendance record
     attendance = await db.attendance.find_one({"id": attendance_id})
     if not attendance:
@@ -697,6 +699,7 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
     # Handle status change
     new_status = update_data.get("status")
     if new_status:
+        logger.info(f"Status change requested: {attendance.get('status', 'unknown')} -> {new_status}")
         update_fields["status"] = new_status
         changes.append(f"status: {attendance.get('status', 'unknown')} -> {new_status}")
         
@@ -754,12 +757,12 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
             update_fields["working_hours"] = round(working_hours, 2)
             changes.append(f"working_hours: {working_hours:.2f}")
             
-            # Auto-correct status when times are provided
-            if not new_status or new_status == "absent":
+            # Auto-correct status when times are provided (only if no explicit status change)
+            if not new_status and attendance.get("status") == "absent":
                 update_fields["status"] = "present"
                 update_fields["absence_reason"] = None
                 update_fields["is_auto_absence"] = False
-                changes.append("auto-corrected status to present")
+                changes.append("auto-corrected status from absent to present")
                 
         except ValueError as e:
             logger.error(f"Time parsing error for {attendance.get('user_name', 'Unknown')}: {e}")
@@ -776,6 +779,7 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
     
     # Apply updates
     if update_fields:
+        logger.info(f"Applying updates: {update_fields}")
         await db.attendance.update_one({"id": attendance_id}, {"$set": update_fields})
         
         # Log the activity
@@ -785,6 +789,10 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
             "attendance_updated", 
             f"Updated attendance for {attendance.get('user_name', 'Unknown')}: {change_summary}"
         )
+        
+        logger.info(f"Successfully updated attendance {attendance_id}")
+    else:
+        logger.warning(f"No updates to apply for attendance {attendance_id}")
     
     return {"message": "Attendance updated successfully", "changes": changes}
 
