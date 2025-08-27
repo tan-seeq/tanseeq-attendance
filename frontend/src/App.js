@@ -380,6 +380,10 @@ const Layout = ({ children }) => {
       { name: t('activity_logs'), href: '/activity-logs', icon: DocumentTextIcon },
       { name: 'إنشاء طلبات للموظفين', href: '/admin-request-creation', icon: PlusIcon },
     ] : []),
+    // Work Reports Module (Isolated)
+    { name: 'لوحة التقارير', href: '/work-reports', icon: ChartBarIcon },
+    { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
+    { name: 'سجلات العمل اليومية', href: '/work-reports/logs', icon: ClockIcon },
   ];
 
   const handleLogout = async () => {
