@@ -34,7 +34,9 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
   InformationCircleIcon,
-  CalculatorIcon
+  CalculatorIcon,
+  PlayIcon,
+  DocumentChartBarIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
