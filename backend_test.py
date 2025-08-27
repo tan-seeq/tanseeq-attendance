@@ -5283,16 +5283,19 @@ class TanseeqAPITester:
             return False
         
         # Test POST client (create)
+        import time
+        unique_suffix = str(int(time.time()))[-6:]  # Last 6 digits of timestamp
         client_data = {
-            "company_name": "Test Client Company Ltd",
+            "company_name": f"Test Client Company Ltd {unique_suffix}",
             "company_name_ar": "شركة العميل التجريبية المحدودة",
+            "client_code": f"TCL{unique_suffix}",
             "industry": "Technology",
             "contact_person": "Ahmed Al-Rashid",
             "phone": "+971501234567",
-            "email": "ahmed@testclient.ae",
+            "email": f"ahmed{unique_suffix}@testclient.ae",
             "address": "Dubai, UAE",
-            "tax_number": "100123456789003",
-            "commercial_registration": "1234567890",
+            "tax_number": f"100123456789{unique_suffix[-3:]}",
+            "commercial_registration": f"123456789{unique_suffix[-1:]}",
             "notes": "Test client for API testing"
         }
         
