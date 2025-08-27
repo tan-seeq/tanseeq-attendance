@@ -179,6 +179,146 @@ class UserResponse(BaseModel):
     flexible_core_hours: str = "10:00-15:00"
     flexible_days_per_week: int = 5
 
+# ============ WORK REPORTS PYDANTIC MODELS ============
+
+class ClientResponse(BaseModel):
+    id: str
+    company_name: str
+    company_name_ar: Optional[str] = None
+    client_code: str
+    industry: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    tax_number: Optional[str] = None
+    commercial_registration: Optional[str] = None
+    notes: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    created_by: str
+    
+    class Config:
+        from_attributes = True
+
+class ClientCreate(BaseModel):
+    company_name: str
+    company_name_ar: Optional[str] = None
+    client_code: Optional[str] = None
+    industry: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    tax_number: Optional[str] = None
+    commercial_registration: Optional[str] = None
+    notes: Optional[str] = None
+
+class ClientUpdate(BaseModel):
+    company_name: Optional[str] = None
+    company_name_ar: Optional[str] = None
+    industry: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    tax_number: Optional[str] = None
+    commercial_registration: Optional[str] = None
+    notes: Optional[str] = None
+
+class ActivityTypeResponse(BaseModel):
+    id: str
+    name: str
+    name_ar: Optional[str] = None
+    category: str
+    description: Optional[str] = None
+    default_rate: Optional[float] = None
+    is_billable: bool = True
+    is_active: bool = True
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class ActivityTypeCreate(BaseModel):
+    name: str
+    name_ar: Optional[str] = None
+    category: str
+    description: Optional[str] = None
+    default_rate: Optional[float] = None
+    is_billable: bool = True
+
+class WorkLogResponse(BaseModel):
+    id: str
+    client_id: str
+    activity_type_id: str
+    user_id: str
+    date: datetime
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    duration_hours: Optional[float] = None
+    description: str
+    notes: Optional[str] = None
+    is_billable: bool = True
+    hourly_rate: Optional[float] = None
+    total_amount: Optional[float] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    # Related data
+    client_name: Optional[str] = None
+    activity_name: Optional[str] = None
+    user_name: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+class WorkLogCreate(BaseModel):
+    client_id: str
+    activity_type_id: str
+    date: datetime
+    start_time: datetime
+    end_time: Optional[datetime] = None
+    description: str
+    notes: Optional[str] = None
+    is_billable: bool = True
+    hourly_rate: Optional[float] = None
+
+class WorkLogUpdate(BaseModel):
+    client_id: Optional[str] = None
+    activity_type_id: Optional[str] = None
+    date: Optional[datetime] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    description: Optional[str] = None
+    notes: Optional[str] = None
+    is_billable: Optional[bool] = None
+    hourly_rate: Optional[float] = None
+
+class ClientCredentialResponse(BaseModel):
+    id: str
+    client_id: str
+    credential_type: str
+    username: str
+    email: Optional[str] = None
+    portal_url: Optional[str] = None
+    description: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class ClientCredentialCreate(BaseModel):
+    client_id: str
+    credential_type: str
+    username: str
+    email: Optional[str] = None
+    password: str
+    portal_url: Optional[str] = None
+    description: Optional[str] = None
+
 class LoginRequest(BaseModel):
     email: str
     password: str
