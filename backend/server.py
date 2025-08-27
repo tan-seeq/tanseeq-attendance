@@ -5373,6 +5373,683 @@ async def get_automation_status(current_user: User = Depends(get_super_admin_use
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting automation status: {str(e)}")
 
+# ============ WORK REPORTS MODULE (COMPLETELY ISOLATED) ============
+"""
+Daily Work Report + Clients Master Feature
+This module is completely isolated from the main TANSEEQ HR system
+Uses PostgreSQL instead of MongoDB for data storage
+"""
+
+@api_router.on_event("startup")
+async def startup_work_reports():
+    """Initialize Work Reports database and default data"""
+    try:
+        # Create tables
+        create_work_reports_tables()
+        
+        # Initialize default activity types
+        from sqlalchemy.orm import sessionmaker
+        from work_reports_db import engine
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        db = SessionLocal()
+        init_default_activity_types(db)
+        db.close()
+        
+        logger.info("Work Reports module initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Work Reports module: {str(e)}")
+
+# ============ CLIENT MANAGEMENT ENDPOINTS ============
+
+@api_router.get("/work-reports/clients", response_model=List[ClientResponse])
+async def get_clients(
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get all clients"""
+    clients = db.query(Client).filter(Client.is_active == True).all()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "view_clients"
+    )
+    
+    return clients
+
+@api_router.post("/work-reports/clients", response_model=ClientResponse)
+async def create_client(
+    client_data: ClientCreate,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Create new client"""
+    # Generate client code if not provided
+    if not client_data.client_code:
+        company_initials = ''.join([word[0].upper() for word in client_data.company_name.split()[:3]])
+        timestamp = datetime.now().strftime("%y%m")
+        client_data.client_code = f"{company_initials}{timestamp}"
+    
+    # Check for duplicate client code
+    existing_client = db.query(Client).filter(Client.client_code == client_data.client_code).first()
+    if existing_client:
+        raise HTTPException(status_code=400, detail="Client code already exists")
+    
+    # Create client
+    client = Client(
+        **client_data.dict(),
+        created_by=current_user.name
+    )
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "create_client",
+        table_name="clients", record_id=str(client.id),
+        after_value=client_data.dict()
+    )
+    
+    return client
+
+@api_router.put("/work-reports/clients/{client_id}", response_model=ClientResponse)
+async def update_client(
+    client_id: str,
+    client_update: ClientUpdate,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Update client information"""
+    client = db.query(Client).filter(Client.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Store original values for audit
+    original_data = {
+        "company_name": client.company_name,
+        "client_code": client.client_code,
+        "email": client.email,
+        "phone": client.phone
+    }
+    
+    # Update client
+    update_data = client_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(client, key, value)
+    
+    client.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(client)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "update_client",
+        table_name="clients", record_id=str(client.id),
+        before_value=original_data, after_value=update_data
+    )
+    
+    return client
+
+@api_router.delete("/work-reports/clients/{client_id}")
+async def delete_client(
+    client_id: str,
+    current_user = Depends(get_admin_user),
+    db = Depends(get_work_reports_db)
+):
+    """Delete client (Admin only) - Soft delete"""
+    client = db.query(Client).filter(Client.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Soft delete
+    client.is_active = False
+    client.updated_at = datetime.utcnow()
+    db.commit()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "delete_client",
+        table_name="clients", record_id=str(client.id)
+    )
+    
+    return {"message": "Client deleted successfully"}
+
+# ============ CLIENT CREDENTIALS MANAGEMENT ============
+
+@api_router.get("/work-reports/clients/{client_id}/credentials", response_model=List[ClientCredentialResponse])
+async def get_client_credentials(
+    client_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get client credentials (without passwords)"""
+    client = db.query(Client).filter(Client.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    credentials = db.query(ClientCredential).filter(
+        ClientCredential.client_id == client_id,
+        ClientCredential.is_active == True
+    ).all()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "view_credentials",
+        table_name="client_credentials", record_id=client_id
+    )
+    
+    return credentials
+
+@api_router.post("/work-reports/clients/{client_id}/credentials", response_model=ClientCredentialResponse)
+async def create_client_credential(
+    client_id: str,
+    credential_data: ClientCredentialCreate,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Create client credential with encrypted password"""
+    client = db.query(Client).filter(Client.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Encrypt password if provided
+    encrypted_password = None
+    if credential_data.password:
+        encrypted_password = credential_encryption.encrypt_password(credential_data.password)
+    
+    # Create credential
+    credential = ClientCredential(
+        client_id=client_id,
+        credential_type=credential_data.credential_type,
+        username=credential_data.username,
+        email=credential_data.email,
+        encrypted_password=encrypted_password,
+        portal_url=credential_data.portal_url,
+        description=credential_data.description,
+        is_active=credential_data.is_active
+    )
+    
+    db.add(credential)
+    db.commit()
+    db.refresh(credential)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "create_credential",
+        table_name="client_credentials", record_id=str(credential.id),
+        after_value={"credential_type": credential_data.credential_type, "client_id": client_id}
+    )
+    
+    return credential
+
+@api_router.get("/work-reports/credentials/{credential_id}/password")
+async def get_credential_password(
+    credential_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get decrypted password (for authorized users only)"""
+    credential = db.query(ClientCredential).filter(ClientCredential.id == credential_id).first()
+    if not credential:
+        raise HTTPException(status_code=404, detail="Credential not found")
+    
+    # Decrypt password
+    decrypted_password = ""
+    if credential.encrypted_password:
+        decrypted_password = credential_encryption.decrypt_password(credential.encrypted_password)
+    
+    # Update last used timestamp
+    credential.last_used = datetime.utcnow()
+    db.commit()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "access_password",
+        table_name="client_credentials", record_id=str(credential.id)
+    )
+    
+    return {"password": decrypted_password}
+
+# ============ ACTIVITY TYPES MANAGEMENT ============
+
+@api_router.get("/work-reports/activity-types", response_model=List[ActivityTypeResponse])
+async def get_activity_types(
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get all activity types"""
+    activity_types = db.query(ActivityType).filter(ActivityType.is_active == True).all()
+    return activity_types
+
+@api_router.post("/work-reports/activity-types", response_model=ActivityTypeResponse)
+async def create_activity_type(
+    activity_data: ActivityTypeCreate,
+    current_user = Depends(get_admin_user),
+    db = Depends(get_work_reports_db)
+):
+    """Create new activity type (Admin only)"""
+    activity_type = ActivityType(**activity_data.dict())
+    db.add(activity_type)
+    db.commit()
+    db.refresh(activity_type)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "create_activity_type",
+        table_name="activity_types", record_id=str(activity_type.id),
+        after_value=activity_data.dict()
+    )
+    
+    return activity_type
+
+# ============ WORK LOG MANAGEMENT ============
+
+@api_router.get("/work-reports/logs", response_model=List[WorkLogResponse])
+async def get_work_logs(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    client_id: Optional[str] = None,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get work logs with filtering options"""
+    query = db.query(WorkLog)
+    
+    # Filter by user for non-admin users
+    if current_user.role == "user":
+        query = query.filter(WorkLog.user_id == current_user.id)
+    
+    # Date filters
+    if start_date:
+        query = query.filter(WorkLog.date >= datetime.strptime(start_date, "%Y-%m-%d"))
+    if end_date:
+        query = query.filter(WorkLog.date <= datetime.strptime(end_date, "%Y-%m-%d"))
+    
+    # Client filter
+    if client_id:
+        query = query.filter(WorkLog.client_id == client_id)
+    
+    work_logs = query.order_by(WorkLog.date.desc()).all()
+    
+    # Enhance response with client and activity names
+    enhanced_logs = []
+    for log in work_logs:
+        log_dict = {
+            "id": str(log.id),
+            "client_id": str(log.client_id),
+            "activity_type_id": str(log.activity_type_id),
+            "user_id": log.user_id,
+            "user_name": log.user_name,
+            "date": log.date,
+            "start_time": log.start_time,
+            "end_time": log.end_time,
+            "duration_minutes": log.duration_minutes,
+            "description": log.description,
+            "notes": log.notes,
+            "is_billable": log.is_billable,
+            "hourly_rate": log.hourly_rate,
+            "total_amount": log.total_amount,
+            "status": log.status,
+            "created_at": log.created_at,
+            "updated_at": log.updated_at,
+            "client_name": log.client.company_name if log.client else "",
+            "activity_name": log.activity_type.name if log.activity_type else ""
+        }
+        enhanced_logs.append(log_dict)
+    
+    return enhanced_logs
+
+@api_router.post("/work-reports/logs", response_model=WorkLogResponse)
+async def create_work_log(
+    log_data: WorkLogCreate,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Create new work log entry"""
+    # Validate client and activity type exist
+    client = db.query(Client).filter(Client.id == log_data.client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    activity_type = db.query(ActivityType).filter(ActivityType.id == log_data.activity_type_id).first()
+    if not activity_type:
+        raise HTTPException(status_code=404, detail="Activity type not found")
+    
+    # Calculate duration and total amount
+    duration_minutes = log_data.duration_minutes
+    if log_data.start_time and log_data.end_time:
+        duration = log_data.end_time - log_data.start_time
+        duration_minutes = int(duration.total_seconds() / 60)
+    
+    hourly_rate = log_data.hourly_rate or activity_type.default_rate or 0
+    total_amount = (duration_minutes / 60) * hourly_rate if duration_minutes and hourly_rate else 0
+    
+    # Create work log
+    work_log = WorkLog(
+        client_id=log_data.client_id,
+        activity_type_id=log_data.activity_type_id,
+        user_id=current_user.id,
+        user_name=current_user.name,
+        date=log_data.date,
+        start_time=log_data.start_time,
+        end_time=log_data.end_time,
+        duration_minutes=duration_minutes,
+        description=log_data.description,
+        notes=log_data.notes,
+        is_billable=log_data.is_billable,
+        hourly_rate=hourly_rate,
+        total_amount=total_amount
+    )
+    
+    db.add(work_log)
+    db.commit()
+    db.refresh(work_log)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "create_work_log",
+        table_name="work_logs", record_id=str(work_log.id),
+        after_value={
+            "client_id": str(log_data.client_id),
+            "activity_type_id": str(log_data.activity_type_id),
+            "duration_minutes": duration_minutes,
+            "total_amount": total_amount
+        }
+    )
+    
+    # Return enhanced response
+    return {
+        "id": str(work_log.id),
+        "client_id": str(work_log.client_id),
+        "activity_type_id": str(work_log.activity_type_id),
+        "user_id": work_log.user_id,
+        "user_name": work_log.user_name,
+        "date": work_log.date,
+        "start_time": work_log.start_time,
+        "end_time": work_log.end_time,
+        "duration_minutes": work_log.duration_minutes,
+        "description": work_log.description,
+        "notes": work_log.notes,
+        "is_billable": work_log.is_billable,
+        "hourly_rate": work_log.hourly_rate,
+        "total_amount": work_log.total_amount,
+        "status": work_log.status,
+        "created_at": work_log.created_at,
+        "updated_at": work_log.updated_at,
+        "client_name": client.company_name,
+        "activity_name": activity_type.name
+    }
+
+@api_router.put("/work-reports/logs/{log_id}", response_model=WorkLogResponse)
+async def update_work_log(
+    log_id: str,
+    log_update: WorkLogUpdate,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Update work log entry"""
+    work_log = db.query(WorkLog).filter(WorkLog.id == log_id).first()
+    if not work_log:
+        raise HTTPException(status_code=404, detail="Work log not found")
+    
+    # Check permissions - users can only edit their own logs
+    if current_user.role == "user" and work_log.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Store original values for audit
+    original_data = {
+        "duration_minutes": work_log.duration_minutes,
+        "total_amount": work_log.total_amount,
+        "description": work_log.description
+    }
+    
+    # Update work log
+    update_data = log_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(work_log, key, value)
+    
+    # Recalculate duration and total if times are updated
+    if work_log.start_time and work_log.end_time:
+        duration = work_log.end_time - work_log.start_time
+        work_log.duration_minutes = int(duration.total_seconds() / 60)
+    
+    if work_log.duration_minutes and work_log.hourly_rate:
+        work_log.total_amount = (work_log.duration_minutes / 60) * work_log.hourly_rate
+    
+    work_log.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(work_log)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "update_work_log",
+        table_name="work_logs", record_id=str(work_log.id),
+        before_value=original_data, after_value=update_data
+    )
+    
+    return {
+        "id": str(work_log.id),
+        "client_id": str(work_log.client_id),
+        "activity_type_id": str(work_log.activity_type_id),
+        "user_id": work_log.user_id,
+        "user_name": work_log.user_name,
+        "date": work_log.date,
+        "start_time": work_log.start_time,
+        "end_time": work_log.end_time,
+        "duration_minutes": work_log.duration_minutes,
+        "description": work_log.description,
+        "notes": work_log.notes,
+        "is_billable": work_log.is_billable,
+        "hourly_rate": work_log.hourly_rate,
+        "total_amount": work_log.total_amount,
+        "status": work_log.status,
+        "created_at": work_log.created_at,
+        "updated_at": work_log.updated_at,
+        "client_name": work_log.client.company_name if work_log.client else "",
+        "activity_name": work_log.activity_type.name if work_log.activity_type else ""
+    }
+
+@api_router.delete("/work-reports/logs/{log_id}")
+async def delete_work_log(
+    log_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Delete work log entry"""
+    work_log = db.query(WorkLog).filter(WorkLog.id == log_id).first()
+    if not work_log:
+        raise HTTPException(status_code=404, detail="Work log not found")
+    
+    # Check permissions - users can only delete their own logs, admins can delete any
+    if current_user.role == "user" and work_log.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    db.delete(work_log)
+    db.commit()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "delete_work_log",
+        table_name="work_logs", record_id=str(log_id)
+    )
+    
+    return {"message": "Work log deleted successfully"}
+
+# ============ CLIENT DATA IMPORT ENDPOINT ============
+
+@api_router.post("/work-reports/import-clients")
+async def import_clients_from_excel(
+    current_user = Depends(get_admin_user),
+    db = Depends(get_work_reports_db)
+):
+    """Import clients from Excel file (عملاء.xlsx)"""
+    try:
+        # Download the Excel file from the provided URL
+        excel_url = "https://customer-assets.emergentagent.com/job_hr-dashboard-20/artifacts/warpb19o_%D8%B9%D9%85%D9%84%D8%A7%D8%A1.xlsx"
+        
+        response = requests.get(excel_url)
+        response.raise_for_status()
+        
+        # Load Excel file
+        workbook = openpyxl.load_workbook(BytesIO(response.content))
+        sheet = workbook.active
+        
+        imported_clients = []
+        errors = []
+        
+        # Assuming the Excel has headers in the first row
+        # Expected columns: Company Name, Contact Person, Phone, Email, etc.
+        headers = []
+        for col in range(1, sheet.max_column + 1):
+            cell_value = sheet.cell(row=1, column=col).value
+            if cell_value:
+                headers.append(str(cell_value).strip())
+        
+        # Process each row (starting from row 2)
+        for row_num in range(2, sheet.max_row + 1):
+            try:
+                row_data = {}
+                for col_num, header in enumerate(headers, 1):
+                    cell_value = sheet.cell(row=row_num, column=col_num).value
+                    if cell_value is not None:
+                        row_data[header] = str(cell_value).strip()
+                
+                # Skip empty rows
+                if not any(row_data.values()):
+                    continue
+                
+                # Map Excel columns to our Client model
+                # Adjust these mappings based on your actual Excel structure
+                company_name = (
+                    row_data.get("Company Name") or 
+                    row_data.get("اسم الشركة") or 
+                    row_data.get("Client Name") or
+                    row_data.get("Name") or ""
+                )
+                
+                if not company_name:
+                    errors.append(f"Row {row_num}: Missing company name")
+                    continue
+                
+                # Generate client code
+                company_initials = ''.join([word[0].upper() for word in company_name.split()[:3]])
+                timestamp = datetime.now().strftime("%y%m")
+                client_code = f"{company_initials}{timestamp}{row_num:03d}"
+                
+                # Check for duplicate
+                existing_client = db.query(Client).filter(
+                    Client.company_name == company_name
+                ).first()
+                
+                if existing_client:
+                    errors.append(f"Row {row_num}: Client '{company_name}' already exists")
+                    continue
+                
+                # Create client
+                client = Client(
+                    company_name=company_name,
+                    company_name_ar=row_data.get("Arabic Name", ""),
+                    client_code=client_code,
+                    industry=row_data.get("Industry", ""),
+                    contact_person=row_data.get("Contact Person") or row_data.get("Contact", ""),
+                    phone=row_data.get("Phone") or row_data.get("Mobile", ""),
+                    email=row_data.get("Email", ""),
+                    address=row_data.get("Address", ""),
+                    tax_number=row_data.get("Tax Number") or row_data.get("TRN", ""),
+                    commercial_registration=row_data.get("CR Number", ""),
+                    notes=f"Imported from Excel on {datetime.now().strftime('%Y-%m-%d')}",
+                    created_by=current_user.name
+                )
+                
+                db.add(client)
+                imported_clients.append({
+                    "company_name": company_name,
+                    "client_code": client_code,
+                    "row": row_num
+                })
+                
+            except Exception as e:
+                errors.append(f"Row {row_num}: Error processing - {str(e)}")
+                continue
+        
+        # Commit all changes
+        db.commit()
+        
+        # Log the import activity
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "import_clients",
+            table_name="clients",
+            after_value={
+                "imported_count": len(imported_clients),
+                "error_count": len(errors)
+            }
+        )
+        
+        return {
+            "message": f"Import completed successfully",
+            "imported_count": len(imported_clients),
+            "error_count": len(errors),
+            "imported_clients": imported_clients[:10],  # Show first 10
+            "errors": errors[:10]  # Show first 10 errors
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
+
+# ============ WORK REPORTS DASHBOARD ENDPOINT ============
+
+@api_router.get("/work-reports/dashboard")
+async def get_work_reports_dashboard(
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get work reports dashboard statistics"""
+    
+    # Get total clients
+    total_clients = db.query(Client).filter(Client.is_active == True).count()
+    
+    # Get work logs for current user or all (based on role)
+    work_logs_query = db.query(WorkLog)
+    if current_user.role == "user":
+        work_logs_query = work_logs_query.filter(WorkLog.user_id == current_user.id)
+    
+    # Get today's work logs
+    today = datetime.now().date()
+    today_logs = work_logs_query.filter(WorkLog.date >= today).count()
+    
+    # Get this week's work logs
+    week_start = today - timedelta(days=today.weekday())
+    week_logs = work_logs_query.filter(WorkLog.date >= week_start).count()
+    
+    # Get this month's work logs
+    month_start = today.replace(day=1)
+    month_logs = work_logs_query.filter(WorkLog.date >= month_start).count()
+    
+    # Get billable hours this month
+    month_billable_logs = work_logs_query.filter(
+        WorkLog.date >= month_start,
+        WorkLog.is_billable == True
+    ).all()
+    
+    total_billable_minutes = sum([log.duration_minutes or 0 for log in month_billable_logs])
+    total_billable_hours = round(total_billable_minutes / 60, 2) if total_billable_minutes else 0
+    
+    # Get total revenue this month
+    total_revenue = sum([log.total_amount or 0 for log in month_billable_logs])
+    
+    # Get recent activity
+    recent_logs = work_logs_query.order_by(WorkLog.created_at.desc()).limit(5).all()
+    recent_activity = []
+    for log in recent_logs:
+        recent_activity.append({
+            "id": str(log.id),
+            "client_name": log.client.company_name if log.client else "Unknown",
+            "activity_name": log.activity_type.name if log.activity_type else "Unknown",
+            "duration_minutes": log.duration_minutes,
+            "date": log.date.isoformat() if log.date else None,
+            "created_at": log.created_at.isoformat()
+        })
+    
+    return {
+        "total_clients": total_clients,
+        "today_logs": today_logs,
+        "week_logs": week_logs,
+        "month_logs": month_logs,
+        "total_billable_hours": total_billable_hours,
+        "total_revenue": round(total_revenue, 2),
+        "recent_activity": recent_activity,
+        "user_role": current_user.role
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
