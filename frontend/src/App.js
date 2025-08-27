@@ -38,6 +38,11 @@ import {
 } from '@heroicons/react/24/outline';
 import './App.css';
 
+// Import Work Reports Components
+import WorkReportsDashboard from './WorkReports/WorkReportsDashboard';
+import ClientManagement from './WorkReports/ClientManagement';
+import WorkLogManagement from './WorkReports/WorkLogManagement';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
