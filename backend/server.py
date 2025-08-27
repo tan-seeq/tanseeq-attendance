@@ -244,6 +244,12 @@ class ActivityTypeResponse(BaseModel):
     is_active: bool = True
     created_at: datetime
     
+    @validator('id', pre=True)
+    def convert_uuid_to_str(cls, v):
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        return v
+    
     class Config:
         from_attributes = True
 
