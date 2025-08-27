@@ -5872,7 +5872,7 @@ async def create_work_log(
         raise HTTPException(status_code=404, detail="Activity type not found")
     
     # Calculate duration and total amount
-    duration_minutes = log_data.duration_minutes
+    duration_minutes = 0
     if log_data.start_time and log_data.end_time:
         duration = log_data.end_time - log_data.start_time
         duration_minutes = int(duration.total_seconds() / 60)
