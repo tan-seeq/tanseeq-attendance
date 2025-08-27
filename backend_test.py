@@ -6401,38 +6401,36 @@ class TanseeqAPITester:
             # Feature-specific tests
             self.test_weekend_blocking(role)
             
-            # ============ DAILY WORK REPORT + CLIENTS MASTER FEATURE TESTS ============
-            print(f"\n📊 Testing Daily Work Report + Clients Master Feature ({role.upper()}):")
+            # ============ WORK REPORTS SYSTEM COMPREHENSIVE TESTING (PHASES 1-3) ============
+            print(f"\n📊 Testing TANSEEQ Work Reports System - ALL PHASES ({role.upper()}):")
             
-            # PostgreSQL Connection and Database Tests
-            self.test_work_reports_postgresql_connection(role)
-            
-            # Client Management Tests
+            # Phase 1: Core Functionality Tests
+            print(f"   🔹 Phase 1: Core Functionality")
+            self.test_work_reports_dashboard(role)
             self.test_work_reports_clients_crud(role)
-            
-            # Activity Types Tests
             self.test_work_reports_activity_types(role)
+            self.test_work_reports_logs_crud(role)
+            self.test_work_reports_excel_import(role)
+            self.test_work_reports_audit_logging(role)
             
-            # Work Log Management Tests
-            self.test_work_reports_work_logs_crud(role)
+            # Phase 2: Advanced Features Tests
+            print(f"   🔹 Phase 2: Advanced Features")
+            self.test_work_reports_credentials_management(role)
+            self.test_work_reports_pdf_generation(role)
+            self.test_work_reports_excel_export(role)
             
-            # Client Credentials with Encryption Tests
-            self.test_work_reports_client_credentials(role)
+            # Phase 3: Comprehensive Analytics and Reporting Tests
+            print(f"   🔹 Phase 3: Comprehensive Analytics")
+            self.test_work_reports_advanced_analytics(role)
+            self.test_work_reports_comprehensive_dashboard(role)
+            self.test_work_reports_multiple_export_formats(role)
+            self.test_work_reports_performance_metrics(role)
             
-            # Dashboard Statistics Tests
-            self.test_work_reports_dashboard_statistics(role)
-            
-            # Client Import Tests
-            self.test_work_reports_client_import(role)
-            
-            # Security and Authentication Tests
-            self.test_work_reports_authentication_security(role)
-            
-            # Isolation Verification Tests
-            self.test_work_reports_isolation_verification(role)
-            
-            # Filtering and Search Tests
-            self.test_work_reports_filtering_and_search(role)
+            # Security and Performance Tests
+            print(f"   🔹 Security & Performance")
+            self.test_work_reports_authentication_authorization(role)
+            self.test_work_reports_error_handling_validation(role)
+            self.test_work_reports_large_dataset_performance(role)
             
             # Logout
             self.test_logout(role)
