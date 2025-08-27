@@ -6269,8 +6269,8 @@ class TanseeqAPITester:
             print("❌ Root endpoint failed - stopping tests")
             return False
         
-        # Test each role - including super_admin for critical systems testing
-        roles_to_test = ['super_admin']  # Focus on super_admin for critical systems testing
+        # Test each role - comprehensive testing for all user types
+        roles_to_test = ['super_admin', 'admin', 'user']  # Test all roles as requested
         
         for role in roles_to_test:
             print(f"\n🔐 Testing {role.upper()} role:")
