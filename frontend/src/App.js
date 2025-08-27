@@ -2876,6 +2876,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/work-reports/audit" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <AuditLogViewer />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
