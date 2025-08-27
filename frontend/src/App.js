@@ -2889,6 +2889,20 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/work-reports/stopwatch" element={
+              <ProtectedRoute>
+                <Layout>
+                  <StopwatchMode />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/work-reports/reports" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ReportsDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
