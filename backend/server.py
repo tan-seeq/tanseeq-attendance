@@ -5725,7 +5725,7 @@ async def create_client_credential(
         encrypted_password=encrypted_password,
         portal_url=credential_data.portal_url,
         description=credential_data.description,
-        is_active=credential_data.is_active
+        is_active=True  # Default to True
     )
     
     db.add(credential)
