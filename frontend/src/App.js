@@ -387,6 +387,8 @@ const Layout = ({ children }) => {
     { name: 'لوحة التقارير', href: '/work-reports', icon: ChartBarIcon },
     { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
     { name: 'سجلات العمل اليومية', href: '/work-reports/logs', icon: ClockIcon },
+    { name: 'وضع ساعة الإيقاف', href: '/work-reports/stopwatch', icon: PlayIcon },
+    { name: 'تقارير متقدمة', href: '/work-reports/reports', icon: DocumentChartBarIcon },
     ...(user?.role === 'super_admin' ? [
       { name: 'سجل تدقيق التقارير', href: '/work-reports/audit', icon: ShieldCheckIcon },
     ] : []),
