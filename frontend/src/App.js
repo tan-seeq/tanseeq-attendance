@@ -2850,6 +2850,28 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            {/* Work Reports Module Routes */}
+            <Route path="/work-reports" element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkReportsDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/work-reports/clients" element={
+              <ProtectedRoute>
+                <Layout>
+                  <ClientManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/work-reports/logs" element={
+              <ProtectedRoute>
+                <Layout>
+                  <WorkLogManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
