@@ -33,6 +33,7 @@ from work_reports_db import (
     WorkLogCreate, WorkLogUpdate, WorkLogResponse,
     credential_encryption, log_work_reports_activity
 )
+from report_generator import report_generator
 
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
