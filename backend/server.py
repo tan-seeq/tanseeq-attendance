@@ -199,6 +199,12 @@ class ClientResponse(BaseModel):
     updated_at: Optional[datetime] = None
     created_by: str
     
+    @validator('id', pre=True)
+    def convert_uuid_to_str(cls, v):
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        return v
+    
     class Config:
         from_attributes = True
 
