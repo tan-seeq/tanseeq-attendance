@@ -42,6 +42,7 @@ import './App.css';
 import WorkReportsDashboard from './WorkReports/WorkReportsDashboard';
 import ClientManagement from './WorkReports/ClientManagement';
 import WorkLogManagement from './WorkReports/WorkLogManagement';
+import AuditLogViewer from './WorkReports/AuditLogViewer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
