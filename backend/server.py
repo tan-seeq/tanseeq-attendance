@@ -6,6 +6,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
+import pyotp
+import qrcode
+from io import BytesIO
+import base64
 from datetime import datetime, timedelta, time
 from jose import JWTError, jwt
 import os
