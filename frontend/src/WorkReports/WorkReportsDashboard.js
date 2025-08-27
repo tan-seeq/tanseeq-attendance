@@ -162,13 +162,19 @@ const WorkReportsDashboard = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+            <button 
+              onClick={() => window.location.href = '/work-reports/logs'}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm sm:text-base"
+            >
               Create Work Log
             </button>
-            <button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+            <button 
+              onClick={() => window.location.href = '/work-reports/clients'}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm sm:text-base"
+            >
               Add New Client
             </button>
-            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm sm:text-base">
               View Reports
             </button>
           </div>
