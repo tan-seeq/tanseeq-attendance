@@ -15,6 +15,20 @@ import bcrypt
 import pytz
 import shutil
 from pathlib import Path
+import requests
+import openpyxl
+from io import BytesIO
+
+# Import Work Reports Database Module
+from work_reports_db import (
+    get_work_reports_db, create_work_reports_tables, init_default_activity_types,
+    Client, ClientCredential, ActivityType, WorkLog, WorkReportsAuditLog,
+    ClientCreate, ClientUpdate, ClientResponse,
+    ClientCredentialCreate, ClientCredentialResponse,
+    ActivityTypeCreate, ActivityTypeResponse,
+    WorkLogCreate, WorkLogUpdate, WorkLogResponse,
+    credential_encryption, log_work_reports_activity
+)
 
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
