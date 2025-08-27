@@ -366,6 +366,32 @@ class WorkReportsAuditLog(Base):
     user_agent = Column(Text)
     timestamp = Column(DateTime, default=datetime.utcnow)
     
+# ============ 2FA SECURITY MODEL ============
+
+class User2FA(Base):
+    __tablename__ = "user_2fa_settings"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String(255), nullable=False, unique=True)
+    secret_key = Column(LargeBinary)  # Encrypted TOTP secret
+    is_enabled = Column(Boolean, default=False)
+    backup_codes = Column(JSON)  # Encrypted backup codes
+    last_used_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class PasswordAccessSession(Base):
+    __tablename__ = "password_access_sessions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String(255), nullable=False)
+    credential_id = Column(UUID(as_uuid=True), ForeignKey("client_credentials.id"))
+    session_token = Column(String(255), unique=True)
+    expires_at = Column(DateTime, nullable=False)
+    ip_address = Column(String(50))
+    user_agent = Column(Text)
+    is_revoked = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 async def log_work_reports_activity(
     db: Session,
     user_id: str,
