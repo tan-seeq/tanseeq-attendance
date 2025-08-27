@@ -1,0 +1,570 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-5678-9012-123456789012",
+		"name": "TANSEEQ Work Reports API",
+		"description": "Complete API collection for TANSEEQ Daily Work Report + Clients Master feature",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"// Auto-login if no token exists",
+					"if (!pm.environment.get('auth_token')) {",
+					"    const loginRequest = {",
+					"        url: pm.environment.get('base_url') + '/api/auth/login',",
+					"        method: 'POST',",
+					"        header: { 'Content-Type': 'application/json' },",
+					"        body: {",
+					"            mode: 'raw',",
+					"            raw: JSON.stringify({",
+					"                email: pm.environment.get('test_email'),", 
+					"                password: pm.environment.get('test_password')",
+					"            })",
+					"        }",
+					"    };",
+					"    ",
+					"    pm.sendRequest(loginRequest, (err, res) => {",
+					"        if (err) throw err;",
+					"        if (res.json().access_token) {",
+					"            pm.environment.set('auth_token', res.json().access_token);",
+					"        }",
+					"    });",
+					"}"
+				],
+				"type": "text/javascript"
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://worklog-client-mgmt.preview.emergentagent.com",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login (Super Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"hatem@tanseeq.com\",\n  \"password\": \"hatem123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.access_token).to.exist;",
+									"    pm.environment.set('auth_token', response.access_token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Login (Admin)",
+					"request": {
+						"method": "POST", 
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"mahmoud@tanseeq.com\",\n  \"password\": \"mahmoud123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login (User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type", 
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"jihad@tanseeq.com\",\n  \"password\": \"jihad123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "dashboard"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Dashboard loads successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.total_clients).to.exist;",
+									"    pm.expect(response.total_billable_hours).to.exist;",
+									"    pm.expect(response.total_revenue).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Client Management", 
+			"item": [
+				{
+					"name": "Get All Clients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/clients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "clients"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get clients successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Create Client",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"company_name\": \"Emirates Trading LLC\",\n  \"company_name_ar\": \"شركة الإمارات للتجارة المحدودة\",\n  \"client_code\": \"ETL2508\",\n  \"industry\": \"Trading\",\n  \"contact_person\": \"Ahmed Al-Rashid\",\n  \"phone\": \"+971501234567\",\n  \"email\": \"ahmed@emiratestrading.ae\",\n  \"address\": \"Dubai, UAE\",\n  \"tax_number\": \"100123456789003\",\n  \"commercial_registration\": \"1234567893\",\n  \"notes\": \"VIP Client - Trading Company\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/clients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "clients"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Client created successfully', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.expect(response.company_name).to.equal('Emirates Trading LLC');",
+									"    pm.environment.set('test_client_id', response.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update Client",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw", 
+							"raw": "{\n  \"phone\": \"+971507654321\",\n  \"notes\": \"Updated VIP Client - Premium Support\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/clients/{{test_client_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "clients", "{{test_client_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Import Clients from Excel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/import-clients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "import-clients"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Import completed', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.imported_count).to.exist;",
+									"    pm.expect(response.summary).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Activity Types",
+			"item": [
+				{
+					"name": "Get Activity Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/activity-types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "activity-types"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Activity types loaded', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"    pm.expect(response.length).to.be.above(0);",
+									"    pm.environment.set('test_activity_id', response[0].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Create Activity Type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Audit Review\",\n  \"name_ar\": \"مراجعة التدقيق\",\n  \"category\": \"audit\",\n  \"description\": \"Financial audit and compliance review\",\n  \"default_rate\": 300.0,\n  \"is_billable\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/activity-types",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "activity-types"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Work Logs",
+			"item": [
+				{
+					"name": "Get Work Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/logs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "logs"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Work logs loaded', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Work Logs with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/logs?start_date=2025-08-01&end_date=2025-08-31&client_id={{test_client_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "logs"],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-08-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-08-31"
+								},
+								{
+									"key": "client_id",
+									"value": "{{test_client_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Work Log",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"client_id\": \"{{test_client_id}}\",\n  \"activity_type_id\": \"{{test_activity_id}}\",\n  \"date\": \"2025-08-27T00:00:00Z\",\n  \"start_time\": \"2025-08-27T09:00:00Z\",\n  \"end_time\": \"2025-08-27T12:00:00Z\",\n  \"description\": \"Monthly VAT return preparation and filing\",\n  \"notes\": \"Client requested expedited processing\",\n  \"is_billable\": true,\n  \"hourly_rate\": 200.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/logs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "logs"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Work log created', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.expect(response.total_amount).to.be.above(0);",
+									"    pm.environment.set('test_log_id', response.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update Work Log",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Updated: Client approved additional review time\",\n  \"hourly_rate\": 250.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/logs/{{test_log_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "logs", "{{test_log_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Work Log",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/logs/{{test_log_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "logs", "{{test_log_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Client Credentials",
+			"item": [
+				{
+					"name": "Get Client Credentials",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/clients/{{test_client_id}}/credentials",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "clients", "{{test_client_id}}", "credentials"]
+						}
+					}
+				},
+				{
+					"name": "Create Client Credential",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"client_id\": \"{{test_client_id}}\",\n  \"credential_type\": \"FTA Portal\",\n  \"username\": \"emirates_user\",\n  \"email\": \"tax@emiratestrading.ae\",\n  \"password\": \"SecurePassword123!\",\n  \"portal_url\": \"https://tax.gov.ae\",\n  \"description\": \"Federal Tax Authority login credentials\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/clients/{{test_client_id}}/credentials",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "clients", "{{test_client_id}}", "credentials"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Credential created', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.id).to.exist;",
+									"    pm.environment.set('test_credential_id', response.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Credential Password (Decrypt)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/work-reports/credentials/{{test_credential_id}}/password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "work-reports", "credentials", "{{test_credential_id}}", "password"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Password decrypted', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.password).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
