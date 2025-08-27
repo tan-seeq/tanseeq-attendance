@@ -283,6 +283,12 @@ class WorkLogResponse(BaseModel):
     activity_name: Optional[str] = None
     user_name: Optional[str] = None
     
+    @validator('id', 'client_id', 'activity_type_id', 'user_id', pre=True)
+    def convert_uuid_to_str(cls, v):
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        return v
+    
     class Config:
         from_attributes = True
 
