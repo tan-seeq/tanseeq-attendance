@@ -6059,6 +6059,7 @@ async def import_clients_from_excel(
                 headers.append(str(cell_value).strip())
         
         # Process each row (starting from row 2)
+        skipped_empty_rows = 0
         for row_num in range(2, sheet.max_row + 1):
             try:
                 row_data = {}
@@ -6067,8 +6068,9 @@ async def import_clients_from_excel(
                     if cell_value is not None:
                         row_data[header] = str(cell_value).strip()
                 
-                # Skip empty rows
-                if not any(row_data.values()):
+                # Skip empty rows (improved detection)
+                if not any(value for value in row_data.values() if value and value.strip()):
+                    skipped_empty_rows += 1
                     continue
                 
                 # Map Excel columns to our Client model
