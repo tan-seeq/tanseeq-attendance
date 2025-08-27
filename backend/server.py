@@ -6141,11 +6141,18 @@ async def import_clients_from_excel(
         )
         
         return {
-            "message": f"Import completed successfully",
+            "message": f"استيراد العملاء مكتمل بنجاح - Client import completed successfully",
             "imported_count": len(imported_clients),
+            "skipped_empty_rows": skipped_empty_rows,
             "error_count": len(errors),
             "imported_clients": imported_clients[:10],  # Show first 10
-            "errors": errors[:10]  # Show first 10 errors
+            "errors": errors[:10] if errors else [],  # Show first 10 errors
+            "summary": {
+                "total_rows_processed": sheet.max_row - 1,
+                "successful_imports": len(imported_clients),
+                "empty_rows_skipped": skipped_empty_rows,
+                "errors_encountered": len(errors)
+            }
         }
         
     except Exception as e:
