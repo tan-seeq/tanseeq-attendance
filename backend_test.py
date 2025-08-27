@@ -5390,6 +5390,39 @@ class TanseeqAPITester:
             # Feature-specific tests
             self.test_weekend_blocking(role)
             
+            # ============ DAILY WORK REPORT + CLIENTS MASTER FEATURE TESTS ============
+            print(f"\n📊 Testing Daily Work Report + Clients Master Feature ({role.upper()}):")
+            
+            # PostgreSQL Connection and Database Tests
+            self.test_work_reports_postgresql_connection(role)
+            
+            # Client Management Tests
+            self.test_work_reports_clients_crud(role)
+            
+            # Activity Types Tests
+            self.test_work_reports_activity_types(role)
+            
+            # Work Log Management Tests
+            self.test_work_reports_work_logs_crud(role)
+            
+            # Client Credentials with Encryption Tests
+            self.test_work_reports_client_credentials(role)
+            
+            # Dashboard Statistics Tests
+            self.test_work_reports_dashboard_statistics(role)
+            
+            # Client Import Tests
+            self.test_work_reports_client_import(role)
+            
+            # Security and Authentication Tests
+            self.test_work_reports_authentication_security(role)
+            
+            # Isolation Verification Tests
+            self.test_work_reports_isolation_verification(role)
+            
+            # Filtering and Search Tests
+            self.test_work_reports_filtering_and_search(role)
+            
             # Logout
             self.test_logout(role)
         
