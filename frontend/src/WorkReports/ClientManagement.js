@@ -146,11 +146,29 @@ const ClientManagement = () => {
         }
       });
       
-      alert(`Import completed! ${response.data.imported_count} clients imported successfully.`);
+      const { imported_count, skipped_empty_rows, error_count, summary } = response.data;
+      
+      // Create detailed message in Arabic and English
+      let message = `استيراد مكتمل!\nImport Completed!\n\n`;
+      message += `✅ عملاء مستوردون: ${imported_count}\n✅ Clients Imported: ${imported_count}\n`;
+      
+      if (skipped_empty_rows > 0) {
+        message += `⚠️ صفوف فارغة تم تجاهلها: ${skipped_empty_rows}\n⚠️ Empty Rows Skipped: ${skipped_empty_rows}\n`;
+      }
+      
+      if (error_count > 0) {
+        message += `❌ أخطاء: ${error_count}\n❌ Errors: ${error_count}\n`;
+      }
+      
+      if (summary) {
+        message += `\nإجمالي الصفوف المعالجة: ${summary.total_rows_processed}\nTotal Rows Processed: ${summary.total_rows_processed}`;
+      }
+      
+      alert(message);
       fetchClients();
     } catch (err) {
       console.error('Error importing clients:', err);
-      setError('Failed to import clients');
+      setError('فشل في استيراد العملاء - Failed to import clients');
     }
   };
 
