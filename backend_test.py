@@ -5247,6 +5247,439 @@ class TanseeqAPITester:
             self.log_test(f"Payroll export with deductions ({role})", False, str(e))
             return False
 
+    # ============ DAILY WORK REPORT + CLIENTS MASTER FEATURE TESTS ============
+    
+    def test_work_reports_postgresql_connection(self, role: str) -> bool:
+        """Test PostgreSQL connection for work reports module"""
+        if role not in self.tokens:
+            return False
+        
+        # Test by trying to access the dashboard endpoint
+        success, response = self.make_request('GET', 'work-reports/dashboard', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check if response has expected dashboard structure
+            expected_keys = ['total_clients', 'today_logs', 'week_logs', 'month_logs', 'total_billable_hours', 'total_revenue', 'recent_activity', 'user_role']
+            has_expected_keys = all(key in response for key in expected_keys)
+            self.log_test(f"Work Reports PostgreSQL connection ({role})", has_expected_keys,
+                         f"Missing keys: {set(expected_keys) - set(response.keys())}" if not has_expected_keys else "")
+            return has_expected_keys
+        else:
+            self.log_test(f"Work Reports PostgreSQL connection ({role})", False, str(response))
+            return False
+
+    def test_work_reports_clients_crud(self, role: str) -> bool:
+        """Test Client Management CRUD operations"""
+        if role not in self.tokens:
+            return False
+        
+        # Test GET clients
+        success, response = self.make_request('GET', 'work-reports/clients', 
+                                            token=self.tokens[role])
+        
+        if not success:
+            self.log_test(f"Work Reports Clients GET ({role})", False, str(response))
+            return False
+        
+        # Test POST client (create)
+        client_data = {
+            "company_name": "Test Client Company Ltd",
+            "company_name_ar": "شركة العميل التجريبية المحدودة",
+            "industry": "Technology",
+            "contact_person": "Ahmed Al-Rashid",
+            "phone": "+971501234567",
+            "email": "ahmed@testclient.ae",
+            "address": "Dubai, UAE",
+            "tax_number": "100123456789003",
+            "commercial_registration": "1234567890",
+            "notes": "Test client for API testing"
+        }
+        
+        create_success, create_response = self.make_request('POST', 'work-reports/clients', 
+                                                          client_data, token=self.tokens[role])
+        
+        if not create_success:
+            self.log_test(f"Work Reports Clients CREATE ({role})", False, str(create_response))
+            return False
+        
+        client_id = create_response.get('id')
+        if not client_id:
+            self.log_test(f"Work Reports Clients CREATE ({role})", False, "No client ID returned")
+            return False
+        
+        # Store client ID for other tests
+        setattr(self, f'test_client_id_{role}', client_id)
+        
+        # Test PUT client (update)
+        update_data = {
+            "phone": "+971507654321",
+            "notes": "Updated test client"
+        }
+        
+        update_success, update_response = self.make_request('PUT', f'work-reports/clients/{client_id}', 
+                                                          update_data, token=self.tokens[role])
+        
+        if not update_success:
+            self.log_test(f"Work Reports Clients UPDATE ({role})", False, str(update_response))
+            return False
+        
+        # Test DELETE client (admin only)
+        if role in ['admin', 'super_admin']:
+            delete_success, delete_response = self.make_request('DELETE', f'work-reports/clients/{client_id}', 
+                                                              token=self.tokens[role])
+            
+            if not delete_success:
+                self.log_test(f"Work Reports Clients DELETE ({role})", False, str(delete_response))
+                return False
+        
+        self.log_test(f"Work Reports Clients CRUD ({role})", True)
+        return True
+
+    def test_work_reports_activity_types(self, role: str) -> bool:
+        """Test Activity Types endpoints"""
+        if role not in self.tokens:
+            return False
+        
+        # Test GET activity types
+        success, response = self.make_request('GET', 'work-reports/activity-types', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Check if default activity types are present
+            activity_names = [activity.get('name', '') for activity in response]
+            expected_activities = ['Tax Declaration Preparation', 'VAT Return Filing', 'Client Meeting']
+            has_default_activities = any(activity in activity_names for activity in expected_activities)
+            
+            self.log_test(f"Work Reports Activity Types GET ({role})", has_default_activities,
+                         f"Found activities: {activity_names[:3]}" if not has_default_activities else "")
+            
+            # Test POST activity type (admin only)
+            if role in ['admin', 'super_admin']:
+                activity_data = {
+                    "name": "Test Activity Type",
+                    "name_ar": "نوع النشاط التجريبي",
+                    "category": "testing",
+                    "description": "Test activity for API testing",
+                    "default_rate": 100.0,
+                    "is_billable": True
+                }
+                
+                create_success, create_response = self.make_request('POST', 'work-reports/activity-types', 
+                                                                  activity_data, token=self.tokens[role])
+                
+                if create_success:
+                    # Store activity type ID for work log tests
+                    activity_id = create_response.get('id')
+                    if activity_id:
+                        setattr(self, f'test_activity_type_id_{role}', activity_id)
+                
+                self.log_test(f"Work Reports Activity Types CREATE ({role})", create_success,
+                             str(create_response) if not create_success else "")
+                return create_success
+            else:
+                # For regular users, just check they can access the list
+                return has_default_activities
+        else:
+            self.log_test(f"Work Reports Activity Types GET ({role})", False, str(response))
+            return False
+
+    def test_work_reports_work_logs_crud(self, role: str) -> bool:
+        """Test Work Log Management CRUD operations"""
+        if role not in self.tokens:
+            return False
+        
+        # Test GET work logs
+        success, response = self.make_request('GET', 'work-reports/logs', 
+                                            token=self.tokens[role])
+        
+        if not success:
+            self.log_test(f"Work Reports Work Logs GET ({role})", False, str(response))
+            return False
+        
+        # Get client and activity type IDs for creating work log
+        client_id = getattr(self, f'test_client_id_{role}', None)
+        activity_type_id = getattr(self, f'test_activity_type_id_{role}', None)
+        
+        # If we don't have IDs, try to get them from existing data
+        if not client_id or not activity_type_id:
+            # Get clients
+            clients_success, clients_response = self.make_request('GET', 'work-reports/clients', 
+                                                                token=self.tokens[role])
+            if clients_success and clients_response:
+                client_id = clients_response[0].get('id')
+            
+            # Get activity types
+            activities_success, activities_response = self.make_request('GET', 'work-reports/activity-types', 
+                                                                      token=self.tokens[role])
+            if activities_success and activities_response:
+                activity_type_id = activities_response[0].get('id')
+        
+        if not client_id or not activity_type_id:
+            self.log_test(f"Work Reports Work Logs CREATE setup ({role})", False, "Missing client or activity type ID")
+            return False
+        
+        # Test POST work log (create)
+        from datetime import datetime
+        work_log_data = {
+            "client_id": client_id,
+            "activity_type_id": activity_type_id,
+            "date": datetime.now().isoformat(),
+            "start_time": datetime.now().replace(hour=9, minute=0, second=0).isoformat(),
+            "end_time": datetime.now().replace(hour=11, minute=30, second=0).isoformat(),
+            "description": "Test work log entry for API testing",
+            "notes": "This is a test work log created during API testing",
+            "is_billable": True,
+            "hourly_rate": 150.0
+        }
+        
+        create_success, create_response = self.make_request('POST', 'work-reports/logs', 
+                                                          work_log_data, token=self.tokens[role])
+        
+        if not create_success:
+            self.log_test(f"Work Reports Work Logs CREATE ({role})", False, str(create_response))
+            return False
+        
+        work_log_id = create_response.get('id')
+        if not work_log_id:
+            self.log_test(f"Work Reports Work Logs CREATE ({role})", False, "No work log ID returned")
+            return False
+        
+        # Test PUT work log (update)
+        update_data = {
+            "description": "Updated test work log entry",
+            "notes": "Updated notes for testing",
+            "hourly_rate": 175.0
+        }
+        
+        update_success, update_response = self.make_request('PUT', f'work-reports/logs/{work_log_id}', 
+                                                          update_data, token=self.tokens[role])
+        
+        if not update_success:
+            self.log_test(f"Work Reports Work Logs UPDATE ({role})", False, str(update_response))
+            return False
+        
+        # Test DELETE work log
+        delete_success, delete_response = self.make_request('DELETE', f'work-reports/logs/{work_log_id}', 
+                                                          token=self.tokens[role])
+        
+        if not delete_success:
+            self.log_test(f"Work Reports Work Logs DELETE ({role})", False, str(delete_response))
+            return False
+        
+        self.log_test(f"Work Reports Work Logs CRUD ({role})", True)
+        return True
+
+    def test_work_reports_client_credentials(self, role: str) -> bool:
+        """Test Client Credentials Management with AES-256-GCM encryption"""
+        if role not in self.tokens:
+            return False
+        
+        # Get a client ID
+        client_id = getattr(self, f'test_client_id_{role}', None)
+        if not client_id:
+            # Try to get from existing clients
+            success, clients = self.make_request('GET', 'work-reports/clients', token=self.tokens[role])
+            if success and clients:
+                client_id = clients[0].get('id')
+        
+        if not client_id:
+            self.log_test(f"Work Reports Client Credentials setup ({role})", False, "No client ID available")
+            return False
+        
+        # Test GET credentials
+        success, response = self.make_request('GET', f'work-reports/clients/{client_id}/credentials', 
+                                            token=self.tokens[role])
+        
+        if not success:
+            self.log_test(f"Work Reports Client Credentials GET ({role})", False, str(response))
+            return False
+        
+        # Test POST credential (create with encryption)
+        credential_data = {
+            "client_id": client_id,
+            "credential_type": "fta_portal",
+            "username": "test_user_fta",
+            "email": "test@client.ae",
+            "password": "SecurePassword123!",
+            "portal_url": "https://tax.gov.ae",
+            "description": "FTA portal credentials for testing"
+        }
+        
+        create_success, create_response = self.make_request('POST', f'work-reports/clients/{client_id}/credentials', 
+                                                          credential_data, token=self.tokens[role])
+        
+        if not create_success:
+            self.log_test(f"Work Reports Client Credentials CREATE ({role})", False, str(create_response))
+            return False
+        
+        credential_id = create_response.get('id')
+        if not credential_id:
+            self.log_test(f"Work Reports Client Credentials CREATE ({role})", False, "No credential ID returned")
+            return False
+        
+        # Test password retrieval (should be decrypted)
+        password_success, password_response = self.make_request('GET', f'work-reports/credentials/{credential_id}/password', 
+                                                              token=self.tokens[role])
+        
+        if password_success:
+            decrypted_password = password_response.get('password')
+            password_matches = decrypted_password == "SecurePassword123!"
+            self.log_test(f"Work Reports Client Credentials ENCRYPTION ({role})", password_matches,
+                         f"Password mismatch: expected 'SecurePassword123!', got '{decrypted_password}'" if not password_matches else "")
+            return password_matches
+        else:
+            self.log_test(f"Work Reports Client Credentials ENCRYPTION ({role})", False, str(password_response))
+            return False
+
+    def test_work_reports_dashboard_statistics(self, role: str) -> bool:
+        """Test Dashboard Statistics endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'work-reports/dashboard', 
+                                            token=self.tokens[role])
+        
+        if success:
+            # Check dashboard structure
+            expected_keys = ['total_clients', 'today_logs', 'week_logs', 'month_logs', 
+                           'total_billable_hours', 'total_revenue', 'recent_activity', 'user_role']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check data types
+            valid_types = (
+                isinstance(response.get('total_clients'), int) and
+                isinstance(response.get('today_logs'), int) and
+                isinstance(response.get('week_logs'), int) and
+                isinstance(response.get('month_logs'), int) and
+                isinstance(response.get('total_billable_hours'), (int, float)) and
+                isinstance(response.get('total_revenue'), (int, float)) and
+                isinstance(response.get('recent_activity'), list) and
+                isinstance(response.get('user_role'), str)
+            )
+            
+            test_passed = has_expected_keys and valid_types
+            
+            self.log_test(f"Work Reports Dashboard Statistics ({role})", test_passed,
+                         f"Keys: {has_expected_keys}, Types: {valid_types}" if not test_passed else "")
+            return test_passed
+        else:
+            self.log_test(f"Work Reports Dashboard Statistics ({role})", False, str(response))
+            return False
+
+    def test_work_reports_client_import(self, role: str) -> bool:
+        """Test Client Import from Excel functionality"""
+        if role not in self.tokens:
+            return False
+        
+        # Only admin and super_admin can import
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        success, response = self.make_request('POST', 'work-reports/import-clients', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check import response structure
+            expected_keys = ['message', 'imported_count', 'error_count']
+            has_expected_keys = all(key in response for key in expected_keys)
+            
+            # Check if import actually processed data
+            imported_count = response.get('imported_count', 0)
+            has_imported_data = isinstance(imported_count, int)
+            
+            test_passed = has_expected_keys and has_imported_data
+            
+            self.log_test(f"Work Reports Client Import ({role})", test_passed,
+                         f"Keys: {has_expected_keys}, Imported: {imported_count}" if not test_passed else "")
+            return test_passed
+        else:
+            test_passed = success
+            self.log_test(f"Work Reports Client Import ({role})", test_passed,
+                         str(response) if not test_passed else "")
+            return test_passed
+
+    def test_work_reports_authentication_security(self, role: str) -> bool:
+        """Test that all work reports endpoints require proper JWT authentication"""
+        if role not in self.tokens:
+            return False
+        
+        # Test endpoints without token (should fail with 401)
+        endpoints_to_test = [
+            'work-reports/dashboard',
+            'work-reports/clients',
+            'work-reports/activity-types',
+            'work-reports/logs'
+        ]
+        
+        all_secured = True
+        for endpoint in endpoints_to_test:
+            success, response = self.make_request('GET', endpoint, expected_status=401)
+            if success:  # Should fail without token
+                self.log_test(f"Work Reports Security - {endpoint} ({role})", False, "Endpoint not secured")
+                all_secured = False
+        
+        if all_secured:
+            self.log_test(f"Work Reports Authentication Security ({role})", True)
+        
+        return all_secured
+
+    def test_work_reports_isolation_verification(self, role: str) -> bool:
+        """Verify work reports module doesn't affect existing TANSEEQ HR system"""
+        if role not in self.tokens:
+            return False
+        
+        # Test that existing HR endpoints still work
+        hr_endpoints = [
+            'dashboard/stats',
+            'attendance',
+            'leaves',
+            'field-exits'
+        ]
+        
+        all_working = True
+        for endpoint in hr_endpoints:
+            success, response = self.make_request('GET', endpoint, token=self.tokens[role])
+            if not success:
+                self.log_test(f"HR System Isolation - {endpoint} ({role})", False, str(response))
+                all_working = False
+        
+        if all_working:
+            self.log_test(f"Work Reports Isolation Verification ({role})", True)
+        
+        return all_working
+
+    def test_work_reports_filtering_and_search(self, role: str) -> bool:
+        """Test work logs filtering and search functionality"""
+        if role not in self.tokens:
+            return False
+        
+        # Test date filtering
+        from datetime import datetime, timedelta
+        today = datetime.now()
+        start_date = (today - timedelta(days=30)).strftime('%Y-%m-%d')
+        end_date = today.strftime('%Y-%m-%d')
+        
+        success, response = self.make_request('GET', f'work-reports/logs?start_date={start_date}&end_date={end_date}', 
+                                            token=self.tokens[role])
+        
+        if not success:
+            self.log_test(f"Work Reports Filtering ({role})", False, str(response))
+            return False
+        
+        # Test client filtering (if we have a client ID)
+        client_id = getattr(self, f'test_client_id_{role}', None)
+        if client_id:
+            client_success, client_response = self.make_request('GET', f'work-reports/logs?client_id={client_id}', 
+                                                              token=self.tokens[role])
+            
+            if not client_success:
+                self.log_test(f"Work Reports Client Filtering ({role})", False, str(client_response))
+                return False
+        
+        self.log_test(f"Work Reports Filtering ({role})", True)
+        return True
+
     def run_comprehensive_tests(self):
         """Run all tests for all roles"""
         print("🚀 Starting TANSEEQ HR Backend API Tests")
