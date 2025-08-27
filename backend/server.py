@@ -6228,6 +6228,206 @@ async def get_work_reports_dashboard(
         "user_role": current_user.role
     }
 
+# ============ PDF REPORTS ENDPOINTS ============
+
+@api_router.get("/work-reports/reports/daily/{date}")
+async def generate_daily_pdf_report(
+    date: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Generate daily PDF work report"""
+    try:
+        report_date = datetime.strptime(date, "%Y-%m-%d")
+        pdf_buffer = report_generator.generate_daily_report(
+            user_id=current_user.id,
+            date=report_date,
+            db=db
+        )
+        
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "generate_daily_report",
+            after_value={"date": date}
+        )
+        
+        return Response(
+            content=pdf_buffer.getvalue(),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=daily_report_{date}.pdf"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+
+@api_router.get("/work-reports/reports/monthly/{year}/{month}")
+async def generate_monthly_pdf_report(
+    year: int,
+    month: int,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Generate monthly summary PDF report"""
+    try:
+        pdf_buffer = report_generator.generate_monthly_summary(
+            user_id=current_user.id,
+            year=year,
+            month=month,
+            db=db
+        )
+        
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "generate_monthly_report",
+            after_value={"year": year, "month": month}
+        )
+        
+        return Response(
+            content=pdf_buffer.getvalue(),
+            media_type="application/pdf", 
+            headers={"Content-Disposition": f"attachment; filename=monthly_report_{year}_{month:02d}.pdf"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Monthly report generation failed: {str(e)}")
+
+@api_router.get("/work-reports/reports/client/{client_id}")
+async def generate_client_pdf_report(
+    client_id: str,
+    start_date: str,
+    end_date: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Generate client-specific PDF report"""
+    try:
+        start = datetime.strptime(start_date, "%Y-%m-%d")
+        end = datetime.strptime(end_date, "%Y-%m-%d")
+        
+        # Get client info for filename
+        client = db.query(Client).filter(Client.id == client_id).first()
+        client_name = client.company_name if client else "Unknown"
+        
+        pdf_buffer = report_generator.generate_client_report(
+            client_id=client_id,
+            start_date=start,
+            end_date=end,
+            db=db
+        )
+        
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "generate_client_report",
+            after_value={
+                "client_id": client_id,
+                "start_date": start_date,
+                "end_date": end_date
+            }
+        )
+        
+        filename = f"client_report_{client_name.replace(' ', '_')}_{start_date}_to_{end_date}.pdf"
+        
+        return Response(
+            content=pdf_buffer.getvalue(),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Client report generation failed: {str(e)}")
+
+# ============ EXCEL EXPORT ENDPOINTS ============
+
+@api_router.get("/work-reports/export/excel")
+async def export_work_logs_excel(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    client_id: Optional[str] = None,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Export work logs to Excel format"""
+    try:
+        import pandas as pd
+        
+        # Build query
+        query = db.query(WorkLog)
+        
+        # Filter by user for non-admin users
+        if current_user.role == "user":
+            query = query.filter(WorkLog.user_id == current_user.id)
+        
+        # Date filters
+        if start_date:
+            query = query.filter(WorkLog.date >= datetime.strptime(start_date, "%Y-%m-%d"))
+        if end_date:
+            query = query.filter(WorkLog.date <= datetime.strptime(end_date, "%Y-%m-%d"))
+        
+        # Client filter
+        if client_id:
+            query = query.filter(WorkLog.client_id == client_id)
+        
+        work_logs = query.all()
+        
+        # Prepare data for Excel
+        excel_data = []
+        for log in work_logs:
+            excel_data.append({
+                'Date': log.date.strftime('%Y-%m-%d') if log.date else '',
+                'User': log.user_name,
+                'Client': log.client.company_name if log.client else '',
+                'Activity': log.activity_type.name if log.activity_type else '',
+                'Start Time': log.start_time.strftime('%H:%M') if log.start_time else '',
+                'End Time': log.end_time.strftime('%H:%M') if log.end_time else '',
+                'Duration (Minutes)': log.duration_minutes or 0,
+                'Description': log.description,
+                'Notes': log.notes or '',
+                'Billable': 'Yes' if log.is_billable else 'No',
+                'Hourly Rate': log.hourly_rate or 0,
+                'Total Amount': log.total_amount or 0,
+                'Status': log.status
+            })
+        
+        # Create DataFrame
+        df = pd.DataFrame(excel_data)
+        
+        # Create Excel buffer
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Work Logs', index=False)
+            
+            # Add summary sheet
+            summary_data = {
+                'Metric': [
+                    'Total Records',
+                    'Total Hours',
+                    'Billable Hours', 
+                    'Total Revenue',
+                    'Average Hourly Rate'
+                ],
+                'Value': [
+                    len(work_logs),
+                    sum([(log.duration_minutes or 0) / 60 for log in work_logs]),
+                    sum([(log.duration_minutes or 0) / 60 for log in work_logs if log.is_billable]),
+                    sum([log.total_amount or 0 for log in work_logs if log.is_billable]),
+                    sum([log.total_amount or 0 for log in work_logs if log.is_billable]) / 
+                    max(sum([(log.duration_minutes or 0) / 60 for log in work_logs if log.is_billable]), 1)
+                ]
+            }
+            pd.DataFrame(summary_data).to_excel(writer, sheet_name='Summary', index=False)
+        
+        excel_buffer.seek(0)
+        
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "export_excel",
+            after_value={"records_count": len(work_logs)}
+        )
+        
+        filename = f"work_logs_export_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+        
+        return Response(
+            content=excel_buffer.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Excel export failed: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
