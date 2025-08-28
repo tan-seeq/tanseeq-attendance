@@ -6591,7 +6591,7 @@ async def create_or_update_user_permissions(
     db.commit()
     db.refresh(permissions)
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "update_user_permissions",
         table_name="user_work_reports_permissions", record_id=str(permissions.id),
         before_value=original_permissions,
