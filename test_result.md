@@ -449,7 +449,7 @@ frontend:
         comment: "LeaveManagement component already has notes modal for approve/reject actions, displays approved_by and admin_notes fields."
   - task: "Employee permissions management system for Work Reports"
     implemented: true
-    working: false
+    working: true
     file: "PermissionsManager.js, server.py, work_reports_db.py, App.js"
     stuck_count: 0
     priority: "high"
