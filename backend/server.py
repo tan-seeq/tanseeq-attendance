@@ -5651,7 +5651,7 @@ async def update_client(
     db.commit()
     db.refresh(client)
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "update_client",
         table_name="clients", record_id=str(client.id),
         before_value=original_data, after_value=update_data
