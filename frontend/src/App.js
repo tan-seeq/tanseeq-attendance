@@ -47,6 +47,7 @@ import WorkLogManagement from './WorkReports/WorkLogManagement';
 import AuditLogViewer from './WorkReports/AuditLogViewer';
 import StopwatchMode from './WorkReports/StopwatchMode';
 import ReportsDashboard from './WorkReports/ReportsDashboard';
+import PermissionsManager from './WorkReports/PermissionsManager';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
