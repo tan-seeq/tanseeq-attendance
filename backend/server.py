@@ -6707,7 +6707,7 @@ async def generate_monthly_pdf_report(
             db=db
         )
         
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "generate_monthly_report",
             after_value={"year": year, "month": month}
         )
