@@ -385,6 +385,199 @@ class PasswordAccessSession(Base):
     is_revoked = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# ============ USER PERMISSIONS MODEL ============
+
+class UserWorkReportsPermission(Base):
+    __tablename__ = "user_work_reports_permissions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String(255), nullable=False, unique=True)  # Reference to TANSEEQ HR user
+    user_name = Column(String(255), nullable=False)
+    user_email = Column(String(255))
+    
+    # Work Reports Permissions
+    can_view_clients = Column(Boolean, default=True)
+    can_create_clients = Column(Boolean, default=False)
+    can_edit_clients = Column(Boolean, default=False)
+    can_delete_clients = Column(Boolean, default=False)
+    can_import_clients = Column(Boolean, default=False)
+    
+    # Work Logs Permissions
+    can_view_own_logs = Column(Boolean, default=True)
+    can_view_all_logs = Column(Boolean, default=False)
+    can_create_work_logs = Column(Boolean, default=True)
+    can_edit_own_logs = Column(Boolean, default=True)
+    can_edit_all_logs = Column(Boolean, default=False)
+    can_delete_own_logs = Column(Boolean, default=False)
+    can_delete_all_logs = Column(Boolean, default=False)
+    
+    # Sensitive Data Permissions (Most Important)
+    can_view_credentials = Column(Boolean, default=False)
+    can_view_usernames = Column(Boolean, default=True)
+    can_view_emails = Column(Boolean, default=True)
+    can_reveal_passwords = Column(Boolean, default=False)
+    can_create_credentials = Column(Boolean, default=False)
+    can_edit_credentials = Column(Boolean, default=False)
+    can_delete_credentials = Column(Boolean, default=False)
+    
+    # Reports and Export Permissions
+    can_generate_reports = Column(Boolean, default=True)
+    can_export_excel = Column(Boolean, default=False)
+    can_export_pdf = Column(Boolean, default=True)
+    can_view_analytics = Column(Boolean, default=True)
+    
+    # Administrative Permissions
+    can_view_audit_logs = Column(Boolean, default=False)
+    can_manage_permissions = Column(Boolean, default=False)
+    can_setup_sample_data = Column(Boolean, default=False)
+    
+    # Permission Level (for easy management)
+    permission_level = Column(String(50), default="user")  # user, supervisor, admin, super_admin
+    
+    # Metadata
+    granted_by = Column(String(255))
+    granted_at = Column(DateTime, default=datetime.utcnow)
+    last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = Column(Boolean, default=True)
+    notes = Column(Text)
+
+# ============ PERMISSION TEMPLATES ============
+
+PERMISSION_TEMPLATES = {
+    "user": {
+        "name": "موظف عادي - User",
+        "description": "صلاحيات أساسية للموظفين العاديين",
+        "permissions": {
+            "can_view_clients": True,
+            "can_create_clients": False,
+            "can_edit_clients": False,
+            "can_delete_clients": False,
+            "can_import_clients": False,
+            "can_view_own_logs": True,
+            "can_view_all_logs": False,
+            "can_create_work_logs": True,
+            "can_edit_own_logs": True,
+            "can_edit_all_logs": False,
+            "can_delete_own_logs": False,
+            "can_delete_all_logs": False,
+            "can_view_credentials": True,
+            "can_view_usernames": True,
+            "can_view_emails": True,
+            "can_reveal_passwords": False,
+            "can_create_credentials": False,
+            "can_edit_credentials": False,
+            "can_delete_credentials": False,
+            "can_generate_reports": True,
+            "can_export_excel": False,
+            "can_export_pdf": True,
+            "can_view_analytics": True,
+            "can_view_audit_logs": False,
+            "can_manage_permissions": False,
+            "can_setup_sample_data": False
+        }
+    },
+    "supervisor": {
+        "name": "مشرف - Supervisor", 
+        "description": "صلاحيات إشرافية مع الوصول لكلمات المرور",
+        "permissions": {
+            "can_view_clients": True,
+            "can_create_clients": True,
+            "can_edit_clients": True,
+            "can_delete_clients": False,
+            "can_import_clients": True,
+            "can_view_own_logs": True,
+            "can_view_all_logs": True,
+            "can_create_work_logs": True,
+            "can_edit_own_logs": True,
+            "can_edit_all_logs": True,
+            "can_delete_own_logs": True,
+            "can_delete_all_logs": False,
+            "can_view_credentials": True,
+            "can_view_usernames": True,
+            "can_view_emails": True,
+            "can_reveal_passwords": True,
+            "can_create_credentials": True,
+            "can_edit_credentials": True,
+            "can_delete_credentials": False,
+            "can_generate_reports": True,
+            "can_export_excel": True,
+            "can_export_pdf": True,
+            "can_view_analytics": True,
+            "can_view_audit_logs": False,
+            "can_manage_permissions": False,
+            "can_setup_sample_data": False
+        }
+    },
+    "admin": {
+        "name": "مدير - Admin",
+        "description": "صلاحيات إدارية كاملة",
+        "permissions": {
+            "can_view_clients": True,
+            "can_create_clients": True,
+            "can_edit_clients": True,
+            "can_delete_clients": True,
+            "can_import_clients": True,
+            "can_view_own_logs": True,
+            "can_view_all_logs": True,
+            "can_create_work_logs": True,
+            "can_edit_own_logs": True,
+            "can_edit_all_logs": True,
+            "can_delete_own_logs": True,
+            "can_delete_all_logs": True,
+            "can_view_credentials": True,
+            "can_view_usernames": True,
+            "can_view_emails": True,
+            "can_reveal_passwords": True,
+            "can_create_credentials": True,
+            "can_edit_credentials": True,
+            "can_delete_credentials": True,
+            "can_generate_reports": True,
+            "can_export_excel": True,
+            "can_export_pdf": True,
+            "can_view_analytics": True,
+            "can_view_audit_logs": True,
+            "can_manage_permissions": True,
+            "can_setup_sample_data": True
+        }
+    }
+}
+
+# ============ PERMISSION MODELS FOR API ============
+
+class UserPermissionResponse(BaseModel):
+    id: str
+    user_id: str
+    user_name: str
+    user_email: Optional[str]
+    permission_level: str
+    can_view_credentials: bool
+    can_reveal_passwords: bool
+    can_manage_permissions: bool
+    is_active: bool
+    granted_by: Optional[str]
+    granted_at: datetime
+    last_updated: datetime
+    
+    class Config:
+        from_attributes = True
+
+class PermissionUpdateRequest(BaseModel):
+    permission_level: Optional[str] = None
+    can_view_clients: Optional[bool] = None
+    can_create_clients: Optional[bool] = None
+    can_edit_clients: Optional[bool] = None
+    can_delete_clients: Optional[bool] = None
+    can_import_clients: Optional[bool] = None
+    can_view_credentials: Optional[bool] = None
+    can_reveal_passwords: Optional[bool] = None
+    can_create_credentials: Optional[bool] = None
+    can_edit_credentials: Optional[bool] = None
+    can_delete_credentials: Optional[bool] = None
+    can_generate_reports: Optional[bool] = None
+    can_export_excel: Optional[bool] = None
+    can_manage_permissions: Optional[bool] = None
+    notes: Optional[str] = None
+
 async def log_work_reports_activity(
     db: Session,
     user_id: str,
