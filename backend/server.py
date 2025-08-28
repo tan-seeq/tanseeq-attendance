@@ -6334,6 +6334,132 @@ async def delete_credential(
     
     return {"message": "Credential deleted successfully"}
 
+@api_router.post("/work-reports/setup-sample-data")
+async def setup_sample_data(
+    current_user = Depends(get_admin_user),
+    db = Depends(get_work_reports_db)
+):
+    """Setup sample data for testing (Admin only)"""
+    try:
+        # إنشاء عميل نموذجي إذا لم يكن موجوداً
+        sample_client = db.query(Client).filter(Client.company_name == "شركة الإمارات التجارية").first()
+        
+        if not sample_client:
+            sample_client = Client(
+                company_name="شركة الإمارات التجارية",
+                company_name_ar="Emirates Trading Company",
+                client_code="ETC2508001",
+                industry="التجارة العامة",
+                contact_person="أحمد محمد",
+                phone="+971501234567",
+                email="contact@emiratestrading.ae",
+                address="دبي، الإمارات العربية المتحدة",
+                tax_number="100123456789003",
+                commercial_registration="1234567890",
+                notes="عميل نموذجي للاختبار",
+                created_by=current_user.name
+            )
+            db.add(sample_client)
+            db.commit()
+            db.refresh(sample_client)
+        
+        # الحصول على نوع النشاط
+        activity_type = db.query(ActivityType).filter(ActivityType.name == "VAT Return Filing").first()
+        if not activity_type:
+            activity_type = db.query(ActivityType).first()
+        
+        # إنشاء سجلات عمل نموذجية
+        sample_logs_data = [
+            {
+                "date_offset": 0,  # اليوم
+                "start_hour": 9,
+                "duration": 180,  # 3 ساعات
+                "description": "إعداد الإقرار الضريبي الشهري للعميل",
+                "notes": "تم إكمال المراجعة وتقديم الإقرار",
+                "hourly_rate": 200.0
+            },
+            {
+                "date_offset": 1,  # أمس
+                "start_hour": 10,
+                "duration": 120,  # ساعتان
+                "description": "مراجعة المستندات المالية وتدقيق البيانات",
+                "notes": "مراجعة شاملة للمستندات المطلوبة",
+                "hourly_rate": 180.0
+            },
+            {
+                "date_offset": 2,  # قبل يومين
+                "start_hour": 14,
+                "duration": 90,   # ساعة ونصف
+                "description": "اجتماع مع العميل لمناقشة متطلبات الضريبة",
+                "notes": "اجتماع مثمر لتوضيح المتطلبات",
+                "hourly_rate": 250.0
+            }
+        ]
+        
+        created_logs = []
+        for log_data in sample_logs_data:
+            # تحقق من وجود سجل مماثل
+            log_date = datetime.now() - timedelta(days=log_data["date_offset"])
+            existing_log = db.query(WorkLog).filter(
+                WorkLog.client_id == sample_client.id,
+                WorkLog.date >= log_date.replace(hour=0, minute=0, second=0),
+                WorkLog.date < log_date.replace(hour=23, minute=59, second=59)
+            ).first()
+            
+            if not existing_log:
+                start_time = log_date.replace(hour=log_data["start_hour"], minute=0, second=0)
+                end_time = start_time + timedelta(minutes=log_data["duration"])
+                total_amount = (log_data["duration"] / 60) * log_data["hourly_rate"]
+                
+                work_log = WorkLog(
+                    client_id=sample_client.id,
+                    activity_type_id=activity_type.id if activity_type else None,
+                    user_id=current_user.id,
+                    user_name=current_user.name,
+                    date=log_date,
+                    start_time=start_time,
+                    end_time=end_time,
+                    duration_minutes=log_data["duration"],
+                    description=log_data["description"],
+                    notes=log_data["notes"],
+                    is_billable=True,
+                    hourly_rate=log_data["hourly_rate"],
+                    total_amount=total_amount,
+                    status="active"
+                )
+                
+                db.add(work_log)
+                created_logs.append({
+                    "date": log_date.strftime("%Y-%m-%d"),
+                    "duration": log_data["duration"],
+                    "amount": total_amount
+                })
+        
+        db.commit()
+        
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "setup_sample_data",
+            after_value={
+                "client_created": sample_client.company_name,
+                "logs_created": len(created_logs)
+            }
+        )
+        
+        return {
+            "message": "تم إنشاء البيانات النموذجية بنجاح",
+            "sample_client": {
+                "id": str(sample_client.id),
+                "name": sample_client.company_name,
+                "code": sample_client.client_code
+            },
+            "work_logs_created": len(created_logs),
+            "sample_logs": created_logs,
+            "total_revenue": sum([log["amount"] for log in created_logs])
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to setup sample data: {str(e)}")
+
 # ============ PDF REPORTS ENDPOINTS ============
 
 @api_router.get("/work-reports/reports/daily/{date}")
