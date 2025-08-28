@@ -6228,6 +6228,58 @@ async def get_work_reports_dashboard(
         "user_role": current_user.role
     }
 
+@api_router.get("/work-reports/credentials/{credential_id}/password")
+async def get_credential_password(
+    credential_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get decrypted password (for authorized users only)"""
+    credential = db.query(ClientCredential).filter(ClientCredential.id == credential_id).first()
+    if not credential:
+        raise HTTPException(status_code=404, detail="Credential not found")
+    
+    # Decrypt password
+    decrypted_password = ""
+    if credential.encrypted_password:
+        decrypted_password = credential_encryption.decrypt_password(credential.encrypted_password)
+    
+    # Update last used timestamp
+    credential.last_used = datetime.utcnow()
+    db.commit()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "access_password",
+        table_name="client_credentials", record_id=str(credential.id)
+    )
+    
+    return {"password": decrypted_password}
+
+@api_router.delete("/work-reports/credentials/{credential_id}")
+async def delete_credential(
+    credential_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Delete client credential"""
+    credential = db.query(ClientCredential).filter(ClientCredential.id == credential_id).first()
+    if not credential:
+        raise HTTPException(status_code=404, detail="Credential not found")
+    
+    # Check permissions - only admin or super admin can delete
+    if current_user.role not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    db.delete(credential)
+    db.commit()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "delete_credential",
+        table_name="client_credentials", record_id=str(credential_id)
+    )
+    
+    return {"message": "Credential deleted successfully"}
+
 # ============ PDF REPORTS ENDPOINTS ============
 
 @api_router.get("/work-reports/reports/daily/{date}")
