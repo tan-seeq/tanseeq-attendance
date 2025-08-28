@@ -29,7 +29,7 @@ const PermissionsManager = () => {
   });
   const [editPermissions, setEditPermissions] = useState({});
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     fetchUserPermissions();
