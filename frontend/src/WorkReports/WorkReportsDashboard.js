@@ -199,9 +199,21 @@ const WorkReportsDashboard = () => {
             >
               Add New Client
             </button>
-            <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm sm:text-base">
+            <button 
+              onClick={() => window.location.href = '/work-reports/reports'}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm sm:text-base"
+            >
               View Reports
             </button>
+            {(dashboard?.total_clients === 0 || dashboard?.month_logs === 0) && (
+              <button 
+                onClick={setupSampleData}
+                disabled={setupLoading}
+                className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm sm:text-base"
+              >
+                {setupLoading ? 'جاري الإنشاء...' : 'إنشاء بيانات نموذجية'}
+              </button>
+            )}
           </div>
         </div>
 
