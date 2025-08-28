@@ -6749,13 +6749,14 @@ class TanseeqAPITester:
             
             # Employee Permissions Management System Tests
             print(f"   🔹 Employee Permissions Management System")
-            self.test_work_reports_permissions_list(role)
             self.test_work_reports_permission_templates(role)
             self.test_work_reports_my_permissions(role)
-            self.test_work_reports_user_permissions_crud(role)
+            self.test_work_reports_permissions_list(role)
+            self.test_work_reports_user_permissions_get(role)
+            self.test_work_reports_permissions_create_update(role)
+            self.test_work_reports_permissions_delete(role)
+            self.test_work_reports_permissions_access_control(role)
             self.test_work_reports_permission_templates_structure(role)
-            self.test_work_reports_permission_access_control(role)
-            self.test_work_reports_audit_logging_for_permissions(role)
             
             # Logout
             self.test_logout(role)
