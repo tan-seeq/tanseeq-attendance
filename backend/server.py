@@ -5614,7 +5614,7 @@ async def create_client(
     db.commit()
     db.refresh(client)
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "create_client",
         table_name="clients", record_id=str(client.id),
         after_value=client_data.dict()
