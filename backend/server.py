@@ -5675,7 +5675,7 @@ async def delete_client(
     client.updated_at = datetime.utcnow()
     db.commit()
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "delete_client",
         table_name="clients", record_id=str(client.id)
     )
