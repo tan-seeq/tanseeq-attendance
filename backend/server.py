@@ -6440,7 +6440,7 @@ async def setup_sample_data(
         
         db.commit()
         
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "setup_sample_data",
             after_value={
                 "client_created": sample_client.company_name,
