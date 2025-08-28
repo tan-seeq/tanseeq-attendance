@@ -5700,7 +5700,7 @@ async def get_client_credentials(
         ClientCredential.is_active == True
     ).all()
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "view_credentials",
         table_name="client_credentials", record_id=client_id
     )
