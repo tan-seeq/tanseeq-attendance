@@ -5798,7 +5798,7 @@ async def create_activity_type(
     db.commit()
     db.refresh(activity_type)
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "create_activity_type",
         table_name="activity_types", record_id=str(activity_type.id),
         after_value=activity_data.dict()
