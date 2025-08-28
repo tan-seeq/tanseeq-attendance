@@ -394,7 +394,7 @@ const Layout = ({ children }) => {
     { name: 'تقارير متقدمة', href: '/work-reports/reports', icon: DocumentChartBarIcon },
     ...(user?.role === 'super_admin' ? [
       { name: 'سجل تدقيق التقارير', href: '/work-reports/audit', icon: ShieldCheckIcon },
-      { name: 'إدارة صلاحيات الموظفين', href: '/work-reports/permissions', icon: UserGroupIcon },
+      { name: 'إدارة صلاحيات الموظفين', href: '/work-reports/permissions', icon: Cog6ToothIcon },
     ] : []),
   ];
 
