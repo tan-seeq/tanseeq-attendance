@@ -27,10 +27,12 @@ from io import BytesIO
 from work_reports_db import (
     get_work_reports_db, create_work_reports_tables, init_default_activity_types,
     Client, ClientCredential, ActivityType, WorkLog, WorkReportsAuditLog,
+    UserWorkReportsPermission, PERMISSION_TEMPLATES,
     ClientCreate, ClientUpdate, ClientResponse,
     ClientCredentialCreate, ClientCredentialResponse,
     ActivityTypeCreate, ActivityTypeResponse,
     WorkLogCreate, WorkLogUpdate, WorkLogResponse,
+    UserPermissionResponse, PermissionUpdateRequest,
     credential_encryption, log_work_reports_activity
 )
 from report_generator import report_generator
