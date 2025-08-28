@@ -11,6 +11,7 @@ from sqlalchemy import (
     create_engine, Column, String, Text, DateTime, Boolean, Float, 
     Integer, ForeignKey, JSON, LargeBinary
 )
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from pydantic import BaseModel, Field
