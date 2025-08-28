@@ -38,3 +38,6 @@ qrcode[pil]>=7.4.2
 reportlab>=4.0.4
 jinja2>=3.1.2
 weasyprint>=61.2
+matplotlib>=3.7.0
+pandas>=2.0.0
+seaborn>=0.12.0
