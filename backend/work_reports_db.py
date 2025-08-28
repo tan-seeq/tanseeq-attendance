@@ -19,18 +19,11 @@ from cryptography.fernet import Fernet
 import base64
 import json
 
-# Database setup
-POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
-POSTGRES_PORT = os.environ.get('POSTGRES_PORT', '5432')
-POSTGRES_DB = os.environ.get('POSTGRES_DB', 'work_reports_db')
-POSTGRES_USER = os.environ.get('POSTGRES_USER', 'postgres')
-POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres')
-
-# Create database URL
-DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+# Database setup - Using SQLite for compatibility
+DATABASE_URL = "sqlite:///./work_reports.db"
 
 # SQLAlchemy setup
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
