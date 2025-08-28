@@ -6463,6 +6463,204 @@ async def setup_sample_data(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to setup sample data: {str(e)}")
 
+# ============ USER PERMISSIONS MANAGEMENT ============
+
+def get_user_permissions(db: Session, user_id: str) -> UserWorkReportsPermission:
+    """Get or create user permissions"""
+    permissions = db.query(UserWorkReportsPermission).filter(
+        UserWorkReportsPermission.user_id == user_id,
+        UserWorkReportsPermission.is_active == True
+    ).first()
+    
+    if not permissions:
+        # Create default permissions for new user
+        permissions = UserWorkReportsPermission(
+            user_id=user_id,
+            user_name="Unknown User",
+            permission_level="user",
+            **PERMISSION_TEMPLATES["user"]["permissions"]
+        )
+        db.add(permissions)
+        db.commit()
+        db.refresh(permissions)
+    
+    return permissions
+
+def check_permission(current_user, db: Session, permission_name: str) -> bool:
+    """Check if user has specific permission"""
+    if current_user.role in ["super_admin"]:
+        return True
+        
+    user_permissions = get_user_permissions(db, current_user.id)
+    return getattr(user_permissions, permission_name, False)
+
+@api_router.get("/work-reports/permissions", response_model=List[UserPermissionResponse])
+async def get_all_user_permissions(
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get all user permissions (Admin only)"""
+    if not check_permission(current_user, db, "can_manage_permissions"):
+        raise HTTPException(status_code=403, detail="Access denied - Permission management required")
+    
+    permissions = db.query(UserWorkReportsPermission).filter(
+        UserWorkReportsPermission.is_active == True
+    ).all()
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "view_all_permissions"
+    )
+    
+    return permissions
+
+@api_router.get("/work-reports/permissions/{user_id}", response_model=UserPermissionResponse)
+async def get_user_permission(
+    user_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get specific user permissions"""
+    if not check_permission(current_user, db, "can_manage_permissions") and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    permissions = get_user_permissions(db, user_id)
+    
+    return permissions
+
+@api_router.post("/work-reports/permissions/{user_id}")
+async def create_or_update_user_permissions(
+    user_id: str,
+    permission_data: PermissionUpdateRequest,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Create or update user permissions (Admin only)"""
+    if not check_permission(current_user, db, "can_manage_permissions"):
+        raise HTTPException(status_code=403, detail="Access denied - Permission management required")
+    
+    # Get existing permissions or create new
+    permissions = db.query(UserWorkReportsPermission).filter(
+        UserWorkReportsPermission.user_id == user_id
+    ).first()
+    
+    if permissions:
+        # Update existing permissions
+        original_permissions = {
+            "permission_level": permissions.permission_level,
+            "can_reveal_passwords": permissions.can_reveal_passwords,
+            "can_manage_permissions": permissions.can_manage_permissions
+        }
+        
+        # Update fields from request
+        update_data = permission_data.dict(exclude_unset=True)
+        
+        # Apply template if permission_level is specified
+        if "permission_level" in update_data and update_data["permission_level"] in PERMISSION_TEMPLATES:
+            template_permissions = PERMISSION_TEMPLATES[update_data["permission_level"]]["permissions"]
+            update_data.update(template_permissions)
+        
+        for key, value in update_data.items():
+            if hasattr(permissions, key):
+                setattr(permissions, key, value)
+        
+        permissions.last_updated = datetime.utcnow()
+        
+    else:
+        # Create new permissions
+        permission_level = permission_data.permission_level or "user"
+        template_permissions = PERMISSION_TEMPLATES.get(permission_level, PERMISSION_TEMPLATES["user"])["permissions"]
+        
+        permissions = UserWorkReportsPermission(
+            user_id=user_id,
+            user_name=f"User {user_id}",  # This should be updated with actual user name
+            permission_level=permission_level,
+            granted_by=current_user.name,
+            notes=permission_data.notes,
+            **template_permissions
+        )
+        
+        # Override with specific permissions from request
+        update_data = permission_data.dict(exclude_unset=True, exclude={"permission_level", "notes"})
+        for key, value in update_data.items():
+            if hasattr(permissions, key):
+                setattr(permissions, key, value)
+        
+        db.add(permissions)
+        original_permissions = None
+    
+    db.commit()
+    db.refresh(permissions)
+    
+    await log_work_reports_activity(
+        db, current_user.id, current_user.name, "update_user_permissions",
+        table_name="user_work_reports_permissions", record_id=str(permissions.id),
+        before_value=original_permissions,
+        after_value=permission_data.dict(exclude_unset=True)
+    )
+    
+    return {
+        "message": "تم تحديث صلاحيات المستخدم بنجاح",
+        "user_id": user_id,
+        "permission_level": permissions.permission_level,
+        "permissions_updated": list(permission_data.dict(exclude_unset=True).keys())
+    }
+
+@api_router.get("/work-reports/permission-templates")
+async def get_permission_templates(
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get available permission templates"""
+    if not check_permission(current_user, db, "can_manage_permissions"):
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return {
+        "templates": PERMISSION_TEMPLATES,
+        "available_levels": list(PERMISSION_TEMPLATES.keys())
+    }
+
+@api_router.get("/work-reports/my-permissions", response_model=UserPermissionResponse)
+async def get_my_permissions(
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Get current user's permissions"""
+    permissions = get_user_permissions(db, current_user.id)
+    
+    # Update user info if needed
+    if permissions.user_name != current_user.name:
+        permissions.user_name = current_user.name
+        permissions.user_email = getattr(current_user, 'email', '')
+        db.commit()
+    
+    return permissions
+
+@api_router.delete("/work-reports/permissions/{user_id}")
+async def revoke_user_permissions(
+    user_id: str,
+    current_user = Depends(get_current_user),
+    db = Depends(get_work_reports_db)
+):
+    """Revoke user permissions (Super Admin only)"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    permissions = db.query(UserWorkReportsPermission).filter(
+        UserWorkReportsPermission.user_id == user_id
+    ).first()
+    
+    if permissions:
+        permissions.is_active = False
+        permissions.last_updated = datetime.utcnow()
+        db.commit()
+        
+        await log_work_reports_activity(
+            db, current_user.id, current_user.name, "revoke_user_permissions",
+            table_name="user_work_reports_permissions", record_id=str(permissions.id)
+        )
+    
+    return {"message": "تم إلغاء صلاحيات المستخدم بنجاح"}
+
 # ============ PDF REPORTS ENDPOINTS ============
 
 @api_router.get("/work-reports/reports/daily/{date}")
