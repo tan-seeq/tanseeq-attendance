@@ -40,6 +40,30 @@ const WorkReportsDashboard = () => {
     }
   };
 
+  const setupSampleData = async () => {
+    if (!window.confirm('هل تريد إنشاء بيانات نموذجية للاختبار؟\n\nسيتم إنشاء:\n• عميل نموذجي\n• 3 سجلات عمل\n• بيانات للتقارير')) {
+      return;
+    }
+    
+    try {
+      setSetupLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${backendUrl}/api/work-reports/setup-sample-data`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      alert(`✅ تم إنشاء البيانات النموذجية بنجاح!\n\n📊 تم إنشاء:\n• العميل: ${response.data.sample_client.name}\n• سجلات العمل: ${response.data.work_logs_created}\n• إجمالي الإيرادات: AED ${response.data.total_revenue.toFixed(2)}\n\nيمكنك الآن اختبار التقارير والتصدير!`);
+      
+      // Refresh dashboard
+      fetchDashboard();
+    } catch (err) {
+      console.error('Error setting up sample data:', err);
+      alert('❌ فشل في إنشاء البيانات النموذجية\n\nيرجى المحاولة مرة أخرى');
+    } finally {
+      setSetupLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
