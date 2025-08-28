@@ -176,8 +176,13 @@ const ClientManagement = () => {
   };
 
   const viewCredentials = (client) => {
-    setSelectedClient(client);
+    setSelectedClientForCredentials(client);
     setShowCredentialsModal(true);
+  };
+
+  const handleCloseCredentials = () => {
+    setShowCredentialsModal(false);
+    setSelectedClientForCredentials(null);
   };
 
   if (loading) {
