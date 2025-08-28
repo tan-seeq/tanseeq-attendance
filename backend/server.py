@@ -6120,23 +6120,60 @@ async def import_clients_from_excel(
                 # Create client
                 client = Client(
                     company_name=company_name,
-                    company_name_ar=row_data.get("Arabic Name", ""),
+                    company_name_ar=company_name,  # استخدام نفس الاسم للعربية
                     client_code=client_code,
-                    industry=row_data.get("Industry", ""),
-                    contact_person=row_data.get("Contact Person") or row_data.get("Contact", ""),
-                    phone=row_data.get("Phone") or row_data.get("Mobile", ""),
-                    email=row_data.get("Email", ""),
-                    address=row_data.get("Address", ""),
-                    tax_number=row_data.get("Tax Number") or row_data.get("TRN", ""),
-                    commercial_registration=row_data.get("CR Number", ""),
-                    notes=f"Imported from Excel on {datetime.now().strftime('%Y-%m-%d')}",
+                    industry=row_data.get("Industry") or row_data.get("القطاع", ""),
+                    contact_person=row_data.get("Contact Person") or row_data.get("Contact") or row_data.get("المسؤول", ""),
+                    phone=row_data.get("Phone") or row_data.get("Mobile") or row_data.get("الهاتف", ""),
+                    email=email,
+                    address=row_data.get("Address") or row_data.get("العنوان", ""),
+                    tax_number=row_data.get("Tax Number") or row_data.get("TRN") or row_data.get("الرقم الضريبي", ""),
+                    commercial_registration=row_data.get("CR Number") or row_data.get("الرخصة التجارية", ""),
+                    notes=f"تم الاستيراد من Excel في {datetime.now().strftime('%Y-%m-%d')}",
                     created_by=current_user.name
                 )
                 
                 db.add(client)
+                
+                # إضافة بيانات الاعتماد إذا كانت متوفرة
+                email_password = row_data.get("باسورد الأميل", "").strip()
+                fta_password = row_data.get("باسورد الهيئة", "").strip()
+                
+                # حفظ العميل أولاً للحصول على ID
+                db.commit()
+                db.refresh(client)
+                
+                # إضافة بيانات اعتماد الإيميل
+                if email and email_password:
+                    email_credential = ClientCredential(
+                        client_id=client.id,
+                        credential_type="email_account",
+                        username=email,
+                        email=email,
+                        encrypted_password=credential_encryption.encrypt_password(email_password),
+                        description="بيانات الإيميل الأساسي للشركة"
+                    )
+                    db.add(email_credential)
+                
+                # إضافة بيانات اعتماد الهيئة
+                if fta_password:
+                    fta_credential = ClientCredential(
+                        client_id=client.id,
+                        credential_type="fta_portal",
+                        username=email,  # غالباً نفس الإيميل
+                        email=email,
+                        encrypted_password=credential_encryption.encrypt_password(fta_password),
+                        portal_url="https://tax.gov.ae",
+                        description="بوابة الهيئة الاتحادية للضرائب"
+                    )
+                    db.add(fta_credential)
+                
                 imported_clients.append({
                     "company_name": company_name,
                     "client_code": client_code,
+                    "email": email,
+                    "has_email_password": bool(email_password),
+                    "has_fta_password": bool(fta_password),
                     "row": row_num
                 })
                 
