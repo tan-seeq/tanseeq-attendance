@@ -6330,7 +6330,7 @@ async def delete_credential(
     db.delete(credential)
     db.commit()
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "delete_credential",
         table_name="client_credentials", record_id=str(credential_id)
     )
