@@ -5983,7 +5983,7 @@ async def update_work_log(
     db.commit()
     db.refresh(work_log)
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "update_work_log",
         table_name="work_logs", record_id=str(work_log.id),
         before_value=original_data, after_value=update_data
