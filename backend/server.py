@@ -6845,7 +6845,7 @@ async def export_work_logs_excel(
         
         excel_buffer.seek(0)
         
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "export_excel",
             after_value={"records_count": len(work_logs)}
         )
