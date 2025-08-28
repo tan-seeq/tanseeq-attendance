@@ -5740,7 +5740,7 @@ async def create_client_credential(
     db.commit()
     db.refresh(credential)
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "create_credential",
         table_name="client_credentials", record_id=str(credential.id),
         after_value={"credential_type": credential_data.credential_type, "client_id": client_id}
