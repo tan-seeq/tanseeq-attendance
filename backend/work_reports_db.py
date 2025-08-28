@@ -13,7 +13,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
-from sqlalchemy.dialects.postgresql import UUID
 from pydantic import BaseModel, Field
 from cryptography.fernet import Fernet
 import base64
@@ -36,7 +35,7 @@ ENCRYPTION_KEY = os.environ.get('WORK_REPORTS_ENCRYPTION_KEY',
 class Client(Base):
     __tablename__ = "clients"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     company_name = Column(String(255), nullable=False)
     company_name_ar = Column(String(255))  # Arabic name
     client_code = Column(String(50), unique=True)
@@ -60,8 +59,8 @@ class Client(Base):
 class ClientCredential(Base):
     __tablename__ = "client_credentials"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    client_id = Column(String(36), ForeignKey("clients.id"), nullable=False)
     credential_type = Column(String(100), nullable=False)  # fta, ministry, bank, portal, etc.
     username = Column(String(255))
     email = Column(String(255))
@@ -79,7 +78,7 @@ class ClientCredential(Base):
 class ActivityType(Base):
     __tablename__ = "activity_types"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String(255), nullable=False)
     name_ar = Column(String(255))  # Arabic name
     category = Column(String(100))  # tax, accounting, consulting, legal, etc.
@@ -95,9 +94,9 @@ class ActivityType(Base):
 class WorkLog(Base):
     __tablename__ = "work_logs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False)
-    activity_type_id = Column(UUID(as_uuid=True), ForeignKey("activity_types.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    client_id = Column(String(36), ForeignKey("clients.id"), nullable=False)
+    activity_type_id = Column(String(36), ForeignKey("activity_types.id"), nullable=False)
     user_id = Column(String(255), nullable=False)  # Reference to TANSEEQ HR user
     user_name = Column(String(255), nullable=False)
     date = Column(DateTime, nullable=False)
@@ -347,7 +346,7 @@ def init_default_activity_types(db: Session):
 class WorkReportsAuditLog(Base):
     __tablename__ = "work_reports_audit_logs"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(255), nullable=False)
     user_name = Column(String(255), nullable=False)
     action = Column(String(100), nullable=False)  # create, update, delete, view, export
@@ -364,7 +363,7 @@ class WorkReportsAuditLog(Base):
 class User2FA(Base):
     __tablename__ = "user_2fa_settings"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(255), nullable=False, unique=True)
     secret_key = Column(LargeBinary)  # Encrypted TOTP secret
     is_enabled = Column(Boolean, default=False)
@@ -375,9 +374,9 @@ class User2FA(Base):
 class PasswordAccessSession(Base):
     __tablename__ = "password_access_sessions"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(255), nullable=False)
-    credential_id = Column(UUID(as_uuid=True), ForeignKey("client_credentials.id"))
+    credential_id = Column(String(36), ForeignKey("client_credentials.id"))
     session_token = Column(String(255), unique=True)
     expires_at = Column(DateTime, nullable=False)
     ip_address = Column(String(50))
