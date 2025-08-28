@@ -149,29 +149,55 @@ const ClientManagement = () => {
         }
       });
       
-      const { imported_count, skipped_empty_rows, error_count, summary } = response.data;
+      const { success, imported_count, skipped_empty_rows, error_count, summary, status_message } = response.data;
       
-      // Create detailed message in Arabic and English
-      let message = `استيراد مكتمل!\nImport Completed!\n\n`;
-      message += `✅ عملاء مستوردون: ${imported_count}\n✅ Clients Imported: ${imported_count}\n`;
+      // إنشاء رسالة مفصلة بناءً على النتائج
+      let message = '';
+      let alertType = 'info';
       
-      if (skipped_empty_rows > 0) {
-        message += `⚠️ صفوف فارغة تم تجاهلها: ${skipped_empty_rows}\n⚠️ Empty Rows Skipped: ${skipped_empty_rows}\n`;
+      if (success && imported_count > 0) {
+        alertType = 'success';
+        message = `✅ ${status_message}\n\n`;
+        message += `📊 تفاصيل الاستيراد:\n`;
+        message += `• عدد العملاء المستوردين: ${imported_count}\n`;
+        message += `• العملاء مع بيانات إيميل: ${summary.clients_with_email_credentials}\n`;
+        message += `• العملاء مع بيانات الهيئة: ${summary.clients_with_fta_credentials}\n`;
+        
+        if (skipped_empty_rows > 0) {
+          message += `• صفوف فارغة تم تجاهلها: ${skipped_empty_rows}\n`;
+        }
+        
+        if (error_count > 0) {
+          message += `⚠️ تحذيرات: ${error_count} صف يحتوي على أخطاء\n`;
+        }
+      } else {
+        alertType = 'error';
+        message = `❌ ${status_message}\n\n`;
+        message += `📊 تفاصيل المشكلة:\n`;
+        message += `• إجمالي الصفوف المعالجة: ${summary.total_rows_processed}\n`;
+        message += `• أخطاء واجهت: ${error_count}\n`;
+        message += `• صفوف فارغة: ${skipped_empty_rows}\n\n`;
+        
+        if (error_count > 0) {
+          message += `أمثلة على الأخطاء:\n`;
+          // Add first few errors if available
+          message += `يرجى التحقق من صحة البيانات في ملف Excel`;
+        }
       }
       
-      if (error_count > 0) {
-        message += `❌ أخطاء: ${error_count}\n❌ Errors: ${error_count}\n`;
+      // Show appropriate alert based on result
+      if (alertType === 'success') {
+        alert(message);
+        fetchClients(); // Refresh the client list
+      } else {
+        if (window.confirm(`${message}\n\nهل تريد المتابعة والمحاولة مرة أخرى؟`)) {
+          // User can try again
+        }
       }
       
-      if (summary) {
-        message += `\nإجمالي الصفوف المعالجة: ${summary.total_rows_processed}\nTotal Rows Processed: ${summary.total_rows_processed}`;
-      }
-      
-      alert(message);
-      fetchClients();
     } catch (err) {
       console.error('Error importing clients:', err);
-      setError('فشل في استيراد العملاء - Failed to import clients');
+      alert('❌ خطأ في الاتصال بالخادم\n\nفشل في استيراد العملاء - خطأ في الشبكة أو الخادم\n\nيرجى المحاولة مرة أخرى لاحقاً');
     }
   };
 
