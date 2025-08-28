@@ -6078,21 +6078,33 @@ async def import_clients_from_excel(
                     skipped_empty_rows += 1
                     continue
                 
-                # Map Excel columns to our Client model
-                # Adjust these mappings based on your actual Excel structure
+                # Map Excel columns to our Client model  
+                # تحديث المطابقة حسب الهيكل الفعلي للملف
                 company_name = (
-                    row_data.get("Company Name") or 
+                    row_data.get("أسم الشركة") or 
                     row_data.get("اسم الشركة") or 
-                    row_data.get("Client Name") or
-                    row_data.get("Name") or ""
+                    row_data.get("Company Name") or
+                    row_data.get("الشركة") or ""
                 )
                 
-                if not company_name:
-                    errors.append(f"Row {row_num}: Missing company name")
+                email = (
+                    row_data.get("أميل") or
+                    row_data.get("ايميل") or
+                    row_data.get("Email") or
+                    row_data.get("البريد الالكتروني") or ""
+                ).strip() if row_data.get("أميل") or row_data.get("ايميل") else ""
+                
+                if not company_name or company_name.strip() == "":
+                    errors.append(f"Row {row_num}: اسم الشركة مفقود - Missing company name")
                     continue
                 
+                # تنظيف اسم الشركة
+                company_name = company_name.strip()
+                
                 # Generate client code
-                company_initials = ''.join([word[0].upper() for word in company_name.split()[:3]])
+                company_initials = ''.join([word[0].upper() for word in company_name.split()[:2] if word.strip()])
+                if not company_initials:
+                    company_initials = "CL"
                 timestamp = datetime.now().strftime("%y%m")
                 client_code = f"{company_initials}{timestamp}{row_num:03d}"
                 
