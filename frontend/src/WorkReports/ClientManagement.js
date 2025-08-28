@@ -8,8 +8,10 @@ import {
   UserIcon,
   PhoneIcon,
   EnvelopeIcon,
-  KeyIcon
+  KeyIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
+import ClientCredentialsManager from './ClientCredentialsManager';
 
 const ClientManagement = () => {
   const [clients, setClients] = useState([]);
