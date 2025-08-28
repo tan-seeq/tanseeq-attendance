@@ -35,6 +35,7 @@ from work_reports_db import (
     UserPermissionResponse, PermissionUpdateRequest,
     credential_encryption, log_work_reports_activity
 )
+from sqlalchemy.orm import Session
 from report_generator import report_generator
 
 # Load environment variables
