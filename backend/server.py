@@ -6195,18 +6195,23 @@ async def import_clients_from_excel(
         )
         
         return {
-            "message": f"استيراد العملاء مكتمل بنجاح - Client import completed successfully",
+            "message": f"استيراد مكتمل - Import Status",
+            "success": len(imported_clients) > 0,
             "imported_count": len(imported_clients),
             "skipped_empty_rows": skipped_empty_rows,
             "error_count": len(errors),
-            "imported_clients": imported_clients[:10],  # Show first 10
-            "errors": errors[:10] if errors else [],  # Show first 10 errors
+            "imported_clients": imported_clients[:5],  # Show first 5
+            "errors": errors[:5] if errors else [],  # Show first 5 errors
             "summary": {
                 "total_rows_processed": sheet.max_row - 1,
                 "successful_imports": len(imported_clients),
                 "empty_rows_skipped": skipped_empty_rows,
-                "errors_encountered": len(errors)
-            }
+                "errors_encountered": len(errors),
+                "clients_with_email_credentials": sum(1 for c in imported_clients if c.get("has_email_password")),
+                "clients_with_fta_credentials": sum(1 for c in imported_clients if c.get("has_fta_password"))
+            },
+            "status": "success" if len(imported_clients) > 0 else "failed",
+            "status_message": f"تم استيراد {len(imported_clients)} عميل بنجاح" if len(imported_clients) > 0 else "فشل الاستيراد - لم يتم استيراد أي عميل"
         }
         
     except Exception as e:
