@@ -250,8 +250,9 @@ const ClientManagement = () => {
                 <button
                   onClick={() => viewCredentials(client)}
                   className="text-green-600 hover:text-green-800"
+                  title="إدارة بيانات الاعتماد والكلمات السرية"
                 >
-                  <KeyIcon className="h-5 w-5" />
+                  <ShieldCheckIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(client.id)}
