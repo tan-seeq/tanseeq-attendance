@@ -6744,7 +6744,7 @@ async def generate_client_pdf_report(
             db=db
         )
         
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "generate_client_report",
             after_value={
                 "client_id": client_id,
