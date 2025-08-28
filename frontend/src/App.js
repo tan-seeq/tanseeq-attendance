@@ -2905,6 +2905,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/work-reports/permissions" element={
+              <ProtectedRoute>
+                <Layout>
+                  <PermissionsManager />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
