@@ -330,7 +330,7 @@ class CriticalSystemsTester:
 
 if __name__ == "__main__":
     # Use the backend URL from frontend/.env
-    backend_url = "https://worklog-client-mgmt.preview.emergentagent.com"
+    backend_url = "https://worklog-manager-6.preview.emergentagent.com"
     
     tester = CriticalSystemsTester(backend_url)
     success = tester.run_tests()

@@ -1,73 +1,75 @@
 <analysis>
-The AI engineer's work trajectory is a detailed record of developing and refining the TANSEEQ HR management system. Initially, it involved fixing critical backend issues related to Overtime, Backup, and Payroll reports, alongside frontend login and UI problems. A notable segment included a hypothetical discussion and report on isolating a new ERP system, which was later confirmed as not being implemented. The core of the work then shifted to an iterative process of addressing user-reported bugs within the existing TANSEEQ HR attendance and leave management. This involved complex debugging of time format inconsistencies, status casing issues, and ensuring correct working hour calculations and Dashboard updates. The system was progressively stabilized, culminating in comprehensive fixes. Finally, a new, large feature for Daily Work Report + Clients Master was meticulously planned, with strict requirements for isolation and advanced security, marking the next development phase.
+The AI engineer's work began by stabilizing the existing TANSEEQ HR system, focusing on resolving critical attendance and leave management bugs, primarily due to time format inconsistencies and status handling. This involved robust backend parsing and frontend UI synchronization. Subsequently, the main effort shifted to developing the new Daily Work Report + Clients Master feature. This was implemented in phases: initial database setup (transitioning from PostgreSQL to SQLite due to environment constraints), backend API creation, and core frontend components. After comprehensive testing and initial user feedback, the engineer addressed several quick fixes, including Excel import issues, mobile viewport responsiveness, and generation of UAT documentation (Postman collection, DB scripts, deployment guide, error codes, Audit Log Viewer). A significant development was the implementation of a secure client credential management system with AES-256-GCM encryption and role-based access. The latest user feedback identified a missing UI for managing these permissions, which the engineer immediately began addressing by creating database tables, API endpoints, and a frontend component for a comprehensive employee permissions management system.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR management system is a comprehensive, full-stack application supporting Arabic/English with UAE timezone, JWT authentication, and role-based access (Super Admin, Admin, User). Core functions include employee management, flexible attendance tracking, leave/field exit management with approval flows, reports, payroll, and activity logs. Recent enhancements added who approved, notes for leave/field exits, separate departure/return times for field exits, automated daily notifications, and payroll deductions. Super Admins can create requests for others and view attachments. The system now includes manual backup/restore, English reports, detailed payroll deductions, and an Overtime Report, supporting advanced penalty calculations and professional report designs. The latest requirement is a new, isolated Daily Work Report + Clients Master feature. This new module will track work time by client/activity, generate reports, securely store client company/FTA credentials (emails, encrypted passwords) using AES-256-GCM encryption and 2FA, enforce audit logging, and support CSV import for clients.
+The TANSEEQ HR system is a full-stack, multi-language (Arabic/English) application with JWT authentication and role-based access (Super Admin, Admin, User). It manages employees, flexible attendance, leave/field exit approvals (with who approved and notes), automatic daily notifications, and payroll deductions. It supports manual backup/restore, English reports, and an Overtime Report with advanced calculations. The key new feature is Daily Work Report + Clients Master, a segregated module to track work time by client/activity, generate reports, and securely store client company/FTA credentials (emails, encrypted passwords) using AES-256-GCM encryption, 2FA, and audit logging. This module also requires CSV import for clients. The most recent explicit request is to add a user interface for managing employee permissions, specifically how to assign or manage what data employees can access within the new Daily Work Report + Clients Master module.
 </product_requirements>
 
 <key_technical_concepts>
-- **Backend:** FastAPI (Python), MongoDB, JWT authentication, , , .
+- **Backend:** FastAPI (Python), SQLAlchemy (SQLite), JWT, , , , , , .
 - **Frontend:** React.js, React Router, Tailwind CSS, Heroicons, .
-- **Database:** UUIDs,  (MongoDB), PostgreSQL (for new feature).
+- **Database:** MongoDB (for HR), SQLite (for Work Reports), UUIDs (initially for PostgreSQL).
 - **Security:** AES-256-GCM encryption, 2FA, RBAC, Audit Logging.
 - **Environment:** Kubernetes, Supervisor, environment variables ().
 </key_technical_concepts>
 
 <code_architecture>
-The application utilizes a FastAPI backend and a React frontend, organized as follows:
+The application uses a FastAPI backend and a React frontend.
 
 
 
--   ****: The central backend file containing all FastAPI routes and business logic.
-    -   **Importance:** Handles all API interactions, database operations, and core logic.
-    -   **Changes Made:** Extensively modified to fix Overtime, Backup, and Payroll report generation. Significant updates for attendance management (Super Admin absence editing, automatic absence detection via  and ), leave request processing, and report enhancements. Crucially, time parsing was made robust to handle HH:MM from frontend, and status handling was standardized.
--   ****: The main React component for routing and UI integration.
-    -   **Importance:** Defines the application's structure, navigation, and renders most UI components.
-    -   **Changes Made:** Corrected API base URL issues and icon imports. Updated the  component to include a status dropdown for Super Admins, display absence reasons, and integrate new UI elements for automatic absence management. Logic in  and  was refined for consistency.
--   ****: Script for seeding initial database data.
-    -   **Importance:** Used for setting up initial user accounts and roles.
-    -   **Changes Made:** Modified to ensure specific user accounts and roles were correctly configured, including fixing login credentials.
--   ****: Frontend environment variables.
-    -   **Importance:** Stores configuration like the backend API URL.
-    -   **Changes Made:**  was updated to ensure correct  prefix usage.
--   ****: Backend environment variables.
-    -   **Importance:** Stores sensitive configuration like MongoDB connection strings.
-    -   **Changes Made:** No explicit changes were made to the protected variables in this trajectory.
--   ****: Documentation for testing and communication protocol.
-    -   **Importance:** Records testing status, identified issues, and resolutions.
-    -   **Changes Made:** Frequently updated to reflect the state of fixes and test outcomes.
-
-**New Architecture for Daily Work Report + Clients Master (Isolated):**
--   **New Database Tables (PostgreSQL-centric):** , , , .
--   **New Backend APIs:** A distinct set of endpoints (e.g., ) in  or a new module to ensure isolation.
--   **New Frontend Components:** A dedicated directory (e.g., ) for new UI components, integrated into  with a separate sidebar section.
+-   ****: The core FastAPI backend.
+    -   **Importance:** Contains all API routes, authentication, and integrates various modules.
+    -   **Changes Made:** Added Work Reports API endpoints, PDF report generation routes, and 2FA-related logic. Modified to import  and . Updated time parsing, status handling, and working hour calculations for HR module. Added  and  imports.
+-   ****: Main React component.
+    -   **Importance:** Handles routing, navigation, and integrates all major UI components.
+    -   **Changes Made:** Integrated new Work Reports components (Dashboard, ClientManagement, WorkLogManagement, AuditLogViewer, StopwatchMode, ReportsDashboard, PermissionsManager) into sidebar navigation and routing. Fixed API base URL and icon imports for existing HR components.
+-   ****: Defines SQLAlchemy models and database operations for the new Work Reports module.
+    -   **Importance:** Centralizes database schema and logic for clients, credentials, activity types, and work logs.
+    -   **Changes Made:** Initially set up for PostgreSQL, later switched to SQLite due to environment constraints. Models updated to use  primary keys instead of s. Added models for permissions and 2FA secrets.
+-   ****: Manages client data in the frontend.
+    -   **Importance:** Provides UI for adding, editing, importing (from Excel), and viewing client information.
+    -   **Changes Made:** Enhanced for Excel import to correctly map Arabic headers and handle empty rows. Integrated the Manage Sensitive Data button leading to . Updated to display import results clearly.
+-   ****: Manages sensitive client credentials.
+    -   **Importance:** Provides a secure UI for adding, viewing, and decrypting client-specific portal credentials with 2FA and audit trails.
+    -   **Changes Made:** Newly created for Phase 2 implementation.
+-   ****: Manages user permissions for work reports.
+    -   **Importance:** Provides a UI for Super Admins/Admins to set and modify employee access to sensitive data and features.
+    -   **Changes Made:** Newly created to address the user's latest request for permission management.
+-   ****: Handles PDF report generation.
+    -   **Importance:** Generates professional PDF reports for work logs.
+    -   **Changes Made:** Newly created for Phase 2.
+-   ****: SQL script for creating Work Reports database tables.
+    -   **Importance:** Defines the DDL for PostgreSQL setup (though SQLite is now used programmatically).
+-   ****: SQL script for seeding default data.
+    -   **Importance:** Provides initial data for testing (e.g., activity types, a test client, sample work log).
+-   ****: Postman collection.
+    -   **Importance:** Documents and enables easy testing of all Work Reports API endpoints.
+-   ****: Deployment documentation.
+    -   **Importance:** Guides on setting up PostgreSQL (initially), generating keys, and key rotation policies.
+-   ****: Error codes documentation.
+    -   **Importance:** Provides a comprehensive list of error codes, messages, and solutions for debugging.
 </code_architecture>
 
 <pending_tasks>
-- **Implement Daily Work Report + Clients Master feature (Phase 1).** This includes creating new PostgreSQL database tables (, , , ), implementing initial FastAPI APIs, and developing basic React frontend components for work log creation and client management.
-- **Secure client credentials** with AES-256-GCM encryption and related 2FA/audit mechanisms (Phase 2).
-- **Develop advanced reports (PDF), notifications, stopwatch mode, and integrations** with the existing attendance system (Phase 3).
+- **Add Permissions Manager to the main application frontend ().**
+- Complete the API endpoints for managing user permissions.
+- Implement the full functionality of the  frontend component.
+- Comprehensive testing of the new permissions management system.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer had just completed a multi-turn debugging process to resolve persistent issues in the **TANSEEQ HR attendance management system**. The key problems addressed were:
-1.  **Status Dropdown Not Working:** The dropdown to change attendance status (e.g., from Late to Present) in the frontend was not effectively updating the backend.
-2.  **Absence Reason Not Clearing:** The غياب تلقائي - لم يسجل حضور message persisted even after converting an absence to a present status.
-3.  **Working Hours Not Calculating:** Editing check-in/out times did not automatically update the calculated working hours, often showing --.
+Immediately before this summary request, the AI engineer was working on implementing a comprehensive employee permissions management system for the new Daily Work Report + Clients Master feature. This was in direct response to the user's explicit question: How can I set permissions, because there is no place to determine employee permissions, or what?.
 
-The root cause was identified as a **time format mismatch**: the frontend sent times as HH:MM, while the backend expected HH:MM:SS, leading to silent parsing failures.
+The work commenced by:
+1.  **Creating a  table** in the SQLite database schema defined in  to store permission settings. This involved adding a new SQLAlchemy model and associated fields to manage granular access control.
+2.  **Adding API endpoints** to  to allow for the creation, retrieval, updating, and deletion of these permission settings. These endpoints would be protected and likely accessible only by Super Admins.
+3.  **Creating a new frontend component**, , which is designed to provide a user interface for administrators to manage these permissions.
 
-**The following fixes were implemented:**
--   **Backend ():** The  utility was enhanced to correctly handle both HH:MM and HH:MM:SS formats by automatically appending :00 for shorter strings. The  endpoint logic was refined to ensure  is cleared when status changes from absent to present, and  are always recalculated accurately based on updated check-in/out times. Status values were normalized to lowercase for consistency.
--   **Frontend ():** The  function in the  component was modified to convert incoming  from the backend to lowercase before populating the dropdown, ensuring the correct option is selected and functionality is restored.
-
-After extensive testing, all these attendance-related issues were confirmed to be resolved, and the TANSEEQ HR system is now fully functional and stable in this area.
-
-The very next task is to begin the **Daily Work Report + Clients Master** feature. A detailed 3-phase execution plan has been agreed upon, including specific PostgreSQL schema adjustments, an AES-256-GCM encryption strategy, and a firm guarantee that this new feature will be completely isolated and will not impact the existing TANSEEQ HR system. The user has provided an  file for client data import for this new feature.
+The trajectory ends as the AI engineer is about to integrate this new  component into the main  for navigation and routing, making it accessible within the application's UI. This is a critical step to allow administrators to configure the role-based access control for sensitive client credentials and other features within the Work Reports module, fulfilling the user's requirement to manage employee access.
 </current_work>
 
 <optional_next_step>
-Start Phase 1 of the Daily Work Report + Clients Master feature by creating the necessary PostgreSQL database tables.
+Integrate the  component into  and implement its routing and navigation.
 </optional_next_step>
-

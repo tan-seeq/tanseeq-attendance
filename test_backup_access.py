@@ -114,7 +114,7 @@ def login_and_test(email, password, base_url):
         return False
 
 if __name__ == "__main__":
-    backend_url = "https://worklog-client-mgmt.preview.emergentagent.com"
+    backend_url = "https://worklog-manager-6.preview.emergentagent.com"
     
     print("🔍 Testing backup system access...")
     print("=" * 50)

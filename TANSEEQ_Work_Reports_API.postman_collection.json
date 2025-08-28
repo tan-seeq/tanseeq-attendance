@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://worklog-client-mgmt.preview.emergentagent.com",
+			"value": "https://worklog-manager-6.preview.emergentagent.com",
 			"type": "string"
 		}
 	],
