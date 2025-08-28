@@ -20,6 +20,7 @@ const ClientManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedClientForCredentials, setSelectedClientForCredentials] = useState(null);
   const [formData, setFormData] = useState({
     company_name: '',
     company_name_ar: '',
