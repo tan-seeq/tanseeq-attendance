@@ -578,7 +578,7 @@ class PermissionUpdateRequest(BaseModel):
     can_manage_permissions: Optional[bool] = None
     notes: Optional[str] = None
 
-async def log_work_reports_activity(
+def log_work_reports_activity(
     db: Session,
     user_id: str,
     user_name: str, 
