@@ -6678,7 +6678,7 @@ async def generate_daily_pdf_report(
             db=db
         )
         
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "generate_daily_report",
             after_value={"date": date}
         )
