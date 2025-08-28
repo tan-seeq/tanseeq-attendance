@@ -6835,6 +6835,336 @@ class TanseeqAPITester:
                 print(f"⚠️  {failed_tests} tests failed")
                 return False
 
+    # ============ EMPLOYEE PERMISSIONS MANAGEMENT SYSTEM TESTS ============
+    
+    def test_work_reports_permission_templates(self, role: str) -> bool:
+        """Test Work Reports permission templates endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        # Only Super Admin should have access to permission templates
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('GET', 'work-reports/permission-templates', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Verify template structure
+            has_templates = 'templates' in response
+            has_levels = 'available_levels' in response
+            
+            if has_templates and has_levels:
+                templates = response['templates']
+                levels = response['available_levels']
+                
+                # Check for expected permission levels
+                expected_levels = ['user', 'supervisor', 'admin']
+                has_expected_levels = all(level in levels for level in expected_levels)
+                
+                # Check template structure
+                valid_template_structure = True
+                for level in expected_levels:
+                    if level in templates:
+                        template = templates[level]
+                        if not ('description' in template and 'permissions' in template):
+                            valid_template_structure = False
+                            break
+                
+                success = has_expected_levels and valid_template_structure
+                
+                if not success:
+                    self.log_test(f"Work Reports permission templates ({role})", False, 
+                                 f"Expected levels: {has_expected_levels}, Valid structure: {valid_template_structure}")
+                else:
+                    self.log_test(f"Work Reports permission templates ({role})", True)
+            else:
+                self.log_test(f"Work Reports permission templates ({role})", False, 
+                             f"Missing templates: {has_templates}, Missing levels: {has_levels}")
+                success = False
+        else:
+            self.log_test(f"Work Reports permission templates ({role})", success, 
+                         str(response) if not success else "")
+        
+        return success
+
+    def test_work_reports_my_permissions(self, role: str) -> bool:
+        """Test Work Reports my permissions endpoint"""
+        if role not in self.tokens:
+            return False
+        
+        success, response = self.make_request('GET', 'work-reports/my-permissions', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, dict):
+            # Check for expected permission fields
+            expected_fields = ['user_id', 'user_name', 'permission_level', 'can_view_clients', 
+                             'can_create_clients', 'can_edit_clients', 'can_delete_clients',
+                             'can_view_credentials', 'can_create_credentials', 'can_edit_credentials',
+                             'can_delete_credentials', 'can_reveal_passwords', 'can_manage_permissions']
+            
+            has_expected_fields = all(field in response for field in expected_fields)
+            
+            # Verify user_id matches current user
+            correct_user_id = response.get('user_id') == self.users[role]['id']
+            
+            test_passed = has_expected_fields and correct_user_id
+            
+            self.log_test(f"Work Reports my permissions ({role})", test_passed,
+                         f"Missing fields: {set(expected_fields) - set(response.keys())}" if not has_expected_fields else 
+                         "User ID mismatch" if not correct_user_id else "")
+            return test_passed
+        else:
+            self.log_test(f"Work Reports my permissions ({role})", False, str(response))
+            return False
+
+    def test_work_reports_permissions_list(self, role: str) -> bool:
+        """Test Work Reports permissions list endpoint (Super Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        # Only Super Admin should have access to list all permissions
+        expected_status = 200 if role == 'super_admin' else 403
+        success, response = self.make_request('GET', 'work-reports/permissions', 
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Should return a list of permissions
+            if isinstance(response, list):
+                self.log_test(f"Work Reports permissions list ({role})", True)
+                return True
+            else:
+                self.log_test(f"Work Reports permissions list ({role})", False, "Response is not a list")
+                return False
+        else:
+            test_passed = success  # 403 is expected for non-super-admin
+            self.log_test(f"Work Reports permissions list ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            return test_passed
+
+    def test_work_reports_user_permissions_get(self, role: str) -> bool:
+        """Test getting specific user permissions"""
+        if role not in self.tokens:
+            return False
+        
+        # Test getting own permissions (should work for all roles)
+        user_id = self.users[role]['id']
+        success, response = self.make_request('GET', f'work-reports/permissions/{user_id}', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, dict):
+            # Check for expected permission structure
+            expected_fields = ['user_id', 'permission_level', 'can_view_clients']
+            has_expected_fields = all(field in response for field in expected_fields)
+            
+            # Verify user_id matches
+            correct_user_id = response.get('user_id') == user_id
+            
+            test_passed = has_expected_fields and correct_user_id
+            
+            self.log_test(f"Work Reports user permissions get ({role})", test_passed,
+                         f"Missing fields or user ID mismatch" if not test_passed else "")
+            return test_passed
+        else:
+            self.log_test(f"Work Reports user permissions get ({role})", False, str(response))
+            return False
+
+    def test_work_reports_permissions_create_update(self, role: str) -> bool:
+        """Test creating/updating user permissions (Super Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        # Only Super Admin should be able to create/update permissions
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Use a test user ID (we'll use the current user's ID for simplicity)
+        test_user_id = self.users[role]['id']
+        
+        # Test creating/updating permissions with supervisor level
+        permission_data = {
+            "permission_level": "supervisor",
+            "notes": "Test permission update for comprehensive testing"
+        }
+        
+        success, response = self.make_request('POST', f'work-reports/permissions/{test_user_id}', 
+                                            permission_data,
+                                            token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check response structure
+            expected_response_fields = ['message', 'user_id', 'permission_level', 'permissions_updated']
+            has_expected_fields = all(field in response for field in expected_response_fields)
+            
+            # Verify permission level was set correctly
+            correct_permission_level = response.get('permission_level') == 'supervisor'
+            
+            test_passed = has_expected_fields and correct_permission_level
+            
+            self.log_test(f"Work Reports permissions create/update ({role})", test_passed,
+                         f"Missing fields or incorrect permission level" if not test_passed else "")
+            return test_passed
+        else:
+            test_passed = success  # 403 is expected for non-super-admin
+            self.log_test(f"Work Reports permissions create/update ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            return test_passed
+
+    def test_work_reports_permissions_delete(self, role: str) -> bool:
+        """Test revoking user permissions (Super Admin only)"""
+        if role not in self.tokens:
+            return False
+        
+        # Only Super Admin should be able to revoke permissions
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Create a test user permission first (if super admin)
+        if role == 'super_admin':
+            test_user_id = self.users[role]['id']
+            
+            # First create a permission to delete
+            permission_data = {
+                "permission_level": "user",
+                "notes": "Test permission for deletion"
+            }
+            
+            create_success, create_response = self.make_request('POST', f'work-reports/permissions/{test_user_id}', 
+                                                              permission_data,
+                                                              token=self.tokens[role])
+            
+            if not create_success:
+                self.log_test(f"Work Reports permissions delete setup ({role})", False, "Could not create permission for deletion test")
+                return False
+            
+            # Now test deletion
+            success, response = self.make_request('DELETE', f'work-reports/permissions/{test_user_id}', 
+                                                token=self.tokens[role],
+                                                expected_status=expected_status)
+            
+            test_passed = success
+            self.log_test(f"Work Reports permissions delete ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            return test_passed
+        else:
+            # For non-super-admin, test that they get 403
+            test_user_id = self.users[role]['id']
+            success, response = self.make_request('DELETE', f'work-reports/permissions/{test_user_id}', 
+                                                token=self.tokens[role],
+                                                expected_status=403)
+            
+            test_passed = success  # 403 is expected
+            self.log_test(f"Work Reports permissions delete ({role})", test_passed, 
+                         str(response) if not test_passed else "")
+            return test_passed
+
+    def test_work_reports_permissions_access_control(self, role: str) -> bool:
+        """Test access control for permissions management"""
+        if role not in self.tokens:
+            return False
+        
+        # Test accessing another user's permissions (should fail for regular users)
+        if role == 'user':
+            # Try to access admin user's permissions
+            admin_user_id = self.users.get('admin', {}).get('id', 'admin-test-id')
+            
+            success, response = self.make_request('GET', f'work-reports/permissions/{admin_user_id}', 
+                                                token=self.tokens[role],
+                                                expected_status=403)
+            
+            test_passed = success  # 403 is expected
+            self.log_test(f"Work Reports permissions access control ({role})", test_passed, 
+                         "Regular user should not access other user's permissions" if not test_passed else "")
+            return test_passed
+        
+        elif role == 'admin':
+            # Admin should have limited access - test accessing super admin functions
+            test_user_id = self.users[role]['id']
+            
+            # Try to create permissions (should fail for admin)
+            permission_data = {"permission_level": "user"}
+            success, response = self.make_request('POST', f'work-reports/permissions/{test_user_id}', 
+                                                permission_data,
+                                                token=self.tokens[role],
+                                                expected_status=403)
+            
+            test_passed = success  # 403 is expected
+            self.log_test(f"Work Reports permissions access control ({role})", test_passed, 
+                         "Admin should not be able to create permissions" if not test_passed else "")
+            return test_passed
+        
+        else:  # super_admin
+            # Super admin should have full access - test that they can access all endpoints
+            endpoints_to_test = [
+                ('GET', 'work-reports/permissions', None, 200),
+                ('GET', 'work-reports/permission-templates', None, 200),
+                ('GET', 'work-reports/my-permissions', None, 200)
+            ]
+            
+            all_passed = True
+            for method, endpoint, data, expected_status in endpoints_to_test:
+                success, response = self.make_request(method, endpoint, data,
+                                                    token=self.tokens[role],
+                                                    expected_status=expected_status)
+                if not success:
+                    all_passed = False
+                    break
+            
+            self.log_test(f"Work Reports permissions access control ({role})", all_passed, 
+                         "Super admin should have full access to all permission endpoints" if not all_passed else "")
+            return all_passed
+
+    def test_work_reports_permission_templates_structure(self, role: str) -> bool:
+        """Test permission templates structure and escalation hierarchy"""
+        if role not in self.tokens:
+            return False
+        
+        # Only test for super_admin as others don't have access
+        if role != 'super_admin':
+            self.log_test(f"Work Reports permission templates structure ({role})", True, "Skipped for non-super-admin")
+            return True
+        
+        success, response = self.make_request('GET', 'work-reports/permission-templates', 
+                                            token=self.tokens[role])
+        
+        if success and 'templates' in response:
+            templates = response['templates']
+            
+            # Test permission escalation hierarchy
+            # User < Supervisor < Admin
+            user_perms = templates.get('user', {}).get('permissions', {})
+            supervisor_perms = templates.get('supervisor', {}).get('permissions', {})
+            admin_perms = templates.get('admin', {}).get('permissions', {})
+            
+            # Check that supervisor has more permissions than user
+            supervisor_has_more = (
+                supervisor_perms.get('can_create_clients', False) >= user_perms.get('can_create_clients', False) and
+                supervisor_perms.get('can_edit_clients', False) >= user_perms.get('can_edit_clients', False) and
+                supervisor_perms.get('can_view_credentials', False) >= user_perms.get('can_view_credentials', False)
+            )
+            
+            # Check that admin has more permissions than supervisor
+            admin_has_more = (
+                admin_perms.get('can_delete_clients', False) >= supervisor_perms.get('can_delete_clients', False) and
+                admin_perms.get('can_create_credentials', False) >= supervisor_perms.get('can_create_credentials', False) and
+                admin_perms.get('can_reveal_passwords', False) >= supervisor_perms.get('can_reveal_passwords', False)
+            )
+            
+            # Check that only admin level has permission management capabilities
+            only_admin_manages = (
+                not user_perms.get('can_manage_permissions', False) and
+                not supervisor_perms.get('can_manage_permissions', False) and
+                admin_perms.get('can_manage_permissions', False)
+            )
+            
+            hierarchy_valid = supervisor_has_more and admin_has_more and only_admin_manages
+            
+            self.log_test(f"Work Reports permission templates structure ({role})", hierarchy_valid,
+                         f"Supervisor > User: {supervisor_has_more}, Admin > Supervisor: {admin_has_more}, Admin only manages: {only_admin_manages}")
+            return hierarchy_valid
+        else:
+            self.log_test(f"Work Reports permission templates structure ({role})", False, str(response))
+            return False
+
     # ============ MESSAGE SYSTEM TESTS ============
     
     def test_message_creation_general(self, role: str) -> bool:
