@@ -467,7 +467,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "Daily Work Report + Clients Master Feature - Frontend Components"
+    - "Employee permissions management system for Work Reports"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
