@@ -6188,7 +6188,7 @@ async def import_clients_from_excel(
         db.commit()
         
         # Log the import activity
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "import_clients",
             table_name="clients",
             after_value={
