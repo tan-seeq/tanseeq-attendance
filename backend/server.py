@@ -6654,7 +6654,7 @@ async def revoke_user_permissions(
         permissions.last_updated = datetime.utcnow()
         db.commit()
         
-        await log_work_reports_activity(
+        log_work_reports_activity(
             db, current_user.id, current_user.name, "revoke_user_permissions",
             table_name="user_work_reports_permissions", record_id=str(permissions.id)
         )
