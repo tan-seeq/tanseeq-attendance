@@ -5768,7 +5768,7 @@ async def get_credential_password(
     credential.last_used = datetime.utcnow()
     db.commit()
     
-    await log_work_reports_activity(
+    log_work_reports_activity(
         db, current_user.id, current_user.name, "access_password",
         table_name="client_credentials", record_id=str(credential.id)
     )
