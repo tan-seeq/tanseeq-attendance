@@ -130,7 +130,16 @@ const ClientCredentialsManager = ({ client, isOpen, onClose }) => {
 
     } catch (err) {
       console.error('Error revealing password:', err);
-      alert('فشل في كشف كلمة المرور. تأكد من صلاحياتك.');
+      const errorMessage = err.response?.data?.detail || 'خطأ غير معروف';
+      const statusCode = err.response?.status || 'غير معروف';
+      
+      if (statusCode === 403) {
+        alert(`فشل في كشف كلمة المرور: ${errorMessage}\n\nتأكد من صلاحياتك أو تحقق من إدارة الصلاحيات.`);
+      } else if (statusCode === 404) {
+        alert('لم يتم العثور على كلمة المرور أو بيانات الاعتماد.');
+      } else {
+        alert(`فشل في كشف كلمة المرور (${statusCode}): ${errorMessage}`);
+      }
     }
   };
 
