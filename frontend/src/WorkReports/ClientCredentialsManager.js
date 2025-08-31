@@ -84,7 +84,9 @@ const ClientCredentialsManager = ({ client, isOpen, onClose }) => {
       alert('تم حفظ بيانات الاعتماد بنجاح مع التشفير');
     } catch (err) {
       console.error('Error saving credential:', err);
-      setError('فشل في حفظ بيانات الاعتماد');
+      const errorMessage = err.response?.data?.detail || 'فشل في حفظ بيانات الاعتماد';
+      setError(`فشل في حفظ بيانات الاعتماد: ${errorMessage}`);
+      alert(`فشل في حفظ بيانات الاعتماد: ${errorMessage}`);
     }
   };
 
