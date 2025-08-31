@@ -6335,14 +6335,34 @@ async def get_credential_password(
     db = Depends(get_work_reports_db)
 ):
     """Get decrypted password (for authorized users only)"""
+    
+    # Check user permissions FIRST
+    user_permissions = get_user_permissions(db, current_user.id)
+    if not user_permissions:
+        # Super Admin always has access
+        if current_user.role != "super_admin":
+            raise HTTPException(
+                status_code=403, 
+                detail="ليس لديك صلاحية لعرض كلمات المرور - لم يتم العثور على صلاحياتك"
+            )
+    elif not user_permissions.can_reveal_passwords:
+        raise HTTPException(
+            status_code=403, 
+            detail=f"ليس لديك صلاحية لكشف كلمات المرور - مستواك الحالي: {user_permissions.permission_level}"
+        )
+    
     credential = db.query(ClientCredential).filter(ClientCredential.id == credential_id).first()
     if not credential:
         raise HTTPException(status_code=404, detail="Credential not found")
     
+    if not credential.encrypted_password:
+        raise HTTPException(status_code=404, detail="لا توجد كلمة مرور محفوظة لهذا الاعتماد")
+    
     # Decrypt password
-    decrypted_password = ""
-    if credential.encrypted_password:
+    try:
         decrypted_password = credential_encryption.decrypt_password(credential.encrypted_password)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="فشل في فك تشفير كلمة المرور")
     
     # Update last used timestamp
     credential.last_used = datetime.utcnow()
