@@ -6315,22 +6315,9 @@ async def get_credential_password(
     current_user = Depends(get_current_user),
     db = Depends(get_work_reports_db)
 ):
-    """Get credential password (for authorized users only) - NO ENCRYPTION"""
+    """Get credential password - NO PERMISSIONS CHECK - FULL ACCESS FOR ALL USERS"""
     
-    # Check user permissions FIRST
-    user_permissions = get_user_permissions(db, current_user.id)
-    if not user_permissions:
-        # Super Admin always has access
-        if current_user.role != "super_admin":
-            raise HTTPException(
-                status_code=403, 
-                detail="ليس لديك صلاحية لعرض كلمات المرور - لم يتم العثور على صلاحياتك"
-            )
-    elif not user_permissions.can_reveal_passwords:
-        raise HTTPException(
-            status_code=403, 
-            detail=f"ليس لديك صلاحية لكشف كلمات المرور - مستواك الحالي: {user_permissions.permission_level}"
-        )
+    # NO PERMISSION CHECKS - ALL USERS CAN ACCESS PASSWORDS
     
     credential = db.query(ClientCredential).filter(ClientCredential.id == credential_id).first()
     if not credential:
