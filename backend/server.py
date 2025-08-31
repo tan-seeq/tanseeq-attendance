@@ -5742,10 +5742,8 @@ async def create_client_credential(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    # Encrypt password if provided
-    encrypted_password = None
-    if credential_data.password:
-        encrypted_password = credential_encryption.encrypt_password(credential_data.password)
+    # Save password as plain text (no encryption)
+    plain_password = credential_data.password if credential_data.password else None
     
     # Create credential
     credential = ClientCredential(
@@ -5753,7 +5751,8 @@ async def create_client_credential(
         credential_type=credential_data.credential_type,
         username=credential_data.username,
         email=credential_data.email,
-        encrypted_password=encrypted_password,
+        password=plain_password,  # Store as plain text
+        encrypted_password=None,  # No encryption
         portal_url=credential_data.portal_url,
         description=credential_data.description,
         is_active=True  # Default to True
