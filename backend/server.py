@@ -685,6 +685,18 @@ async def logout(current_user: User = Depends(get_current_user)):
     await log_activity(current_user.id, "logout", f"User {current_user.email} logged out")
     return {"message": "Logged out successfully"}
 
+@api_router.get("/auth/me")
+async def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Get current user information"""
+    return {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role,
+        "position": current_user.position,
+        "is_active": current_user.is_active
+    }
+
 @api_router.post("/auth/reset-password")
 async def reset_password(request: PasswordResetRequest, current_user: User = Depends(get_super_admin_user)):
     """Reset user password (Super admin only)"""
