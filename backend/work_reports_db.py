@@ -168,7 +168,6 @@ class ClientCredentialBase(BaseModel):
     is_active: bool = True
 
 class ClientCredentialCreate(ClientCredentialBase):
-    client_id: str
     password: Optional[str] = None  # Will be encrypted before storing
 
 class ClientCredentialResponse(ClientCredentialBase):
