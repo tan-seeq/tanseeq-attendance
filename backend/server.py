@@ -342,14 +342,15 @@ class ClientCredentialResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class ClientCredentialCreate(BaseModel):
-    client_id: str
-    credential_type: str
-    username: str
-    email: Optional[str] = None
-    password: str
-    portal_url: Optional[str] = None
-    description: Optional[str] = None
+# Remove duplicate ClientCredentialCreate class - use the one from work_reports_db
+# class ClientCredentialCreate(BaseModel):
+#     client_id: str
+#     credential_type: str
+#     username: str
+#     email: Optional[str] = None
+#     password: str
+#     portal_url: Optional[str] = None
+#     description: Optional[str] = None
 
 class LoginRequest(BaseModel):
     email: str
