@@ -6329,7 +6329,7 @@ async def get_credential_password(
     current_user = Depends(get_current_user),
     db = Depends(get_work_reports_db)
 ):
-    """Get decrypted password (for authorized users only)"""
+    """Get credential password (for authorized users only) - NO ENCRYPTION"""
     
     # Check user permissions FIRST
     user_permissions = get_user_permissions(db, current_user.id)
@@ -6350,14 +6350,9 @@ async def get_credential_password(
     if not credential:
         raise HTTPException(status_code=404, detail="Credential not found")
     
-    if not credential.encrypted_password:
+    # Get plain text password (no encryption)
+    if not credential.password:
         raise HTTPException(status_code=404, detail="لا توجد كلمة مرور محفوظة لهذا الاعتماد")
-    
-    # Decrypt password
-    try:
-        decrypted_password = credential_encryption.decrypt_password(credential.encrypted_password)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="فشل في فك تشفير كلمة المرور")
     
     # Update last used timestamp
     credential.last_used = datetime.utcnow()
@@ -6368,7 +6363,7 @@ async def get_credential_password(
         table_name="client_credentials", record_id=str(credential.id)
     )
     
-    return {"password": decrypted_password}
+    return {"password": credential.password}
 
 @api_router.delete("/work-reports/credentials/{credential_id}")
 async def delete_credential(
