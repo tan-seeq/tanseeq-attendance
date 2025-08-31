@@ -5727,6 +5727,16 @@ async def create_client_credential(
     db = Depends(get_work_reports_db)
 ):
     """Create client credential with encrypted password"""
+    
+    # Check user permissions
+    user_permissions = get_user_permissions(db, current_user.id)
+    if not user_permissions:
+        # Super Admin always has permissions
+        if current_user.role != "super_admin":
+            raise HTTPException(status_code=403, detail="ليس لديك صلاحية لإدارة بيانات الاعتماد")
+    elif not user_permissions.can_create_credentials:
+        raise HTTPException(status_code=403, detail="ليس لديك صلاحية لإنشاء بيانات اعتماد")
+    
     client = db.query(Client).filter(Client.id == client_id).first()
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
