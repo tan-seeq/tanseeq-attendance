@@ -65,7 +65,8 @@ class ClientCredential(Base):
     credential_type = Column(String(100), nullable=False)  # fta, ministry, bank, portal, etc.
     username = Column(String(255))
     email = Column(String(255))
-    encrypted_password = Column(LargeBinary)  # AES-256-GCM encrypted
+    password = Column(String(500))  # Plain text password (no encryption)
+    encrypted_password = Column(LargeBinary)  # Legacy field (not used)
     portal_url = Column(String(500))
     description = Column(Text)
     is_active = Column(Boolean, default=True)
