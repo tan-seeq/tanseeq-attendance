@@ -6650,36 +6650,47 @@ async def get_my_permissions(
     """Get current user's permissions"""
     permissions = get_user_permissions(db, current_user.id)
     
-    # If user has no permissions, return default based on role (without saving to DB)
-    if not permissions:
-        # Super Admin gets admin level permissions by default
-        if current_user.role == "super_admin":
-            default_template = PERMISSION_TEMPLATES["admin"]
-            return UserPermissionResponse(
-                user_id=current_user.id,
-                user_name=current_user.name,
-                user_email=getattr(current_user, 'email', ''),
-                permission_level="admin",
-                **default_template["permissions"]
-            )
-        # Regular users get basic permissions
-        else:
-            default_template = PERMISSION_TEMPLATES["user"]
-            return UserPermissionResponse(
-                user_id=current_user.id,
-                user_name=current_user.name,
-                user_email=getattr(current_user, 'email', ''),
-                permission_level="user",
-                **default_template["permissions"]
-            )
-    else:
-        # Update user info if needed (but don't commit if no changes)
+    # If user has permissions in DB, return them
+    if permissions:
+        # Update user info if needed (but don't commit if no changes needed)
+        update_needed = False
         if permissions.user_name != current_user.name:
             permissions.user_name = current_user.name
+            update_needed = True
+        if permissions.user_email != getattr(current_user, 'email', ''):
             permissions.user_email = getattr(current_user, 'email', '')
+            update_needed = True
+            
+        if update_needed:
             db.commit()
+            
+        return permissions
     
-    return permissions
+    # If no permissions exist, return default based on role (without saving to DB)
+    if current_user.role == "super_admin":
+        default_template = PERMISSION_TEMPLATES["admin"]
+        return UserPermissionResponse(
+            user_id=current_user.id,
+            user_name=current_user.name,
+            user_email=getattr(current_user, 'email', ''),
+            permission_level="admin",
+            granted_at=datetime.utcnow(),
+            last_updated=datetime.utcnow(),
+            is_active=True,
+            **default_template["permissions"]
+        )
+    else:
+        default_template = PERMISSION_TEMPLATES["user"] 
+        return UserPermissionResponse(
+            user_id=current_user.id,
+            user_name=current_user.name,
+            user_email=getattr(current_user, 'email', ''),
+            permission_level="user",
+            granted_at=datetime.utcnow(),
+            last_updated=datetime.utcnow(),
+            is_active=True,
+            **default_template["permissions"]
+        )
 
 @api_router.delete("/work-reports/permissions/{user_id}")
 async def revoke_user_permissions(
