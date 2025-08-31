@@ -124,14 +124,23 @@ const PermissionsManager = () => {
         }
       });
       
+      // Close modal first
       setShowEditModal(false);
       setSelectedUser(null);
       setEditPermissions({});
-      fetchUserPermissions();
-      alert('تم تحديث صلاحيات المستخدم بنجاح');
+      
+      // Refresh permissions data BEFORE showing success message
+      await fetchUserPermissions();
+      
+      // Wait a bit for UI to update
+      setTimeout(() => {
+        alert('تم تحديث صلاحيات المستخدم بنجاح');
+      }, 500);
+      
     } catch (err) {
       console.error('Error updating permissions:', err);
-      alert('فشل في تحديث الصلاحيات');
+      const errorMessage = err.response?.data?.detail || 'فشل في تحديث الصلاحيات';
+      alert(`فشل في تحديث الصلاحيات: ${errorMessage}`);
     }
   };
 
