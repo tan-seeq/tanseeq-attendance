@@ -81,8 +81,19 @@ const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await axios.get(`${API}/dashboard/stats`);
+      if (response.data && response.data.user_name) {
+        // Extract user info from dashboard stats response
+        const userData = {
+          id: response.data.user_id,
+          name: response.data.user_name,
+          email: response.data.user_email,
+          role: response.data.user_role
+        };
+        setUser(userData);
+      }
       setLoading(false);
     } catch (error) {
+      console.error('Fetch user error:', error);
       logout();
     }
   };
