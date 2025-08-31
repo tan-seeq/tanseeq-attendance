@@ -6639,11 +6639,34 @@ async def get_my_permissions(
     """Get current user's permissions"""
     permissions = get_user_permissions(db, current_user.id)
     
-    # Update user info if needed
-    if permissions.user_name != current_user.name:
-        permissions.user_name = current_user.name
-        permissions.user_email = getattr(current_user, 'email', '')
-        db.commit()
+    # If user has no permissions, create default based on role
+    if not permissions:
+        # Super Admin gets admin level permissions by default
+        if current_user.role == "super_admin":
+            default_template = PERMISSION_TEMPLATES["admin"]
+            permissions = UserWorkReportsPermission(
+                user_id=current_user.id,
+                user_name=current_user.name,
+                user_email=getattr(current_user, 'email', ''),
+                permission_level="admin",
+                **default_template["permissions"]
+            )
+        # Regular users get basic permissions
+        else:
+            default_template = PERMISSION_TEMPLATES["user"]
+            permissions = UserWorkReportsPermission(
+                user_id=current_user.id,
+                user_name=current_user.name,
+                user_email=getattr(current_user, 'email', ''),
+                permission_level="user",
+                **default_template["permissions"]
+            )
+    else:
+        # Update user info if needed
+        if permissions.user_name != current_user.name:
+            permissions.user_name = current_user.name
+            permissions.user_email = getattr(current_user, 'email', '')
+            db.commit()
     
     return permissions
 
