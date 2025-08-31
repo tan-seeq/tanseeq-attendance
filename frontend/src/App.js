@@ -80,21 +80,32 @@ const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${API}/dashboard/stats`);
-      if (response.data && response.data.user_name) {
-        // Extract user info from dashboard stats response
-        const userData = {
-          id: response.data.user_id,
-          name: response.data.user_name,
-          email: response.data.user_email,
-          role: response.data.user_role
-        };
-        setUser(userData);
+      // Try to get user info from a dedicated endpoint or decode from token
+      const response = await axios.get(`${API}/auth/me`);
+      if (response.data) {
+        setUser(response.data);
       }
       setLoading(false);
     } catch (error) {
-      console.error('Fetch user error:', error);
-      logout();
+      // If /auth/me doesn't exist, try dashboard stats and extract from token
+      try {
+        const statsResponse = await axios.get(`${API}/dashboard/stats`);
+        // Try to decode user info from JWT token
+        if (token) {
+          const decoded = jwt_decode(token);
+          const userData = {
+            id: decoded.sub || decoded.user_id || decoded.id,
+            name: decoded.name || 'User',
+            email: decoded.email || decoded.username,
+            role: decoded.role || 'user'
+          };
+          setUser(userData);
+        }
+        setLoading(false);
+      } catch (fallbackError) {
+        console.error('Both user fetch attempts failed:', error, fallbackError);
+        logout();
+      }
     }
   };
 
