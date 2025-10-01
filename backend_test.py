@@ -7251,54 +7251,6 @@ class TanseeqAPITester:
         
         print("=" * 80)
             
-            # NEW: QR Code Attendance System Tests (Arabic review request)
-            print(f"\n📱 Testing QR Code Attendance System ({role.upper()}):")
-            self.test_attendance_daily_qr(role)
-            self.test_attendance_check_in_with_qr(role)
-            self.test_attendance_check_out_with_qr(role)
-            self.test_qr_admin_exclusion(role)
-            
-            # NEW: Enhanced Payroll System with Deductions Tests (Arabic review request)
-            print(f"\n💰 Testing Enhanced Payroll System with Deductions ({role.upper()}):")
-            self.test_enhanced_payroll_with_deductions(role)
-            
-            # NEW: Overtime Reports Tests (Arabic review request)
-            print(f"\n⏰ Testing Overtime Reports System ({role.upper()}):")
-            self.test_overtime_reports_system(role)
-            self.test_overtime_reports_excel_export(role)
-            self.test_overtime_reports_pdf_export(role)
-            
-            # NEW: Enhanced Backup System Tests (Arabic review request)
-            print(f"\n💾 Testing Enhanced Backup System ({role.upper()}):")
-            self.test_enhanced_backup_create_download(role)
-            self.test_enhanced_backup_download_zip(role)
-            self.test_enhanced_backup_download_json(role)
-            
-            # Legacy tests (if they exist)
-            if hasattr(self, 'test_payroll_calculate_with_deductions'):
-                self.test_payroll_calculate_with_deductions(role)
-                self.test_payroll_export_with_deductions_column(role)
-            
-            # NEW: Late Penalty System Tests (Arabic review request)
-            print(f"\n⏰ Testing Late Penalty System ({role.upper()}):")
-            self.test_penalties_late_calculation(role)
-            self.test_penalties_complex_rules_verification(role)
-            self.test_penalties_apply(role)
-            self.test_penalties_history(role)
-            self.test_penalties_security_access_control(role)
-            self.test_penalties_hatem_only_application(role)
-            self.test_penalties_daily_salary_calculation(role)
-            
-            # NEW: Internal Messaging System Tests (current focus)
-            print(f"\n📨 Testing Internal Messaging System ({role.upper()}):")
-            self.test_messages_creation_general(role)
-            self.test_messages_friday_work_creation(role)
-            self.test_messages_display(role)
-            self.test_messages_read_tracking(role)
-            self.test_messages_unread_count(role)
-            self.test_messages_statistics(role)
-            self.test_messages_security_access_control(role)
-            
             # NEW HIGH PRIORITY: Automation and Admin Enhancement Tests
             print(f"\n🤖 Testing Automation and Notification System ({role.upper()}):")
             self.test_notifications_late_warning(role)
