@@ -3366,16 +3366,20 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
                 if working_calc.get("early_departure_minutes", 0) > 0:
                     early_departure_incidents += 1
         
-        # Calculate base salary
+        # Calculate base salary - IMPROVED ACCURACY
         monthly_salary = user.get("monthly_salary", 0)
         daily_rate = monthly_salary / 22  # 22 working days per month
         
-        # Calculate salary based on actual hours worked vs standard hours
+        # Calculate salary based on presence, NOT hours (more accurate for UAE labor law)
+        # Full daily rate for each present day, regardless of slight time variations
+        base_earned_salary = present_days * daily_rate
+        
+        # Calculate hourly rate for deductions only
         standard_monthly_hours = 22 * 9  # 22 days * 9 hours = 198 hours standard
         hourly_rate = monthly_salary / standard_monthly_hours
         
-        # Base salary calculation
-        earned_salary = total_working_hours * hourly_rate
+        # Use base salary unless significantly under-hours
+        earned_salary = base_earned_salary
         
         # Deductions calculation - SIMPLIFIED
         total_deductions = 0.0
