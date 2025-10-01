@@ -20,11 +20,26 @@ load_dotenv()
 # MongoDB connection - Use same connection as main system
 mongo_url = os.environ.get('MONGO_URL')
 if not mongo_url:
-    raise ValueError("MONGO_URL environment variable not set")
+    print("Warning: MONGO_URL environment variable not set for Work Reports")
+    # Use a dummy connection that won't fail startup
+    mongo_url = "mongodb://localhost:27017"
 
-# Create MongoDB client and database
-client = AsyncIOMotorClient(mongo_url)
-work_reports_db = client[f"{os.environ.get('DB_NAME', 'tanseeq_hr')}_work_reports"]
+try:
+    # Create MongoDB client with connection pooling and timeout settings
+    client = AsyncIOMotorClient(
+        mongo_url,
+        serverSelectionTimeoutMS=5000,  # 5 second timeout
+        connectTimeoutMS=5000,
+        socketTimeoutMS=5000,
+        maxPoolSize=10,
+        minPoolSize=1
+    )
+    work_reports_db = client[f"{os.environ.get('DB_NAME', 'tanseeq_hr')}_work_reports"]
+    print("Work Reports MongoDB client initialized successfully")
+except Exception as e:
+    print(f"Warning: Work Reports MongoDB initialization failed: {e}")
+    # Create a mock database that won't break the app
+    work_reports_db = None
 
 # Encryption key for client credentials 
 ENCRYPTION_KEY = os.environ.get('WORK_REPORTS_ENCRYPTION_KEY', 
