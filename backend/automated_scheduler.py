@@ -50,7 +50,7 @@ class AutomatedScheduler:
             # Login as system user (we'll create a system user)
             response = requests.post(f"{API_BASE_URL}/auth/login", json={
                 "email": "hatem@tanseeq.com",
-                "password": "hatem123"
+                "password": os.environ.get('ADMIN_PASSWORD', 'hatem123')
             })
             
             if response.status_code == 200:
