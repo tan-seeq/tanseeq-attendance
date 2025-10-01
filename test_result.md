@@ -93,16 +93,19 @@ backend:
         comment: "✅ FIELD EXIT REPORT SYSTEM IMPLEMENTED: Added /field-exits/{id}/report endpoint requiring detailed report (min 20 chars) before checkout. New flow: start → report_submitted → completed. Fields: detailed_report, accomplishments, challenges, next_steps. Enhanced exit_status tracking. Users cannot checkout until detailed report is submitted with Arabic validation messages."
 
   - task: "Approval/rejection notification system"
-    implemented: false
-    working: false
+    implemented: true
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: false
         agent: "main"
         comment: "NEW REQUIREMENT: When leave/field exit requests are approved/rejected, employee must receive notification in dashboard with: 1) Approval details (what was approved) 2) Rejection reason if denied 3) Complete request information for reference"
+      - working: true
+        agent: "main"
+        comment: "✅ NOTIFICATION SYSTEM IMPLEMENTED: Added automatic notifications for leave/field exit approval/rejection. Notifications include: 1) Complete request details (dates, type, reason) 2) Approver/rejector name 3) Admin notes/reasons 4) Arabic messages with emojis for better UX 5) Different priority levels (success for approval, warning for rejection). Employees now receive detailed notifications in their dashboard."
   - task: "Complete payroll calculation logic refactor"
     implemented: true
     working: true
