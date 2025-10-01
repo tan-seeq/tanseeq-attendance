@@ -6999,14 +6999,23 @@ class TanseeqAPITester:
             # Feature-specific tests
             self.test_weekend_blocking(role)
             
+            # ============ WORK REPORTS MONGODB MIGRATION TESTING ============
+            print(f"\n📊 Testing Work Reports MongoDB Migration ({role.upper()}):")
+            
+            # MongoDB Migration Verification Tests
+            print(f"   🔹 MongoDB Migration Verification")
+            self.test_work_reports_dashboard(role)
+            self.test_work_reports_clients_mongodb(role)
+            self.test_work_reports_activity_types_mongodb(role)
+            self.test_mongodb_migration_verification(role)
+            self.test_system_integration_verification(role)
+            
             # ============ WORK REPORTS SYSTEM COMPREHENSIVE TESTING (PHASES 1-3) ============
             print(f"\n📊 Testing TANSEEQ Work Reports System - ALL PHASES ({role.upper()}):")
             
             # Phase 1: Core Functionality Tests
             print(f"   🔹 Phase 1: Core Functionality")
-            self.test_work_reports_dashboard(role)
-            self.test_work_reports_clients_crud(role)
-            self.test_work_reports_activity_types(role)
+            self.test_work_reports_logs_crud(role)
             self.test_work_reports_logs_crud(role)
             self.test_work_reports_excel_import(role)
             self.test_work_reports_audit_logging(role)
