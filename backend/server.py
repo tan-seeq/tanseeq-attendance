@@ -2198,6 +2198,29 @@ async def approve_field_exit(field_exit_id: str, approval_data: dict = None, cur
     
     await db.field_exits.update_one({"id": field_exit_id}, {"$set": update_data})
     
+    # Send notification to employee about approval
+    notification = Notification(
+        recipient_id=field_exit.get("user_id"),
+        recipient_name=field_exit.get("user_name"),
+        sender_id=current_user.id,
+        sender_name=current_user.name,
+        subject="موافقة على طلب الزيارة الخارجية",
+        message=f"""تم الموافقة على طلب زيارتك الخارجية:
+
+🏢 نوع الزيارة: {field_exit.get('visit_type', 'غير محدد')}
+📅 التاريخ: {field_exit.get('date')}
+⏰ الوقت المتوقع: من {field_exit.get('expected_start_time')} إلى {field_exit.get('expected_end_time')}
+👤 تمت الموافقة من: {current_user.name}
+{f"📋 ملاحظات الإدارة: {notes}" if notes else ""}
+
+يمكنك الآن تسجيل وقت المغادرة عند بدء الزيارة.""",
+        type="success",
+        priority="normal",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+    
     # Log activity
     await log_activity(
         current_user.id, 
