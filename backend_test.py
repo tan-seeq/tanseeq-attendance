@@ -1511,10 +1511,6 @@ class TanseeqAPITester:
                      f"({passed_tests}/{total_tests}) {test_details}")
         
         return integration_success
-            return has_default_activities
-        else:
-            self.log_test(f"Work Reports activity types ({role})", False, str(response))
-            return False
 
     def test_work_reports_logs_crud(self, role: str) -> bool:
         """Test Work Reports work logs CRUD operations (Phase 1)"""
