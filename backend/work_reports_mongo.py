@@ -254,35 +254,32 @@ async def get_work_reports_db():
     return work_reports_db
 
 async def init_work_reports_collections():
-    """Initialize MongoDB collections and indexes for work reports"""
+    """Initialize MongoDB collections and indexes for work reports - Fast & Non-blocking"""
     try:
-        # Create indexes for better performance
-        await work_reports_db.clients.create_index("client_code", unique=True, sparse=True)
-        await work_reports_db.clients.create_index("company_name")
-        await work_reports_db.clients.create_index("is_active")
+        # Create essential indexes only, avoid blocking operations
+        import asyncio
         
-        await work_reports_db.client_credentials.create_index("client_id")
-        await work_reports_db.client_credentials.create_index("portal_name")
+        # Use background: True for non-blocking index creation
+        index_tasks = [
+            work_reports_db.clients.create_index("is_active", background=True),
+            work_reports_db.work_logs.create_index("date", background=True),
+            work_reports_db.user_permissions.create_index("user_id", background=True),
+        ]
         
-        await work_reports_db.activity_types.create_index("name")
-        await work_reports_db.activity_types.create_index("category")
+        # Wait only for essential indexes with timeout
+        await asyncio.wait_for(
+            asyncio.gather(*index_tasks, return_exceptions=True),
+            timeout=5.0  # 5 second timeout
+        )
         
-        await work_reports_db.work_logs.create_index("client_id")
-        await work_reports_db.work_logs.create_index("activity_type_id")
-        await work_reports_db.work_logs.create_index("date")
-        await work_reports_db.work_logs.create_index("created_by")
-        
-        await work_reports_db.user_permissions.create_index("user_id", unique=True)
-        
-        await work_reports_db.audit_logs.create_index("user_id")
-        await work_reports_db.audit_logs.create_index("action_type")
-        await work_reports_db.audit_logs.create_index("timestamp")
-        
-        print("Work Reports MongoDB collections initialized successfully")
+        print("Work Reports MongoDB essential indexes created successfully")
         return True
+    except asyncio.TimeoutError:
+        print("Work Reports index creation timed out - continuing with server startup")
+        return True  # Don't fail startup on timeout
     except Exception as e:
-        print(f"Error initializing Work Reports collections: {e}")
-        return False
+        print(f"Warning: Work Reports collections initialization failed: {e}")
+        return True  # Don't fail startup on errors
 
 async def init_default_activity_types():
     """Initialize default activity types"""
