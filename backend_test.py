@@ -1366,8 +1366,8 @@ class TanseeqAPITester:
             self.log_test(f"Work Reports clients MongoDB CRUD ({role})", False, f"Client creation failed: {create_response}")
             return False
 
-    def test_work_reports_activity_types(self, role: str) -> bool:
-        """Test Work Reports activity types management (Phase 1)"""
+    def test_work_reports_activity_types_mongodb(self, role: str) -> bool:
+        """Test Work Reports activity types MongoDB operations - Migration Verification"""
         if role not in self.tokens:
             return False
             
@@ -1375,7 +1375,7 @@ class TanseeqAPITester:
                                             token=self.tokens[role])
         
         if success and isinstance(response, list):
-            # Check if default activity types exist
+            # Check if default activity types exist in MongoDB
             activity_names = [activity.get('name', '') for activity in response]
             expected_activities = ['Tax Consultation', 'Audit Services', 'Bookkeeping', 'VAT Services']
             
