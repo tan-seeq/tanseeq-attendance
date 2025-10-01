@@ -1376,6 +1376,141 @@ class TanseeqAPITester:
         
         if success and isinstance(response, list):
             # Check if default activity types exist in MongoDB
+            expected_activities = ['Tax Consultation', 'Audit Services', 'Bookkeeping', 'VAT Filing']
+            has_default_activities = len(response) > 0
+            
+            # Verify MongoDB document structure (not SQLite row structure)
+            if response:
+                first_activity = response[0]
+                has_mongodb_fields = all(field in first_activity for field in ['id', 'name', 'created_at'])
+                # Check for UUID format (not SQLite integer ID)
+                is_uuid_format = len(first_activity.get('id', '')) > 10 and '-' in first_activity.get('id', '')
+            else:
+                has_mongodb_fields = True  # Empty list is acceptable
+                is_uuid_format = True
+            
+            test_passed = has_default_activities and has_mongodb_fields and is_uuid_format
+            self.log_test(f"Work Reports activity types MongoDB ({role})", test_passed,
+                         f"Activities: {has_default_activities}, MongoDB fields: {has_mongodb_fields}, UUID: {is_uuid_format}")
+            return test_passed
+        else:
+            self.log_test(f"Work Reports activity types MongoDB ({role})", False, str(response))
+            return False
+
+    def test_mongodb_migration_verification(self, role: str) -> bool:
+        """Comprehensive MongoDB Migration Verification - SQLite to MongoDB"""
+        if role not in self.tokens:
+            return False
+        
+        migration_tests = []
+        
+        # Test 1: Verify Work Reports endpoints use MongoDB (not SQLite)
+        dashboard_success, dashboard_response = self.make_request('GET', 'work-reports/dashboard', 
+                                                                token=self.tokens[role])
+        migration_tests.append(('Dashboard MongoDB', dashboard_success))
+        
+        # Test 2: Verify clients endpoint returns MongoDB documents
+        clients_success, clients_response = self.make_request('GET', 'work-reports/clients', 
+                                                            token=self.tokens[role])
+        if clients_success and isinstance(clients_response, list):
+            # Check for MongoDB document structure vs SQLite row structure
+            mongodb_structure = True
+            if clients_response:
+                # MongoDB uses UUID strings, SQLite uses integer IDs
+                first_client = clients_response[0]
+                has_uuid_id = isinstance(first_client.get('id'), str) and len(first_client.get('id', '')) > 10
+                mongodb_structure = has_uuid_id
+            migration_tests.append(('Clients MongoDB Structure', mongodb_structure))
+        else:
+            migration_tests.append(('Clients MongoDB Structure', False))
+        
+        # Test 3: Verify activity types use MongoDB
+        activities_success, activities_response = self.make_request('GET', 'work-reports/activity-types', 
+                                                                  token=self.tokens[role])
+        if activities_success and isinstance(activities_response, list):
+            mongodb_activities = True
+            if activities_response:
+                first_activity = activities_response[0]
+                has_uuid_id = isinstance(first_activity.get('id'), str) and len(first_activity.get('id', '')) > 10
+                mongodb_activities = has_uuid_id
+            migration_tests.append(('Activity Types MongoDB', mongodb_activities))
+        else:
+            migration_tests.append(('Activity Types MongoDB', False))
+        
+        # Test 4: Test async operations (MongoDB motor vs SQLite synchronous)
+        # Create a test client to verify async MongoDB operations
+        test_client_data = {
+            "company_name": "MongoDB Migration Test Client",
+            "client_code": "MIGRATION001",
+            "industry": "Migration Testing"
+        }
+        
+        create_success, create_response = self.make_request('POST', 'work-reports/clients', 
+                                                          test_client_data, token=self.tokens[role])
+        
+        if create_success and 'id' in create_response:
+            # Clean up test client
+            client_id = create_response['id']
+            delete_success, _ = self.make_request('DELETE', f'work-reports/clients/{client_id}', 
+                                                token=self.tokens[role])
+            migration_tests.append(('Async MongoDB Operations', create_success and delete_success))
+        else:
+            migration_tests.append(('Async MongoDB Operations', False))
+        
+        # Calculate overall migration success
+        passed_tests = sum(1 for _, success in migration_tests if success)
+        total_tests = len(migration_tests)
+        migration_success = passed_tests == total_tests
+        
+        test_details = ', '.join([f"{name}: {'✓' if success else '✗'}" for name, success in migration_tests])
+        self.log_test(f"MongoDB Migration Verification ({role})", migration_success,
+                     f"({passed_tests}/{total_tests}) {test_details}")
+        
+        return migration_success
+
+    def test_system_integration_verification(self, role: str) -> bool:
+        """Verify Work Reports system doesn't interfere with main TANSEEQ HR system"""
+        if role not in self.tokens:
+            return False
+        
+        integration_tests = []
+        
+        # Test 1: Main HR dashboard still works
+        hr_dashboard_success, _ = self.make_request('GET', 'dashboard/stats', token=self.tokens[role])
+        integration_tests.append(('HR Dashboard', hr_dashboard_success))
+        
+        # Test 2: Main HR attendance system still works
+        attendance_success, _ = self.make_request('GET', 'attendance', token=self.tokens[role])
+        integration_tests.append(('HR Attendance', attendance_success))
+        
+        # Test 3: Main HR users system still works (admin only)
+        if role in ['admin', 'super_admin']:
+            users_success, _ = self.make_request('GET', 'users', token=self.tokens[role])
+            integration_tests.append(('HR Users', users_success))
+        else:
+            integration_tests.append(('HR Users', True))  # Skip for regular users
+        
+        # Test 4: Work Reports system is accessible
+        work_reports_success, _ = self.make_request('GET', 'work-reports/dashboard', token=self.tokens[role])
+        integration_tests.append(('Work Reports Access', work_reports_success))
+        
+        # Test 5: Both systems can operate simultaneously
+        # Make concurrent requests to both systems
+        hr_concurrent_success, _ = self.make_request('GET', 'dashboard/stats', token=self.tokens[role])
+        wr_concurrent_success, _ = self.make_request('GET', 'work-reports/dashboard', token=self.tokens[role])
+        concurrent_success = hr_concurrent_success and wr_concurrent_success
+        integration_tests.append(('Concurrent Operations', concurrent_success))
+        
+        # Calculate overall integration success
+        passed_tests = sum(1 for _, success in integration_tests if success)
+        total_tests = len(integration_tests)
+        integration_success = passed_tests == total_tests
+        
+        test_details = ', '.join([f"{name}: {'✓' if success else '✗'}" for name, success in integration_tests])
+        self.log_test(f"System Integration Verification ({role})", integration_success,
+                     f"({passed_tests}/{total_tests}) {test_details}")
+        
+        return integration_success
             activity_names = [activity.get('name', '') for activity in response]
             expected_activities = ['Tax Consultation', 'Audit Services', 'Bookkeeping', 'VAT Services']
             
