@@ -1304,32 +1304,36 @@ class TanseeqAPITester:
             self.log_test(f"Work Reports dashboard - MongoDB ({role})", False, str(response))
             return False
 
-    def test_work_reports_clients_crud(self, role: str) -> bool:
-        """Test Work Reports clients CRUD operations (Phase 1)"""
+    def test_work_reports_clients_mongodb(self, role: str) -> bool:
+        """Test Work Reports clients MongoDB operations - Migration Verification"""
         if role not in self.tokens:
             return False
         
-        # Test GET clients
+        # Test GET clients - MongoDB backend
         success, response = self.make_request('GET', 'work-reports/clients', 
                                             token=self.tokens[role])
         
         if not success:
-            self.log_test(f"Work Reports clients GET ({role})", False, str(response))
+            self.log_test(f"Work Reports clients MongoDB GET ({role})", False, str(response))
             return False
         
-        # Test POST client creation
+        # Verify response is list (MongoDB collection query result)
+        if not isinstance(response, list):
+            self.log_test(f"Work Reports clients MongoDB GET ({role})", False, "Response is not a list")
+            return False
+        
+        # Test POST client creation - MongoDB insert
         client_data = {
-            "company_name": "Test Client Company Ltd",
-            "company_name_ar": "شركة العميل التجريبية المحدودة",
-            "client_code": "TEST001",
-            "industry": "Technology",
-            "contact_person": "Ahmed Mohamed",
+            "company_name": "MongoDB Test Client Ltd",
+            "company_name_ar": "شركة اختبار مونجو دي بي المحدودة",
+            "client_code": "MONGO001",
+            "industry": "Database Technology",
+            "contact_person": "MongoDB Tester",
             "phone": "+971501234567",
-            "email": "ahmed@testclient.com",
+            "email": "mongo@testclient.com",
             "address": "Dubai, UAE",
             "tax_number": "100123456789003",
-            "commercial_registration": "1234567890",
-            "notes": "Test client for API testing"
+            "commercial_registration": "1234567890"
         }
         
         create_success, create_response = self.make_request('POST', 'work-reports/clients', 
@@ -1338,25 +1342,28 @@ class TanseeqAPITester:
         if create_success and 'id' in create_response:
             client_id = create_response['id']
             
-            # Test PUT client update
+            # Verify MongoDB UUID format (not SQLite integer ID)
+            is_uuid_format = len(client_id) > 10 and '-' in client_id
+            
+            # Test PUT client update - MongoDB update operation
             update_data = {
-                "company_name": "Updated Test Client Company Ltd",
-                "notes": "Updated notes for testing"
+                "company_name": "Updated MongoDB Test Client Ltd",
+                "industry": "Updated Database Technology"
             }
             
             update_success, update_response = self.make_request('PUT', f'work-reports/clients/{client_id}', 
                                                               update_data, token=self.tokens[role])
             
-            # Test DELETE client
+            # Test DELETE client - MongoDB delete operation
             delete_success, delete_response = self.make_request('DELETE', f'work-reports/clients/{client_id}', 
                                                               token=self.tokens[role])
             
-            all_passed = create_success and update_success and delete_success
-            self.log_test(f"Work Reports clients CRUD ({role})", all_passed,
-                         f"Create: {create_success}, Update: {update_success}, Delete: {delete_success}")
+            all_passed = create_success and update_success and delete_success and is_uuid_format
+            self.log_test(f"Work Reports clients MongoDB CRUD ({role})", all_passed,
+                         f"Create: {create_success}, Update: {update_success}, Delete: {delete_success}, UUID: {is_uuid_format}")
             return all_passed
         else:
-            self.log_test(f"Work Reports clients CRUD ({role})", False, f"Client creation failed: {create_response}")
+            self.log_test(f"Work Reports clients MongoDB CRUD ({role})", False, f"Client creation failed: {create_response}")
             return False
 
     def test_work_reports_activity_types(self, role: str) -> bool:
