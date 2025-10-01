@@ -7176,7 +7176,7 @@ class TanseeqAPITester:
             self.test_work_reports_dashboard(role)
             self.test_work_reports_clients_mongodb(role)
             self.test_work_reports_activity_types_mongodb(role)
-            self.test_work_reports_logs_mongodb(role)
+            self.test_work_reports_logs_crud(role)
             self.test_work_reports_credentials_mongodb(role)
             
             # 5. Payroll System Verification
