@@ -162,6 +162,49 @@ const NotificationSystem = () => {
     }
   };
 
+  // Debug info
+  console.log('NotificationSystem rendered');
+  console.log('BACKEND_URL:', BACKEND_URL);
+  console.log('API:', API);
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex justify-center items-center min-h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">جاري تحميل نظام الإشعارات...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-center">
+            <ExclamationCircleIcon className="h-6 w-6 text-red-400 mr-3" />
+            <div>
+              <h3 className="text-lg font-medium text-red-800">خطأ في تحميل النظام</h3>
+              <p className="text-red-600 mt-1">{error}</p>
+              <button 
+                onClick={() => {
+                  fetchNotifications();
+                  fetchAllUsers();
+                }}
+                className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
