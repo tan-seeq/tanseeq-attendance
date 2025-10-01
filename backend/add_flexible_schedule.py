@@ -38,7 +38,7 @@ async def add_flexible_schedule_to_all_employees():
     
     # Print all users to verify
     users = await db.users.find({}).to_list(1000)
-    print(f"\n📋 Current employees status:")
+    print("\n📋 Current employees status:")
     for user in users:
         print(f"  - {user['name']} ({user['email']}): Flexible Schedule = {user.get('has_flexible_schedule', False)}")
     
