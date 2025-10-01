@@ -6373,54 +6373,62 @@ async def import_clients_from_excel(
 
 @api_router.get("/work-reports/dashboard")
 async def get_work_reports_dashboard(
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    current_user = Depends(get_current_user)
 ):
-    """Get work reports dashboard statistics"""
+    """Get work reports dashboard statistics - MongoDB version"""
     
     # Get total clients
-    total_clients = db.query(Client).filter(Client.is_active == True).count()
-    
-    # Get work logs for current user or all (based on role)
-    work_logs_query = db.query(WorkLog)
-    if current_user.role == "user":
-        work_logs_query = work_logs_query.filter(WorkLog.user_id == current_user.id)
+    total_clients = await work_reports_db.clients.count_documents({"is_active": True})
     
     # Get today's work logs
-    today = datetime.now().date()
-    today_logs = work_logs_query.filter(WorkLog.date >= today).count()
+    today = datetime.now().date().isoformat()
+    today_logs_filter = {"date": today}
+    if current_user.role == "user":
+        today_logs_filter["created_by"] = current_user.id
+    today_logs = await work_reports_db.work_logs.count_documents(today_logs_filter)
     
     # Get this week's work logs
-    week_start = today - timedelta(days=today.weekday())
-    week_logs = work_logs_query.filter(WorkLog.date >= week_start).count()
+    week_start = (datetime.now().date() - timedelta(days=datetime.now().weekday())).isoformat()
+    week_logs_filter = {"date": {"$gte": week_start}}
+    if current_user.role == "user":
+        week_logs_filter["created_by"] = current_user.id
+    week_logs = await work_reports_db.work_logs.count_documents(week_logs_filter)
     
     # Get this month's work logs
-    month_start = today.replace(day=1)
-    month_logs = work_logs_query.filter(WorkLog.date >= month_start).count()
+    month_start = datetime.now().date().replace(day=1).isoformat()
+    month_logs_filter = {"date": {"$gte": month_start}}
+    if current_user.role == "user":
+        month_logs_filter["created_by"] = current_user.id
+    month_logs = await work_reports_db.work_logs.count_documents(month_logs_filter)
     
     # Get billable hours this month
-    month_billable_logs = work_logs_query.filter(
-        WorkLog.date >= month_start,
-        WorkLog.is_billable == True
-    ).all()
+    month_billable_logs = await work_reports_db.work_logs.find(month_logs_filter).to_list(1000)
     
-    total_billable_minutes = sum([log.duration_minutes or 0 for log in month_billable_logs])
+    total_billable_minutes = sum([log.get("duration_minutes", 0) for log in month_billable_logs])
     total_billable_hours = round(total_billable_minutes / 60, 2) if total_billable_minutes else 0
     
     # Get total revenue this month
-    total_revenue = sum([log.total_amount or 0 for log in month_billable_logs])
+    total_revenue = sum([log.get("amount", 0) or 0 for log in month_billable_logs])
     
     # Get recent activity
-    recent_logs = work_logs_query.order_by(WorkLog.created_at.desc()).limit(5).all()
+    recent_logs_filter = {}
+    if current_user.role == "user":
+        recent_logs_filter["created_by"] = current_user.id
+        
+    recent_logs = await work_reports_db.work_logs.find(recent_logs_filter).sort("created_at", -1).limit(5).to_list(5)
     recent_activity = []
     for log in recent_logs:
+        # Get client and activity info
+        client = await work_reports_db.clients.find_one({"id": log.get("client_id")})
+        activity = await work_reports_db.activity_types.find_one({"id": log.get("activity_type_id")})
+        
         recent_activity.append({
-            "id": str(log.id),
-            "client_name": log.client.company_name if log.client else "Unknown",
-            "activity_name": log.activity_type.name if log.activity_type else "Unknown",
-            "duration_minutes": log.duration_minutes,
-            "date": log.date.isoformat() if log.date else None,
-            "created_at": log.created_at.isoformat()
+            "id": log.get("id"),
+            "client_name": client.get("company_name", "Unknown") if client else "Unknown",
+            "activity_name": activity.get("name", "Unknown") if activity else "Unknown",
+            "duration_minutes": log.get("duration_minutes", 0),
+            "date": log.get("date"),
+            "created_at": log.get("created_at").isoformat() if log.get("created_at") else None
         })
     
     return {
