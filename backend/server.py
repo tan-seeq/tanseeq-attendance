@@ -2026,9 +2026,62 @@ async def start_field_exit(field_exit_id: str, current_user: User = Depends(get_
     
     return {"message": "Departure time recorded successfully", "actual_start_time": actual_start_time}
 
+@api_router.post("/field-exits/{field_exit_id}/report")
+async def submit_field_exit_report(
+    field_exit_id: str, 
+    report_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Submit detailed visit report - REQUIRED before check-out"""
+    field_exit = await db.field_exits.find_one({"id": field_exit_id})
+    if not field_exit:
+        raise HTTPException(status_code=404, detail="Field exit request not found")
+    
+    # Check if this is the user's request
+    if field_exit.get("user_id") != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Check if departed first
+    if not field_exit.get("actual_start_time"):
+        raise HTTPException(status_code=400, detail="Must record departure time first")
+    
+    # Check if already returned
+    if field_exit.get("actual_end_time"):
+        raise HTTPException(status_code=400, detail="Visit already completed")
+    
+    # Validate report content (must be detailed)
+    detailed_report = report_data.get("detailed_report", "").strip()
+    if len(detailed_report) < 20:
+        raise HTTPException(status_code=400, detail="يجب أن يحتوي التقرير على 20 حرف على الأقل لوصف ما تم إنجازه")
+    
+    # Update field exit with detailed report
+    await db.field_exits.update_one(
+        {"id": field_exit_id},
+        {"$set": {
+            "detailed_report": detailed_report,
+            "accomplishments": report_data.get("accomplishments", ""),
+            "challenges": report_data.get("challenges", ""),
+            "next_steps": report_data.get("next_steps", ""),
+            "exit_status": "report_submitted"
+        }}
+    )
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "field_exit_report_submitted", 
+        f"Submitted visit report for {field_exit.get('visit_type', 'Unknown')}"
+    )
+    
+    return {
+        "message": "Visit report submitted successfully", 
+        "status": "report_submitted",
+        "can_checkout": True
+    }
+
 @api_router.post("/field-exits/{field_exit_id}/end")
 async def end_field_exit(field_exit_id: str, current_user: User = Depends(get_current_user)):
-    """Record actual return time"""
+    """Record actual return time - REQUIRES REPORT SUBMISSION FIRST"""
     field_exit = await db.field_exits.find_one({"id": field_exit_id})
     if not field_exit:
         raise HTTPException(status_code=404, detail="Field exit request not found")
@@ -2045,24 +2098,31 @@ async def end_field_exit(field_exit_id: str, current_user: User = Depends(get_cu
     if not field_exit.get("actual_start_time"):
         raise HTTPException(status_code=400, detail="Must record departure time first")
     
+    # NEW REQUIREMENT: Must submit detailed report before checkout
+    if field_exit.get("exit_status") != "report_submitted":
+        raise HTTPException(
+            status_code=400, 
+            detail="يجب كتابة تقرير مفصل عن الزيارة قبل تسجيل وقت العودة"
+        )
+    
     # Get current UAE time
     uae_time = datetime.now(UAE_TZ)
     actual_end_time = uae_time.strftime("%H:%M:%S")
     
-    # Update field exit with actual end time
+    # Update field exit
     await db.field_exits.update_one(
         {"id": field_exit_id},
         {"$set": {
             "actual_end_time": actual_end_time,
-            "exit_status": "returned"
+            "exit_status": "completed"
         }}
     )
     
     # Log activity
     await log_activity(
         current_user.id, 
-        "field_exit_returned", 
-        f"Returned from {field_exit.get('visit_type', 'Unknown')} at {actual_end_time}"
+        "field_exit_completed", 
+        f"Completed visit to {field_exit.get('visit_type', 'Unknown')} at {actual_end_time} with detailed report"
     )
     
     return {"message": "Return time recorded successfully", "actual_end_time": actual_end_time}
