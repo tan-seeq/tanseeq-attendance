@@ -147,7 +147,7 @@ const NotificationSystem = () => {
       console.error('Error sending warning:', error);
       alert('فشل في إرسال الإنذار');
     } finally {
-      setLoading(false);
+      setApiLoading(false);
     }
   };
 
