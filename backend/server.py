@@ -3374,7 +3374,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         
         # Headers with enhanced styling  
         headers = [
-            "Employee Name", "Working Days", "Basic Salary", "Late Days", 
+            "Employee Name", "Working Days", "Monthly Salary", "Late Incidents", 
             "Absence Days", "Total Deductions", "Deduction Details", "Final Salary", "Month", "Status"
         ]
         
