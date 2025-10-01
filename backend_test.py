@@ -6761,7 +6761,13 @@ class TanseeqAPITester:
             # Role-specific endpoints
             self.test_users_endpoint(role)
             self.test_activity_logs(role)
+            
+            # COMPREHENSIVE PAYROLL TESTING (AS PER REVIEW REQUEST)
+            print(f"\n💰 Testing REFACTORED Payroll Calculation System ({role.upper()}):")
             self.test_payroll_calculation(role)
+            self.test_payroll_calculation_edge_cases(role)
+            self.test_payroll_calculation_multiple_employees(role)
+            
             self.test_password_change(role)
             
             # Enhanced field exit and leave management tests (from review request)
