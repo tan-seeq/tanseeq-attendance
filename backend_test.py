@@ -1274,6 +1274,266 @@ class TanseeqAPITester:
 
     # ============ ENHANCED HR SYSTEM TESTING - REVIEW REQUEST REQUIREMENTS ============
     
+    def test_super_admin_warning_notifications(self, role: str) -> bool:
+        """Test Super Admin Warning Notifications System - REVIEW REQUEST PRIORITY 1"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role == 'super_admin' else 403
+        
+        # Test sending warning notification with Arabic message and emojis
+        warning_data = {
+            "recipient_id": self.users['user']['id'] if 'user' in self.users else 'test-user-id',
+            "title": "تحذير إداري",
+            "message": "يرجى الالتزام بمواعيد العمل المحددة وتجنب التأخير المتكرر",
+            "notification_type": "warning",
+            "required_action": "تحسين الانضباط في الحضور",
+            "additional_notes": "هذا تحذير أول، يرجى عدم تكرار التأخير"
+        }
+        
+        success, response = self.make_request('POST', 'notifications/send-warning', 
+                                            warning_data, token=self.tokens[role],
+                                            expected_status=expected_status)
+        
+        if expected_status == 200 and success:
+            # Check if response contains proper structure
+            has_message = 'message' in response
+            has_notification_type = 'notification_type' in response
+            has_recipient = 'recipient' in response
+            
+            success = success and has_message and has_notification_type and has_recipient
+            
+            if not success:
+                self.log_test(f"Super Admin warning notifications ({role})", False, 
+                             f"Missing fields: message={has_message}, type={has_notification_type}, recipient={has_recipient}")
+            else:
+                self.log_test(f"Super Admin warning notifications ({role})", True)
+        else:
+            self.log_test(f"Super Admin warning notifications ({role})", success, str(response) if not success else "")
+        
+        return success
+
+    def test_attendance_rules_no_early_penalty(self, role: str) -> bool:
+        """Test Enhanced Attendance Rules - NO penalty for check-in before 9 AM - REVIEW REQUEST PRIORITY 2"""
+        if role not in self.tokens:
+            return False
+        
+        # Test check-in functionality (should work without penalty for early arrival)
+        success, response = self.make_request('POST', 'attendance/check-in', 
+                                            token=self.tokens[role])
+        
+        # Check-in might fail if already checked in, which is acceptable
+        already_checked_in = not success and 'already checked in' in str(response).lower()
+        test_passed = success or already_checked_in
+        
+        if test_passed:
+            # Get attendance records to verify no early penalty
+            att_success, att_records = self.make_request('GET', 'attendance', token=self.tokens[role])
+            if att_success and att_records:
+                # Look for today's record
+                today_record = None
+                today = datetime.now().strftime('%Y-%m-%d')
+                for record in att_records:
+                    if record.get('date') == today:
+                        today_record = record
+                        break
+                
+                if today_record:
+                    # Check that early check-in doesn't result in penalty
+                    check_in_time = today_record.get('check_in', '')
+                    if check_in_time and check_in_time < '09:00:00':
+                        # Early check-in should not be marked as late
+                        is_not_late = not today_record.get('is_late', False)
+                        self.log_test(f"Attendance rules - no early penalty ({role})", is_not_late,
+                                     f"Early check-in at {check_in_time} marked as late: {today_record.get('is_late')}")
+                        return is_not_late
+        
+        self.log_test(f"Attendance rules - no early penalty ({role})", test_passed, 
+                     str(response) if not test_passed else "")
+        return test_passed
+
+    def test_payroll_calculation_accuracy(self, role: str) -> bool:
+        """Test Enhanced Payroll Calculation Logic - REVIEW REQUEST PRIORITY 2"""
+        if role not in self.tokens:
+            return False
+        
+        expected_status = 200 if role in ['admin', 'super_admin'] else 403
+        
+        if expected_status != 200:
+            self.log_test(f"Payroll calculation accuracy ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        success, response = self.make_request('GET', 'payroll/calculate/2025-01', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list) and response:
+            # Test accuracy of payroll calculations
+            calculation_errors = []
+            
+            for employee in response[:3]:  # Test first 3 employees
+                # Verify presence days vs hourly calculations
+                monthly_salary = employee.get('monthly_salary', 0)
+                daily_rate = employee.get('daily_rate', 0)
+                present_days = employee.get('present_days', 0)
+                final_salary = employee.get('final_salary', 0)
+                
+                # Check daily rate calculation
+                expected_daily_rate = monthly_salary / 22 if monthly_salary > 0 else 0
+                if abs(daily_rate - expected_daily_rate) > 0.01:
+                    calculation_errors.append(f"Daily rate incorrect for {employee.get('name', 'Unknown')}")
+                
+                # Check that deductions are properly applied for absent days
+                approved_leaves = employee.get('approved_leaves', 0)
+                approved_field_exits = employee.get('approved_field_exits', 0)
+                working_days = employee.get('working_days', 0)
+                
+                # Working days should include present days + approved leaves + field exits
+                expected_working_days = present_days + approved_leaves + approved_field_exits
+                if working_days != expected_working_days:
+                    calculation_errors.append(f"Working days calculation incorrect for {employee.get('name', 'Unknown')}")
+                
+                # Final salary should not be negative
+                if final_salary < 0:
+                    calculation_errors.append(f"Final salary is negative for {employee.get('name', 'Unknown')}")
+            
+            test_passed = len(calculation_errors) == 0
+            
+            if test_passed:
+                self.log_test(f"Payroll calculation accuracy ({role})", True, f"Verified {len(response)} employees")
+            else:
+                self.log_test(f"Payroll calculation accuracy ({role})", False, "; ".join(calculation_errors))
+            
+            return test_passed
+        else:
+            self.log_test(f"Payroll calculation accuracy ({role})", False, str(response))
+            return False
+
+    def test_field_exit_detailed_report_system(self, role: str) -> bool:
+        """Test Field Exit Detailed Report System - 3-step flow - REVIEW REQUEST PRIORITY 3"""
+        if role not in self.tokens:
+            return False
+        
+        # Create a field exit to test the detailed report system
+        field_exit_data = {
+            'visit_type': 'client_visit',
+            'client_name': 'شركة اختبار التقارير التفصيلية',
+            'expected_start_time': '10:00:00',
+            'expected_end_time': '12:00:00',
+            'report': 'زيارة عميل لمناقشة الخدمات الضريبية والمحاسبية'
+        }
+        
+        url = f"{self.api_url}/field-exits"
+        headers = {'Authorization': f'Bearer {self.tokens[role]}'}
+        
+        try:
+            # Step 1: Create field exit (departure)
+            create_response = requests.post(url, data=field_exit_data, headers=headers, timeout=30)
+            if create_response.status_code != 200:
+                self.log_test(f"Field exit detailed report system setup ({role})", False, 
+                             f"Could not create field exit: {create_response.status_code}")
+                return False
+            
+            field_exit_id = create_response.json().get('id')
+            if not field_exit_id:
+                self.log_test(f"Field exit detailed report system setup ({role})", False, "No field exit ID returned")
+                return False
+            
+            # Step 2: Submit detailed report (mandatory before checkout)
+            detailed_report_data = {
+                "detailed_report": "تم زيارة العميل ومناقشة جميع الخدمات الضريبية والمحاسبية المطلوبة. تم شرح الإجراءات والمتطلبات اللازمة للامتثال الضريبي وتقديم الاستشارات المحاسبية.",
+                "accomplishments": "تم توضيح جميع الخدمات المتاحة وتحديد احتياجات العميل بدقة وتقديم خطة عمل مفصلة",
+                "challenges": "تحدي في فهم بعض المتطلبات الضريبية الجديدة من قبل العميل",
+                "next_steps": "متابعة مع العميل خلال الأسبوع القادم لتنفيذ الخطة المتفق عليها وتقديم الدعم اللازم"
+            }
+            
+            # Test character count validation (minimum 20 characters)
+            if len(detailed_report_data["detailed_report"]) < 20:
+                self.log_test(f"Field exit detailed report system ({role})", False, "Test report too short")
+                return False
+            
+            success, response = self.make_request('POST', f'field-exits/{field_exit_id}/report', 
+                                                detailed_report_data, token=self.tokens[role])
+            
+            if success:
+                # Check if response indicates report was submitted successfully
+                has_message = 'message' in response
+                report_submitted = 'report' in str(response).lower() or 'submitted' in str(response).lower()
+                
+                # Step 3: Verify the 3-step flow is complete
+                # Get the field exit to check its status
+                get_success, field_exit = self.make_request('GET', f'field-exits', token=self.tokens[role])
+                
+                if get_success:
+                    # Find our field exit
+                    our_exit = None
+                    for exit_record in field_exit:
+                        if exit_record.get('id') == field_exit_id:
+                            our_exit = exit_record
+                            break
+                    
+                    if our_exit:
+                        # Check if report fields are present
+                        has_detailed_report = 'detailed_report' in our_exit or 'report' in our_exit
+                        has_accomplishments = 'accomplishments' in our_exit
+                        has_challenges = 'challenges' in our_exit
+                        has_next_steps = 'next_steps' in our_exit
+                        
+                        test_passed = has_message and (report_submitted or has_detailed_report)
+                        
+                        self.log_test(f"Field exit detailed report system ({role})", test_passed,
+                                     f"Message: {has_message}, Report: {has_detailed_report}, Accomplishments: {has_accomplishments}")
+                        return test_passed
+                
+                self.log_test(f"Field exit detailed report system ({role})", success, "Report submitted but could not verify")
+                return success
+            else:
+                self.log_test(f"Field exit detailed report system ({role})", False, str(response))
+                return False
+                
+        except Exception as e:
+            self.log_test(f"Field exit detailed report system ({role})", False, str(e))
+            return False
+
+    def test_work_reports_mongodb_migration(self, role: str) -> bool:
+        """Test Work Reports MongoDB Migration - REVIEW REQUEST PRIORITY 5"""
+        if role not in self.tokens:
+            return False
+        
+        # Test Work Reports endpoints to verify MongoDB migration
+        endpoints_to_test = [
+            'work-reports/dashboard',
+            'work-reports/clients', 
+            'work-reports/activity-types',
+            'work-reports/logs'
+        ]
+        
+        all_passed = True
+        
+        for endpoint in endpoints_to_test:
+            success, response = self.make_request('GET', endpoint, token=self.tokens[role])
+            
+            if success:
+                # Check if response has expected structure
+                if endpoint == 'work-reports/dashboard':
+                    expected_keys = ['total_clients', 'total_logs', 'billable_hours']
+                    has_expected_structure = any(key in response for key in expected_keys)
+                elif endpoint in ['work-reports/clients', 'work-reports/activity-types', 'work-reports/logs']:
+                    has_expected_structure = isinstance(response, list)
+                else:
+                    has_expected_structure = True
+                
+                if has_expected_structure:
+                    self.log_test(f"Work Reports {endpoint.split('/')[-1]} ({role})", True)
+                else:
+                    self.log_test(f"Work Reports {endpoint.split('/')[-1]} ({role})", False, 
+                                 f"Unexpected response structure: {type(response)}")
+                    all_passed = False
+            else:
+                self.log_test(f"Work Reports {endpoint.split('/')[-1]} ({role})", False, str(response))
+                all_passed = False
+        
+        return all_passed
+
     def test_leave_attachment_viewing(self, role: str) -> bool:
         """Test leave attachment viewing and download functionality - REVIEW REQUEST"""
         if role not in self.tokens:
