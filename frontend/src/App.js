@@ -2478,13 +2478,25 @@ const FieldExits = () => {
   };
 
   const handleReturnTime = async (id) => {
+    const fieldExit = fieldExits.find(fe => fe.id === id);
+    
+    // Check if report is already submitted
+    if (fieldExit.exit_status !== 'report_submitted') {
+      alert('يجب كتابة تقرير مفصل عن الزيارة قبل تسجيل وقت العودة');
+      return;
+    }
+    
     try {
       await axios.post(`${API}/field-exits/${id}/end`);
       fetchFieldExits();
       alert('تم تسجيل وقت العودة بنجاح');
     } catch (error) {
       console.error('Error recording return time:', error);
-      alert('حدث خطأ في تسجيل وقت العودة');
+      if (error.response?.data?.detail) {
+        alert(error.response.data.detail);
+      } else {
+        alert('حدث خطأ في تسجيل وقت العودة');
+      }
     }
   };
 
