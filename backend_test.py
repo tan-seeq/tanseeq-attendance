@@ -1272,10 +1272,10 @@ class TanseeqAPITester:
         
         return all_passed
 
-    # ============ WORK REPORTS SYSTEM TESTING (PHASES 1-3) ============
+    # ============ WORK REPORTS MONGODB MIGRATION TESTING ============
     
     def test_work_reports_dashboard(self, role: str) -> bool:
-        """Test Work Reports dashboard statistics (Phase 1)"""
+        """Test Work Reports dashboard statistics - MongoDB Migration Verification"""
         if role not in self.tokens:
             return False
             
@@ -1297,11 +1297,11 @@ class TanseeqAPITester:
             )
             
             test_passed = has_expected_keys and valid_types
-            self.log_test(f"Work Reports dashboard ({role})", test_passed,
+            self.log_test(f"Work Reports dashboard - MongoDB ({role})", test_passed,
                          f"Missing keys: {set(expected_keys) - set(response.keys())}" if not has_expected_keys else "")
             return test_passed
         else:
-            self.log_test(f"Work Reports dashboard ({role})", False, str(response))
+            self.log_test(f"Work Reports dashboard - MongoDB ({role})", False, str(response))
             return False
 
     def test_work_reports_clients_crud(self, role: str) -> bool:
