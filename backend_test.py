@@ -7127,69 +7127,88 @@ class TanseeqAPITester:
         return all_passed
 
     def run_comprehensive_tests(self):
-        """Run all tests for all roles"""
-        print("🚀 Starting TANSEEQ HR Backend API Tests")
-        print(f"📍 Testing against: {self.base_url}")
-        print("=" * 60)
+        """Run comprehensive backend API tests - ENHANCED FOR REVIEW REQUEST"""
+        print("🚀 Starting TANSEEQ HR System Backend API Testing - ENHANCED REVIEW")
+        print(f"📍 Testing against: {self.api_url}")
+        print("🎯 Focus: Attachment System, Field Exit Reports, Notifications, Work Reports MongoDB, Payroll")
+        print("=" * 80)
         
         # Test root endpoint first
         if not self.test_root_endpoint():
             print("❌ Root endpoint failed - stopping tests")
-            return False
+            return
         
-        # Test each role - comprehensive testing for all user types
-        roles_to_test = ['super_admin', 'admin', 'user']  # Test all roles as requested
+        # Test login for all roles
+        login_success = {}
+        for role in self.test_users.keys():
+            login_success[role] = self.test_login(role)
         
-        for role in roles_to_test:
-            print(f"\n🔐 Testing {role.upper()} role:")
-            print("-" * 30)
-            
-            # Login
-            if not self.test_login(role):
-                print(f"❌ Login failed for {role} - skipping role tests")
+        if not any(login_success.values()):
+            print("❌ All logins failed - stopping tests")
+            return
+        
+        print("\n" + "=" * 80)
+        print("🔍 Running Enhanced Backend Tests - REVIEW REQUEST REQUIREMENTS")
+        print("=" * 80)
+        
+        # Run tests for each role
+        for role in self.test_users.keys():
+            if not login_success[role]:
                 continue
+                
+            print(f"\n📋 Testing as {role.upper()} ({self.test_users[role]['email']})")
+            print("-" * 60)
             
-            # Core endpoints
+            # ============ REVIEW REQUEST PRIORITY TESTS ============
+            print("🎯 REVIEW REQUEST PRIORITY TESTS:")
+            
+            # 1. Fixed Attachment System
+            self.test_leave_attachment_viewing(role)
+            
+            # 2. Enhanced Field Exit Report System
+            self.test_field_exit_report_system(role)
+            self.test_field_exit_checkout_validation(role)
+            
+            # 3. Approval/Rejection Notification System
+            self.test_approval_rejection_notifications(role)
+            
+            # 4. Work Reports MongoDB Migration
+            self.test_work_reports_dashboard(role)
+            self.test_work_reports_clients_mongodb(role)
+            self.test_work_reports_activity_types_mongodb(role)
+            self.test_work_reports_logs_mongodb(role)
+            self.test_work_reports_credentials_mongodb(role)
+            
+            # 5. Payroll System Verification
+            self.test_payroll_calculation(role)
+            self.test_payroll_calculation_edge_cases(role)
+            self.test_payroll_calculation_multiple_employees(role)
+            self.test_payroll_export_excel(role)
+            self.test_payroll_export_pdf(role)
+            
+            print("\n📊 CORE SYSTEM TESTS:")
+            
+            # Core functionality tests
             self.test_dashboard_stats(role)
             self.test_attendance_check_in(role)
             self.test_attendance_records(role)
+            self.test_users_endpoint(role)
             self.test_leaves_endpoint(role)
             self.test_field_exits_endpoint(role)
             
-            # New admin endpoints
+            # Admin-only tests
             self.test_attendance_all_endpoint(role)
             self.test_leaves_all_endpoint(role)
             self.test_field_exits_all_endpoint(role)
             self.test_reports_endpoint(role)
             self.test_reports_custom_date_range(role)
-            self.test_activity_logs_with_date(role)
-            
-            # Enhanced reporting tests (from review request)
-            print(f"\n📊 Testing Enhanced Reporting System ({role.upper()}):")
             self.test_reports_export_excel(role)
             self.test_reports_export_pdf(role)
-            self.test_reports_company_branding(role)
-            self.test_all_report_types_no_strange_symbols(role)
-            
-            # Payroll reporting tests (from review request)
-            print(f"\n💰 Testing Payroll Reporting System ({role.upper()}):")
-            self.test_payroll_export_excel(role)
-            self.test_payroll_export_pdf(role)
-            
-            # Role-specific endpoints
-            self.test_users_endpoint(role)
+            self.test_attendance_update_endpoint(role)
             self.test_activity_logs(role)
+            self.test_activity_logs_with_date(role)
             
-            # COMPREHENSIVE PAYROLL TESTING (AS PER REVIEW REQUEST)
-            print(f"\n💰 Testing REFACTORED Payroll Calculation System ({role.upper()}):")
-            self.test_payroll_calculation(role)
-            self.test_payroll_calculation_edge_cases(role)
-            self.test_payroll_calculation_multiple_employees(role)
-            
-            self.test_password_change(role)
-            
-            # Enhanced field exit and leave management tests (from review request)
-            print(f"\n🚶 Testing Enhanced Field Exit Management ({role.upper()}):")
+            # Enhanced features tests
             self.test_field_exit_creation_with_expected_times(role)
             self.test_field_exit_start_tracking(role)
             self.test_field_exit_end_tracking(role)
@@ -7197,10 +7216,16 @@ class TanseeqAPITester:
             self.test_field_exit_reject_with_notes(role)
             self.test_field_exits_all_with_approved_by_and_notes(role)
             
-            print(f"\n🏖️ Testing Enhanced Leave Management ({role.upper()}):")
             self.test_leaves_approve_with_notes(role)
             self.test_leaves_reject_with_notes(role)
             self.test_leaves_all_with_approved_by_and_notes(role)
+            
+            # Report quality tests
+            self.test_reports_company_branding(role)
+            self.test_all_report_types_no_strange_symbols(role)
+            
+            # Password change test (Hatem only)
+            self.test_password_change(role)
             
             # NEW: Backup System Tests (Arabic review request)
             print(f"\n💾 Testing Enhanced Backup System ({role.upper()}):")
