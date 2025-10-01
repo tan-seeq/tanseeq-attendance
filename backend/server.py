@@ -3187,14 +3187,24 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         story = []
         styles = getSampleStyleSheet()
         
-        # Custom styles
+        # Enhanced PDF styles for professional A4 printing
+        # Register Arabic font if available
+        try:
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            # Note: Add Arabic font file to support Arabic text properly
+        except:
+            pass
+        
+        # Professional styles for A4 format
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=24,
-            spaceAfter=10,
+            fontSize=20,  # Reduced for A4 fit
+            spaceAfter=12,
             alignment=1,  # Center alignment
-            textColor=colors.Color(0.12, 0.31, 0.47)  # Dark blue
+            textColor=colors.Color(0.12, 0.31, 0.47),  # TANSEEQ Blue
+            fontName='Helvetica-Bold'
         )
         
         subtitle_style = ParagraphStyle(
