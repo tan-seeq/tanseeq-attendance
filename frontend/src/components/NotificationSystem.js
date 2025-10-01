@@ -19,6 +19,17 @@ const NotificationSystem = () => {
     priority: 'normal',
     type: 'info'
   });
+  
+  // Warning/Notice notification state
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [warningNotification, setWarningNotification] = useState({
+    recipient_id: '',
+    title: '',
+    message: '',
+    notification_type: 'warning',
+    required_action: '',
+    additional_notes: ''
+  });
   const [loading, setLoading] = useState(false);
 
   const API = process.env.REACT_APP_BACKEND_URL;
