@@ -3697,7 +3697,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         <b>Summary | الملخص</b><br/>
         Total Employees: {len(payroll_data)} | إجمالي الموظفين<br/>
         Total Monthly Salaries: AED {total_monthly_salary:.2f} | إجمالي الرواتب الشهرية<br/>
-        Total Basic Salaries: AED {total_basic_salary:.2f} | إجمالي الرواتب الأساسية<br/>
         Total Deductions: AED {total_deductions:.2f} | إجمالي الخصومات<br/>
         Total Final Salaries: AED {total_final_salary:.2f} | إجمالي الرواتب النهائية
         """
