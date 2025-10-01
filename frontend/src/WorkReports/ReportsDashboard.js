@@ -23,7 +23,7 @@ const ReportsDashboard = () => {
   const [selectedClient, setSelectedClient] = useState('');
   const [reportType, setReportType] = useState('daily');
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     fetchClients();
