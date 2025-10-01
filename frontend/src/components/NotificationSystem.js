@@ -5,8 +5,13 @@ import {
   PaperAirplaneIcon, 
   ExclamationTriangleIcon,
   InformationCircleIcon,
-  XMarkIcon
+  XMarkIcon,
+  ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
+
+// API Configuration
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const NotificationSystem = () => {
   const [notifications, setNotifications] = useState([]);
