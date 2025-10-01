@@ -266,6 +266,8 @@ credential_encryption = CredentialEncryption()
 
 async def get_work_reports_db():
     """Get work reports MongoDB database"""
+    if work_reports_db is None:
+        raise HTTPException(status_code=503, detail="Work Reports database not available")
     return work_reports_db
 
 async def init_work_reports_collections():
