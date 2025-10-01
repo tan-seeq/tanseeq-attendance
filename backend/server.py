@@ -3507,8 +3507,8 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
                 f"AED {employee['monthly_salary']:.2f}",
                 str(employee["working_days"]),
                 f"{employee.get('total_hours', 0):.1f}h",
-                str(employee.get("late_days", 0)),
-                f"AED {employee['basic_salary']:.2f}",
+                str(employee.get("late_incidents", 0)),  # Fixed: use late_incidents
+                f"AED {employee['monthly_salary']:.2f}",  # Fixed: use monthly_salary
                 f"AED {employee.get('late_deductions', 0):.2f}",
                 f"AED {employee.get('absence_deductions', 0):.2f}",
                 f"AED {employee.get('total_deductions', 0):.2f}",
