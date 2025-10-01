@@ -3843,21 +3843,70 @@ const LeaveManagement = () => {
         </div>
       )}
 
-      {/* Image Modal */}
+      {/* Enhanced Attachment Modal */}
       {showImageModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="relative max-w-4xl max-h-full">
-            <button
-              onClick={() => setShowImageModal(false)}
-              className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2"
-            >
-              <XIcon className="h-6 w-6" />
-            </button>
-            <img
-              src={selectedImage}
-              alt="Leave attachment"
-              className="max-w-full max-h-full object-contain"
-            />
+          <div className="relative max-w-4xl max-h-full bg-white rounded-lg p-6 m-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">عرض مرفق الإجازة</h3>
+              <div className="flex items-center space-x-2">
+                <a
+                  href={selectedImage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 flex items-center"
+                >
+                  <ArrowDownTrayIcon className="h-5 w-5 mr-1" />
+                  تحميل
+                </a>
+                <button
+                  onClick={() => setShowImageModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+            <div className="text-center">
+              {selectedImage && selectedImage.toLowerCase().includes('.pdf') ? (
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <DocumentTextIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">ملف PDF - انقر للفتح في نافذة جديدة</p>
+                  <a
+                    href={selectedImage}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                  >
+                    <DocumentTextIcon className="h-4 w-4 mr-2" />
+                    فتح PDF
+                  </a>
+                </div>
+              ) : (
+                <img
+                  src={selectedImage}
+                  alt="Leave attachment"
+                  className="max-w-full max-h-96 object-contain rounded-lg shadow-md"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'block';
+                  }}
+                />
+              )}
+              <div className="hidden bg-gray-50 p-6 rounded-lg mt-4">
+                <DocumentTextIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">خطأ في تحميل المرفق</p>
+                <a
+                  href={selectedImage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                  تحميل مباشرة
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
