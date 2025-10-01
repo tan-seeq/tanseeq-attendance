@@ -114,7 +114,7 @@ const NotificationSystem = () => {
       console.error('Error sending notification:', error);
       alert('فشل في إرسال الإشعار');
     } finally {
-      setLoading(false);
+      setApiLoading(false);
     }
   };
 
