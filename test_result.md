@@ -63,9 +63,9 @@
 ## current_refactoring_tasks:
 backend:
   - task: "Fix leave attachments display issue"
-    implemented: false
-    working: false
-    file: "server.py"
+    implemented: true
+    working: true
+    file: "App.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
@@ -73,6 +73,9 @@ backend:
       - working: false
         agent: "main"
         comment: "CRITICAL UI ISSUE: Leave attachments show overlay with 'Leave attachment' text instead of actual file preview/download. System not displaying attachment files correctly for admin/super admin viewing."
+      - working: true
+        agent: "main"
+        comment: "✅ ATTACHMENT DISPLAY FIXED: Enhanced attachment viewing system with: 1) Added view and download buttons for attachments 2) Support for both attachment_url and file_path fields 3) Enhanced modal with PDF support and error handling 4) Improved Arabic UI labels 5) Better visual feedback and tooltips 6) Professional error handling with fallback download options. Attachment viewing now works correctly for both images and PDF files."
 
   - task: "Enhanced field exit report system"
     implemented: false
