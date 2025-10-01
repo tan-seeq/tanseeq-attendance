@@ -2477,6 +2477,54 @@ const FieldExits = () => {
     }
   };
 
+  // State for visit report modal
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [selectedFieldExit, setSelectedFieldExit] = useState(null);
+  const [visitReport, setVisitReport] = useState({
+    detailed_report: '',
+    accomplishments: '',
+    challenges: '',
+    next_steps: ''
+  });
+
+  const handleSubmitReport = async (id) => {
+    const fieldExit = fieldExits.find(fe => fe.id === id);
+    if (fieldExit.exit_status !== 'departed') {
+      alert('يجب أولاً تسجيل وقت المغادرة');
+      return;
+    }
+    
+    setSelectedFieldExit(fieldExit);
+    setShowReportModal(true);
+    setVisitReport({
+      detailed_report: '',
+      accomplishments: '',
+      challenges: '',
+      next_steps: ''
+    });
+  };
+
+  const submitVisitReport = async () => {
+    if (!visitReport.detailed_report || visitReport.detailed_report.trim().length < 20) {
+      alert('يجب أن يحتوي التقرير المفصل على 20 حرف على الأقل');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/field-exits/${selectedFieldExit.id}/report`, visitReport);
+      setShowReportModal(false);
+      fetchFieldExits();
+      alert('تم إرسال تقرير الزيارة بنجاح! يمكنك الآن تسجيل وقت العودة');
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      if (error.response?.data?.detail) {
+        alert(error.response.data.detail);
+      } else {
+        alert('حدث خطأ في إرسال التقرير');
+      }
+    }
+  };
+
   const handleReturnTime = async (id) => {
     const fieldExit = fieldExits.find(fe => fe.id === id);
     
