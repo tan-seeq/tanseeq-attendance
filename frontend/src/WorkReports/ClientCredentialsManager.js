@@ -29,7 +29,7 @@ const ClientCredentialsManager = ({ client, isOpen, onClose }) => {
     description: ''
   });
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
   const credentialTypes = [
     { value: 'fta_portal', label: 'بوابة الهيئة الاتحادية للضرائب - FTA Portal', icon: '🏛️' },
