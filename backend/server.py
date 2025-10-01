@@ -1140,7 +1140,7 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
         update_fields["check_out"] = update_data["check_out"]
         changes.append(f"check_out: {update_data['check_out']}")
     
-    # Calculate working hours if both times are available
+    # Calculate working hours if both times are available using improved logic
     current_check_in = update_fields.get("check_in") or attendance.get("check_in")
     current_check_out = update_fields.get("check_out") or attendance.get("check_out")
     
@@ -1156,16 +1156,18 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
             if len(check_out_str) == 5:  # HH:MM format  
                 check_out_str += ":00"
             
-            check_in_time = datetime.strptime(check_in_str, "%H:%M:%S")
-            check_out_time = datetime.strptime(check_out_str, "%H:%M:%S")
+            # Use the improved calculation function
+            is_admin_edited = attendance.get('admin_edited', False) or True  # Mark as admin edited since this is manual update
+            working_hours_info = calculate_working_hours_and_deductions(
+                f"{attendance.get('date', '')} {check_in_str}",
+                f"{attendance.get('date', '')} {check_out_str}",
+                break_time_minutes=60,  # 1 hour lunch break
+                is_admin_edited=is_admin_edited
+            )
             
-            # Handle overnight shifts
-            if check_out_time < check_in_time:
-                check_out_time += timedelta(days=1)
-            
-            working_hours = (check_out_time - check_in_time).total_seconds() / 3600
-            update_fields["working_hours"] = round(working_hours, 2)
-            changes.append(f"working_hours: {working_hours:.2f}")
+            # Update fields with calculated values
+            update_fields["working_hours"] = working_hours_info.get("total_hours", 0)
+            changes.append(f"working_hours: {working_hours_info.get('total_hours', 0):.2f}")
             
             # Auto-correct status when times are provided (only if no explicit status change)
             if not new_status and attendance.get("status") == "absent":
