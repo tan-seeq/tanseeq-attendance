@@ -764,9 +764,9 @@ async def get_notifications(current_user: User = Depends(get_current_user)):
 @api_router.get("/notifications/my")
 async def get_my_notifications(current_user: User = Depends(get_current_user)):
     """Get notifications for current user"""
-    notifications = list(db.notifications.find(
+    notifications = await db.notifications.find(
         {"recipient_id": current_user.id}
-    ).sort("sent_at", -1).limit(50))
+    ).sort("sent_at", -1).limit(50).to_list(50)
     
     # Convert ObjectId to string
     for notification in notifications:
