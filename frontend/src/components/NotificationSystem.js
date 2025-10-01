@@ -89,7 +89,7 @@ const NotificationSystem = () => {
 
   const handleSendNotification = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setApiLoading(true);
 
     try {
       const token = localStorage.getItem('token');
