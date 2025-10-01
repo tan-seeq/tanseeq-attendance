@@ -7250,54 +7250,6 @@ class TanseeqAPITester:
             print("🔍 Focus on failed tests related to review request requirements.")
         
         print("=" * 80)
-            print(f"\n⏰ Testing Overtime Reports System (SUPER_ADMIN):")
-            self.test_overtime_report('super_admin')
-            self.test_overtime_report_excel_export('super_admin')
-            self.test_overtime_report_pdf_export('super_admin')
-            
-            # Enhanced Backup System Testing
-            print(f"\n💾 Testing Enhanced Backup System (SUPER_ADMIN):")
-            self.test_backup_create_download('super_admin')
-            self.test_backup_list_files('super_admin')
-            self.test_backup_download('super_admin')
-            self.test_backup_restore('super_admin')
-            
-            # Enhanced Payroll with Deductions Testing
-            print(f"\n💰 Testing Enhanced Payroll with Deductions (SUPER_ADMIN):")
-            self.test_enhanced_payroll_with_deductions('super_admin')
-            
-            # Legacy tests (if they exist)
-            if hasattr(self, 'test_backup_download_file'):
-                self.test_backup_download_file('super_admin')
-            if hasattr(self, 'test_attendance_daily_qr'):
-                self.test_attendance_daily_qr('super_admin')
-                self.test_attendance_check_in_with_qr('super_admin')
-                self.test_attendance_check_out_with_qr('super_admin')
-                self.test_qr_admin_exclusion('super_admin')
-            if hasattr(self, 'test_payroll_calculate_with_deductions'):
-                self.test_payroll_calculate_with_deductions('super_admin')
-                self.test_payroll_export_with_deductions_column('super_admin')
-            
-            self.test_logout('super_admin')
-        else:
-            print("⚠️  Super admin login failed - password may need to be reset by admin")
-            print("   This is a known issue and doesn't affect core functionality")
-        
-        # Print summary
-        print("\n" + "=" * 60)
-        print(f"📊 Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
-        
-        if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed!")
-            return True
-        else:
-            failed_tests = self.tests_run - self.tests_passed
-            if failed_tests <= 2:  # Allow for super_admin login and minor issues
-                print("✅ All critical tests passed! (Minor issues may exist)")
-                return True
-            else:
-                print(f"⚠️  {failed_tests} tests failed")
-                return False
 
     # ============ EMPLOYEE PERMISSIONS MANAGEMENT SYSTEM TESTS ============
     
