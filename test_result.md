@@ -60,6 +60,44 @@
 ##     -agent: "main"  # or "testing" or "user"
 ##     -message: "Communication message between agents"
 
+## current_refactoring_tasks:
+backend:
+  - task: "Complete payroll calculation logic refactor"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "CRITICAL ISSUE IDENTIFIED: Current payroll calculation function has broken logic with undefined variables (working_days, total_hours, late_days, basic_salary, late_deductions, absence_deductions) and conflicting calculation sections. Function returns data using variables that don't exist in current scope. Need complete refactor to fix broken implementation."
+
+  - task: "Migrate Work Reports from SQLite to MongoDB"  
+    implemented: false
+    working: false
+    file: "work_reports_db.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "DEPLOYMENT BLOCKER: Work Reports module uses SQLite which is incompatible with Kubernetes production environment. Need to migrate to MongoDB to match main system architecture."
+
+  - task: "Redesign PDF reports for A4 printing"
+    implemented: false  
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "PDF reports need professional redesign for A4 printing with improved bilingual (Arabic/English) support and better formatting."
+
 # Protocol Guidelines for Main agent
 #
 # 1. Update Test Result File Before Testing:
