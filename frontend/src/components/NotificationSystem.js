@@ -12,6 +12,8 @@ const NotificationSystem = () => {
   const [notifications, setNotifications] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [showSendModal, setShowSendModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [newNotification, setNewNotification] = useState({
     recipient_id: '',
     subject: '',
