@@ -5851,19 +5851,37 @@ Uses PostgreSQL instead of MongoDB for data storage
 
 # ============ CLIENT MANAGEMENT ENDPOINTS ============
 
-@api_router.get("/work-reports/clients", response_model=List[ClientResponse])
-async def get_clients(
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
-):
-    """Get all clients"""
-    clients = db.query(Client).filter(Client.is_active == True).all()
-    
-    log_work_reports_activity(
-        db, current_user.id, current_user.name, "view_clients"
-    )
-    
-    return clients
+@api_router.get("/work-reports/clients")
+async def get_clients(current_user = Depends(get_current_user)):
+    """Get all clients - MongoDB version"""
+    try:
+        clients = await work_reports_db.clients.find({"is_active": True}).to_list(1000)
+        
+        # Convert to response format
+        client_list = []
+        for client in clients:
+            client_list.append({
+                "id": client.get("id"),
+                "company_name": client.get("company_name"),
+                "company_name_ar": client.get("company_name_ar"),
+                "client_code": client.get("client_code"),
+                "industry": client.get("industry"),
+                "contact_person": client.get("contact_person"),
+                "phone": client.get("phone"),
+                "email": client.get("email"),
+                "address": client.get("address"),
+                "tax_number": client.get("tax_number"),
+                "commercial_registration": client.get("commercial_registration"),
+                "is_active": client.get("is_active", True),
+                "created_at": client.get("created_at"),
+                "updated_at": client.get("updated_at")
+            })
+        
+        await log_work_reports_activity(current_user.id, "view_clients", "Viewed clients list")
+        
+        return client_list
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting clients: {str(e)}")
 
 @api_router.post("/work-reports/clients", response_model=ClientResponse)
 async def create_client(
