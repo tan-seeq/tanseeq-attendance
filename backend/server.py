@@ -3644,7 +3644,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         story.append(decorative_line)
         
         # Create enhanced table data with deductions
-        table_data = [["Employee", "Monthly\nSalary", "Basic\nSalary", "Late\nDeductions", "Absence\nDeductions", "Total\nDeductions", "Final\nSalary"]]
+        table_data = [["Employee", "Monthly\nSalary", "Working\nDays", "Late\nIncidents", "Absences", "Total\nDeductions", "Final\nSalary"]]
         for employee in payroll_data:
             table_data.append([
                 employee["name"][:15],  # Truncate long names for better fit
