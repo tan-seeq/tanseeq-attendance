@@ -62,6 +62,41 @@
 
 ## current_refactoring_tasks:
 backend:
+  - task: "Fix leave attachments display issue"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "CRITICAL UI ISSUE: Leave attachments show overlay with 'Leave attachment' text instead of actual file preview/download. System not displaying attachment files correctly for admin/super admin viewing."
+
+  - task: "Enhanced field exit report system"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "NEW REQUIREMENT: Field exit system needs: 1) Only set departure time initially 2) Timer/counter during visit 3) Mandatory detailed report before allowing check-out 4) Report must describe what was done (visited market, client meeting, document collection, etc.)"
+
+  - task: "Approval/rejection notification system"
+    implemented: false
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "NEW REQUIREMENT: When leave/field exit requests are approved/rejected, employee must receive notification in dashboard with: 1) Approval details (what was approved) 2) Rejection reason if denied 3) Complete request information for reference"
   - task: "Complete payroll calculation logic refactor"
     implemented: true
     working: true
