@@ -2659,7 +2659,7 @@ const FieldExits = () => {
                     <div className="flex flex-col space-y-2">
                       {/* User Actions */}
                       {user?.role === 'user' && exit.user_id === user.id && exit.status === 'approved' && (
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col space-y-1">
                           {!exit.actual_start_time && (
                             <button
                               onClick={() => handleDepartureTime(exit.id)}
@@ -2668,13 +2668,26 @@ const FieldExits = () => {
                               تسجيل الذهاب
                             </button>
                           )}
-                          {exit.actual_start_time && !exit.actual_end_time && (
+                          {exit.actual_start_time && exit.exit_status === 'departed' && (
+                            <button
+                              onClick={() => handleSubmitReport(exit.id)}
+                              className="px-3 py-1 bg-orange-500 text-white text-xs rounded-md hover:bg-orange-600"
+                            >
+                              كتابة تقرير الزيارة
+                            </button>
+                          )}
+                          {exit.exit_status === 'report_submitted' && !exit.actual_end_time && (
                             <button
                               onClick={() => handleReturnTime(exit.id)}
                               className="px-3 py-1 bg-green-500 text-white text-xs rounded-md hover:bg-green-600"
                             >
                               تسجيل العودة
                             </button>
+                          )}
+                          {exit.exit_status === 'report_submitted' && (
+                            <span className="text-xs text-green-600 font-medium">
+                              ✓ تم تسليم التقرير
+                            </span>
                           )}
                         </div>
                       )}
