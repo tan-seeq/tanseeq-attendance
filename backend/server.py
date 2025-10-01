@@ -3197,17 +3197,28 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
                 "amount": round(hours_deduction, 2)
             })
                 
+        # Get approved leaves for this month
+        approved_leaves = await db.leaves.find({
+            "user_id": user["id"],
+            "status": "approved",
+            "start_date": {"$regex": f"^{month}"}
+        }).to_list(1000)
+        approved_leave_days = sum(int(leave.get("days_count", 0)) for leave in approved_leaves)
+        
+        # Get approved field exits for this month
+        approved_field_exits = await db.field_exits.find({
+            "user_id": user["id"],
+            "status": "approved", 
+            "date": {"$regex": f"^{month}"}
+        }).to_list(1000)
+        approved_field_exit_days = len(approved_field_exits)
+        
+        # Calculate working days (present + approved absences)
+        working_days = present_days + approved_leave_days + approved_field_exit_days
+        
         # Calculate final salary
         gross_salary = min(earned_salary, monthly_salary)  # Cannot exceed monthly salary
         final_salary = max(0, gross_salary - total_deductions)  # Cannot be negative  
-        for detail in absence_penalty_details:
-            if "Unauthorized Absences:" in detail:
-                try:
-                    # Extract AED amount from detail string
-                    amount_str = detail.split("AED ")[1].split()[0]
-                    absence_deductions += float(amount_str)
-                except:
-                    pass
         
         # Translation for English reports
         english_name = translate_to_english(user["name"])
@@ -3219,17 +3230,18 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
             "arabic_name": user["name"],  # Keep original Arabic
             "position": english_position,  # English translation
             "arabic_position": user["position"],  # Keep original Arabic
-            "monthly_salary": user["monthly_salary"],
-            "daily_rate": user["daily_rate"],
+            "monthly_salary": monthly_salary,
+            "daily_rate": daily_rate,
             "working_days": working_days,
-            "total_hours": round(total_hours, 2),
-            "late_days": late_days,
+            "present_days": present_days,
+            "total_hours": round(total_working_hours, 2),
+            "late_incidents": late_incidents,
+            "early_departure_incidents": early_departure_incidents,
             "approved_leaves": approved_leave_days,
             "approved_field_exits": approved_field_exit_days,
-            "unauthorized_absences": max(actual_absences, 0),
-            "basic_salary": round(basic_salary, 2),
-            "late_deductions": round(late_deductions, 2),
-            "absence_deductions": round(absence_deductions, 2),
+            "unauthorized_absences": absent_days,
+            "earned_salary": round(earned_salary, 2),
+            "gross_salary": round(gross_salary, 2),
             "total_deductions": round(total_deductions, 2),
             "deduction_details": deduction_details,
             "final_salary": round(final_salary, 2),
