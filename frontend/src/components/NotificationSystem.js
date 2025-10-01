@@ -157,13 +157,22 @@ const NotificationSystem = () => {
           </h1>
           <p className="text-gray-600 mt-2">إرسال إشعارات وتنبيهات للموظفين</p>
         </div>
-        <button
-          onClick={() => setShowSendModal(true)}
-          className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center"
-        >
-          <PaperAirplaneIcon className="h-5 w-5 mr-2" />
-          إرسال إشعار جديد
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowSendModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center"
+          >
+            <PaperAirplaneIcon className="h-5 w-5 mr-2" />
+            إرسال إشعار جديد
+          </button>
+          <button
+            onClick={() => setShowWarningModal(true)}
+            className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center"
+          >
+            <ExclamationTriangleIcon className="h-5 w-5 mr-2" />
+            إرسال إنذار/لفت نظر
+          </button>
+        </div>
       </div>
 
       {/* Notifications List */}
