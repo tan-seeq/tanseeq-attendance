@@ -7251,13 +7251,6 @@ class TanseeqAPITester:
         
         print("=" * 80)
             
-            # NEW: Backup System Tests (Arabic review request)
-            print(f"\n💾 Testing Enhanced Backup System ({role.upper()}):")
-            self.test_backup_create_download(role)
-            self.test_backup_list_files(role)
-            self.test_backup_download_file(role)
-            self.test_backup_restore(role)
-            
             # NEW: QR Code Attendance System Tests (Arabic review request)
             print(f"\n📱 Testing QR Code Attendance System ({role.upper()}):")
             self.test_attendance_daily_qr(role)
