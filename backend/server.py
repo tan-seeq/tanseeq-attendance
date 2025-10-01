@@ -3175,58 +3175,27 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
         total_deductions = 0.0
         deduction_details = []
         
-        # 1. Late arrival penalties with complex rules
-        late_records = [a for a in attendance_records if a.get("is_late")]
+        # SIMPLIFIED DEDUCTION SYSTEM
         
-        if late_records:
-            # Group late records by minutes
-            late_minutes_list = []
-            for record in late_records:
-                check_in_str = record.get("check_in", "09:00:00")
-                try:
-                    check_in_time = datetime.strptime(check_in_str, "%H:%M:%S").time()
-                    if user.get("has_flexible_schedule"):
-                        # For flexible schedule, calculate against 11:00 AM (latest allowed start)
-                        standard_start = datetime.strptime("11:00:00", "%H:%M:%S").time()
-                    else:
-                        # For fixed schedule, use working_hours_start
-                        standard_start = datetime.strptime(user.get("working_hours_start", "09:00"), "%H:%M").time()
-                    
-                    # Calculate late minutes
-                    check_in_dt = datetime.combine(datetime.min, check_in_time)
-                    standard_dt = datetime.combine(datetime.min, standard_start)
-                    
-                    if check_in_dt > standard_dt:
-                        late_minutes = (check_in_dt - standard_dt).total_seconds() / 60
-                        late_minutes_list.append(late_minutes)
-                except:
-                    continue
-            
-            if late_minutes_list:
-                # Apply complex penalty rules
-                total_late_minutes = sum(late_minutes_list)
-                free_late_count = 0
-                penalty_minutes = 0
-                half_day_penalties = 0
-                full_day_penalties = 0
-                
-                for minutes in late_minutes_list:
-                    if minutes <= 15:
-                        # First 15 minutes x 4 times are free
-                        if free_late_count < 4:
-                            free_late_count += 1
-                        else:
-                            penalty_minutes += minutes
-                    elif minutes <= 20:
-                        # 15-20 minutes: accumulate for deduction
-                        penalty_minutes += minutes
-                    elif minutes <= 120:  # 20 minutes to 2 hours
-                        # More than 20 minutes but less than 2 hours: half day
-                        half_day_penalties += 1
-                        penalty_minutes += minutes  # Also accumulate the minutes
-                    else:  # More than 2 hours
-                        # More than 2 hours: full day
-                        full_day_penalties += 1
+        # 1. Absence deductions (full day salary per absent day)
+        if absent_days > 0:
+            absence_deduction = absent_days * daily_rate
+            total_deductions += absence_deduction
+            deduction_details.append({
+                "type": "غياب",
+                "description": f"{absent_days} يوم غياب",
+                "amount": round(absence_deduction, 2)
+            })
+        
+        # 2. Deducted hours penalty (for late arrival and early departure)
+        if total_deducted_hours > 0:
+            hours_deduction = total_deducted_hours * hourly_rate
+            total_deductions += hours_deduction
+            deduction_details.append({
+                "type": "ساعات منقوصة",
+                "description": f"{total_deducted_hours:.1f} ساعة تأخير/انصراف مبكر",
+                "amount": round(hours_deduction, 2)
+            })
                 
                 # Calculate penalties
                 # 1. Accumulated minutes penalty (convert to daily rate fraction)
