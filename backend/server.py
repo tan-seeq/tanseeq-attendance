@@ -6674,9 +6674,8 @@ async def revoke_user_permissions(
     current_user = Depends(get_current_user),
     db = Depends(get_work_reports_db)
 ):
-    """Revoke user permissions (Super Admin only)"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """Revoke user permissions - NO RESTRICTIONS - ALL USERS CAN MANAGE PERMISSIONS"""
+    # NO PERMISSION CHECKS - ALL USERS CAN MANAGE PERMISSIONS
     
     permissions = db.query(UserWorkReportsPermission).filter(
         UserWorkReportsPermission.user_id == user_id
