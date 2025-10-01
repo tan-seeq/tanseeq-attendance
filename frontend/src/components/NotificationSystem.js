@@ -70,12 +70,20 @@ const NotificationSystem = () => {
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
+      
+      console.log('Fetching users from:', `${API}/users`);
+      
       const response = await axios.get(`${API}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log('Users response:', response.data);
       setAllUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
+      if (!error) {
+        setError(`فشل في تحميل قائمة الموظفين: ${error.message}`);
+      }
     }
   };
 
