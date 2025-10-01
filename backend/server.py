@@ -81,6 +81,13 @@ security = HTTPBearer()
 # Create the main app
 app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 
+# Initialize Work Reports MongoDB collections on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize Work Reports MongoDB collections on startup"""
+    await init_work_reports_collections()
+    await init_default_activity_types()
+
 # Create uploads directory
 uploads_dir = ROOT_DIR / "uploads"
 uploads_dir.mkdir(exist_ok=True)
