@@ -121,7 +121,7 @@ const NotificationSystem = () => {
   // Handle sending warning/notice notifications
   const handleSendWarning = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setApiLoading(true);
 
     try {
       const token = localStorage.getItem('token');
