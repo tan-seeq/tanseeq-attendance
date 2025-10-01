@@ -1511,13 +1511,6 @@ class TanseeqAPITester:
                      f"({passed_tests}/{total_tests}) {test_details}")
         
         return integration_success
-            activity_names = [activity.get('name', '') for activity in response]
-            expected_activities = ['Tax Consultation', 'Audit Services', 'Bookkeeping', 'VAT Services']
-            
-            has_default_activities = any(activity in activity_names for activity in expected_activities)
-            
-            self.log_test(f"Work Reports activity types ({role})", has_default_activities,
-                         f"Found activities: {activity_names}" if not has_default_activities else "")
             return has_default_activities
         else:
             self.log_test(f"Work Reports activity types ({role})", False, str(response))
