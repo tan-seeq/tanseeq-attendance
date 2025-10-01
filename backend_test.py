@@ -466,26 +466,161 @@ class TanseeqAPITester:
         return success
 
     def test_payroll_calculation(self, role: str) -> bool:
-        """Test payroll calculation endpoint"""
+        """Test payroll calculation endpoint - COMPREHENSIVE TESTING AS PER REVIEW REQUEST"""
         if role not in self.tokens:
             return False
             
         expected_status = 200 if role in ['admin', 'super_admin'] else 403
-        success, response = self.make_request('GET', 'payroll/calculate/2025-02', 
+        success, response = self.make_request('GET', 'payroll/calculate/2024-12', 
                                             token=self.tokens[role],
                                             expected_status=expected_status)
         
         if expected_status == 200:
             success = success and isinstance(response, list)
             if success and response:
-                # Check if payroll data has expected structure
+                # Check if payroll data has expected structure - NO UNDEFINED VARIABLES
                 first_record = response[0]
-                expected_keys = ['user_id', 'name', 'monthly_salary', 'daily_rate', 'working_days', 'final_salary']
+                expected_keys = [
+                    'user_id', 'name', 'monthly_salary', 'daily_rate', 'working_days', 
+                    'final_salary', 'present_days', 'total_hours', 'late_incidents',
+                    'early_departure_incidents', 'approved_leaves', 'approved_field_exits',
+                    'unauthorized_absences', 'earned_salary', 'gross_salary', 'total_deductions'
+                ]
                 has_expected_keys = all(key in first_record for key in expected_keys)
-                success = success and has_expected_keys
+                
+                # Verify no undefined variables - all values should be defined
+                no_undefined_values = True
+                undefined_fields = []
+                for key in expected_keys:
+                    value = first_record.get(key)
+                    if value is None or (isinstance(value, str) and value.lower() in ['undefined', 'null', 'none']):
+                        no_undefined_values = False
+                        undefined_fields.append(key)
+                
+                # Verify mathematical correctness of calculations
+                calculations_correct = True
+                calc_errors = []
+                
+                for record in response[:3]:  # Test first 3 employees
+                    # Check daily rate calculation
+                    expected_daily_rate = record['monthly_salary'] / 22
+                    if abs(record['daily_rate'] - expected_daily_rate) > 0.01:
+                        calculations_correct = False
+                        calc_errors.append(f"Daily rate incorrect for {record['name']}")
+                    
+                    # Check working days calculation (should be sum of present + approved leaves + field exits)
+                    expected_working_days = record['present_days'] + record['approved_leaves'] + record['approved_field_exits']
+                    if record['working_days'] != expected_working_days:
+                        calculations_correct = False
+                        calc_errors.append(f"Working days calculation incorrect for {record['name']}")
+                    
+                    # Check final salary is not negative
+                    if record['final_salary'] < 0:
+                        calculations_correct = False
+                        calc_errors.append(f"Final salary is negative for {record['name']}")
+                
+                success = success and has_expected_keys and no_undefined_values and calculations_correct
+                
+                if not success:
+                    error_details = []
+                    if not has_expected_keys:
+                        missing_keys = set(expected_keys) - set(first_record.keys())
+                        error_details.append(f"Missing keys: {missing_keys}")
+                    if not no_undefined_values:
+                        error_details.append(f"Undefined fields: {undefined_fields}")
+                    if not calculations_correct:
+                        error_details.append(f"Calculation errors: {calc_errors}")
+                    
+                    self.log_test(f"Payroll calculation ({role})", False, "; ".join(error_details))
+                else:
+                    self.log_test(f"Payroll calculation ({role})", True, f"Processed {len(response)} employees successfully")
+            else:
+                self.log_test(f"Payroll calculation ({role})", False, "Empty response or invalid format")
+        else:
+            self.log_test(f"Payroll calculation ({role})", success, str(response) if not success else "")
         
-        self.log_test(f"Payroll calculation ({role})", success, str(response) if not success else "")
         return success
+
+    def test_payroll_calculation_edge_cases(self, role: str) -> bool:
+        """Test payroll calculation edge cases - NO ATTENDANCE DATA, NO SALARY DATA"""
+        if role not in self.tokens:
+            return False
+            
+        if role not in ['admin', 'super_admin']:
+            self.log_test(f"Payroll edge cases ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        # Test with a month that likely has no data
+        success, response = self.make_request('GET', 'payroll/calculate/2023-01', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            # Should still return employee records even with no attendance data
+            if response:
+                first_record = response[0]
+                # Check that system handles missing data gracefully
+                handles_no_data = (
+                    first_record.get('present_days', 0) >= 0 and
+                    first_record.get('total_hours', 0) >= 0 and
+                    first_record.get('final_salary', 0) >= 0
+                )
+                
+                self.log_test(f"Payroll edge cases ({role})", handles_no_data,
+                             f"System handles missing data: {handles_no_data}")
+                return handles_no_data
+            else:
+                # No employees found is also acceptable
+                self.log_test(f"Payroll edge cases ({role})", True, "No employees found (acceptable)")
+                return True
+        else:
+            self.log_test(f"Payroll edge cases ({role})", False, str(response))
+            return False
+
+    def test_payroll_calculation_multiple_employees(self, role: str) -> bool:
+        """Test payroll calculations work for multiple employees with different attendance patterns"""
+        if role not in self.tokens:
+            return False
+            
+        if role not in ['admin', 'super_admin']:
+            self.log_test(f"Payroll multiple employees ({role})", True, "Access denied as expected for non-admin")
+            return True
+        
+        success, response = self.make_request('GET', 'payroll/calculate/2024-12', 
+                                            token=self.tokens[role])
+        
+        if success and isinstance(response, list):
+            if len(response) >= 2:  # Need at least 2 employees to test different patterns
+                # Check that different employees have different data patterns
+                different_patterns = False
+                first_emp = response[0]
+                
+                for emp in response[1:]:
+                    # Check if employees have different attendance patterns
+                    if (emp['present_days'] != first_emp['present_days'] or 
+                        emp['total_hours'] != first_emp['total_hours'] or
+                        emp['final_salary'] != first_emp['final_salary']):
+                        different_patterns = True
+                        break
+                
+                # Verify each employee has valid calculations
+                all_valid = True
+                for emp in response:
+                    if (emp['monthly_salary'] <= 0 or 
+                        emp['daily_rate'] <= 0 or
+                        emp['final_salary'] < 0):
+                        all_valid = False
+                        break
+                
+                test_passed = all_valid and (different_patterns or len(response) == 1)
+                self.log_test(f"Payroll multiple employees ({role})", test_passed,
+                             f"Processed {len(response)} employees, patterns vary: {different_patterns}, all valid: {all_valid}")
+                return test_passed
+            else:
+                self.log_test(f"Payroll multiple employees ({role})", True, f"Only {len(response)} employee(s) found")
+                return True
+        else:
+            self.log_test(f"Payroll multiple employees ({role})", False, str(response))
+            return False
 
     def test_password_change(self, role: str) -> bool:
         """Test password change endpoint (Hatem only)"""
