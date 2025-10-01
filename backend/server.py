@@ -35,6 +35,27 @@ from work_reports_db import (
     UserPermissionResponse, PermissionUpdateRequest,
     credential_encryption, log_work_reports_activity
 )
+
+# Notification Model
+class Notification(BaseModel):
+    id: Optional[str] = None
+    recipient_id: str
+    recipient_name: Optional[str] = None
+    sender_id: str
+    sender_name: Optional[str] = None
+    subject: str
+    message: str
+    type: str = "info"  # info, warning, alert
+    priority: str = "normal"  # low, normal, high, urgent
+    is_read: bool = False
+    sent_at: Optional[datetime] = None
+
+class SendNotificationRequest(BaseModel):
+    recipient_id: str
+    subject: str
+    message: str
+    type: str = "info"
+    priority: str = "normal"
 from sqlalchemy.orm import Session
 from report_generator import report_generator
 
