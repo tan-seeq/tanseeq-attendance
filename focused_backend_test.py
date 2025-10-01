@@ -23,8 +23,8 @@ class FocusedTanseeqTester:
         self.tests_run = 0
         self.tests_passed = 0
         
-        # Super admin credentials (from test_result.md)
-        self.super_admin_creds = {'email': 'hatem@tanseeq.com', 'password': 'hatem123'}
+        # Super admin credentials (from database check)
+        self.super_admin_creds = {'email': 'hatemmo186@gmail.com', 'password': '123456'}
 
     def log_test(self, name: str, success: bool, details: str = ""):
         """Log test result"""
