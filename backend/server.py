@@ -3475,12 +3475,12 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         
         # Headers with enhanced styling including deductions 
         headers = [
-            "Employee Name", "Monthly Salary", "Working Days", "Total Hours", "Late Days", 
-            "Basic Salary", "Late Deductions", "Absence Deductions", "Total Deductions", "Final Salary"
+            "Employee Name", "Monthly Salary", "Working Days", "Total Hours", "Late Incidents", 
+            "Present Days", "Approved Leaves", "Absence Days", "Total Deductions", "Final Salary"
         ]
         headers_ar = [
-            "اسم الموظف", "الراتب الشهري", "أيام العمل", "إجمالي الساعات", "الأيام المتأخرة",
-            "الراتب الأساسي", "خصومات التأخير", "خصومات الغياب", "إجمالي الخصومات", "الراتب النهائي"
+            "اسم الموظف", "الراتب الشهري", "أيام العمل", "إجمالي الساعات", "حوادث التأخير",
+            "أيام الحضور", "الإجازات المعتمدة", "أيام الغياب", "إجمالي الخصومات", "الراتب النهائي"
         ]
         
         header_row = 6
