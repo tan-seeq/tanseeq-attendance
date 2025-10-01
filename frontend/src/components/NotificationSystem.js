@@ -94,6 +94,39 @@ const NotificationSystem = () => {
     }
   };
 
+  // Handle sending warning/notice notifications
+  const handleSendWarning = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/notifications/send-warning`, warningNotification, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      alert('تم إرسال الإنذار/الإشعار بنجاح');
+      setShowWarningModal(false);
+      setWarningNotification({
+        recipient_id: '',
+        title: '',
+        message: '',
+        notification_type: 'warning',
+        required_action: '',
+        additional_notes: ''
+      });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error sending warning:', error);
+      alert('فشل في إرسال الإنذار');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'urgent': return 'bg-red-100 text-red-800';
