@@ -2936,6 +2936,13 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/notifications" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <NotificationSystem />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
