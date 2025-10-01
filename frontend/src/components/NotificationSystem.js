@@ -406,7 +406,7 @@ const NotificationSystem = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={apiLoading}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors disabled:opacity-50"
                 >
                   {loading ? 'جاري الإرسال...' : 'إرسال الإشعار'}
@@ -537,7 +537,7 @@ const NotificationSystem = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={apiLoading}
                     className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-300"
                   >
                     {loading ? 'جاري الإرسال...' : 'إرسال الإنذار'}
