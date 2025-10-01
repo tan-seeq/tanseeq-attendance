@@ -6584,9 +6584,9 @@ async def get_work_reports_dashboard(
     
     return {
         "total_clients": total_clients,
-        "today_logs": today_logs,
+        "todays_logs": today_logs,
         "week_logs": week_logs,
-        "month_logs": month_logs,
+        "monthly_logs": month_logs,
         "total_billable_hours": total_billable_hours,
         "total_revenue": round(total_revenue, 2),
         "recent_activity": recent_activity,
