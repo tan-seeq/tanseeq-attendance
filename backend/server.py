@@ -1881,6 +1881,28 @@ async def reject_leave(leave_id: str, rejection_data: dict = None, current_user:
     
     await db.leaves.update_one({"id": leave_id}, {"$set": update_data})
     
+    # Send notification to employee about rejection
+    notification = Notification(
+        recipient_id=leave.get("user_id"),
+        recipient_name=leave.get("user_name"),
+        sender_id=current_user.id,
+        sender_name=current_user.name,
+        subject="رفض طلب الإجازة",
+        message=f"""تم رفض طلب إجازتك:
+
+📅 الفترة المطلوبة: من {leave.get('start_date')} إلى {leave.get('end_date')}
+📝 السبب المقدم: {leave.get('reason')}
+👤 تم الرفض من: {current_user.name}
+{f"📋 سبب الرفض: {notes}" if notes else "❗ لم يتم تحديد سبب محدد للرفض"}
+
+يمكنك التواصل مع الإدارة لمزيد من التوضيح.""",
+        type="warning",
+        priority="high",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+    
     # Log activity
     await log_activity(
         current_user.id, 
