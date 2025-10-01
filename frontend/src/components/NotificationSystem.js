@@ -37,9 +37,7 @@ const NotificationSystem = () => {
     required_action: '',
     additional_notes: ''
   });
-  const [loading, setLoading] = useState(false);
-
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const [apiLoading, setApiLoading] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
