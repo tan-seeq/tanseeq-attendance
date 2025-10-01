@@ -418,6 +418,7 @@ const Layout = ({ children }) => {
     ...(user?.role === 'super_admin' ? [
       { name: 'سجل تدقيق التقارير', href: '/work-reports/audit', icon: ShieldCheckIcon },
       { name: 'إدارة صلاحيات الموظفين', href: '/work-reports/permissions', icon: Cog6ToothIcon },
+      { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
     ] : []),
   ];
 
