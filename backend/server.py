@@ -3108,7 +3108,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
 
 @api_router.get("/payroll/calculate/{month}")
 async def calculate_payroll(month: str, current_user: User = Depends(get_admin_user)):
-    """Calculate payroll for a specific month with automatic deductions (Admin only)"""
+    """Calculate payroll for a specific month - SIMPLIFIED AND ACCURATE SYSTEM"""
     try:
         # Validate month format (YYYY-MM)
         datetime.strptime(month, "%Y-%m")
@@ -3130,20 +3130,50 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
             "date": {"$regex": f"^{month}"}
         }).to_list(1000)
         
-        # Calculate working days and hours
-        working_days = len([a for a in attendance_records if a.get("check_in")])
-        total_hours = sum([a.get("working_hours", 0) for a in attendance_records if a.get("working_hours")])
-        late_days = len([a for a in attendance_records if a.get("is_late")])
+        # IMPROVED CALCULATIONS
+        present_days = 0
+        absent_days = 0
+        total_working_hours = 0.0
+        total_deducted_hours = 0.0
+        late_incidents = 0
+        early_departure_incidents = 0
         
-        # Calculate basic salary based on daily rate
-        calculated_salary = working_days * user["daily_rate"]
-        basic_salary = min(calculated_salary, user["monthly_salary"])
+        for record in attendance_records:
+            if record.get("status") == "absent":
+                absent_days += 1
+            elif record.get("check_in") and record.get("check_out"):
+                present_days += 1
+                
+                # Use improved calculation function
+                working_calc = calculate_working_hours_and_deductions(
+                    record.get("check_in"),
+                    record.get("check_out"),
+                    break_time_minutes=60,
+                    is_admin_edited=record.get("admin_edited", False)
+                )
+                
+                total_working_hours += working_calc.get("regular_hours", 0)
+                total_deducted_hours += working_calc.get("deducted_hours", 0)
+                
+                if working_calc.get("late_minutes", 0) > 0:
+                    late_incidents += 1
+                if working_calc.get("early_departure_minutes", 0) > 0:
+                    early_departure_incidents += 1
         
-        # Calculate automatic deductions with complex rules
+        # Calculate base salary
+        monthly_salary = user.get("monthly_salary", 0)
+        daily_rate = monthly_salary / 22  # 22 working days per month
+        
+        # Calculate salary based on actual hours worked vs standard hours
+        standard_monthly_hours = 22 * 9  # 22 days * 9 hours = 198 hours standard
+        hourly_rate = monthly_salary / standard_monthly_hours
+        
+        # Base salary calculation
+        earned_salary = total_working_hours * hourly_rate
+        
+        # Deductions calculation - SIMPLIFIED
         total_deductions = 0.0
         deduction_details = []
-        late_penalty_details = []
-        absence_penalty_details = []
         
         # 1. Late arrival penalties with complex rules
         late_records = [a for a in attendance_records if a.get("is_late")]
