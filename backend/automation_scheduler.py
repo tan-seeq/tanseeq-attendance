@@ -29,7 +29,7 @@ BACKEND_URL = "http://localhost:8001/api"  # Internal backend URL
 class AutomationScheduler:
     def __init__(self):
         self.client = AsyncIOMotorClient(MONGO_URL)
-        self.db = self.client.tanseeq_hr
+        self.db = self.client[os.environ.get('DB_NAME', 'tanseeq_hr')]
         self.session = None
         
     async def get_admin_token(self):
