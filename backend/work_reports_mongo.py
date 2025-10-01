@@ -282,56 +282,54 @@ async def init_work_reports_collections():
         return True  # Don't fail startup on errors
 
 async def init_default_activity_types():
-    """Initialize default activity types"""
-    default_activities = [
-        {
-            "id": str(uuid.uuid4()),
-            "name": "Tax Consultation",
-            "name_ar": "استشارة ضريبية",
-            "description": "General tax consultation services",
-            "hourly_rate": 300.0,
-            "is_billable": True,
-            "category": "Consultation",
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "VAT Return Preparation",
-            "name_ar": "إعداد إقرار ضريبة القيمة المضافة",
-            "description": "VAT return preparation and filing",
-            "hourly_rate": 250.0,
-            "is_billable": True,
-            "category": "Tax Filing",
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "Corporate Tax Planning",
-            "name_ar": "تخطيط ضريبة الشركات",
-            "description": "Corporate tax planning and optimization",
-            "hourly_rate": 400.0,
-            "is_billable": True,
-            "category": "Planning",
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "Meeting/Research",
-            "name_ar": "اجتماع/بحث",
-            "description": "Client meetings and research activities",
-            "hourly_rate": 200.0,
-            "is_billable": False,
-            "category": "Administration",
-            "created_at": datetime.utcnow()
-        }
-    ]
-    
-    for activity in default_activities:
-        existing = await work_reports_db.activity_types.find_one({"name": activity["name"]})
-        if not existing:
-            await work_reports_db.activity_types.insert_one(activity)
-    
-    return len(default_activities)
+    """Initialize default activity types - Fast & Non-blocking"""
+    try:
+        # Quick check if any activity types exist
+        existing_count = await work_reports_db.activity_types.count_documents({}, limit=1)
+        if existing_count > 0:
+            print("Activity types already exist, skipping initialization")
+            return existing_count
+        
+        # Only create if none exist - fast batch insert
+        default_activities = [
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Tax Consultation",
+                "name_ar": "استشارة ضريبية",
+                "description": "General tax consultation services",
+                "hourly_rate": 300.0,
+                "is_billable": True,
+                "category": "Consultation",
+                "created_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "VAT Return Preparation", 
+                "name_ar": "إعداد إقرار ضريبة القيمة المضافة",
+                "description": "VAT return preparation and filing",
+                "hourly_rate": 250.0,
+                "is_billable": True,
+                "category": "Tax Filing",
+                "created_at": datetime.utcnow()
+            }
+        ]
+        
+        # Fast batch insert with timeout
+        import asyncio
+        await asyncio.wait_for(
+            work_reports_db.activity_types.insert_many(default_activities),
+            timeout=3.0
+        )
+        
+        print(f"Initialized {len(default_activities)} default activity types")
+        return len(default_activities)
+        
+    except asyncio.TimeoutError:
+        print("Activity types initialization timed out - continuing")
+        return 0
+    except Exception as e:
+        print(f"Warning: Activity types initialization failed: {e}")
+        return 0
 
 async def log_work_reports_activity(user_id: str, action_type: str, details: str, 
                                   target_id: Optional[str] = None, before_value: Optional[str] = None, 
