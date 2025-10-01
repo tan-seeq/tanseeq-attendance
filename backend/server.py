@@ -722,21 +722,121 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
     }
 
 @api_router.post("/auth/reset-password")
-async def reset_password(request: PasswordResetRequest, current_user: User = Depends(get_super_admin_user)):
-    """Reset user password (Super admin only)"""
+async def reset_password(request: PasswordResetRequest):
+    """Reset user password"""
+    # Find user by email
     user = await db.users.find_one({"email": request.email})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Hash new password
     hashed_password = hash_password(request.new_password)
+    
+    # Update password
     await db.users.update_one(
         {"email": request.email},
         {"$set": {"password": hashed_password}}
     )
     
-    await log_activity(current_user.id, "password_reset", f"Reset password for {request.email}")
+    await log_activity(user['id'], "password_reset", f"Password reset for {request.email}")
     
-    return {"message": "Password reset successfully"}
+    return {"message": "Password updated successfully"}
+
+# ============ NOTIFICATION SYSTEM ENDPOINTS ============
+
+@api_router.get("/notifications")
+async def get_notifications(current_user: User = Depends(get_current_user)):
+    """Get all notifications sent by current user (for Super Admin)"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Only Super Admin can view notifications")
+    
+    notifications = list(db.notifications.find(
+        {"sender_id": current_user.id}
+    ).sort("sent_at", -1).limit(100))
+    
+    # Convert ObjectId to string and format dates
+    for notification in notifications:
+        notification['id'] = str(notification['_id'])
+        del notification['_id']
+    
+    return notifications
+
+@api_router.get("/notifications/my")
+async def get_my_notifications(current_user: User = Depends(get_current_user)):
+    """Get notifications for current user"""
+    notifications = list(db.notifications.find(
+        {"recipient_id": current_user.id}
+    ).sort("sent_at", -1).limit(50))
+    
+    # Convert ObjectId to string
+    for notification in notifications:
+        notification['id'] = str(notification['_id'])
+        del notification['_id']
+    
+    return notifications
+
+@api_router.post("/notifications/send")
+async def send_notification(
+    notification_data: SendNotificationRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Send notification to employee (Super Admin only)"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Only Super Admin can send notifications")
+    
+    # Get recipient user info
+    recipient = await db.users.find_one({"id": notification_data.recipient_id})
+    if not recipient:
+        raise HTTPException(status_code=404, detail="Recipient not found")
+    
+    # Create notification document
+    notification = {
+        "recipient_id": notification_data.recipient_id,
+        "recipient_name": recipient.get('name', 'Unknown'),
+        "sender_id": current_user.id,
+        "sender_name": current_user.name,
+        "subject": notification_data.subject,
+        "message": notification_data.message,
+        "type": notification_data.type,
+        "priority": notification_data.priority,
+        "is_read": False,
+        "sent_at": datetime.utcnow()
+    }
+    
+    # Insert into database
+    result = await db.notifications.insert_one(notification)
+    
+    # Log activity
+    await log_activity(
+        current_user.id, 
+        "send_notification",
+        f"Sent notification to {recipient.get('name', 'Unknown')}: {notification_data.subject}"
+    )
+    
+    notification['id'] = str(result.inserted_id)
+    return notification
+
+@api_router.post("/notifications/{notification_id}/read")
+async def mark_notification_read(
+    notification_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Mark notification as read"""
+    try:
+        result = await db.notifications.update_one(
+            {
+                "_id": ObjectId(notification_id),
+                "recipient_id": current_user.id
+            },
+            {"$set": {"is_read": True}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Notification not found")
+        
+        return {"message": "Notification marked as read"}
+    except:
+        raise HTTPException(status_code=400, detail="Invalid notification ID")
 
 # ============ USER ENDPOINTS ============
 
