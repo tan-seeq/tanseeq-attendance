@@ -349,6 +349,138 @@ const NotificationSystem = () => {
           </div>
         </div>
       )}
+
+      {/* Warning/Notice Modal */}
+      {showWarningModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-6 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl leading-6 font-medium text-gray-900 flex items-center">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-red-500 mr-2" />
+                  إرسال إنذار أو لفت نظر للموظف
+                </h3>
+                <button
+                  onClick={() => setShowWarningModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSendWarning} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      اختر الموظف *
+                    </label>
+                    <select
+                      value={warningNotification.recipient_id}
+                      onChange={(e) => setWarningNotification({...warningNotification, recipient_id: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                      required
+                    >
+                      <option value="">-- اختر الموظف --</option>
+                      {allUsers.filter(user => user.role === 'user').map(user => (
+                        <option key={user.id} value={user.id}>
+                          {user.name} - {user.position}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      نوع الإشعار *
+                    </label>
+                    <select
+                      value={warningNotification.notification_type}
+                      onChange={(e) => setWarningNotification({...warningNotification, notification_type: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                      required
+                    >
+                      <option value="warning">⚠️ إنذار رسمي</option>
+                      <option value="notice">📋 لفت نظر</option>
+                      <option value="reminder">🔔 تذكير</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    عنوان الإشعار *
+                  </label>
+                  <input
+                    type="text"
+                    value={warningNotification.title}
+                    onChange={(e) => setWarningNotification({...warningNotification, title: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="مثال: إنذار بخصوص التأخير المتكرر"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    محتوى الإشعار *
+                  </label>
+                  <textarea
+                    value={warningNotification.message}
+                    onChange={(e) => setWarningNotification({...warningNotification, message: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    rows="4"
+                    placeholder="اكتب محتوى الإشعار بالتفصيل..."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الإجراء المطلوب (اختياري)
+                  </label>
+                  <input
+                    type="text"
+                    value={warningNotification.required_action}
+                    onChange={(e) => setWarningNotification({...warningNotification, required_action: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="مثال: الالتزام بمواعيد العمل الرسمية"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    ملاحظات إضافية (اختياري)
+                  </label>
+                  <textarea
+                    value={warningNotification.additional_notes}
+                    onChange={(e) => setWarningNotification({...warningNotification, additional_notes: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    rows="2"
+                    placeholder="ملاحظات إضافية أو توجيهات..."
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowWarningModal(false)}
+                    className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-300"
+                  >
+                    {loading ? 'جاري الإرسال...' : 'إرسال الإنذار'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
