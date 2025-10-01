@@ -3440,7 +3440,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         summary_row = row_num + 2
         ws.merge_cells(f'A{summary_row}:I{summary_row}')
         summary_cell = ws[f'A{summary_row}']
-        summary_cell.value = f"Total Employees: {len(payroll_data)} | Total Basic Salary: AED {sum(emp['basic_salary'] for emp in payroll_data):.2f} | Total Deductions: AED {sum(emp['total_deductions'] for emp in payroll_data):.2f} | Net Payroll: AED {sum(emp['final_salary'] for emp in payroll_data):.2f}"
+        summary_cell.value = f"Total Employees: {len(payroll_data)} | Total Monthly Salary: AED {sum(emp['monthly_salary'] for emp in payroll_data):.2f} | Total Deductions: AED {sum(emp['total_deductions'] for emp in payroll_data):.2f} | Net Payroll: AED {sum(emp['final_salary'] for emp in payroll_data):.2f}"
         summary_cell.font = Font(name="Arial", size=12, bold=True, color="1B4477")
         summary_cell.fill = PatternFill(start_color="E8F4FD", end_color="E8F4FD", fill_type="solid")
         summary_cell.alignment = Alignment(horizontal="center", vertical="center")
