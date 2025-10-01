@@ -2257,6 +2257,29 @@ async def reject_field_exit(field_exit_id: str, rejection_data: dict = None, cur
     
     await db.field_exits.update_one({"id": field_exit_id}, {"$set": update_data})
     
+    # Send notification to employee about rejection
+    notification = Notification(
+        recipient_id=field_exit.get("user_id"),
+        recipient_name=field_exit.get("user_name"),
+        sender_id=current_user.id,
+        sender_name=current_user.name,
+        subject="رفض طلب الزيارة الخارجية",
+        message=f"""تم رفض طلب زيارتك الخارجية:
+
+🏢 نوع الزيارة المطلوبة: {field_exit.get('visit_type', 'غير محدد')}
+📅 التاريخ المطلوب: {field_exit.get('date')}
+⏰ الوقت المطلوب: من {field_exit.get('expected_start_time')} إلى {field_exit.get('expected_end_time')}
+👤 تم الرفض من: {current_user.name}
+{f"📋 سبب الرفض: {notes}" if notes else "❗ لم يتم تحديد سبب محدد للرفض"}
+
+يمكنك التواصل مع الإدارة لمزيد من التوضيح أو إعادة التقديم.""",
+        type="warning",
+        priority="high",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+    
     # Log activity
     await log_activity(
         current_user.id, 
