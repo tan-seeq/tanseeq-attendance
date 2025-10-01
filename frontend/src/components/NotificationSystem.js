@@ -409,7 +409,7 @@ const NotificationSystem = () => {
                   disabled={apiLoading}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'جاري الإرسال...' : 'إرسال الإشعار'}
+                  {apiLoading ? 'جاري الإرسال...' : 'إرسال الإشعار'}
                 </button>
               </div>
             </form>
