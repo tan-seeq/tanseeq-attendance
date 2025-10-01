@@ -3716,15 +3716,29 @@ const LeaveManagement = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {leave.attachment_url ? (
-                      <button
-                        onClick={() => handleImageClick(`${BACKEND_URL}${leave.attachment_url}`)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
+                    {leave.attachment_url || leave.file_path ? (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleImageClick(`${BACKEND_URL}${leave.attachment_url || leave.file_path}`)}
+                          className="text-blue-600 hover:text-blue-900 flex items-center"
+                          title="عرض المرفق"
+                        >
+                          <EyeIcon className="h-4 w-4 mr-1" />
+                          عرض
+                        </button>
+                        <a
+                          href={`${BACKEND_URL}${leave.attachment_url || leave.file_path}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-900 flex items-center"
+                          title="تحميل المرفق"
+                        >
+                          <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                          تحميل
+                        </a>
+                      </div>
                     ) : (
-                      '-'
+                      <span className="text-gray-400">لا يوجد مرفق</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -4724,15 +4738,29 @@ const Leaves = () => {
                     {leave.reason}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {leave.attachment_url ? (
-                      <button
-                        onClick={() => handleImageClick(`${BACKEND_URL}${leave.attachment_url}`)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
+                    {leave.attachment_url || leave.file_path ? (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleImageClick(`${BACKEND_URL}${leave.attachment_url || leave.file_path}`)}
+                          className="text-blue-600 hover:text-blue-900 flex items-center"
+                          title="عرض المرفق"
+                        >
+                          <EyeIcon className="h-4 w-4 mr-1" />
+                          عرض
+                        </button>
+                        <a
+                          href={`${BACKEND_URL}${leave.attachment_url || leave.file_path}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-900 flex items-center"
+                          title="تحميل المرفق"
+                        >
+                          <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                          تحميل
+                        </a>
+                      </div>
                     ) : (
-                      '-'
+                      <span className="text-gray-400">لا يوجد مرفق</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
