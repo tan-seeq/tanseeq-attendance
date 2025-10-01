@@ -2817,6 +2817,114 @@ const FieldExits = () => {
           </div>
         </div>
       )}
+
+      {/* Visit Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-6 border w-full max-w-3xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  تقرير مفصل عن الزيارة الخارجية
+                </h3>
+                <button
+                  onClick={() => setShowReportModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+              
+              {selectedFieldExit && (
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <h4 className="font-semibold mb-2">معلومات الزيارة</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>نوع الزيارة: <span className="font-medium">{visitTypeOptions[selectedFieldExit.visit_type]}</span></div>
+                    <div>العميل: <span className="font-medium">{selectedFieldExit.client_name || 'غير محدد'}</span></div>
+                    <div>التاريخ: <span className="font-medium">{selectedFieldExit.date}</span></div>
+                    <div>وقت المغادرة: <span className="font-medium">{selectedFieldExit.actual_start_time}</span></div>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={(e) => {e.preventDefault(); submitVisitReport();}} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    تقرير مفصل عن الزيارة* <span className="text-red-500">(الحد الأدنى 20 حرف)</span>
+                  </label>
+                  <textarea
+                    value={visitReport.detailed_report}
+                    onChange={(e) => setVisitReport({...visitReport, detailed_report: e.target.value})}
+                    required
+                    rows="4"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="اكتب تقريراً مفصلاً عما تم إنجازه في الزيارة، مثل: زيارة سوق الحراج للسيارات المستعملة، مقابلة العميل أحمد محمد، تسليم المستندات المطلوبة، مناقشة الاحتياجات المستقبلية..."
+                  />
+                  <div className="text-xs text-gray-500 mt-1">
+                    عدد الأحرف: {visitReport.detailed_report.length}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الإنجازات المحققة
+                  </label>
+                  <textarea
+                    value={visitReport.accomplishments}
+                    onChange={(e) => setVisitReport({...visitReport, accomplishments: e.target.value})}
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="ما الذي تم إنجازه بنجاح؟ (مثال: توقيع عقد، تحصيل دفعة، تسليم مستندات)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    التحديات أو المشاكل المواجهة
+                  </label>
+                  <textarea
+                    value={visitReport.challenges}
+                    onChange={(e) => setVisitReport({...visitReport, challenges: e.target.value})}
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="هل واجهت أي صعوبات أو تحديات؟ (اختياري)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الخطوات التالية المطلوبة
+                  </label>
+                  <textarea
+                    value={visitReport.next_steps}
+                    onChange={(e) => setVisitReport({...visitReport, next_steps: e.target.value})}
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="ما هي المتابعة المطلوبة؟ (مثال: اتصال تأكيدي، تسليم مستندات إضافية، زيارة أخرى)"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={visitReport.detailed_report.length < 20}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    إرسال التقرير
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowReportModal(false)}
+                    className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
