@@ -3689,7 +3689,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         
         # Calculate totals
         total_monthly_salary = sum(emp['monthly_salary'] for emp in payroll_data)
-        total_basic_salary = sum(emp['basic_salary'] for emp in payroll_data)
+        total_basic_salary = sum(emp['monthly_salary'] for emp in payroll_data)  # Fixed: use monthly_salary
         total_deductions = sum(emp.get('total_deductions', 0) for emp in payroll_data)
         total_final_salary = sum(emp['final_salary'] for emp in payroll_data)
         
