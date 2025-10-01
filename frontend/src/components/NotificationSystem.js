@@ -46,13 +46,24 @@ const NotificationSystem = () => {
 
   const fetchNotifications = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const token = localStorage.getItem('token');
+      
+      console.log('Fetching notifications from:', `${API}/notifications`);
+      
       const response = await axios.get(`${API}/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      console.log('Notifications response:', response.data);
       setNotifications(response.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      setError(`فشل في تحميل الإشعارات: ${error.message}`);
+      setNotifications([]);
+    } finally {
+      setLoading(false);
     }
   };
 
