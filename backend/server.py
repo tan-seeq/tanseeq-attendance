@@ -3401,8 +3401,8 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             row_data = [
                 emp["name"],  # English translated name
                 emp["working_days"],
-                f"AED {emp['basic_salary']:.2f}",
-                emp["late_days"],
+                f"AED {emp['monthly_salary']:.2f}",  # Fixed: use monthly_salary instead of basic_salary
+                emp["late_incidents"],  # Fixed: use late_incidents instead of late_days
                 emp.get("unauthorized_absences", 0),
                 f"AED {emp['total_deductions']:.2f}",
                 deduction_details_text,
