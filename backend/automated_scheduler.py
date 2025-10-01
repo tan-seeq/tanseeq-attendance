@@ -38,7 +38,7 @@ MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/tanseeq_hr")
 API_BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:8001/api")
 
 client = AsyncIOMotorClient(MONGO_URL)
-db = client.tanseeq_hr
+db = client[os.environ.get('DB_NAME', 'tanseeq_hr')]
 
 class AutomatedScheduler:
     def __init__(self):
