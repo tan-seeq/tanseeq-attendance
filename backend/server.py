@@ -1824,6 +1824,28 @@ async def approve_leave(leave_id: str, approval_data: dict = None, current_user:
     
     await db.leaves.update_one({"id": leave_id}, {"$set": update_data})
     
+    # Send notification to employee about approval
+    notification = Notification(
+        recipient_id=leave.get("user_id"),
+        recipient_name=leave.get("user_name"),
+        sender_id=current_user.id,
+        sender_name=current_user.name,
+        subject="موافقة على طلب الإجازة",
+        message=f"""تم الموافقة على طلب إجازتك:
+
+📅 الفترة: من {leave.get('start_date')} إلى {leave.get('end_date')}
+📝 السبب: {leave.get('reason')}
+👤 تمت الموافقة من: {current_user.name}
+{f"📋 ملاحظات الإدارة: {notes}" if notes else ""}
+
+يمكنك الاستمتاع بإجازتك!""",
+        type="success",
+        priority="normal",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+    
     # Log activity
     await log_activity(
         current_user.id, 
