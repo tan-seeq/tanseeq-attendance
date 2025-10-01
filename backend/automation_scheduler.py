@@ -39,7 +39,7 @@ class AutomationScheduler:
                 # Try to login with Hatem (Super Admin) credentials
                 login_data = {
                     "email": "hatem@tanseeq.com",
-                    "password": "hatem123"
+                    "password": os.environ.get('ADMIN_PASSWORD', 'hatem123')
                 }
                 
                 async with session.post(f"{BACKEND_URL}/auth/login", json=login_data) as response:
