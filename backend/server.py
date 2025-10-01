@@ -6077,14 +6077,29 @@ async def get_credential_password(
 
 # ============ ACTIVITY TYPES MANAGEMENT ============
 
-@api_router.get("/work-reports/activity-types", response_model=List[ActivityTypeResponse])
-async def get_activity_types(
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
-):
-    """Get all activity types"""
-    activity_types = db.query(ActivityType).filter(ActivityType.is_active == True).all()
-    return activity_types
+@api_router.get("/work-reports/activity-types")
+async def get_activity_types(current_user = Depends(get_current_user)):
+    """Get all activity types - MongoDB version"""
+    try:
+        activity_types = await work_reports_db.activity_types.find({}).to_list(1000)
+        
+        # Convert to response format
+        activities = []
+        for activity in activity_types:
+            activities.append({
+                "id": activity.get("id"),
+                "name": activity.get("name"),
+                "name_ar": activity.get("name_ar"),
+                "description": activity.get("description"),
+                "hourly_rate": activity.get("hourly_rate"),
+                "is_billable": activity.get("is_billable", True),
+                "category": activity.get("category"),
+                "created_at": activity.get("created_at")
+            })
+        
+        return activities
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting activity types: {str(e)}")
 
 @api_router.post("/work-reports/activity-types", response_model=ActivityTypeResponse)
 async def create_activity_type(
