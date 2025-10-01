@@ -750,9 +750,9 @@ async def get_notifications(current_user: User = Depends(get_current_user)):
     if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Only Super Admin can view notifications")
     
-    notifications = list(db.notifications.find(
+    notifications = await db.notifications.find(
         {"sender_id": current_user.id}
-    ).sort("sent_at", -1).limit(100))
+    ).sort("sent_at", -1).limit(100).to_list(100)
     
     # Convert ObjectId to string and format dates
     for notification in notifications:
