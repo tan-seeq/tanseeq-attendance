@@ -3649,7 +3649,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             table_data.append([
                 employee["name"][:15],  # Truncate long names for better fit
                 f"AED\n{employee['monthly_salary']:.0f}",
-                f"AED\n{employee['basic_salary']:.0f}",
+                f"AED\n{employee['monthly_salary']:.0f}",  # Fixed: use monthly_salary
                 f"AED\n{employee.get('late_deductions', 0):.0f}",
                 f"AED\n{employee.get('absence_deductions', 0):.0f}",
                 f"AED\n{employee.get('total_deductions', 0):.0f}",
