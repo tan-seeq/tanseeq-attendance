@@ -871,45 +871,94 @@ async def get_my_notifications(current_user: User = Depends(get_current_user)):
     return notifications
 
 @api_router.post("/notifications/send")
-async def send_notification(
-    notification_data: SendNotificationRequest,
-    current_user: User = Depends(get_current_user)
-):
-    """Send notification to employee (Super Admin only)"""
+async def send_notification(notification_data: dict, current_user: User = Depends(get_current_user)):
+    """Send notification to specific employee"""
     if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Only Super Admin can send notifications")
+        raise HTTPException(status_code=403, detail="Only super admin can send notifications")
     
-    # Get recipient user info
-    recipient = await db.users.find_one({"id": notification_data.recipient_id})
+    # Get recipient user
+    recipient = await db.users.find_one({"id": notification_data["recipient_id"]})
     if not recipient:
         raise HTTPException(status_code=404, detail="Recipient not found")
     
-    # Create notification document
-    notification = {
-        "recipient_id": notification_data.recipient_id,
-        "recipient_name": recipient.get('name', 'Unknown'),
-        "sender_id": current_user.id,
-        "sender_name": current_user.name,
-        "subject": notification_data.subject,
-        "message": notification_data.message,
-        "type": notification_data.type,
-        "priority": notification_data.priority,
-        "is_read": False,
-        "sent_at": datetime.utcnow()
-    }
+    # Create notification
+    notification = Notification(
+        recipient_id=notification_data["recipient_id"],
+        recipient_name=recipient["name"],
+        sender_id=current_user.id,
+        sender_name=current_user.name,
+        subject=notification_data["subject"],
+        message=notification_data["message"],
+        type=notification_data.get("type", "info"),
+        priority=notification_data.get("priority", "normal"),
+        sent_at=datetime.utcnow()
+    )
     
-    # Insert into database
-    result = await db.notifications.insert_one(notification)
+    await db.notifications.insert_one(notification.dict())
     
     # Log activity
     await log_activity(
         current_user.id, 
-        "send_notification",
-        f"Sent notification to {recipient.get('name', 'Unknown')}: {notification_data.subject}"
+        "notification_sent", 
+        f"Sent notification to {recipient['name']}: {notification_data['subject']}"
     )
     
-    notification['id'] = str(result.inserted_id)
-    return notification
+    return {"message": "Notification sent successfully"}
+
+@api_router.post("/notifications/send-warning")
+async def send_warning_notification(notification_data: dict, current_user: User = Depends(get_current_user)):
+    """Send warning/notice notification to specific employee - Super Admin Only"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Only super admin can send warning notifications")
+    
+    # Get recipient user
+    recipient = await db.users.find_one({"id": notification_data["recipient_id"]})
+    if not recipient:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Determine notification type based on content
+    notification_type = notification_data.get("notification_type", "warning")
+    
+    # Create structured warning message
+    warning_message = f"""
+🔔 {notification_data.get('title', 'إشعار إداري')}
+
+📝 {notification_data['message']}
+
+👤 من: {current_user.name} (الإدارة العليا)
+📅 التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+
+{f"⚠️ إجراء مطلوب: {notification_data['required_action']}" if notification_data.get('required_action') else ""}
+{f"📋 ملاحظات إضافية: {notification_data['additional_notes']}" if notification_data.get('additional_notes') else ""}
+"""
+
+    # Create notification
+    notification = Notification(
+        recipient_id=notification_data["recipient_id"],
+        recipient_name=recipient["name"],
+        sender_id=current_user.id,
+        sender_name=current_user.name,
+        subject=f"⚠️ {notification_data.get('title', 'إشعار إداري')}",
+        message=warning_message.strip(),
+        type="warning" if notification_type == "warning" else "info",
+        priority="high" if notification_type == "warning" else "normal",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+    
+    # Log activity with detailed information
+    await log_activity(
+        current_user.id, 
+        f"warning_notification_sent", 
+        f"Sent {notification_type} notification to {recipient['name']}: {notification_data.get('title', 'Administrative Notice')}"
+    )
+    
+    return {
+        "message": "تم إرسال الإشعار بنجاح", 
+        "notification_type": notification_type,
+        "recipient": recipient["name"]
+    }
 
 @api_router.post("/notifications/{notification_id}/read")
 async def mark_notification_read(
