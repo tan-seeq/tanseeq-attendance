@@ -511,6 +511,94 @@ async def log_activity(user_id: str, action: str, details: str, before_value: st
         after_value=after_value
     )
     await db.activity_logs.insert_one(activity_log.dict())
+def calculate_working_hours_and_deductions(check_in, check_out, break_time_minutes=0, is_admin_edited=False):
+    """Calculate working hours and deductions with improved logic - NO EARLY ARRIVAL PENALTY"""
+    
+    # Standard work hours
+    STANDARD_START_TIME = datetime.strptime("09:00", "%H:%M").time()
+    STANDARD_END_TIME = datetime.strptime("18:00", "%H:%M").time() 
+    STANDARD_HOURS = 9.0  # 9 hours standard
+    BREAK_TIME = break_time_minutes / 60.0  # Convert to hours
+    
+    if not check_in or not check_out:
+        return {
+            "total_hours": 0.0,
+            "regular_hours": 0.0,
+            "overtime_hours": 0.0,
+            "deducted_hours": 0.0,
+            "late_minutes": 0,
+            "early_departure_minutes": 0,
+            "status": "incomplete"
+        }
+
+    try:
+        # Parse times
+        if isinstance(check_in, str):
+            check_in_time = datetime.strptime(check_in.split('T')[0] + ' ' + check_in.split('T')[1][:5], "%Y-%m-%d %H:%M")
+        else:
+            check_in_time = check_in
+
+        if isinstance(check_out, str):
+            check_out_time = datetime.strptime(check_out.split('T')[0] + ' ' + check_out.split('T')[1][:5], "%Y-%m-%d %H:%M")
+        else:
+            check_out_time = check_out
+
+        # Calculate total worked time
+        total_worked_time = (check_out_time - check_in_time).total_seconds() / 3600.0
+        
+        # Subtract break time
+        net_worked_hours = max(0, total_worked_time - BREAK_TIME)
+        
+        # NO PENALTY FOR EARLY ARRIVAL (before 9:00 AM) - REMOVED!
+        late_minutes = 0
+        if check_in_time.time() > STANDARD_START_TIME:
+            late_delta = datetime.combine(check_in_time.date(), check_in_time.time()) - datetime.combine(check_in_time.date(), STANDARD_START_TIME)
+            late_minutes = int(late_delta.total_seconds() / 60)
+        
+        # Calculate early departure ONLY (before 6:00 PM) - MAIN DEDUCTION SOURCE
+        early_departure_minutes = 0
+        if check_out_time.time() < STANDARD_END_TIME:
+            early_delta = datetime.combine(check_out_time.date(), STANDARD_END_TIME) - datetime.combine(check_out_time.date(), check_out_time.time())
+            early_departure_minutes = int(early_delta.total_seconds() / 60)
+        
+        # NO DEDUCTIONS IF ADMIN EDITED THE ATTENDANCE
+        if is_admin_edited:
+            late_minutes = 0
+            early_departure_minutes = 0
+        
+        # Calculate deductions (ONLY from late arrival and early departure)
+        total_deduction_minutes = late_minutes + early_departure_minutes
+        deducted_hours = total_deduction_minutes / 60.0
+        
+        # Calculate regular and overtime hours
+        regular_hours = min(net_worked_hours, STANDARD_HOURS)
+        overtime_hours = max(0, net_worked_hours - STANDARD_HOURS)
+        
+        # Adjust regular hours for deductions
+        effective_regular_hours = max(0, regular_hours - deducted_hours)
+        
+        return {
+            "total_hours": round(net_worked_hours, 2),
+            "regular_hours": round(effective_regular_hours, 2),
+            "overtime_hours": round(overtime_hours, 2),
+            "deducted_hours": round(deducted_hours, 2),
+            "late_minutes": late_minutes,
+            "early_departure_minutes": early_departure_minutes,
+            "status": "complete",
+            "admin_edited": is_admin_edited
+        }
+
+    except Exception as e:
+        print(f"Error calculating working hours: {e}")
+        return {
+            "total_hours": 0.0,
+            "regular_hours": 0.0,
+            "overtime_hours": 0.0,
+            "deducted_hours": 0.0,
+            "late_minutes": 0,
+            "early_departure_minutes": 0,
+            "status": "error"
+        }
 
 # ============ AUTH DEPENDENCY ============
 
