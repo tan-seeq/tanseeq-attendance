@@ -56,6 +56,7 @@ class SendNotificationRequest(BaseModel):
     message: str
     type: str = "info"
     priority: str = "normal"
+
 from sqlalchemy.orm import Session
 from report_generator import report_generator
 
