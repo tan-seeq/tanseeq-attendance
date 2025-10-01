@@ -21,7 +21,7 @@ const AuditLogViewer = () => {
     table_name: ''
   });
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
   const actionTypes = [
     'create_client', 'update_client', 'delete_client',
