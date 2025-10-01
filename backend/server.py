@@ -5697,24 +5697,7 @@ This module is completely isolated from the main TANSEEQ HR system
 Uses PostgreSQL instead of MongoDB for data storage
 """
 
-@api_router.on_event("startup")
-async def startup_work_reports():
-    """Initialize Work Reports database and default data"""
-    try:
-        # Create tables
-        create_work_reports_tables()
-        
-        # Initialize default activity types
-        from sqlalchemy.orm import sessionmaker
-        from work_reports_db import engine
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        db = SessionLocal()
-        init_default_activity_types(db)
-        db.close()
-        
-        logger.info("Work Reports module initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize Work Reports module: {str(e)}")
+# Work Reports MongoDB initialization is now handled in app startup event
 
 # ============ CLIENT MANAGEMENT ENDPOINTS ============
 
