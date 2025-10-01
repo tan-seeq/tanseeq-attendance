@@ -311,13 +311,22 @@ async def init_work_reports_collections():
 async def init_default_activity_types():
     """Initialize default activity types - Fast & Non-blocking"""
     try:
-        # Quick check if any activity types exist
-        existing_count = await work_reports_db.activity_types.count_documents({}, limit=1)
+        if work_reports_db is None:
+            print("Work Reports database not available, skipping activity types initialization")
+            return 0
+            
+        # Quick check with timeout
+        import asyncio
+        existing_count = await asyncio.wait_for(
+            work_reports_db.activity_types.count_documents({}, limit=1),
+            timeout=2.0
+        )
+        
         if existing_count > 0:
             print("Activity types already exist, skipping initialization")
             return existing_count
         
-        # Only create if none exist - fast batch insert
+        # Only create if none exist - minimal set for faster startup
         default_activities = [
             {
                 "id": str(uuid.uuid4()),
@@ -328,24 +337,13 @@ async def init_default_activity_types():
                 "is_billable": True,
                 "category": "Consultation",
                 "created_at": datetime.utcnow()
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "name": "VAT Return Preparation", 
-                "name_ar": "إعداد إقرار ضريبة القيمة المضافة",
-                "description": "VAT return preparation and filing",
-                "hourly_rate": 250.0,
-                "is_billable": True,
-                "category": "Tax Filing",
-                "created_at": datetime.utcnow()
             }
         ]
         
-        # Fast batch insert with timeout
-        import asyncio
+        # Fast insert with timeout
         await asyncio.wait_for(
             work_reports_db.activity_types.insert_many(default_activities),
-            timeout=3.0
+            timeout=2.0
         )
         
         print(f"Initialized {len(default_activities)} default activity types")
