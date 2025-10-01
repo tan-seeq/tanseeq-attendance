@@ -24,9 +24,9 @@ import requests
 import openpyxl
 from io import BytesIO
 
-# Import Work Reports Database Module
-from work_reports_db import (
-    get_work_reports_db, create_work_reports_tables, init_default_activity_types,
+# Import Work Reports Database Module - MongoDB version
+from work_reports_mongo import (
+    get_work_reports_db, init_work_reports_collections, init_default_activity_types,
     Client, ClientCredential, ActivityType, WorkLog, WorkReportsAuditLog,
     UserWorkReportsPermission, PERMISSION_TEMPLATES,
     ClientCreate, ClientUpdate, ClientResponse,
@@ -34,7 +34,7 @@ from work_reports_db import (
     ActivityTypeCreate, ActivityTypeResponse,
     WorkLogCreate, WorkLogUpdate, WorkLogResponse,
     UserPermissionResponse, PermissionUpdateRequest,
-    credential_encryption, log_work_reports_activity
+    credential_encryption, log_work_reports_activity, work_reports_db
 )
 
 # Notification Model
