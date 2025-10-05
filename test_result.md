@@ -55,8 +55,8 @@
 ##   test_priority: "high_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
+##     -agent: "main"
+##     -message: "TESTING REQUEST: Comprehensive backend testing needed for new Advances and Loans Management System. Please test all 8 API endpoints with authentication: /advances/create (Super Admin only), /advances/expense (with file upload), /advances/my-balance, /advances/my-transactions, /advances/admin/all-balances, /advances/admin/pending-approvals, /advances/{transaction_id}/approve, /advances/attachment/{transaction_id}/{attachment_id}. Focus on: 1) Authentication and role-based access control 2) File upload functionality for invoices 3) Balance calculation logic 4) Approval workflow 5) Notification system integration. Test with all user roles: regular user (jihad@tanseeq.com), admin (mahmoud@tanseeq.com), super_admin (hatem@tanseeq.com)."
 
 ## current_refactoring_tasks:
 backend:
