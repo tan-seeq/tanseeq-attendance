@@ -3187,6 +3187,7 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/marketing-visits" element={<MarketingVisits />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
