@@ -11,7 +11,7 @@ import pyotp
 import qrcode
 from io import BytesIO
 import base64
-from datetime import datetime, timedelta, time
+from datetime import datetime, timezone, timedelta, time
 from jose import JWTError, jwt
 import os
 import logging
