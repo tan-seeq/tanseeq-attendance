@@ -1729,7 +1729,6 @@ async def edit_advance_transaction(
     
     # إضافة سجل في النشاطات
     await log_activity(
-        db, 
         current_user.id,
         "advance_edited",
         f"تعديل معاملة {transaction['transaction_type_ar']} - {transaction['employee_name']}"
