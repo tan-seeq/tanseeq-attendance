@@ -909,9 +909,9 @@ async def create_advance_or_custody(
 
 @api_router.post("/advances/expense")
 async def create_expense_with_invoice(
-    amount: float = Form(..., gt=0),
+    amount: float = Form(...),
     category: str = Form(...),
-    description: str = Form(..., min_length=5),
+    description: str = Form(...),
     expense_date: str = Form(...),
     notes: Optional[str] = Form(None),
     invoice_files: List[UploadFile] = File(...),
