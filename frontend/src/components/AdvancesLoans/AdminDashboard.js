@@ -313,6 +313,16 @@ const AdminDashboard = () => {
             >
               أرصدة الموظفين ({data.allBalances.length})
             </button>
+            <button
+              onClick={() => setActiveTab('transactions')}
+              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+                activeTab === 'transactions'
+                  ? 'border-green-500 text-green-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              جميع المعاملات ({data.allTransactions.length})
+            </button>
           </nav>
         </div>
 
