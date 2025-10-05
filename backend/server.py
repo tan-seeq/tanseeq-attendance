@@ -1018,11 +1018,11 @@ async def get_visits_history(
     }).sort("start_time", -1).limit(limit).to_list(limit)
     
     # تحويل التواريخ وإضافة الترجمات
+    dubai_tz = timezone(timedelta(hours=4))  # تعريف dubai_tz مرة واحدة
+    
     for visit in visits:
         if visit.get("start_time"):
             start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
-            # تحويل إلى توقيت دبي للعرض
-            dubai_tz = timezone(timedelta(hours=4))
             visit["start_time_display"] = start_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
         
         if visit.get("end_time"):
