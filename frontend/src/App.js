@@ -425,15 +425,9 @@ const Layout = ({ children }) => {
     ...(user?.role === 'super_admin' ? [
       { name: '👑 إدارة السُلف والعُهد', href: '/advances/admin', icon: UserIcon },
     ] : []),
-    // Work Reports Module (Isolated)
-    { name: 'لوحة التقارير', href: '/work-reports', icon: ChartBarIcon },
+    // Work Reports Module (Isolated) - Removed per user request
     { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
-    { name: 'سجلات العمل اليومية', href: '/work-reports/logs', icon: ClockIcon },
-    { name: 'وضع ساعة الإيقاف', href: '/work-reports/stopwatch', icon: PlayIcon },
-    { name: 'تقارير متقدمة', href: '/work-reports/reports', icon: DocumentChartBarIcon },
     ...(user?.role === 'super_admin' ? [
-      { name: 'سجل تدقيق التقارير', href: '/work-reports/audit', icon: ShieldCheckIcon },
-      { name: 'إدارة صلاحيات الموظفين', href: '/work-reports/permissions', icon: Cog6ToothIcon },
       { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
     ] : []),
   ];
