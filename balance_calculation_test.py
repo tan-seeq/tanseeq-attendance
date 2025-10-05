@@ -171,16 +171,62 @@ class BalanceCalculationTester:
         if 'super_admin' not in self.tokens or not self.test_employee_id:
             return False
         
-        # First login as the test employee to create expense
-        # Get test employee credentials - we'll use a workaround by creating expense as super admin
+        # Create a test PDF file for the expense (minimal PDF structure)
+        test_pdf_content = b"""%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Test Invoice) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000206 00000 n 
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+300
+%%EOF"""
         
-        # Create a test file for the expense
-        test_file_content = b"Test invoice content for balance calculation test"
-        test_file_path = "/tmp/test_invoice.txt"
+        test_file_path = "/tmp/test_invoice.pdf"
         
         try:
             with open(test_file_path, "wb") as f:
-                f.write(test_file_content)
+                f.write(test_pdf_content)
             
             # Use requests with files for multipart form data
             url = f"{self.api_url}/advances/expense"
@@ -194,7 +240,7 @@ class BalanceCalculationTester:
                 'notes': 'اختبار خصم المصروف من العهدة'
             }
             
-            files = {'invoice_files': ('test_invoice.txt', open(test_file_path, 'rb'), 'text/plain')}
+            files = {'invoice_files': ('test_invoice.pdf', open(test_file_path, 'rb'), 'application/pdf')}
             
             response = requests.post(url, data=form_data, files=files, headers=headers, timeout=30)
             
