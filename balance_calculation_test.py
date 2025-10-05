@@ -37,6 +37,7 @@ class BalanceCalculationTester:
         # Test credentials from review request
         self.super_admin_creds = {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'}
         self.test_employee_id = None
+        self.test_employee_creds = None
         self.custody_transaction_id = None
         self.expense_transaction_id = None
 
