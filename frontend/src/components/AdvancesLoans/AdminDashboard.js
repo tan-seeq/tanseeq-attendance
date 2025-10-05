@@ -569,23 +569,12 @@ const AdminDashboard = () => {
               {selectedTransaction.attachments && selectedTransaction.attachments.length > 0 && (
                 <div className="bg-blue-50 p-4 rounded-lg mb-6">
                   <h4 className="font-semibold text-gray-800 mb-3">المرفقات ({selectedTransaction.attachments.length})</h4>
-                  <div className="space-y-2">
-                    {selectedTransaction.attachments.map((attachment, index) => (
-                      <div key={index} className="flex items-center justify-between bg-white p-3 rounded border">
-                        <div className="flex items-center">
-                          <DocumentTextIcon className="h-5 w-5 text-blue-600 ml-2" />
-                          <span className="text-sm font-medium">{attachment.original_filename}</span>
-                          <span className="text-xs text-gray-500 mr-2">({(attachment.file_size / 1024).toFixed(1)} KB)</span>
-                        </div>
-                        <button
-                          onClick={() => window.open(`${API}/advances/attachment/${selectedTransaction.id}/${attachment.id}`, '_blank')}
-                          className="text-blue-600 hover:text-blue-800 text-sm"
-                        >
-                          عرض
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                  <AttachmentViewer 
+                    attachments={selectedTransaction.attachments.map(attachment => ({
+                      ...attachment,
+                      url: `${API}/advances/attachment/${selectedTransaction.id}/${attachment.id}`
+                    }))}
+                  />
                 </div>
               )}
 
