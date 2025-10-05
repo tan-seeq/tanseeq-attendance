@@ -420,6 +420,11 @@ const Layout = ({ children }) => {
       { name: t('activity_logs'), href: '/activity-logs', icon: DocumentTextIcon },
       { name: 'إنشاء طلبات للموظفين', href: '/admin-request-creation', icon: PlusIcon },
     ] : []),
+    // Advances & Loans System
+    { name: '💰 السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
+    ...(user?.role === 'super_admin' ? [
+      { name: '👑 إدارة السُلف والعُهد', href: '/advances/admin', icon: UserIcon },
+    ] : []),
     // Work Reports Module (Isolated)
     { name: 'لوحة التقارير', href: '/work-reports', icon: ChartBarIcon },
     { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
