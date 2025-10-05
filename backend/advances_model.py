@@ -104,6 +104,7 @@ class EmployeeBalance(BaseModel):
     # Calculated Balances
     remaining_advance: float = Field(default=0.0, description="السلفة المتبقية")
     remaining_custody: float = Field(default=0.0, description="العهدة المتبقية")
+    total_available: float = Field(default=0.0, description="إجمالي الرصيد المتاح")
     
     # Metadata
     last_transaction_date: Optional[datetime] = None
