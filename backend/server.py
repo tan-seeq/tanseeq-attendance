@@ -1784,7 +1784,6 @@ async def settle_advance_with_salary(
     
     # إضافة سجل في النشاطات
     await log_activity(
-        db, 
         current_user.id,
         "advance_settlement",
         f"تسوية سلفة للموظف {employee['name']} بمبلغ {settlement_amount} درهم"
