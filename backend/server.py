@@ -1670,7 +1670,6 @@ async def edit_marketing_visit(
     
     # إضافة سجل في النشاطات
     await log_activity(
-        db, 
         current_user.id,
         "marketing_visit_edited",
         f"تعديل زيارة تسويقية - {visit['client_name']}"
