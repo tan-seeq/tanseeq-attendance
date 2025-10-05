@@ -21,11 +21,13 @@ class AdvancesCreateDebugTester:
         self.token = None
         self.user_info = None
         
-        # Super Admin credentials as specified in review request
-        self.super_admin_creds = {
-            'email': 'hatem@tanseeq.com', 
-            'password': 'hatem123'
-        }
+        # Super Admin credentials - trying different variations
+        self.super_admin_creds_list = [
+            {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'},
+            {'email': 'hatem@tanseeq.com', 'password': 'hatem123'},
+            {'email': 'hatemmo186@gmail.com', 'password': 'hatem123'},
+            {'email': 'hatemmo186@gmail.com', 'password': '123456'}
+        ]
 
     def log_detailed(self, title: str, data: Any):
         """Log detailed information"""
