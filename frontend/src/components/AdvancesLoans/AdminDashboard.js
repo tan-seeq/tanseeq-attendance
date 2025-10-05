@@ -87,10 +87,17 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${API}/advances/create`, {
-        ...createForm,
-        amount: parseFloat(createForm.amount)
-      }, {
+      const requestData = {
+        employee_id: createForm.employee_id,
+        transaction_type: createForm.transaction_type,
+        amount: parseFloat(createForm.amount),
+        description: createForm.description,
+        notes: createForm.notes
+      };
+      
+      console.log('Sending advance create request:', requestData);
+      
+      const response = await axios.post(`${API}/advances/create`, requestData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
