@@ -158,6 +158,7 @@ class BalanceResponse(BaseModel):
     total_returns: float
     remaining_advance: float
     remaining_custody: float
+    total_available: float  # Total available balance (remaining_advance + remaining_custody)
     last_transaction_date: Optional[str] = None
 
 # Database Helper Functions
