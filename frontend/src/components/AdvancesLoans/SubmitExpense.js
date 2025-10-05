@@ -13,6 +13,7 @@ import {
   ArrowDownTrayIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
+import AttachmentViewer from '../AttachmentViewer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
