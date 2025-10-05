@@ -296,9 +296,9 @@ startxref
                                             data=form_data, files={},
                                             token=self.tokens['user'], expected_status=422)
         
-        validation_success = success  # Should fail with 400
+        validation_success = success  # Should fail with 422
         self.log_test("Expense validation (no files)", validation_success,
-                     "Expected 400 but got different status" if not validation_success else "")
+                     "Expected 422 but got different status" if not validation_success else "")
         
         return validation_success
 
