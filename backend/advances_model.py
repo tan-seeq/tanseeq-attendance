@@ -252,8 +252,26 @@ class AdvancesDB:
                 last_transaction_date = tx_date
         
         # Calculate remaining balances
-        remaining_advance = totals["total_advances"] - totals["total_expenses"]
-        remaining_custody = totals["total_custody"] - totals["total_returns"]
+        # Total available balance = advances + custody - expenses - returns
+        total_available = totals["total_advances"] + totals["total_custody"] - totals["total_expenses"] - totals["total_returns"]
+        
+        # Deduct expenses proportionally from advances and custody based on their original amounts
+        total_source = totals["total_advances"] + totals["total_custody"]
+        
+        if total_source > 0:
+            # Calculate proportional deduction
+            total_deductions = totals["total_expenses"] + totals["total_returns"]
+            advance_ratio = totals["total_advances"] / total_source
+            custody_ratio = totals["total_custody"] / total_source
+            
+            advance_deductions = total_deductions * advance_ratio
+            custody_deductions = total_deductions * custody_ratio
+            
+            remaining_advance = max(0, totals["total_advances"] - advance_deductions)
+            remaining_custody = max(0, totals["total_custody"] - custody_deductions)
+        else:
+            remaining_advance = 0
+            remaining_custody = 0
         
         return EmployeeBalance(
             employee_id=employee_id,
