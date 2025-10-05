@@ -240,8 +240,8 @@ startxref
             self.log_test("Submit expense with file", False, "User not logged in")
             return False
         
-        # Create a test file
-        temp_file_path, original_filename = self.create_test_file("test_invoice.txt", "Test invoice content for expense")
+        # Create a test PDF file
+        temp_file_path, original_filename = self.create_test_file("test_invoice.pdf", "Test invoice content for expense")
         
         try:
             # Prepare form data
