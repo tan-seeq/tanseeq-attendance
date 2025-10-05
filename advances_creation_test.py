@@ -23,9 +23,11 @@ class AdvancesCreationTester:
         self.tests_run = 0
         self.tests_passed = 0
         
-        # Test credentials from review request
+        # Test credentials from review request - try multiple variations
         self.test_users = {
-            'super_admin': {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'}
+            'super_admin_1': {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'},
+            'super_admin_2': {'email': 'hatem@tanseeq.com', 'password': 'hatem123'},
+            'super_admin_3': {'email': 'hatemmo186@gmail.com', 'password': 'hatem123'}
         }
 
     def log_test(self, name: str, success: bool, details: str = ""):
