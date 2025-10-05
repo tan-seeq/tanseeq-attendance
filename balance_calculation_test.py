@@ -431,6 +431,13 @@ startxref
             print("❌ CRITICAL: Could not create custody transaction. Cannot proceed.")
             return False
         
+        # Step 4.5: Check balance after custody creation
+        print("🔍 Checking balance after custody creation...")
+        updated_balance = self.get_current_balance()
+        if updated_balance:
+            print(f"   Total Custody: {updated_balance.get('total_custody', 0)} AED")
+            print(f"   Total Available: {updated_balance.get('total_available', 0)} AED")
+        
         # Step 5: Create expense of 30 AED
         if not self.create_expense_transaction(30.0):
             print("❌ CRITICAL: Could not create expense transaction. Cannot proceed.")
