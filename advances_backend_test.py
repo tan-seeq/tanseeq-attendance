@@ -413,16 +413,45 @@ startxref
         """Test POST /api/advances/{transaction_id}/approve - Approve/reject transactions"""
         print("\n=== Testing Transaction Approval/Rejection ===")
         
-        if 'super_admin' not in self.tokens:
-            self.log_test("Approve transaction", False, "Super admin not logged in")
+        if 'super_admin' not in self.tokens or 'user' not in self.tokens:
+            self.log_test("Approve transaction", False, "Required users not logged in")
             return False
         
-        # First, get pending transactions to find one to approve
+        # First, create an expense to have something to approve
+        temp_file_path, original_filename = self.create_test_file("approval_test_invoice.pdf")
+        
+        try:
+            form_data = {
+                'amount': '200.0',
+                'category': 'meals',
+                'description': 'Test expense for approval testing',
+                'expense_date': '2024-01-20',
+                'notes': 'Created for approval testing'
+            }
+            
+            with open(temp_file_path, 'rb') as f:
+                files = {'invoice_files': (original_filename, f, 'application/pdf')}
+                
+                expense_success, expense_response = self.make_request('POST', 'advances/expense', 
+                                                                    data=form_data, files=files,
+                                                                    token=self.tokens['user'])
+            
+            if not expense_success:
+                self.log_test("Approve transaction (create expense first)", False, str(expense_response))
+                return False
+                
+        finally:
+            try:
+                os.unlink(temp_file_path)
+            except:
+                pass
+        
+        # Now get pending transactions to find one to approve
         success, response = self.make_request('GET', 'advances/admin/pending-approvals', 
                                             token=self.tokens['super_admin'])
         
         if not success or not response.get('pending_transactions'):
-            self.log_test("Approve transaction", False, "No pending transactions to test approval")
+            self.log_test("Approve transaction", False, "No pending transactions found even after creating one")
             return False
         
         # Get the first pending transaction
