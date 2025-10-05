@@ -3208,6 +3208,42 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             } />
+            {/* Advances & Loans Routes */}
+            <Route path="/advances" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdvancesDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/advances/admin" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <AdminDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/advances/submit-expense" element={
+              <ProtectedRoute>
+                <Layout>
+                  <SubmitExpense />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/advances/my-transactions" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MyTransactions />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/advances/balance-details" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdvancesDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
