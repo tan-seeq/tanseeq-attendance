@@ -86,9 +86,15 @@ const AdminDashboard = () => {
     }
 
     try {
+      const token = localStorage.getItem('token');
       await axios.post(`${API}/advances/create`, {
         ...createForm,
         amount: parseFloat(createForm.amount)
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       alert('تم إنشاء السلفة/العهدة بنجاح!');
