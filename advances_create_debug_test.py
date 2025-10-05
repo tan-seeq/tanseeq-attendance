@@ -82,22 +82,27 @@ class AdvancesCreateDebugTester:
             return 0, error_data
 
     def test_super_admin_login(self) -> bool:
-        """Test Super Admin login with exact credentials"""
+        """Test Super Admin login with different credential variations"""
         print("🔐 TESTING SUPER ADMIN LOGIN")
         
-        status_code, response = self.make_detailed_request('POST', 'auth/login', self.super_admin_creds)
+        for i, creds in enumerate(self.super_admin_creds_list):
+            print(f"\n--- Trying credentials {i+1}: {creds['email']} ---")
+            
+            status_code, response = self.make_detailed_request('POST', 'auth/login', creds)
+            
+            if status_code == 200 and 'access_token' in response:
+                self.token = response['access_token']
+                self.user_info = response['user']
+                print(f"✅ Login successful with {creds['email']}!")
+                print(f"User Role: {self.user_info.get('role')}")
+                print(f"User Name: {self.user_info.get('name')}")
+                print(f"User Email: {self.user_info.get('email')}")
+                return True
+            else:
+                print(f"❌ Login failed with {creds['email']}")
         
-        if status_code == 200 and 'access_token' in response:
-            self.token = response['access_token']
-            self.user_info = response['user']
-            print(f"✅ Login successful!")
-            print(f"User Role: {self.user_info.get('role')}")
-            print(f"User Name: {self.user_info.get('name')}")
-            print(f"User Email: {self.user_info.get('email')}")
-            return True
-        else:
-            print(f"❌ Login failed!")
-            return False
+        print("❌ All login attempts failed!")
+        return False
 
     def get_existing_employee_id(self) -> Optional[str]:
         """Get an existing employee ID for testing"""
