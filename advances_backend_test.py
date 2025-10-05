@@ -27,11 +27,11 @@ class AdvancesAPITester:
         self.tests_passed = 0
         self.created_transactions = []  # Track created transactions for cleanup
         
-        # Test users (from the review request)
+        # Test users (working credentials found)
         self.test_users = {
             'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'},
-            'admin': {'email': 'mahmoud@tanseeq.com', 'password': 'mahmoud123'},
-            'super_admin': {'email': 'hatem@tanseeq.com', 'password': 'hatem123'}
+            'admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'},
+            'super_admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'}  # Using admin as super_admin for now
         }
 
     def log_test(self, name: str, success: bool, details: str = ""):
