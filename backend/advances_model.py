@@ -23,6 +23,7 @@ class TransactionType(str, Enum):
     EXPENSE = "expense"           # مصروف
     RETURN = "return"             # إرجاع
     ADJUSTMENT = "adjustment"     # تسوية
+    ADVANCE_SETTLEMENT = "advance_settlement"  # تسوية سلفة مع الراتب
 
 # Transaction Status
 class TransactionStatus(str, Enum):
