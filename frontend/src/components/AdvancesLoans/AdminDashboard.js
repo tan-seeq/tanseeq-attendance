@@ -27,6 +27,7 @@ const AdminDashboard = () => {
   const [data, setData] = useState({
     pendingApprovals: [],
     allBalances: [],
+    allTransactions: [],
     users: []
   });
   const [showCreateModal, setShowCreateModal] = useState(false);
