@@ -41,7 +41,7 @@ class UpdatedAdvancesSystemTester:
         self.test_users = {
             'super_admin': {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'},
             'admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'},
-            'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'}
+            'user': {'email': 'jihad@tanseeq.com', 'password': '123456'}
         }
 
     def log_test(self, name: str, success: bool, details: str = ""):
