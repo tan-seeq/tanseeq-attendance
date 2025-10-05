@@ -844,6 +844,281 @@ async def reset_password(request: PasswordResetRequest):
     
     return {"message": "Password updated successfully"}
 
+# ============ MARKETING VISITS SYSTEM ============
+
+from marketing_visits_model import (
+    MarketingVisit, StartVisitRequest, CompleteVisitRequest, VisitResponse,
+    ActiveVisitResponse, VisitStatus, VisitPurpose, VisitResult,
+    MarketingVisitsDB, PURPOSE_TRANSLATIONS, RESULT_TRANSLATIONS,
+    GPSLocation, VisitReport
+)
+
+@api_router.post("/marketing-visits/start", response_model=Dict[str, Any])
+async def start_marketing_visit(
+    visit_request: StartVisitRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """بدء زيارة خارجية جديدة - Server-generated timestamp"""
+    
+    # التحقق من عدم وجود زيارة قيد التنفيذ لنفس الموظف
+    active_visit = await db.marketing_visits.find_one({
+        "employee_id": current_user.id,
+        "status": VisitStatus.STARTED
+    })
+    
+    if active_visit:
+        raise HTTPException(
+            status_code=400, 
+            detail="لديك زيارة خارجية قيد التنفيذ بالفعل. يجب إنهاؤها أولاً قبل بدء زيارة جديدة"
+        )
+    
+    # إنشاء زيارة جديدة بوقت السيرفر
+    visit = MarketingVisit(
+        employee_id=current_user.id,
+        employee_name=current_user.name,
+        client_name=visit_request.client_name,
+        location_name=visit_request.location_name,
+        area=visit_request.area,
+        purpose=visit_request.purpose,
+        purpose_details=visit_request.purpose_details,
+        start_location=visit_request.gps_location,
+        start_time=datetime.now(timezone.utc)  # Server timestamp
+    )
+    
+    # حفظ في قاعدة البيانات
+    visit_dict = MarketingVisitsDB.visit_to_dict(visit)
+    await db.marketing_visits.insert_one(visit_dict)
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "marketing_visit_started",
+        f"بدأ زيارة خارجية للعميل: {visit.client_name} في {visit.location_name}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم بدء الزيارة الخارجية بنجاح",
+        "visit_id": visit.id,
+        "start_time": visit.start_time.isoformat(),
+        "client_name": visit.client_name,
+        "location": visit.location_name
+    }
+
+@api_router.get("/marketing-visits/active")
+async def get_active_visit(current_user: User = Depends(get_current_user)):
+    """الحصول على الزيارة النشطة للموظف الحالي"""
+    
+    active_visit = await db.marketing_visits.find_one({
+        "employee_id": current_user.id,
+        "status": VisitStatus.STARTED
+    })
+    
+    if not active_visit:
+        return {"active_visit": None}
+    
+    # حساب الوقت المنقضي
+    start_time = datetime.fromisoformat(active_visit["start_time"].replace("Z", "+00:00"))
+    elapsed_minutes = int((datetime.now(timezone.utc) - start_time).total_seconds() / 60)
+    
+    return {
+        "active_visit": {
+            "id": active_visit["id"],
+            "client_name": active_visit["client_name"],
+            "location_name": active_visit["location_name"],
+            "area": active_visit["area"],
+            "purpose": active_visit["purpose"],
+            "purpose_ar": PURPOSE_TRANSLATIONS[VisitPurpose(active_visit["purpose"])]["ar"],
+            "start_time": active_visit["start_time"],
+            "elapsed_minutes": elapsed_minutes,
+            "can_complete": True
+        }
+    }
+
+@api_router.post("/marketing-visits/{visit_id}/complete")
+async def complete_marketing_visit(
+    visit_id: str,
+    completion_request: CompleteVisitRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """إنهاء الزيارة الخارجية مع تقرير إلزامي"""
+    
+    # البحث عن الزيارة
+    visit = await db.marketing_visits.find_one({
+        "id": visit_id,
+        "employee_id": current_user.id,
+        "status": VisitStatus.STARTED
+    })
+    
+    if not visit:
+        raise HTTPException(
+            status_code=404,
+            detail="الزيارة غير موجودة أو مكتملة بالفعل"
+        )
+    
+    # التحقق من اكتمال التقرير
+    report = completion_request.visit_report
+    if not report or not all([
+        report.summary and len(report.summary.strip()) >= 20,
+        report.details and len(report.details.strip()) >= 50,
+        report.result,
+        report.next_actions and len(report.next_actions.strip()) >= 10
+    ]):
+        raise HTTPException(
+            status_code=400,
+            detail="يجب تعبئة جميع حقول التقرير الإلزامية بالشكل المطلوب"
+        )
+    
+    # حساب مدة الزيارة
+    start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
+    end_time = datetime.now(timezone.utc)
+    duration_minutes = int((end_time - start_time).total_seconds() / 60)
+    
+    # تحديث الزيارة
+    update_data = {
+        "end_time": end_time.isoformat(),
+        "duration_minutes": duration_minutes,
+        "status": VisitStatus.COMPLETED,
+        "report": report.dict(),
+        "end_location": completion_request.gps_location.dict() if completion_request.gps_location else None,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.marketing_visits.update_one(
+        {"id": visit_id},
+        {"$set": update_data}
+    )
+    
+    # إرسال إشعار للسوبر أدمن
+    await send_visit_completion_notification(visit, report, current_user, duration_minutes)
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "marketing_visit_completed",
+        f"أكمل زيارة خارجية للعميل: {visit['client_name']} - المدة: {duration_minutes} دقيقة"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إنهاء الزيارة وإرسال التقرير بنجاح",
+        "duration_minutes": duration_minutes,
+        "visit_id": visit_id
+    }
+
+@api_router.get("/marketing-visits/history")
+async def get_visits_history(
+    limit: int = 50,
+    current_user: User = Depends(get_current_user)
+):
+    """تاريخ الزيارات الخارجية للموظف"""
+    
+    visits = await db.marketing_visits.find({
+        "employee_id": current_user.id
+    }).sort("start_time", -1).limit(limit).to_list(limit)
+    
+    # تحويل التواريخ وإضافة الترجمات
+    for visit in visits:
+        if visit.get("start_time"):
+            start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
+            # تحويل إلى توقيت دبي للعرض
+            dubai_tz = timezone(timedelta(hours=4))
+            visit["start_time_display"] = start_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        if visit.get("end_time"):
+            end_time = datetime.fromisoformat(visit["end_time"].replace("Z", "+00:00"))
+            visit["end_time_display"] = end_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        # إضافة الترجمات
+        if visit.get("purpose"):
+            visit["purpose_ar"] = PURPOSE_TRANSLATIONS.get(VisitPurpose(visit["purpose"]), {}).get("ar", visit["purpose"])
+        
+        if visit.get("report") and visit["report"].get("result"):
+            visit["result_ar"] = RESULT_TRANSLATIONS.get(VisitResult(visit["report"]["result"]), {}).get("ar", visit["report"]["result"])
+    
+    return {"visits": visits}
+
+@api_router.get("/marketing-visits/admin/all")
+async def get_all_visits_admin(
+    limit: int = 100,
+    employee_id: Optional[str] = None,
+    current_user: User = Depends(get_admin_user)
+):
+    """جميع الزيارات الخارجية للإدارة"""
+    
+    filter_query = {}
+    if employee_id:
+        filter_query["employee_id"] = employee_id
+    
+    visits = await db.marketing_visits.find(filter_query).sort("start_time", -1).limit(limit).to_list(limit)
+    
+    # معالجة البيانات للعرض
+    for visit in visits:
+        # تحويل التواريخ
+        if visit.get("start_time"):
+            start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
+            dubai_tz = timezone(timedelta(hours=4))
+            visit["start_time_display"] = start_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        if visit.get("end_time"):
+            end_time = datetime.fromisoformat(visit["end_time"].replace("Z", "+00:00"))
+            visit["end_time_display"] = end_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        # إضافة الترجمات
+        if visit.get("purpose"):
+            visit["purpose_ar"] = PURPOSE_TRANSLATIONS.get(VisitPurpose(visit["purpose"]), {}).get("ar", visit["purpose"])
+        
+        if visit.get("report") and visit["report"].get("result"):
+            visit["result_ar"] = RESULT_TRANSLATIONS.get(VisitResult(visit["report"]["result"]), {}).get("ar", visit["report"]["result"])
+    
+    return {"visits": visits}
+
+async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
+    """إرسال إشعار للسوبر أدمن عند إكمال الزيارة"""
+    
+    # البحث عن جميع السوبر أدمن
+    super_admins = await db.users.find({"role": "super_admin"}).to_list(10)
+    
+    # تحويل مدة الزيارة لصيغة مقروءة
+    hours = duration_minutes // 60
+    minutes = duration_minutes % 60
+    duration_text = ""
+    if hours > 0:
+        duration_text += f"{hours} ساعة "
+    if minutes > 0:
+        duration_text += f"{minutes} دقيقة"
+    
+    # إنشاء رسالة الإشعار
+    notification_message = f"""🏢 تم إكمال زيارة خارجية جديدة
+
+👤 الموظف: {employee.name}
+🏪 العميل: {visit_data['client_name']}
+📍 المكان: {visit_data['location_name']} - {visit_data['area']}
+🎯 الغرض: {PURPOSE_TRANSLATIONS.get(VisitPurpose(visit_data['purpose']), {}).get('ar', visit_data['purpose'])}
+⏱️ المدة: {duration_text}
+📊 النتيجة: {RESULT_TRANSLATIONS.get(VisitResult(report.result), {}).get('ar', report.result)}
+
+📋 ملخص التقرير:
+{report.summary}
+
+🔗 لعرض التفاصيل الكاملة، انتقل إلى صفحة إدارة الزيارات الخارجية"""
+
+    # إرسال إشعار لكل سوبر أدمن
+    for admin in super_admins:
+        notification = Notification(
+            recipient_id=admin["id"],
+            recipient_name=admin["name"],
+            sender_id="system",
+            sender_name="نظام الزيارات الخارجية",
+            subject="🏢 تم إكمال زيارة خارجية",
+            message=notification_message,
+            type="info",
+            priority="normal",
+            sent_at=datetime.utcnow()
+        )
+        
+        await db.notifications.insert_one(notification.dict())
+
 # ============ NOTIFICATION SYSTEM ENDPOINTS ============
 
 @api_router.get("/notifications")
