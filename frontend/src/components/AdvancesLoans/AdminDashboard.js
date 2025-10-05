@@ -80,8 +80,24 @@ const AdminDashboard = () => {
   const handleCreateAdvance = async (e) => {
     e.preventDefault();
     
-    if (!createForm.employee_id || !createForm.amount || !createForm.description) {
-      alert('يرجى تعبئة جميع الحقول المطلوبة');
+    // Comprehensive validation
+    if (!createForm.employee_id || createForm.employee_id === '') {
+      alert('يرجى اختيار الموظف');
+      return;
+    }
+    
+    if (!createForm.transaction_type || createForm.transaction_type === '') {
+      alert('يرجى اختيار نوع المعاملة');
+      return;
+    }
+    
+    if (!createForm.amount || parseFloat(createForm.amount) <= 0) {
+      alert('يرجى إدخال مبلغ صحيح');
+      return;
+    }
+    
+    if (!createForm.description || createForm.description.trim().length < 5) {
+      alert('يرجى إدخال وصف لا يقل عن 5 أحرف');
       return;
     }
 
