@@ -297,7 +297,8 @@ TRANSACTION_TYPE_AR = {
     TransactionType.CUSTODY: "عهدة", 
     TransactionType.EXPENSE: "مصروف",
     TransactionType.RETURN: "إرجاع",
-    TransactionType.ADJUSTMENT: "تسوية"
+    TransactionType.ADJUSTMENT: "تسوية",
+    TransactionType.ADVANCE_SETTLEMENT: "تسوية سلفة مع الراتب"
 }
 
 TRANSACTION_STATUS_AR = {
