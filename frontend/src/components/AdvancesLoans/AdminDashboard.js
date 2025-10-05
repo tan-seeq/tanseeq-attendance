@@ -60,15 +60,17 @@ const AdminDashboard = () => {
       setLoading(true);
       
       // Fetch all data in parallel
-      const [pendingRes, balancesRes, usersRes] = await Promise.all([
+      const [pendingRes, balancesRes, transactionsRes, usersRes] = await Promise.all([
         axios.get(`${API}/advances/admin/pending-approvals`),
         axios.get(`${API}/advances/admin/all-balances`),
+        axios.get(`${API}/advances/admin/all-transactions`),
         axios.get(`${API}/users`)
       ]);
 
       setData({
         pendingApprovals: pendingRes.data.pending_transactions || [],
         allBalances: balancesRes.data.employee_balances || [],
+        allTransactions: transactionsRes.data.transactions || [],
         users: usersRes.data || []
       });
     } catch (error) {
