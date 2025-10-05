@@ -620,10 +620,25 @@ const Dashboard = () => {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await axios.get(`${API}/messages/unread-count`);
-      setUnreadCount(response.data.unread_count);
+      // Get unread count from both messages and notifications
+      const [messagesRes, notificationsRes] = await Promise.all([
+        axios.get(`${API}/messages/unread-count`),
+        axios.get(`${API}/notifications/my`).catch(() => ({ data: [] }))
+      ]);
+      
+      const unreadNotifications = notificationsRes.data.filter(n => !n.is_read).length;
+      const totalUnread = messagesRes.data.unread_count + unreadNotifications;
+      
+      setUnreadCount(totalUnread);
     } catch (error) {
       console.error('Error fetching unread count:', error);
+      // Fallback to messages only
+      try {
+        const response = await axios.get(`${API}/messages/unread-count`);
+        setUnreadCount(response.data.unread_count);
+      } catch (fallbackError) {
+        console.error('Error fetching unread count (fallback):', fallbackError);
+      }
     }
   };
 
