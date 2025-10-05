@@ -37,10 +37,10 @@ class UpdatedAdvancesSystemTester:
         self.tests_passed = 0
         self.created_transactions = []
         
-        # Test users from review request
+        # Test users from review request (using working credentials)
         self.test_users = {
             'super_admin': {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'},
-            'admin': {'email': 'mahmoud@tanseeq.com', 'password': 'mahmoud123'},
+            'admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'},
             'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'}
         }
 
