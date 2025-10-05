@@ -101,32 +101,15 @@ class BalanceCalculationTester:
         success, response = self.make_request('GET', 'users', token=self.tokens['super_admin'])
         
         if success and isinstance(response, list) and len(response) > 0:
-            # Try to find a known test employee with credentials we can use
-            known_employees = [
-                {'email': 'jihad@tanseeq.com', 'password': 'jihad123'},
-                {'email': 'mahmoud@tanseeq.com', 'password': 'mahmoud123'},
-                {'email': 'admin@tanseeq.com', 'password': 'admin123'},
-                {'email': 'tarek.wazzan@tanseeq.com', 'password': 'tarek123'}
-            ]
-            
-            # Find a user we can login as
-            for user in response:
-                for known in known_employees:
-                    if user.get('email') == known['email'] and user.get('is_active', True):
-                        self.test_employee_id = user['id']
-                        self.test_employee_creds = known
-                        self.log_test(f"Test Employee Selected: {user.get('name', 'Unknown')} ({known['email']})", True)
-                        return True
-            
-            # If no known employee found, use the super admin as test employee
+            # Use the super admin as test employee since we have their credentials
             for user in response:
                 if user.get('email') == self.super_admin_creds['email']:
                     self.test_employee_id = user['id']
                     self.test_employee_creds = self.super_admin_creds
-                    self.log_test(f"Test Employee Selected: {user.get('name', 'Unknown')} (Super Admin as test)", True)
+                    self.log_test(f"Test Employee Selected: {user.get('name', 'Unknown')} (Super Admin)", True)
                     return True
             
-            self.log_test("Get Test Employee", False, "No suitable test employee found")
+            self.log_test("Get Test Employee", False, "Super admin user not found")
             return False
         else:
             self.log_test("Get Test Employee", False, str(response))
