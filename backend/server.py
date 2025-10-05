@@ -1741,6 +1741,105 @@ async def edit_advance_transaction(
         "transaction_id": transaction_id
     }
 
+@api_router.post("/advances/settle-advance")
+async def settle_advance_with_salary(
+    settlement_request: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تسوية سلفة مع الراتب (خاص بالسوبر أدمن فقط)"""
+    
+    employee_id = settlement_request.get("employee_id")
+    settlement_amount = settlement_request.get("settlement_amount")
+    salary_month = settlement_request.get("salary_month")
+    notes = settlement_request.get("notes", "")
+    
+    if not employee_id or not settlement_amount or not salary_month:
+        raise HTTPException(status_code=400, detail="جميع الحقول مطلوبة")
+    
+    # التحقق من وجود الموظف
+    employee = await db.users.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="الموظف غير موجود")
+    
+    # إنشاء معاملة تسوية
+    settlement_transaction = AdvanceTransaction(
+        employee_id=employee_id,
+        employee_name=employee["name"],
+        transaction_type=TransactionType.ADVANCE_SETTLEMENT,
+        amount=settlement_amount,
+        description=f"تسوية سلفة مع راتب شهر {salary_month}",
+        status=TransactionStatus.APPROVED,
+        approved_by=current_user.id,
+        approved_at=datetime.now(timezone.utc),
+        notes=notes,
+        created_by=current_user.id
+    )
+    
+    # حفظ في قاعدة البيانات
+    transaction_dict = AdvancesDB.transaction_to_dict(settlement_transaction)
+    await db.advance_transactions.insert_one(transaction_dict)
+    
+    # تحديث رصيد الموظف
+    await update_employee_balance(employee_id)
+    
+    # إضافة سجل في النشاطات
+    await log_activity(
+        db, 
+        current_user.id,
+        "advance_settlement",
+        f"تسوية سلفة للموظف {employee['name']} بمبلغ {settlement_amount} درهم"
+    )
+    
+    return {
+        "success": True,
+        "message": f"تم تسوية السلفة بنجاح بمبلغ {settlement_amount} درهم",
+        "transaction_id": settlement_transaction.id
+    }
+
+@api_router.put("/advances/expense/{transaction_id}/set-deduction-source")
+async def set_expense_deduction_source(
+    transaction_id: str,
+    deduction_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تحديد مصدر خصم المصروف (سلفة أم عهدة) - خاص بالسوبر أدمن"""
+    
+    deduction_source = deduction_data.get("deduction_source")  # "advance" or "custody"
+    
+    if deduction_source not in ["advance", "custody"]:
+        raise HTTPException(status_code=400, detail="مصدر الخصم يجب أن يكون 'advance' أو 'custody'")
+    
+    # البحث عن المعاملة
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    if transaction.get("transaction_type") != "expense":
+        raise HTTPException(status_code=400, detail="هذه المعاملة ليست مصروف")
+    
+    # تحديث مصدر الخصم
+    result = await db.advance_transactions.update_one(
+        {"id": transaction_id},
+        {"$set": {
+            "deduction_source": deduction_source,
+            "deduction_source_ar": "سلفة" if deduction_source == "advance" else "عهدة",
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": current_user.id
+        }}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم التحديث")
+    
+    # إعادة حساب الرصيد
+    await update_employee_balance(transaction['employee_id'])
+    
+    return {
+        "success": True,
+        "message": f"تم تحديد مصدر الخصم: {'سلفة' if deduction_source == 'advance' else 'عهدة'}",
+        "deduction_source": deduction_source
+    }
+
 async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
     """إرسال إشعار للسوبر أدمن عند إكمال الزيارة"""
     
