@@ -151,6 +151,14 @@ class TransactionResponse(BaseModel):
     created_at: str
     notes: Optional[str] = None
 
+# Settlement Request Model
+class AdvanceSettlementRequest(BaseModel):
+    employee_id: str
+    settlement_amount: float
+    settlement_date: str  # YYYY-MM-DD format
+    salary_month: str     # e.g., "2024-10"
+    notes: Optional[str] = None
+
 class BalanceResponse(BaseModel):
     employee_id: str
     employee_name: str
