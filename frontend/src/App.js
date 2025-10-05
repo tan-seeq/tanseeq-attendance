@@ -392,11 +392,12 @@ const Layout = ({ children }) => {
 
   const navigation = [
     { name: t('dashboard'), href: '/dashboard', icon: ChartBarIcon },
+    // الزيارات الخارجية للجميع
+    { name: 'الزيارات الخارجية التسويقية', href: '/marketing-visits', icon: BuildingOfficeIcon },
     ...(user?.role === 'user' ? [
       { name: t('attendance'), href: '/attendance', icon: ClockIcon },
       { name: t('leaves'), href: '/leaves', icon: CalendarIcon },
       { name: t('field_exits'), href: '/field-exits', icon: DocumentTextIcon },
-      { name: 'الزيارات الخارجية', href: '/marketing-visits', icon: BuildingOfficeIcon },
     ] : []),
     ...(user?.role === 'admin' || user?.role === 'super_admin' ? [
       { name: t('employees'), href: '/employees', icon: UserGroupIcon },
