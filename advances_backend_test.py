@@ -31,7 +31,7 @@ class AdvancesAPITester:
         self.test_users = {
             'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'},
             'admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'},
-            'super_admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'}  # Using admin as super_admin for now
+            'super_admin': {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'}
         }
 
     def log_test(self, name: str, success: bool, details: str = ""):
