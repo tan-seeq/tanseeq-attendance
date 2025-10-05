@@ -255,7 +255,7 @@ startxref
             
             # Prepare file
             with open(temp_file_path, 'rb') as f:
-                files = {'invoice_files': (original_filename, f, 'text/plain')}
+                files = {'invoice_files': (original_filename, f, 'application/pdf')}
                 
                 success, response = self.make_request('POST', 'advances/expense', 
                                                     data=form_data, files=files,
