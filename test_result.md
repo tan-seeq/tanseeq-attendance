@@ -464,7 +464,7 @@ backend:
     file: "AdvancesDashboard.js, AdminDashboard.js, SubmitExpense.js, MyTransactions.js, AttachmentViewer.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
