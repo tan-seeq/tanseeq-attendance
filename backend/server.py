@@ -1059,6 +1059,9 @@ async def get_all_visits_admin(
     dubai_tz = timezone(timedelta(hours=4))  # تعريف dubai_tz مرة واحدة
     
     for visit in visits:
+        # إزالة _id من MongoDB لتجنب مشاكل JSON serialization
+        if "_id" in visit:
+            del visit["_id"]
         # تحويل التواريخ
         if visit.get("start_time"):
             start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
