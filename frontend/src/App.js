@@ -53,6 +53,12 @@ import PermissionsManager from './WorkReports/PermissionsManager';
 import NotificationSystem from './components/NotificationSystem';
 import MarketingVisits from './components/MarketingVisits';
 
+// Import Advances & Loans Components
+import AdvancesDashboard from './components/AdvancesLoans/AdvancesDashboard';
+import AdminDashboard from './components/AdvancesLoans/AdminDashboard';
+import SubmitExpense from './components/AdvancesLoans/SubmitExpense';
+import MyTransactions from './components/AdvancesLoans/MyTransactions';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
