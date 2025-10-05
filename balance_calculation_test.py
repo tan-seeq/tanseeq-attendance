@@ -141,6 +141,21 @@ class BalanceCalculationTester:
             'total_available': 0.0
         }
 
+    def get_current_balance(self) -> Dict[str, float]:
+        """Get current balance for test employee"""
+        if 'super_admin' not in self.tokens or not self.test_employee_id:
+            return {}
+            
+        success, response = self.make_request('GET', 'advances/admin/all-balances', 
+                                            token=self.tokens['super_admin'])
+        
+        if success and 'employee_balances' in response:
+            for balance in response['employee_balances']:
+                if balance['employee_id'] == self.test_employee_id:
+                    return balance
+        
+        return {}
+
     def create_custody_transaction(self, amount: float = 100.0) -> bool:
         """Create custody of 100 AED as per review request"""
         if 'super_admin' not in self.tokens or not self.test_employee_id:
