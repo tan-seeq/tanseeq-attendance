@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://hrapp-tanseeq.preview.emergentagent.com",
+			"value": "https://visits-tracking.preview.emergentagent.com",
 			"type": "string"
 		}
 	],
