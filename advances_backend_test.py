@@ -294,7 +294,7 @@ startxref
         
         success, response = self.make_request('POST', 'advances/expense', 
                                             data=form_data, files={},
-                                            token=self.tokens['user'], expected_status=400)
+                                            token=self.tokens['user'], expected_status=422)
         
         validation_success = success  # Should fail with 400
         self.log_test("Expense validation (no files)", validation_success,
