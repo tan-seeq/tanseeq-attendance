@@ -104,7 +104,8 @@ const AdminDashboard = () => {
       fetchDashboardData();
     } catch (error) {
       console.error('Error creating advance:', error);
-      alert('حدث خطأ في إنشاء السلفة/العهدة');
+      const errorMessage = error.response?.data?.detail || error.message || 'خطأ غير معروف';
+      alert(`حدث خطأ في إنشاء السلفة/العهدة: ${errorMessage}`);
     }
   };
 
