@@ -569,6 +569,17 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Helper function to calculate time ago
+  const calculateTimeAgo = (date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'منذ لحظات';
+    if (diffInSeconds < 3600) return `منذ ${Math.floor(diffInSeconds / 60)} دقيقة`;
+    if (diffInSeconds < 86400) return `منذ ${Math.floor(diffInSeconds / 3600)} ساعة`;
+    return `منذ ${Math.floor(diffInSeconds / 86400)} يوم`;
+  };
+
   const fetchMessages = async () => {
     try {
       // Fetch both messages and notifications
