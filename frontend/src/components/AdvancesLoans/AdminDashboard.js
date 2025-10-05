@@ -87,7 +87,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/advances/create`, {
+      const response = await axios.post(`${API}/advances/create`, {
         ...createForm,
         amount: parseFloat(createForm.amount)
       }, {
@@ -97,20 +97,29 @@ const AdminDashboard = () => {
         }
       });
 
-      alert('تم إنشاء السلفة/العهدة بنجاح!');
-      setShowCreateModal(false);
-      setCreateForm({
-        employee_id: '',
-        transaction_type: 'advance',
-        amount: '',
-        description: '',
-        category: '',
-        notes: ''
-      });
-      fetchDashboardData();
+      console.log('Create advance response:', response.data);
+      
+      // Check if the response indicates success
+      if (response.data && response.data.success === true) {
+        alert('تم إنشاء السلفة/العهدة بنجاح!');
+        setShowCreateModal(false);
+        setCreateForm({
+          employee_id: '',
+          transaction_type: 'advance',
+          amount: '',
+          description: '',
+          category: '',
+          notes: ''
+        });
+        fetchDashboardData();
+      } else {
+        // If success is not true, show the error message from the response
+        const message = response.data?.message || 'حدث خطأ غير متوقع';
+        alert(`خطأ في إنشاء السلفة/العهدة: ${message}`);
+      }
     } catch (error) {
       console.error('Error creating advance:', error);
-      const errorMessage = error.response?.data?.detail || error.message || 'خطأ غير معروف';
+      const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || 'خطأ غير معروف';
       alert(`حدث خطأ في إنشاء السلفة/العهدة: ${errorMessage}`);
     }
   };
