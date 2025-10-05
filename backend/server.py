@@ -909,11 +909,11 @@ async def create_advance_or_custody(
 
 @api_router.post("/advances/expense")
 async def create_expense_with_invoice(
-    amount: float = Field(..., gt=0),
-    category: str = Field(...),
-    description: str = Field(..., min_length=5),
-    expense_date: str = Field(...),
-    notes: Optional[str] = None,
+    amount: float = Form(..., gt=0),
+    category: str = Form(...),
+    description: str = Form(..., min_length=5),
+    expense_date: str = Form(...),
+    notes: Optional[str] = Form(None),
     invoice_files: List[UploadFile] = File(...),
     current_user: User = Depends(get_current_user)
 ):
