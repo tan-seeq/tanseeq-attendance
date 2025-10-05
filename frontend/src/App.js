@@ -396,6 +396,7 @@ const Layout = ({ children }) => {
       { name: t('attendance'), href: '/attendance', icon: ClockIcon },
       { name: t('leaves'), href: '/leaves', icon: CalendarIcon },
       { name: t('field_exits'), href: '/field-exits', icon: DocumentTextIcon },
+      { name: 'الزيارات الخارجية', href: '/marketing-visits', icon: BuildingOfficeIcon },
     ] : []),
     ...(user?.role === 'admin' || user?.role === 'super_admin' ? [
       { name: t('employees'), href: '/employees', icon: UserGroupIcon },
