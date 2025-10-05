@@ -1021,6 +1021,9 @@ async def get_visits_history(
     dubai_tz = timezone(timedelta(hours=4))  # تعريف dubai_tz مرة واحدة
     
     for visit in visits:
+        # إزالة _id من MongoDB لتجنب مشاكل JSON serialization
+        if "_id" in visit:
+            del visit["_id"]
         if visit.get("start_time"):
             start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
             visit["start_time_display"] = start_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
