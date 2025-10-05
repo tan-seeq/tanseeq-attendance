@@ -29,7 +29,7 @@ class AdvancesAPITester:
         
         # Test users (working credentials found)
         self.test_users = {
-            'user': {'email': 'jihad@tanseeq.com', 'password': 'jihad123'},
+            'user': {'email': 'tarek.wazzan@tanseeq.com', 'password': 'tarek123'},
             'admin': {'email': 'admin@tanseeq.com', 'password': 'admin123'},
             'super_admin': {'email': 'hatem@tan-seeq.co', 'password': 'hatem123'}
         }
