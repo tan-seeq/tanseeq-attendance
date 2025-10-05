@@ -1574,6 +1574,119 @@ async def get_all_visits_admin(
     
     return {"visits": visits}
 
+@api_router.put("/marketing-visits/{visit_id}/edit")
+async def edit_marketing_visit(
+    visit_id: str,
+    edit_data: Dict[str, Any],
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تعديل زيارة تسويقية (خاص بالسوبر أدمن فقط)"""
+    
+    # البحث عن الزيارة
+    visit = await db.marketing_visits.find_one({"id": visit_id})
+    if not visit:
+        raise HTTPException(status_code=404, detail="الزيارة غير موجودة")
+    
+    # تحضير البيانات المحدثة
+    update_data = {}
+    
+    # الحقول القابلة للتعديل
+    editable_fields = [
+        'client_name', 'location_name', 'area', 'purpose', 'purpose_details',
+        'start_time', 'end_time'
+    ]
+    
+    for field in editable_fields:
+        if field in edit_data:
+            update_data[field] = edit_data[field]
+    
+    # تحديث وقت التعديل
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    update_data['edited_by'] = current_user.id
+    update_data['edited_by_name'] = current_user.name
+    
+    # تحديث في قاعدة البيانات
+    result = await db.marketing_visits.update_one(
+        {"id": visit_id},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم التحديث")
+    
+    # إضافة سجل في النشاطات
+    await log_activity(
+        db, 
+        current_user.id,
+        "marketing_visit_edited",
+        f"تعديل زيارة تسويقية - {visit['client_name']}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تعديل الزيارة بنجاح",
+        "visit_id": visit_id
+    }
+
+@api_router.put("/advances/{transaction_id}/edit")
+async def edit_advance_transaction(
+    transaction_id: str,
+    edit_data: Dict[str, Any],
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تعديل معاملة سلفة/عهدة (خاص بالسوبر أدمن فقط)"""
+    
+    # البحث عن المعاملة
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    # التأكد أن المعاملة لم تتم الموافقة عليها بعد أو رفضها
+    if transaction.get("status") in ["approved", "rejected"]:
+        raise HTTPException(status_code=400, detail="لا يمكن تعديل معاملة تمت الموافقة عليها أو رفضها")
+    
+    # تحضير البيانات المحدثة
+    update_data = {}
+    
+    # الحقول القابلة للتعديل
+    editable_fields = ['amount', 'description', 'notes', 'category']
+    
+    for field in editable_fields:
+        if field in edit_data:
+            update_data[field] = edit_data[field]
+    
+    # تحديث وقت التعديل
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    update_data['edited_by'] = current_user.id
+    update_data['edited_by_name'] = current_user.name
+    
+    # تحديث في قاعدة البيانات
+    result = await db.advance_transactions.update_one(
+        {"id": transaction_id},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم التحديث")
+    
+    # إذا تم تعديل المبلغ، إعادة حساب الرصيد
+    if 'amount' in edit_data:
+        await update_employee_balance(transaction['employee_id'])
+    
+    # إضافة سجل في النشاطات
+    await log_activity(
+        db, 
+        current_user.id,
+        "advance_edited",
+        f"تعديل معاملة {transaction['transaction_type_ar']} - {transaction['employee_name']}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تعديل المعاملة بنجاح",
+        "transaction_id": transaction_id
+    }
+
 async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
     """إرسال إشعار للسوبر أدمن عند إكمال الزيارة"""
     
