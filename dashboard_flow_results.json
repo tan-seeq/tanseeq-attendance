@@ -1,0 +1,133 @@
+{
+  "timestamp": "2025-10-05T08:41:53.922393",
+  "results": [
+    {
+      "email": "admin@tanseeq.com",
+      "password": "admin123",
+      "expected_role": "admin",
+      "steps": {
+        "login": {
+          "status": "SUCCESS",
+          "user_name": "\u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645",
+          "user_role": "admin",
+          "user_position": "\u0645\u062f\u064a\u0631",
+          "is_active": true
+        },
+        "user_info": {
+          "status": "SUCCESS",
+          "data": {
+            "id": "admin_001",
+            "name": "\u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645",
+            "email": "admin@tanseeq.com",
+            "role": "admin",
+            "position": "\u0645\u062f\u064a\u0631",
+            "is_active": true
+          }
+        },
+        "dashboard_stats": {
+          "status": "SUCCESS",
+          "data": {
+            "total_users": 13,
+            "present_today": 0,
+            "pending_leaves": 0,
+            "pending_field_exits": 79
+          }
+        },
+        "role_access": {
+          "status": "COMPLETED",
+          "results": {
+            "/users": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 6989
+            },
+            "/attendance/all": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 17661
+            },
+            "/leaves/all": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 8457
+            },
+            "/field-exits/all": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 90885
+            }
+          }
+        },
+        "logout": {
+          "status": "SUCCESS"
+        }
+      },
+      "overall_status": "SUCCESS",
+      "success_rate": "5/5"
+    },
+    {
+      "email": "hatem@tan-seeq.co",
+      "password": "hatem123",
+      "expected_role": "super_admin",
+      "steps": {
+        "login": {
+          "status": "SUCCESS",
+          "user_name": "\u062d\u0627\u062a\u0645 \u0645\u062d\u0645\u062f",
+          "user_role": "super_admin",
+          "user_position": "\u0645\u062f\u064a\u0631 \u0639\u0627\u0645",
+          "is_active": true
+        },
+        "user_info": {
+          "status": "SUCCESS",
+          "data": {
+            "id": "hatem_tan_seeq_001",
+            "name": "\u062d\u0627\u062a\u0645 \u0645\u062d\u0645\u062f",
+            "email": "hatem@tan-seeq.co",
+            "role": "super_admin",
+            "position": "\u0645\u062f\u064a\u0631 \u0639\u0627\u0645",
+            "is_active": true
+          }
+        },
+        "dashboard_stats": {
+          "status": "SUCCESS",
+          "data": {
+            "total_users": 13,
+            "present_today": 0,
+            "pending_leaves": 0,
+            "pending_field_exits": 79
+          }
+        },
+        "role_access": {
+          "status": "COMPLETED",
+          "results": {
+            "/users": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 6989
+            },
+            "/activity-logs": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 294615
+            },
+            "/advances/admin/all-balances": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 408
+            },
+            "/advances/admin/pending-approvals": {
+              "status_code": 200,
+              "accessible": true,
+              "response_size": 1001
+            }
+          }
+        },
+        "logout": {
+          "status": "SUCCESS"
+        }
+      },
+      "overall_status": "SUCCESS",
+      "success_rate": "5/5"
+    }
+  ]
+}
