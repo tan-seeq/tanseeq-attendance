@@ -37,7 +37,8 @@ import {
   CalculatorIcon,
   PlayIcon,
   DocumentChartBarIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 
