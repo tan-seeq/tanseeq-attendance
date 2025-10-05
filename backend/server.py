@@ -81,19 +81,19 @@ security = HTTPBearer()
 # Create the main app
 app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 
-# Initialize Work Reports MongoDB collections on startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize Work Reports MongoDB collections on startup - Non-blocking"""
-    try:
-        # Run initialization in background without blocking server startup
-        import asyncio
-        asyncio.create_task(init_work_reports_collections())
-        asyncio.create_task(init_default_activity_types())
-        print("Work Reports initialization started in background")
-    except Exception as e:
-        print(f"Warning: Work Reports initialization failed: {e}")
-        # Don't block server startup on initialization failures
+# Initialize Work Reports MongoDB collections on startup - DISABLED for performance
+# @app.on_event("startup")
+# async def startup_event():
+#     """Initialize Work Reports MongoDB collections on startup - Non-blocking"""
+#     try:
+#         # Run initialization in background without blocking server startup
+#         import asyncio
+#         asyncio.create_task(init_work_reports_collections())
+#         asyncio.create_task(init_default_activity_types())
+#         print("Work Reports initialization started in background")
+#     except Exception as e:
+#         print(f"Warning: Work Reports initialization failed: {e}")
+#         # Don't block server startup on initialization failures
 
 # Create uploads directory
 uploads_dir = ROOT_DIR / "uploads"
