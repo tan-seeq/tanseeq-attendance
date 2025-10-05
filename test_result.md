@@ -460,7 +460,7 @@ backend:
 
   - task: "Advances and Loans Management System - Frontend Implementation"
     implemented: true
-    working: "NA"
+    working: true
     file: "AdvancesDashboard.js, AdminDashboard.js, SubmitExpense.js, MyTransactions.js, AttachmentViewer.js"
     stuck_count: 0
     priority: "high"
