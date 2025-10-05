@@ -470,6 +470,99 @@ const AdminDashboard = () => {
               )}
             </div>
           )}
+
+          {/* All Transactions Tab */}
+          {activeTab === 'transactions' && (
+            <div>
+              {data.allTransactions.length > 0 ? (
+                <div className="space-y-4">
+                  {data.allTransactions.map((transaction) => (
+                    <div key={transaction.id} className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-shrink-0">
+                            <div className={`p-3 rounded-full ${
+                              transaction.transaction_type === 'expense' ? 'bg-red-100' : 
+                              transaction.transaction_type === 'advance_settlement' ? 'bg-purple-100' : 'bg-green-100'
+                            }`}>
+                              {transaction.transaction_type === 'expense' ? (
+                                <ArrowDownIcon className="h-6 w-6 text-red-600" />
+                              ) : transaction.transaction_type === 'advance_settlement' ? (
+                                <CalendarIcon className="h-6 w-6 text-purple-600" />
+                              ) : (
+                                <ArrowUpIcon className="h-6 w-6 text-green-600" />
+                              )}
+                            </div>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTransactionTypeColor(transaction.transaction_type)}`}>
+                                {transaction.transaction_type_ar}
+                              </span>
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(transaction.status)}`}>
+                                {transaction.status_ar}
+                              </span>
+                              {transaction.category_ar && (
+                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                  {transaction.category_ar}
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                              {transaction.employee_name}
+                            </h3>
+                            <p className="text-gray-600 mb-1">{transaction.description}</p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                              <div className="flex items-center">
+                                <CalendarIcon className="h-4 w-4 ml-1" />
+                                <span>{transaction.created_at_display}</span>
+                              </div>
+                              {transaction.attachments && transaction.attachments.length > 0 && (
+                                <div className="flex items-center text-blue-600">
+                                  <DocumentTextIcon className="h-4 w-4 ml-1" />
+                                  <span>{transaction.attachments.length} مرفق(ات)</span>
+                                </div>
+                              )}
+                            </div>
+                            {transaction.notes && (
+                              <p className="text-sm text-gray-500 mt-2">
+                                ملاحظات: {transaction.notes}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-left">
+                            <p className={`text-2xl font-bold ${
+                              transaction.transaction_type === 'expense' ? 'text-red-600' : 
+                              transaction.transaction_type === 'advance_settlement' ? 'text-purple-600' : 'text-green-600'
+                            }`}>
+                              {transaction.transaction_type === 'expense' || transaction.transaction_type === 'advance_settlement' ? '-' : '+'}{formatCurrency(transaction.amount)}
+                            </p>
+                          </div>
+                          <div className="flex flex-col space-y-2">
+                            <button
+                              onClick={() => viewTransactionDetails(transaction)}
+                              className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors flex items-center space-x-1"
+                            >
+                              <EyeIcon className="h-4 w-4" />
+                              <span>التفاصيل</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <DocumentTextIcon className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">لا توجد معاملات</h3>
+                  <p className="text-gray-500">لم يتم العثور على أي معاملات في النظام</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
