@@ -274,6 +274,9 @@ class AdvancesDB:
             remaining_advance = 0
             remaining_custody = 0
         
+        # Calculate total available balance
+        total_available = remaining_advance + remaining_custody
+        
         return EmployeeBalance(
             employee_id=employee_id,
             employee_name=employee_name,
@@ -283,6 +286,7 @@ class AdvancesDB:
             total_returns=totals["total_returns"],
             remaining_advance=max(0, remaining_advance),
             remaining_custody=max(0, remaining_custody),
+            total_available=total_available,
             last_transaction_date=last_transaction_date
         )
 
