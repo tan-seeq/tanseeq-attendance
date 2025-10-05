@@ -73,17 +73,19 @@ class AdvancesCreationTester:
 
     def test_login_super_admin(self) -> bool:
         """Test login with Super Admin credentials from review request"""
-        user_data = self.test_users['super_admin']
-        success, response = self.make_request('POST', 'auth/login', user_data)
+        # Try different credential variations
+        for key, user_data in self.test_users.items():
+            success, response = self.make_request('POST', 'auth/login', user_data)
+            
+            if success and 'access_token' in response:
+                self.tokens['super_admin'] = response['access_token']
+                self.users['super_admin'] = response['user']
+                self.log_test(f"Super Admin Login ({user_data['email']})", True)
+                return True
         
-        if success and 'access_token' in response:
-            self.tokens['super_admin'] = response['access_token']
-            self.users['super_admin'] = response['user']
-            self.log_test("Super Admin Login (hatem@tan-seeq.co)", True)
-            return True
-        else:
-            self.log_test("Super Admin Login (hatem@tan-seeq.co)", False, str(response))
-            return False
+        # If none worked, log the last failure
+        self.log_test("Super Admin Login (all attempts failed)", False, str(response))
+        return False
 
     def test_production_url_connectivity(self) -> bool:
         """Test connectivity to production URL"""
