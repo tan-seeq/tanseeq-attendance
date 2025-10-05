@@ -571,10 +571,39 @@ const Dashboard = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get(`${API}/messages`);
-      setMessages(response.data);
+      // Fetch both messages and notifications
+      const [messagesRes, notificationsRes] = await Promise.all([
+        axios.get(`${API}/messages`),
+        axios.get(`${API}/notifications/my`).catch(() => ({ data: [] })) // Handle error if endpoint doesn't exist
+      ]);
+      
+      // Convert notifications to message format for unified display
+      const notifications = notificationsRes.data.map(notification => ({
+        id: `notification_${notification.id}`,
+        title: notification.subject,
+        content: notification.message,
+        message_type: 'notification',
+        priority: notification.priority || 'normal',
+        created_at: notification.sent_at,
+        is_read: notification.is_read || false,
+        time_ago: calculateTimeAgo(new Date(notification.sent_at)),
+        sender: notification.sender_name || 'الإدارة'
+      }));
+      
+      // Combine and sort by creation date
+      const allMessages = [...messagesRes.data, ...notifications]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      
+      setMessages(allMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      // Fallback to messages only if notifications fail
+      try {
+        const response = await axios.get(`${API}/messages`);
+        setMessages(response.data);
+      } catch (fallbackError) {
+        console.error('Error fetching messages (fallback):', fallbackError);
+      }
     }
   };
 
