@@ -198,9 +198,29 @@ class BalanceCalculationTester:
             self.log_test(f"Create Custody Transaction ({amount} AED)", False, str(response))
             return False
 
+    def login_test_employee(self) -> bool:
+        """Login as test employee to create expense"""
+        if not self.test_employee_creds:
+            return False
+        
+        success, response = self.make_request('POST', 'auth/login', self.test_employee_creds)
+        
+        if success and 'access_token' in response:
+            self.tokens['test_employee'] = response['access_token']
+            self.users['test_employee'] = response['user']
+            self.log_test(f"Test Employee Login ({self.test_employee_creds['email']})", True)
+            return True
+        else:
+            self.log_test(f"Test Employee Login ({self.test_employee_creds['email']})", False, str(response))
+            return False
+
     def create_expense_transaction(self, amount: float = 30.0) -> bool:
         """Create expense of 30 AED as per review request"""
-        if 'super_admin' not in self.tokens or not self.test_employee_id:
+        if not self.test_employee_id or not self.test_employee_creds:
+            return False
+        
+        # Login as test employee first
+        if not self.login_test_employee():
             return False
         
         # Create a test PDF file for the expense (minimal PDF structure)
@@ -262,7 +282,7 @@ startxref
             
             # Use requests with files for multipart form data
             url = f"{self.api_url}/advances/expense"
-            headers = {'Authorization': f'Bearer {self.tokens["super_admin"]}'}
+            headers = {'Authorization': f'Bearer {self.tokens["test_employee"]}'}
             
             form_data = {
                 'amount': str(amount),
