@@ -1079,6 +1079,60 @@ async def get_my_transactions(
     
     return {"transactions": transactions}
 
+@api_router.get("/advances/admin/all-transactions")
+async def get_all_transactions_admin(
+    limit: int = 100,
+    employee_id: Optional[str] = None,
+    transaction_type: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """جميع المعاملات - Super Admin Only"""
+    
+    # إنشاء فلتر البحث
+    filter_query = {}
+    
+    if employee_id:
+        filter_query["employee_id"] = employee_id
+    
+    if transaction_type:
+        filter_query["transaction_type"] = transaction_type
+        
+    if status:
+        filter_query["status"] = status
+    
+    transactions = await db.advance_transactions.find(filter_query).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # معالجة البيانات للعرض
+    dubai_tz = timezone(timedelta(hours=4))
+    
+    for transaction in transactions:
+        if "_id" in transaction:
+            del transaction["_id"]
+        
+        # تحويل التواريخ
+        if transaction.get("created_at"):
+            created_at = datetime.fromisoformat(transaction["created_at"].replace("Z", "+00:00"))
+            transaction["created_at_display"] = created_at.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        # إضافة الترجمات
+        if transaction.get("transaction_type"):
+            transaction["transaction_type_ar"] = TRANSACTION_TYPE_AR.get(
+                TransactionType(transaction["transaction_type"]), transaction["transaction_type"]
+            )
+        
+        if transaction.get("status"):
+            transaction["status_ar"] = TRANSACTION_STATUS_AR.get(
+                TransactionStatus(transaction["status"]), transaction["status"]
+            )
+        
+        if transaction.get("category"):
+            transaction["category_ar"] = EXPENSE_CATEGORY_AR.get(
+                ExpenseCategory(transaction["category"]), transaction["category"]
+            )
+    
+    return {"transactions": transactions}
+
 @api_router.get("/advances/admin/all-balances")
 async def get_all_employee_balances(current_user: User = Depends(get_super_admin_user)):
     """جميع أرصدة الموظفين - Super Admin Only"""
