@@ -629,7 +629,13 @@ const Dashboard = () => {
 
   const markAsRead = async (messageId) => {
     try {
-      await axios.post(`${API}/messages/${messageId}/read`);
+      // Check if it's a notification or message
+      if (messageId.startsWith('notification_')) {
+        const notificationId = messageId.replace('notification_', '');
+        await axios.post(`${API}/notifications/${notificationId}/read`);
+      } else {
+        await axios.post(`${API}/messages/${messageId}/read`);
+      }
       fetchMessages();
       fetchUnreadCount();
     } catch (error) {
