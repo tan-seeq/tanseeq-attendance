@@ -1053,11 +1053,12 @@ async def get_all_visits_admin(
     visits = await db.marketing_visits.find(filter_query).sort("start_time", -1).limit(limit).to_list(limit)
     
     # معالجة البيانات للعرض
+    dubai_tz = timezone(timedelta(hours=4))  # تعريف dubai_tz مرة واحدة
+    
     for visit in visits:
         # تحويل التواريخ
         if visit.get("start_time"):
             start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
-            dubai_tz = timezone(timedelta(hours=4))
             visit["start_time_display"] = start_time.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
         
         if visit.get("end_time"):
