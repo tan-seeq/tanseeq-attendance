@@ -501,44 +501,12 @@ const MyTransactions = () => {
                     <DocumentTextIcon className="h-5 w-5 text-blue-600 ml-2" />
                     المرفقات ({selectedTransaction.attachments.length})
                   </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedTransaction.attachments.map((attachment, index) => (
-                      <div key={index} className="flex items-center justify-between bg-white p-4 rounded border">
-                        <div className="flex items-center">
-                          <div className="bg-blue-100 p-2 rounded ml-3">
-                            <DocumentTextIcon className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">{attachment.original_filename}</p>
-                            <p className="text-xs text-gray-500">
-                              {(attachment.file_size / 1024).toFixed(1)} KB
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => window.open(`${API}/advances/attachment/${selectedTransaction.id}/${attachment.id}`, '_blank')}
-                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                          >
-                            <EyeIcon className="h-4 w-4 ml-1" />
-                            عرض
-                          </button>
-                          <button
-                            onClick={() => {
-                              const link = document.createElement('a');
-                              link.href = `${API}/advances/attachment/${selectedTransaction.id}/${attachment.id}`;
-                              link.download = attachment.original_filename;
-                              link.click();
-                            }}
-                            className="text-green-600 hover:text-green-800 text-sm flex items-center"
-                          >
-                            <ArrowDownTrayIcon className="h-4 w-4 ml-1" />
-                            تحميل
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <AttachmentViewer 
+                    attachments={selectedTransaction.attachments.map(attachment => ({
+                      ...attachment,
+                      url: `${API}/advances/attachment/${selectedTransaction.id}/${attachment.id}`
+                    }))}
+                  />
                 </div>
               )}
 
