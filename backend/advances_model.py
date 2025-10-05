@@ -253,27 +253,26 @@ class AdvancesDB:
             if not last_transaction_date or tx_date > last_transaction_date:
                 last_transaction_date = tx_date
         
-        # Calculate remaining balances
-        # Total available balance = advances + custody - expenses - returns
-        total_available = totals["total_advances"] + totals["total_custody"] - totals["total_expenses"] - totals["total_returns"]
+        # Calculate remaining balances according to business rules:
+        # 1. Advances (السُلف) remain intact until settlement (تسوية) with salary
+        # 2. Only expenses marked to be deducted from custody are deducted
+        # 3. Returns are deducted from both advances and custody proportionally
         
-        # Deduct expenses proportionally from advances and custody based on their original amounts
-        total_source = totals["total_advances"] + totals["total_custody"]
+        remaining_advance = totals["total_advances"] - totals["total_returns"] * (
+            totals["total_advances"] / (totals["total_advances"] + totals["total_custody"])
+            if (totals["total_advances"] + totals["total_custody"]) > 0 else 0
+        )
         
-        if total_source > 0:
-            # Calculate proportional deduction
-            total_deductions = totals["total_expenses"] + totals["total_returns"]
-            advance_ratio = totals["total_advances"] / total_source
-            custody_ratio = totals["total_custody"] / total_source
-            
-            advance_deductions = total_deductions * advance_ratio
-            custody_deductions = total_deductions * custody_ratio
-            
-            remaining_advance = max(0, totals["total_advances"] - advance_deductions)
-            remaining_custody = max(0, totals["total_custody"] - custody_deductions)
-        else:
-            remaining_advance = 0
-            remaining_custody = 0
+        # For custody, we need to check each expense to see if it's marked for custody deduction
+        # For now, we'll deduct all expenses from custody only (as per user requirement)
+        remaining_custody = totals["total_custody"] - totals["total_expenses"] - totals["total_returns"] * (
+            totals["total_custody"] / (totals["total_advances"] + totals["total_custody"])
+            if (totals["total_advances"] + totals["total_custody"]) > 0 else 0
+        )
+        
+        # Ensure no negative values
+        remaining_advance = max(0, remaining_advance)
+        remaining_custody = max(0, remaining_custody)
         
         # Calculate total available balance
         total_available = remaining_advance + remaining_custody
