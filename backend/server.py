@@ -844,6 +844,499 @@ async def reset_password(request: PasswordResetRequest):
     
     return {"message": "Password updated successfully"}
 
+# ============ EMPLOYEE ADVANCES & CUSTODY SYSTEM ============
+
+from advances_model import (
+    AdvanceTransaction, CreateAdvanceRequest, CreateExpenseRequest, ApprovalRequest,
+    TransactionResponse, BalanceResponse, AdvancesDB, EmployeeBalance,
+    TransactionType, TransactionStatus, ExpenseCategory, Attachment,
+    TRANSACTION_TYPE_AR, TRANSACTION_STATUS_AR, EXPENSE_CATEGORY_AR
+)
+import shutil
+from fastapi import UploadFile, File
+
+@api_router.post("/advances/create")
+async def create_advance_or_custody(
+    request: CreateAdvanceRequest,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إنشاء سلفة أو عهدة جديدة - Super Admin Only"""
+    
+    # التحقق من وجود الموظف
+    employee = await db.users.find_one({"id": request.employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="الموظف غير موجود")
+    
+    # إنشاء المعاملة
+    transaction = AdvanceTransaction(
+        employee_id=request.employee_id,
+        employee_name=employee["name"],
+        transaction_type=request.transaction_type,
+        amount=request.amount,
+        description=request.description,
+        category=request.category,
+        expense_date=request.expense_date,
+        status=TransactionStatus.APPROVED,  # تلقائياً معتمد من السوبر أدمن
+        approved_by=current_user.id,
+        approved_at=datetime.now(timezone.utc),
+        notes=request.notes
+    )
+    
+    # حفظ في قاعدة البيانات
+    transaction_dict = AdvancesDB.transaction_to_dict(transaction)
+    await db.advance_transactions.insert_one(transaction_dict)
+    
+    # تحديث رصيد الموظف
+    await update_employee_balance(request.employee_id)
+    
+    # إرسال إشعار للموظف
+    await send_advance_notification(employee, transaction, current_user, "created")
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        f"advance_{request.transaction_type}_created",
+        f"إنشاء {TRANSACTION_TYPE_AR[request.transaction_type]} للموظف {employee['name']} بمبلغ {request.amount} درهم"
+    )
+    
+    return {
+        "success": True,
+        "message": f"تم إنشاء {TRANSACTION_TYPE_AR[request.transaction_type]} بنجاح",
+        "transaction_id": transaction.id,
+        "amount": request.amount
+    }
+
+@api_router.post("/advances/expense")
+async def create_expense_with_invoice(
+    amount: float = Field(..., gt=0),
+    category: str = Field(...),
+    description: str = Field(..., min_length=5),
+    expense_date: str = Field(...),
+    notes: Optional[str] = None,
+    invoice_files: List[UploadFile] = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    """إنشاء مصروف مع رفع الفواتير"""
+    
+    try:
+        # التحقق من وجود فواتير
+        if not invoice_files:
+            raise HTTPException(status_code=400, detail="يجب رفع فاتورة واحدة على الأقل")
+        
+        # التحقق من صحة التصنيف
+        try:
+            expense_category = ExpenseCategory(category)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="تصنيف المصروف غير صحيح")
+        
+        # رفع الملفات وحفظها
+        attachments = []
+        for file in invoice_files:
+            if file.filename:
+                # التحقق من نوع الملف
+                allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
+                if file.content_type not in allowed_types:
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"نوع الملف {file.content_type} غير مدعوم. المسموح: صور أو PDF"
+                    )
+                
+                # إنشاء مجلد الحفظ
+                upload_dir = f"/app/uploads/expenses/{current_user.id}"
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # إنشاء اسم ملف فريد
+                file_extension = os.path.splitext(file.filename)[1]
+                unique_filename = f"{uuid.uuid4()}{file_extension}"
+                file_path = f"{upload_dir}/{unique_filename}"
+                
+                # حفظ الملف
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+                
+                # إنشاء معلومات المرفق
+                attachment = Attachment(
+                    filename=unique_filename,
+                    original_filename=file.filename,
+                    file_path=file_path,
+                    file_size=os.path.getsize(file_path),
+                    file_type=file.content_type
+                )
+                attachments.append(attachment)
+        
+        # التحقق من الرصيد المتبقي
+        balance = await AdvancesDB.calculate_employee_balance(db, current_user.id)
+        total_available = balance.remaining_advance + balance.remaining_custody
+        
+        if amount > total_available:
+            raise HTTPException(
+                status_code=400,
+                detail=f"المبلغ المطلوب ({amount} درهم) يتجاوز الرصيد المتاح ({total_available} درهم)"
+            )
+        
+        # إنشاء معاملة المصروف
+        transaction = AdvanceTransaction(
+            employee_id=current_user.id,
+            employee_name=current_user.name,
+            transaction_type=TransactionType.EXPENSE,
+            amount=amount,
+            category=expense_category,
+            description=description,
+            expense_date=expense_date,
+            attachments=attachments,
+            status=TransactionStatus.PENDING,  # يحتاج موافقة
+            notes=notes
+        )
+        
+        # حفظ في قاعدة البيانات
+        transaction_dict = AdvancesDB.transaction_to_dict(transaction)
+        await db.advance_transactions.insert_one(transaction_dict)
+        
+        # إرسال إشعار للسوبر أدمن
+        await send_expense_approval_notification(current_user, transaction, attachments)
+        
+        # تسجيل النشاط
+        await log_activity(
+            current_user.id,
+            "expense_submitted",
+            f"تقديم مصروف بمبلغ {amount} درهم - {EXPENSE_CATEGORY_AR[expense_category]} مع {len(attachments)} فاتورة"
+        )
+        
+        return {
+            "success": True,
+            "message": "تم تقديم المصروف بنجاح وإرسال للموافقة",
+            "transaction_id": transaction.id,
+            "attachments_count": len(attachments),
+            "remaining_balance": total_available - amount if amount <= total_available else total_available
+        }
+        
+    except Exception as e:
+        # تنظيف الملفات في حالة الخطأ
+        for attachment in attachments:
+            try:
+                if os.path.exists(attachment.file_path):
+                    os.remove(attachment.file_path)
+            except:
+                pass
+        raise e
+
+@api_router.get("/advances/my-balance")
+async def get_my_balance(current_user: User = Depends(get_current_user)):
+    """الحصول على رصيد الموظف الحالي"""
+    
+    balance = await AdvancesDB.calculate_employee_balance(db, current_user.id)
+    
+    return {
+        "employee_name": balance.employee_name,
+        "total_advances": balance.total_advances,
+        "total_custody": balance.total_custody,
+        "total_expenses": balance.total_expenses,
+        "remaining_advance": balance.remaining_advance,
+        "remaining_custody": balance.remaining_custody,
+        "total_available": balance.remaining_advance + balance.remaining_custody,
+        "last_transaction_date": balance.last_transaction_date.isoformat() if balance.last_transaction_date else None
+    }
+
+@api_router.get("/advances/my-transactions")
+async def get_my_transactions(
+    limit: int = 50,
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على معاملات الموظف"""
+    
+    transactions = await db.advance_transactions.find({
+        "employee_id": current_user.id
+    }).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # معالجة البيانات للعرض
+    dubai_tz = timezone(timedelta(hours=4))
+    
+    for transaction in transactions:
+        if "_id" in transaction:
+            del transaction["_id"]
+        
+        # تحويل التواريخ
+        if transaction.get("created_at"):
+            created_at = datetime.fromisoformat(transaction["created_at"].replace("Z", "+00:00"))
+            transaction["created_at_display"] = created_at.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        # إضافة الترجمات
+        if transaction.get("transaction_type"):
+            transaction["transaction_type_ar"] = TRANSACTION_TYPE_AR.get(
+                TransactionType(transaction["transaction_type"]), transaction["transaction_type"]
+            )
+        
+        if transaction.get("status"):
+            transaction["status_ar"] = TRANSACTION_STATUS_AR.get(
+                TransactionStatus(transaction["status"]), transaction["status"]
+            )
+        
+        if transaction.get("category"):
+            transaction["category_ar"] = EXPENSE_CATEGORY_AR.get(
+                ExpenseCategory(transaction["category"]), transaction["category"]
+            )
+    
+    return {"transactions": transactions}
+
+@api_router.get("/advances/admin/all-balances")
+async def get_all_employee_balances(current_user: User = Depends(get_super_admin_user)):
+    """جميع أرصدة الموظفين - Super Admin Only"""
+    
+    # الحصول على جميع الموظفين الذين لديهم معاملات
+    employee_ids = await db.advance_transactions.distinct("employee_id")
+    
+    balances = []
+    for employee_id in employee_ids:
+        balance = await AdvancesDB.calculate_employee_balance(db, employee_id)
+        balances.append(balance.dict())
+    
+    # ترتيب حسب إجمالي المبلغ المتبقي
+    balances.sort(key=lambda x: (x["remaining_advance"] + x["remaining_custody"]), reverse=True)
+    
+    return {"employee_balances": balances}
+
+@api_router.get("/advances/admin/pending-approvals")
+async def get_pending_approvals(current_user: User = Depends(get_super_admin_user)):
+    """المعاملات المُعلقة للموافقة - Super Admin Only"""
+    
+    pending_transactions = await db.advance_transactions.find({
+        "status": TransactionStatus.PENDING
+    }).sort("created_at", -1).to_list(100)
+    
+    # معالجة البيانات
+    dubai_tz = timezone(timedelta(hours=4))
+    
+    for transaction in pending_transactions:
+        if "_id" in transaction:
+            del transaction["_id"]
+        
+        # تحويل التواريخ
+        if transaction.get("created_at"):
+            created_at = datetime.fromisoformat(transaction["created_at"].replace("Z", "+00:00"))
+            transaction["created_at_display"] = created_at.astimezone(dubai_tz).strftime("%Y-%m-%d %H:%M")
+        
+        # إضافة الترجمات
+        if transaction.get("transaction_type"):
+            transaction["transaction_type_ar"] = TRANSACTION_TYPE_AR.get(
+                TransactionType(transaction["transaction_type"]), transaction["transaction_type"]
+            )
+        
+        if transaction.get("category"):
+            transaction["category_ar"] = EXPENSE_CATEGORY_AR.get(
+                ExpenseCategory(transaction["category"]), transaction["category"]
+            )
+    
+    return {"pending_transactions": pending_transactions}
+
+@api_router.post("/advances/{transaction_id}/approve")
+async def approve_transaction(
+    transaction_id: str,
+    approval: ApprovalRequest,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """الموافقة على أو رفض معاملة"""
+    
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    if transaction["status"] != TransactionStatus.PENDING:
+        raise HTTPException(status_code=400, detail="هذه المعاملة تم معالجتها بالفعل")
+    
+    # تحديث حالة المعاملة
+    update_data = {
+        "status": approval.status,
+        "approved_by": current_user.id,
+        "approved_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if approval.status == TransactionStatus.REJECTED:
+        update_data["rejection_reason"] = approval.notes or "لم يتم تحديد سبب"
+    
+    if approval.notes:
+        update_data["notes"] = approval.notes
+    
+    await db.advance_transactions.update_one(
+        {"id": transaction_id},
+        {"$set": update_data}
+    )
+    
+    # تحديث رصيد الموظف إذا تمت الموافقة
+    if approval.status == TransactionStatus.APPROVED:
+        await update_employee_balance(transaction["employee_id"])
+    
+    # إرسال إشعار للموظف
+    employee = await db.users.find_one({"id": transaction["employee_id"]})
+    if employee:
+        await send_expense_decision_notification(employee, transaction, approval, current_user)
+    
+    # تسجيل النشاط
+    action = "approved" if approval.status == TransactionStatus.APPROVED else "rejected"
+    await log_activity(
+        current_user.id,
+        f"expense_{action}",
+        f"{'موافقة' if approval.status == TransactionStatus.APPROVED else 'رفض'} مصروف للموظف {transaction['employee_name']} بمبلغ {transaction['amount']} درهم"
+    )
+    
+    return {
+        "success": True,
+        "message": f"تم {'الموافقة على' if approval.status == TransactionStatus.APPROVED else 'رفض'} المعاملة",
+        "transaction_id": transaction_id
+    }
+
+@api_router.get("/advances/attachment/{transaction_id}/{attachment_id}")
+async def view_attachment(
+    transaction_id: str,
+    attachment_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """عرض مرفق (فاتورة)"""
+    
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    # التحقق من الصلاحية
+    if current_user.role != "super_admin" and transaction["employee_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="غير مسموح")
+    
+    # البحث عن المرفق
+    attachment = None
+    for att in transaction.get("attachments", []):
+        if att["id"] == attachment_id:
+            attachment = att
+            break
+    
+    if not attachment:
+        raise HTTPException(status_code=404, detail="المرفق غير موجود")
+    
+    # التحقق من وجود الملف
+    if not os.path.exists(attachment["file_path"]):
+        raise HTTPException(status_code=404, detail="الملف غير موجود")
+    
+    return FileResponse(
+        path=attachment["file_path"],
+        filename=attachment["original_filename"],
+        media_type=attachment["file_type"]
+    )
+
+async def update_employee_balance(employee_id: str):
+    """تحديث رصيد الموظف"""
+    balance = await AdvancesDB.calculate_employee_balance(db, employee_id)
+    
+    # حفظ أو تحديث الرصيد
+    await db.employee_balances.replace_one(
+        {"employee_id": employee_id},
+        balance.dict(),
+        upsert=True
+    )
+
+async def send_advance_notification(employee, transaction, admin, action):
+    """إرسال إشعار للموظف عند إنشاء سلفة/عهدة"""
+    
+    message = f"""💰 {TRANSACTION_TYPE_AR[TransactionType(transaction.transaction_type)]} جديدة
+
+👤 الموظف: {employee['name']}
+💵 المبلغ: {transaction.amount} درهم
+📝 الوصف: {transaction.description}
+👤 تم الإنشاء من: {admin.name}
+📅 التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+
+{f"📋 ملاحظات: {transaction.notes}" if transaction.notes else ""}
+
+يمكنك الآن استخدام هذا المبلغ في مصروفاتك."""
+
+    notification = Notification(
+        recipient_id=employee["id"],
+        recipient_name=employee["name"],
+        sender_id=admin.id,
+        sender_name=admin.name,
+        subject=f"💰 {TRANSACTION_TYPE_AR[TransactionType(transaction.transaction_type)]} جديدة بمبلغ {transaction.amount} درهم",
+        message=message,
+        type="success",
+        priority="normal",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+
+async def send_expense_approval_notification(employee, transaction, attachments):
+    """إرسال إشعار للسوبر أدمن عند تقديم مصروف"""
+    
+    super_admins = await db.users.find({"role": "super_admin"}).to_list(10)
+    
+    message = f"""🧾 طلب موافقة على مصروف جديد
+
+👤 الموظف: {employee.name}
+💵 المبلغ: {transaction.amount} درهم
+📂 التصنيف: {EXPENSE_CATEGORY_AR[transaction.category]}
+📅 تاريخ المصروف: {transaction.expense_date}
+📝 الوصف: {transaction.description}
+📎 عدد الفواتير: {len(attachments)}
+
+يرجى مراجعة الطلب والفواتير للموافقة أو الرفض."""
+
+    for admin in super_admins:
+        notification = Notification(
+            recipient_id=admin["id"],
+            recipient_name=admin["name"],
+            sender_id="system",
+            sender_name="نظام السلف والعهد",
+            subject=f"🧾 طلب موافقة مصروف - {employee.name}",
+            message=message,
+            type="info",
+            priority="high",
+            sent_at=datetime.utcnow()
+        )
+        
+        await db.notifications.insert_one(notification.dict())
+
+async def send_expense_decision_notification(employee, transaction, approval, admin):
+    """إرسال إشعار بقرار الموافقة/الرفض"""
+    
+    if approval.status == TransactionStatus.APPROVED:
+        message = f"""✅ تمت الموافقة على مصروفك
+
+💵 المبلغ: {transaction['amount']} درهم
+📂 التصنيف: {EXPENSE_CATEGORY_AR[ExpenseCategory(transaction['category'])]}
+📅 تاريخ المصروف: {transaction['expense_date']}
+👤 تمت الموافقة من: {admin.name}
+
+{f"📋 ملاحظات الإدارة: {approval.notes}" if approval.notes else ""}
+
+تم خصم المبلغ من رصيدك المتاح."""
+
+        subject = "✅ تمت الموافقة على مصروفك"
+        msg_type = "success"
+    else:
+        message = f"""❌ تم رفض مصروفك
+
+💵 المبلغ: {transaction['amount']} درهم
+📂 التصنيف: {EXPENSE_CATEGORY_AR[ExpenseCategory(transaction['category'])]}
+📅 تاريخ المصروف: {transaction['expense_date']}
+👤 تم الرفض من: {admin.name}
+❗ سبب الرفض: {approval.notes or 'لم يتم تحديد سبب'}
+
+يرجى مراجعة الفواتير وإعادة التقديم."""
+
+        subject = "❌ تم رفض مصروفك"
+        msg_type = "warning"
+
+    notification = Notification(
+        recipient_id=employee["id"],
+        recipient_name=employee["name"],
+        sender_id=admin.id,
+        sender_name=admin.name,
+        subject=subject,
+        message=message,
+        type=msg_type,
+        priority="normal",
+        sent_at=datetime.utcnow()
+    )
+    
+    await db.notifications.insert_one(notification.dict())
+
 # ============ MARKETING VISITS SYSTEM ============
 
 from marketing_visits_model import (
