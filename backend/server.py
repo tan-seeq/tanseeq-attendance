@@ -2870,7 +2870,7 @@ async def update_deduction(
                 "severity": "important",
                 "category": "deduction",
                 "user_id": existing["employee_id"],
-                "sender": current_user["name"],
+                "sender": current_user.name,
                 "is_read": False,
                 "sent_at": datetime.now().isoformat(),
                 "created_at": datetime.now().isoformat()
