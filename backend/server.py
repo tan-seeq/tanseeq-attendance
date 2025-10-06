@@ -2850,6 +2850,34 @@ async def create_manual_deduction(
             created_by=current_user.id
         )
         
+        # ربط تلقائي بدورة الراتب المفتوحة
+        try:
+            global payroll_engine
+            if payroll_engine:
+                from .attendance_models import PayrollDeduction, DeductionType, DeductionCategory, DeductionSource
+                
+                # تحويل البيانات لنموذج الخصم
+                deduction_obj = PayrollDeduction(
+                    id=deduction["id"],
+                    employee_id=deduction["employee_id"],
+                    employee_name=deduction["employee_name"],
+                    deduction_type=DeductionType.MANUAL,
+                    category=DeductionCategory.CUSTOM,
+                    date=target_date,
+                    amount=deduction["amount"],
+                    reason=deduction["reason"],
+                    source=DeductionSource.MANUAL,
+                    created_by=current_user.id,
+                    created_by_name=current_user.name
+                )
+                
+                # ربط مع دورة الراتب
+                linked = await payroll_engine.link_deduction_to_payroll(deduction_obj)
+                if linked:
+                    print(f"✅ خصم {deduction['id']} تم ربطه تلقائياً بدورة الراتب")
+        except Exception as link_error:
+            print(f"⚠️ فشل ربط الخصم بدورة الراتب: {link_error}")
+        
         return {"message": "Manual deduction created successfully", "deduction": deduction}
         
     except ValueError as e:
