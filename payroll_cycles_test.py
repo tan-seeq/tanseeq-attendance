@@ -398,8 +398,9 @@ class PayrollSystemTester:
             )
             
             if status == 200:
+                payroll_count = len(response) if isinstance(response, list) else len(response.get('payroll_history', []))
                 self.log_result(test_name, True, 
-                              f"Regular user can access own payroll history: {len(response.get('payroll_history', []))} records")
+                              f"Regular user can access own payroll history: {payroll_count} records")
             else:
                 self.log_result(test_name, False, f"Failed to access own payroll: {status} - {response}")
         else:
