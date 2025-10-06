@@ -2929,7 +2929,7 @@ async def update_deduction(
         await db.activity_logs.insert_one({
             "id": str(uuid.uuid4()),
             "user_id": current_user.id if hasattr(current_user, 'id') else current_user.id,
-            "user_name": current_user.name if hasattr(current_user, 'name') else current_user["name"],
+            "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": f"Updated deduction {deduction_id}",
             "details": f"Updated fields: {', '.join(update_fields.keys())}",
             "timestamp": datetime.now().isoformat()
@@ -2999,7 +2999,7 @@ async def void_deduction(
         await db.activity_logs.insert_one({
             "id": str(uuid.uuid4()),
             "user_id": current_user.id if hasattr(current_user, 'id') else current_user.id,
-            "user_name": current_user.name if hasattr(current_user, 'name') else current_user["name"],
+            "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": f"Voided deduction {deduction_id}",
             "details": f"Reason: {void_reason}",
             "timestamp": datetime.now().isoformat()
@@ -3124,7 +3124,7 @@ async def recompute_attendance(
         await db.activity_logs.insert_one({
             "id": str(uuid.uuid4()),
             "user_id": current_user.id if hasattr(current_user, 'id') else current_user.id,
-            "user_name": current_user.name if hasattr(current_user, 'name') else current_user["name"],
+            "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": "Recomputed attendance",
             "details": message,
             "timestamp": datetime.now().isoformat()
@@ -3162,7 +3162,7 @@ async def create_payroll_cycle(
         cycle = await payroll_engine.create_payroll_cycle(
             month=month,
             created_by=current_user.id,
-            created_by_name=current_user["name"],
+            created_by_name=current_user.name,
             notes=notes
         )
         
@@ -3225,7 +3225,7 @@ async def lock_payroll_cycle(
         success = await payroll_engine.lock_payroll_cycle(
             cycle_id=cycle_id,
             locked_by=current_user.id,
-            locked_by_name=current_user["name"],
+            locked_by_name=current_user.name,
             lock_reason=lock_reason
         )
         
@@ -3307,7 +3307,7 @@ async def create_installment_schedule(
             number_of_installments=int(number_of_installments),
             start_date=start_date,
             created_by=current_user.id,
-            created_by_name=current_user["name"],
+            created_by_name=current_user.name,
             respect_ceiling=schedule_data.get("respect_ceiling", True)
         )
         
