@@ -70,7 +70,7 @@ class AdvancesSystemTester:
                 print(f"🧪 Testing login: {cred['email']} ({cred['name']})")
                 
                 response = self.session.post(
-                    f"{BACKEND_URL}/auth/login",
+                    f"{backend_url}/auth/login",
                     json={
                         "email": cred["email"],
                         "password": cred["password"]
