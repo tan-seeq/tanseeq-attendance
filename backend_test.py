@@ -1,53 +1,64 @@
 #!/usr/bin/env python3
 """
-URGENT VERIFICATION: Complete System Health Check After Environment Fix
-Testing all advances endpoints with the new production domain: hrapp-tanseeq.emergent.host
+Advanced Attendance Deductions System Testing
+اختبار نظام الخصومات المتقدم للحضور - أكتوبر 2025
+
+Testing the new advanced attendance deductions system with:
+- GET /api/deductions - Get deductions with filters
+- POST /api/deductions/manual - Create manual deduction (Super Admin only)
+- PATCH /api/deductions/{id} - Update deduction (Super Admin only)
+- POST /api/deductions/{id}/void - Void/cancel deduction (Super Admin only)
+- GET /api/attendance/stats/{employee_id} - Get attendance statistics
+- POST /api/attendance/recompute - Recompute attendance (Super Admin only)
 """
 
 import requests
 import json
 import os
-from datetime import datetime, timedelta
-import uuid
+from datetime import datetime, date, timedelta
+from typing import Dict, Any, Optional
 
-# Configuration - Test both local and production
-LOCAL_BACKEND_URL = "http://localhost:8001/api"
-PRODUCTION_BACKEND_URL = "https://hrapp-tanseeq.emergent.host/api"
+# Configuration
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://advanced-hr.preview.emergentagent.com')
+API_BASE = f"{BACKEND_URL}/api"
 
-print(f"🔗 Testing Local Backend URL: {LOCAL_BACKEND_URL}")
-print(f"🔗 Testing Production Backend URL: {PRODUCTION_BACKEND_URL}")
+# Test credentials from review request
+SUPER_ADMIN_CREDENTIALS = {
+    "email": "hatem@tan-seeq.co",
+    "password": "hatem123"
+}
 
-# Test credentials from previous testing history
-TEST_CREDENTIALS = [
-    {"email": "hatem@tanseeq.com", "password": "hatem123", "role": "super_admin", "name": "Hatem (Super Admin)"},
-    {"email": "hatem@tan-seeq.co", "password": "hatem123", "role": "super_admin", "name": "Hatem Alt (Super Admin)"},
-    {"email": "mahmoud@tanseeq.com", "password": "admin123", "role": "admin", "name": "Mahmoud (Admin)"},
-    {"email": "jihad@tanseeq.com", "password": "user123", "role": "user", "name": "Jihad (User)"},
-    {"email": "admin@tanseeq.com", "password": "admin123", "role": "admin", "name": "Admin"},
-    {"email": "hatemmo186@gmail.com", "password": "hatem123", "role": "super_admin", "name": "Hatem Gmail"}
-]
+REGULAR_USER_CREDENTIALS = {
+    "email": "jihad@tanseeq.com", 
+    "password": "jihad123"
+}
 
-class AdvancesSystemTester:
+class AttendanceDeductionsTestSuite:
+    """Test suite for Advanced Attendance Deductions System"""
+    
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        })
-        self.auth_token = None
-        self.current_user = None
+        self.super_admin_token = None
+        self.regular_user_token = None
+        self.super_admin_user = None
+        self.regular_user = None
         self.test_results = []
+        self.created_deductions = []  # Track created deductions for cleanup
         
-    def log_test(self, test_name, success, details="", error=""):
-        """Log test results"""
+    def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
+        """Log test result"""
         status = "✅ PASS" if success else "❌ FAIL"
-        result = {
+        print(f"{status} {test_name}")
+        if details:
+            print(f"   Details: {details}")
+        if response_data and not success:
+            print(f"   Response: {response_data}")
+        print()
+        
+        self.test_results.append({
             "test": test_name,
-            "status": status,
             "success": success,
             "details": details,
-            "error": error,
-            "timestamp": datetime.now().isoformat()
+            "response": response_data
         }
         self.test_results.append(result)
         print(f"{status}: {test_name}")
