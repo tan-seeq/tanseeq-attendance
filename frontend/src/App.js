@@ -98,6 +98,10 @@ const AuthProvider = ({ children }) => {
       const response = await axios.get(`${API}/auth/me`);
       if (response.data) {
         setUser(response.data);
+        // Check for mandatory notifications after setting user
+        setTimeout(() => {
+          checkMandatoryNotifications();
+        }, 1000);
       }
       setLoading(false);
     } catch (error) {
@@ -114,6 +118,10 @@ const AuthProvider = ({ children }) => {
             role: decoded.role || 'user'
           };
           setUser(userData);
+          // Check for mandatory notifications after setting user
+          setTimeout(() => {
+            checkMandatoryNotifications();
+          }, 1000);
         }
         setLoading(false);
       } catch (fallbackError) {
