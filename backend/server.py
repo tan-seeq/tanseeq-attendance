@@ -2817,10 +2817,10 @@ async def create_manual_deduction(
 async def update_deduction(
     deduction_id: str,
     update_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Update deduction (Super Admin only)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
