@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, Clock, AlertTriangle, DollarSign, Users, 
-  Plus, Edit, Trash2, Eye, Download, Filter, Search,
-  CheckCircle, XCircle, AlertCircle, Info
-} from 'lucide-react';
+import {
+  ExclamationTriangleIcon as AlertTriangle,
+  PlusIcon as Plus,
+  PencilIcon as Edit,
+  TrashIcon as Trash2,
+  EyeIcon as Eye,
+  ArrowDownTrayIcon as Download,
+  FunnelIcon as Filter,
+  MagnifyingGlassIcon as Search,
+  CheckCircleIcon as CheckCircle,
+  XCircleIcon as XCircle,
+  InformationCircleIcon as Info,
+  CalendarIcon as Calendar,
+  ClockIcon as Clock,
+  CurrencyDollarIcon as DollarSign,
+  UserGroupIcon as Users
+} from '@heroicons/react/24/outline';
 
 const AttendanceDeductionsAdmin = () => {
   const [activeTab, setActiveTab] = useState('overview');
