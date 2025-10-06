@@ -128,10 +128,10 @@ class WorkingHoursTestSuite:
                     f"Retrieved {len(records)} attendance records"
                 )
                 
-                # Find records with check-in but no check-out or existing check-out to update
+                # Find records with check-in and check-out to test working hours calculation
                 test_records = []
                 for record in records:
-                    if record.get('check_in') and record.get('status') in ['present', 'late']:
+                    if record.get('check_in') and record.get('check_out'):
                         test_records.append(record)
                 
                 return test_records[:5]  # Return first 5 suitable records
