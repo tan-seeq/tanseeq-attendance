@@ -2733,6 +2733,342 @@ async def send_visit_completion_notification(visit_data, report, employee, durat
         await db.notifications.insert_one(notification.dict())
 
 # ================================
+# ATTENDANCE DEDUCTIONS SYSTEM
+# ================================
+
+# Initialize attendance engine
+attendance_engine = None
+
+@app.on_event("startup")
+async def initialize_attendance_engine():
+    """Initialize attendance engine on startup"""
+    global attendance_engine
+    from .attendance_engine import AttendanceEngine
+    attendance_engine = AttendanceEngine(db)
+    await attendance_engine.initialize()
+
+@app.get("/api/deductions")
+async def get_deductions(
+    employee_id: Optional[str] = None,
+    month: Optional[str] = None,
+    deduction_type: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get deductions with filtering"""
+    try:
+        # Regular users can only see their own deductions
+        if current_user.get("role") == "user":
+            employee_id = current_user["id"]
+        
+        filters = {}
+        if employee_id:
+            filters["employee_id"] = employee_id
+        if month:
+            filters["date"] = {"$regex": f"^{month}"}
+        if deduction_type:
+            filters["deduction_type"] = deduction_type
+        
+        deductions = await db.payroll_deductions.find(
+            filters
+        ).sort([("date", -1)]).to_list(length=100)
+        
+        # Convert ObjectId to string
+        for deduction in deductions:
+            deduction["_id"] = str(deduction["_id"])
+        
+        return deductions
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching deductions: {str(e)}")
+
+@app.post("/api/deductions/manual")
+async def create_manual_deduction(
+    deduction_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create manual deduction (Super Admin only)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        global attendance_engine
+        from .attendance_models import DeductionType, DeductionCategory
+        from datetime import date
+        
+        # Validate required fields
+        required_fields = ["employee_id", "amount", "reason", "date"]
+        for field in required_fields:
+            if field not in deduction_data:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        # Parse date
+        target_date = datetime.strptime(deduction_data["date"], "%Y-%m-%d").date()
+        
+        # Create manual deduction
+        deduction = await attendance_engine.create_manual_deduction(
+            employee_id=deduction_data["employee_id"],
+            deduction_type=DeductionType.MANUAL,
+            category=DeductionCategory.CUSTOM,
+            target_date=target_date,
+            amount=float(deduction_data["amount"]),
+            reason=deduction_data["reason"],
+            created_by=current_user["id"]
+        )
+        
+        return {"message": "Manual deduction created successfully", "deduction": deduction}
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid data: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating manual deduction: {str(e)}")
+
+@app.patch("/api/deductions/{deduction_id}")
+async def update_deduction(
+    deduction_id: str,
+    update_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update deduction (Super Admin only)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        # Find existing deduction
+        existing = await db.payroll_deductions.find_one({"id": deduction_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Deduction not found")
+        
+        # Update allowed fields
+        allowed_updates = ["amount", "reason", "is_voided"]
+        update_fields = {}
+        
+        for field, value in update_data.items():
+            if field in allowed_updates:
+                update_fields[field] = value
+        
+        if not update_fields:
+            raise HTTPException(status_code=400, detail="No valid fields to update")
+        
+        # Add audit information
+        update_fields["updated_by"] = current_user["id"]
+        update_fields["updated_at"] = datetime.now().isoformat()
+        
+        # Update deduction
+        result = await db.payroll_deductions.update_one(
+            {"id": deduction_id},
+            {"$set": update_fields}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Deduction not found or no changes made")
+        
+        # Log activity
+        await log_activity(
+            user_id=current_user["id"],
+            user_name=current_user["name"],
+            action=f"Updated deduction {deduction_id}",
+            details=f"Updated fields: {', '.join(update_fields.keys())}"
+        )
+        
+        # Send notification if amount changed
+        if "amount" in update_fields:
+            notification = {
+                "id": str(uuid.uuid4()),
+                "title": "تعديل خصم من الراتب",
+                "message": f"تم تعديل خصم بمبلغ {update_fields['amount']} درهم. السبب: {update_fields.get('reason', 'غير محدد')}",
+                "severity": "important",
+                "category": "deduction",
+                "user_id": existing["employee_id"],
+                "sender": current_user["name"],
+                "is_read": False,
+                "sent_at": datetime.now().isoformat(),
+                "created_at": datetime.now().isoformat()
+            }
+            await db.notifications.insert_one(notification)
+        
+        return {"message": "Deduction updated successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating deduction: {str(e)}")
+
+@app.post("/api/deductions/{deduction_id}/void")
+async def void_deduction(
+    deduction_id: str,
+    void_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Void/cancel a deduction (Super Admin only)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        # Find existing deduction
+        existing = await db.payroll_deductions.find_one({"id": deduction_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Deduction not found")
+        
+        if existing.get("is_voided", False):
+            raise HTTPException(status_code=400, detail="Deduction already voided")
+        
+        void_reason = void_data.get("reason", "إلغاء إداري")
+        
+        # Mark as voided
+        void_fields = {
+            "is_voided": True,
+            "voided_by": current_user["id"],
+            "voided_at": datetime.now().isoformat(),
+            "void_reason": void_reason
+        }
+        
+        result = await db.payroll_deductions.update_one(
+            {"id": deduction_id},
+            {"$set": void_fields}
+        )
+        
+        if result.modified_count == 0:
+            raise HTTPException(status_code=404, detail="Deduction not found")
+        
+        # Log activity
+        await log_activity(
+            user_id=current_user["id"],
+            user_name=current_user["name"],
+            action=f"Voided deduction {deduction_id}",
+            details=f"Reason: {void_reason}"
+        )
+        
+        # Send notification
+        notification = {
+            "id": str(uuid.uuid4()),
+            "title": "إلغاء خصم من الراتب",
+            "message": f"تم إلغاء خصم بمبلغ {existing.get('amount', 0)} درهم. السبب: {void_reason}",
+            "severity": "important",
+            "category": "deduction",
+            "user_id": existing["employee_id"],
+            "sender": current_user["name"],
+            "is_read": False,
+            "sent_at": datetime.now().isoformat(),
+            "created_at": datetime.now().isoformat()
+        }
+        await db.notifications.insert_one(notification)
+        
+        return {"message": "Deduction voided successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error voiding deduction: {str(e)}")
+
+@app.get("/api/attendance/stats/{employee_id}")
+async def get_attendance_stats(
+    employee_id: str,
+    month: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get attendance statistics for employee"""
+    try:
+        # Regular users can only see their own stats
+        if current_user.get("role") == "user" and employee_id != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        if not month:
+            month = datetime.now().strftime("%Y-%m")
+        
+        global attendance_engine
+        
+        # Get monthly deductions summary
+        summary = await attendance_engine.get_monthly_deductions_summary(employee_id, month)
+        
+        return summary
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching attendance stats: {str(e)}")
+
+@app.post("/api/attendance/recompute")
+async def recompute_attendance(
+    recompute_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Recompute attendance for specific date/month (Super Admin only)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        global attendance_engine
+        
+        if "date" in recompute_data:
+            # Recompute specific date
+            target_date = datetime.strptime(recompute_data["date"], "%Y-%m-%d").date()
+            employee_id = recompute_data.get("employee_id")
+            
+            if employee_id:
+                await attendance_engine.process_daily_attendance(
+                    employee_id=employee_id,
+                    target_date=target_date,
+                    force_recompute=True
+                )
+                message = f"Recomputed attendance for employee {employee_id} on {target_date}"
+            else:
+                # Recompute for all employees on that date
+                employees = await db.users.find({"role": {"$in": ["user", "admin"]}}).to_list(length=None)
+                for emp in employees:
+                    await attendance_engine.process_daily_attendance(
+                        employee_id=emp["id"],
+                        target_date=target_date,
+                        force_recompute=True
+                    )
+                message = f"Recomputed attendance for all employees on {target_date}"
+                
+        elif "month" in recompute_data:
+            # Recompute entire month
+            month = recompute_data["month"]
+            employee_id = recompute_data.get("employee_id")
+            
+            year, month_num = map(int, month.split('-'))
+            days_in_month = calendar.monthrange(year, month_num)[1]
+            
+            if employee_id:
+                for day in range(1, days_in_month + 1):
+                    target_date = date(year, month_num, day)
+                    await attendance_engine.process_daily_attendance(
+                        employee_id=employee_id,
+                        target_date=target_date,
+                        force_recompute=True
+                    )
+                message = f"Recomputed attendance for employee {employee_id} for month {month}"
+            else:
+                employees = await db.users.find({"role": {"$in": ["user", "admin"]}}).to_list(length=None)
+                for emp in employees:
+                    for day in range(1, days_in_month + 1):
+                        target_date = date(year, month_num, day)
+                        await attendance_engine.process_daily_attendance(
+                            employee_id=emp["id"],
+                            target_date=target_date,
+                            force_recompute=True
+                        )
+                message = f"Recomputed attendance for all employees for month {month}"
+        else:
+            raise HTTPException(status_code=400, detail="Either 'date' or 'month' is required")
+        
+        # Log activity
+        await log_activity(
+            user_id=current_user["id"],
+            user_name=current_user["name"],
+            action="Recomputed attendance",
+            details=message
+        )
+        
+        return {"message": message}
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error recomputing attendance: {str(e)}")
+
+# ================================
 # NOTIFICATION SYSTEM ENDPOINTS
 # ================================
 
