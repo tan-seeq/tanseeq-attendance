@@ -192,7 +192,7 @@ class AdvancesSystemTester:
 
             # Test all transactions
             try:
-                response = self.session.get(f"{BACKEND_URL}/advances/admin/all-transactions", timeout=30)
+                response = self.session.get(f"{backend_url}/advances/admin/all-transactions", timeout=30)
                 if response.status_code == 200:
                     transactions_data = response.json()
                     transaction_count = len(transactions_data.get('transactions', []))
