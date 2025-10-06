@@ -2743,13 +2743,13 @@ async def get_deductions(
     employee_id: Optional[str] = None,
     month: Optional[str] = None,
     deduction_type: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Get deductions with filtering"""
     try:
         # Regular users can only see their own deductions
-        if current_user.get("role") == "user":
-            employee_id = current_user["id"]
+        if current_user.role == "user":
+            employee_id = current_user.id
         
         filters = {}
         if employee_id:
