@@ -548,14 +548,42 @@ def calculate_working_hours_and_deductions(check_in, check_out, break_time_minut
         }
 
     try:
-        # Parse times
+        # Parse times - handle both ISO format (T separator) and space format
         if isinstance(check_in, str):
-            check_in_time = datetime.strptime(check_in.split('T')[0] + ' ' + check_in.split('T')[1][:5], "%Y-%m-%d %H:%M")
+            try:
+                if 'T' in check_in:
+                    # ISO format: "2025-08-28T11:08:41"
+                    check_in_time = datetime.strptime(check_in.split('T')[0] + ' ' + check_in.split('T')[1][:5], "%Y-%m-%d %H:%M")
+                else:
+                    # Space format: "2025-08-28 11:08:41" or "2025-08-28 11:08"
+                    if len(check_in.split(' ')) >= 2:
+                        date_part = check_in.split(' ')[0]
+                        time_part = check_in.split(' ')[1][:5]  # Take first 5 chars (HH:MM)
+                        check_in_time = datetime.strptime(f"{date_part} {time_part}", "%Y-%m-%d %H:%M")
+                    else:
+                        raise ValueError(f"Invalid check_in format: {check_in}")
+            except ValueError as e:
+                print(f"Error parsing check_in time '{check_in}': {e}")
+                raise
         else:
             check_in_time = check_in
 
         if isinstance(check_out, str):
-            check_out_time = datetime.strptime(check_out.split('T')[0] + ' ' + check_out.split('T')[1][:5], "%Y-%m-%d %H:%M")
+            try:
+                if 'T' in check_out:
+                    # ISO format: "2025-08-28T18:00:00"
+                    check_out_time = datetime.strptime(check_out.split('T')[0] + ' ' + check_out.split('T')[1][:5], "%Y-%m-%d %H:%M")
+                else:
+                    # Space format: "2025-08-28 18:00:00" or "2025-08-28 18:00"
+                    if len(check_out.split(' ')) >= 2:
+                        date_part = check_out.split(' ')[0]
+                        time_part = check_out.split(' ')[1][:5]  # Take first 5 chars (HH:MM)
+                        check_out_time = datetime.strptime(f"{date_part} {time_part}", "%Y-%m-%d %H:%M")
+                    else:
+                        raise ValueError(f"Invalid check_out format: {check_out}")
+            except ValueError as e:
+                print(f"Error parsing check_out time '{check_out}': {e}")
+                raise
         else:
             check_out_time = check_out
 
