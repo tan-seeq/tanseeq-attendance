@@ -25,7 +25,7 @@ from payroll_models import (
 )
 
 try:
-    from .attendance_models import (
+    from attendance_models import (
         PayrollDeduction, DeductionType, DeductionCategory
     )
 except ImportError:
@@ -35,7 +35,7 @@ except ImportError:
     DeductionCategory = None
 
 try:
-    from .advances_model import (
+    from advances_model import (
         AdvanceTransaction, TransactionType, TransactionStatus
     )
 except ImportError:
