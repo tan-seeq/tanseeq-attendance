@@ -38,7 +38,7 @@ MONGO_URL = os.environ.get("MONGO_URL")
 API_BASE_URL = os.environ.get("BACKEND_URL", "http://localhost:8001/api")
 
 client = AsyncIOMotorClient(MONGO_URL)
-db = client[os.environ.get('DB_NAME', 'tanseeq_hr')]
+db = client[os.environ.get('DB_NAME')]
 
 class AutomatedScheduler:
     def __init__(self):
