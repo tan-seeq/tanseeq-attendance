@@ -516,7 +516,7 @@ class AttendanceWorkingHoursTestSuite:
                 # Verify data persistence by fetching the record again
                 fetch_response = self.session.get(f"{API_BASE}/attendance/with-absences", timeout=30)
                 if fetch_response.status_code == 200:
-                    records = fetch_response.json().get('attendance_records', [])
+                    records = fetch_response.json()  # API returns direct array
                     updated_record = next((r for r in records if r.get('id') == attendance_id), None)
                     
                     if updated_record:
