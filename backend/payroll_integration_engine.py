@@ -68,10 +68,18 @@ class PayrollIntegrationEngine:
         start_date, end_date = get_month_boundaries(year, month_num)
         cutoff_date = end_date + timedelta(days=5)  # 5 أيام بعد نهاية الشهر
         
+        # إنشاء اسم العرض
+        month_names = {
+            1: "يناير", 2: "فبراير", 3: "مارس", 4: "أبريل", 5: "مايو", 6: "يونيو",
+            7: "يوليو", 8: "أغسطس", 9: "سبتمبر", 10: "أكتوبر", 11: "نوفمبر", 12: "ديسمبر"
+        }
+        display_name = f"دورة راتب {month_names.get(month_num, month_num)} {year}"
+        
         # إنشاء الدورة
         cycle = PayrollCycle(
             month=month,
             year=year,
+            display_name=display_name,
             start_date=start_date,
             end_date=end_date,
             cutoff_date=cutoff_date,
