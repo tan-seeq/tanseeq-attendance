@@ -337,19 +337,30 @@ class AdvancesSystemTester:
         print("=" * 80)
         print()
         
-        # Step 1: Test Authentication
-        if not self.test_authentication():
-            print("🚨 CRITICAL FAILURE: Authentication failed - cannot proceed with other tests")
-            return self.generate_summary()
-        
-        # Step 2: Test Advances System
-        self.test_advances_endpoints()
-        
-        # Step 3: Test General System Health
-        self.test_general_system_health()
-        
-        # Step 4: Test Database Connectivity
-        self.test_database_connectivity()
+        # Test both local and production environments
+        for backend_name, backend_url in [("LOCAL", LOCAL_BACKEND_URL), ("PRODUCTION", PRODUCTION_BACKEND_URL)]:
+            print(f"\n🌐 TESTING {backend_name} ENVIRONMENT: {backend_url}")
+            print("=" * 80)
+            
+            # Reset authentication for each environment
+            self.auth_token = None
+            self.current_user = None
+            if 'Authorization' in self.session.headers:
+                del self.session.headers['Authorization']
+            
+            # Step 1: Test Authentication
+            if not self.test_authentication(backend_url):
+                print(f"🚨 CRITICAL FAILURE: Authentication failed for {backend_name} - skipping other tests")
+                continue
+            
+            # Step 2: Test Advances System
+            self.test_advances_endpoints(backend_url)
+            
+            # Step 3: Test General System Health
+            self.test_general_system_health(backend_url)
+            
+            # Step 4: Test Database Connectivity
+            self.test_database_connectivity(backend_url)
         
         return self.generate_summary()
 
