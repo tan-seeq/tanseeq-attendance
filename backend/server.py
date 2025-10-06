@@ -2406,6 +2406,237 @@ async def get_attendance_stats(
     stats = await attendance_engine.get_attendance_stats(employee_id, month)
     return {"stats": stats.dict()}
 
+# ====================
+# SYSTEM NOTIFICATIONS API
+# ====================
+
+@api_router.get("/notifications/unread")
+async def get_unread_notifications(
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على الإشعارات غير المقروءة"""
+    
+    notifications = await db.system_notifications.find({
+        "employee_id": current_user.id,
+        "acknowledged_at": None
+    }).sort("created_at", -1).limit(50).to_list(50)
+    
+    # إضافة الترجمات
+    for notification in notifications:
+        if "_id" in notification:
+            del notification["_id"]
+        
+        if notification.get("severity"):
+            notification["severity_ar"] = NOTIFICATION_SEVERITY_AR.get(
+                NotificationSeverity(notification["severity"]), notification["severity"]
+            )
+    
+    return {"notifications": notifications}
+
+@api_router.post("/notifications/{notification_id}/acknowledge")
+async def acknowledge_notification(
+    notification_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """إقرار إشعار"""
+    
+    notification = await db.system_notifications.find_one({
+        "id": notification_id,
+        "employee_id": current_user.id
+    })
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="الإشعار غير موجود")
+    
+    # تحديث الإشعار
+    await db.system_notifications.update_one(
+        {"id": notification_id},
+        {"$set": {
+            "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+            "read_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إقرار الإشعار بنجاح"
+    }
+
+@api_router.post("/notifications/system")
+async def create_system_notification(
+    notification_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إنشاء إشعار نظام - Super Admin Only"""
+    
+    employee_id = notification_data.get("employee_id")
+    title = notification_data.get("title", "")
+    message = notification_data.get("message", "")
+    severity = notification_data.get("severity", "normal")
+    must_acknowledge = notification_data.get("must_acknowledge", False)
+    
+    if not employee_id or not title or not message:
+        raise HTTPException(status_code=400, detail="جميع الحقول مطلوبة")
+    
+    # التحقق من وجود الموظف
+    employee = await db.users.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="الموظف غير موجود")
+    
+    # إنشاء إشعار
+    notification = SystemNotification(
+        employee_id=employee_id,
+        employee_name=employee["name"],
+        title=title,
+        message=message,
+        severity=NotificationSeverity(severity),
+        must_acknowledge=must_acknowledge,
+        category="admin_message",
+        data={"created_by": current_user.name}
+    )
+    
+    await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "system_notification_created",
+        f"إنشاء إشعار نظام للموظف {employee['name']}: {title}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إنشاء الإشعار بنجاح",
+        "notification_id": notification.id
+    }
+
+# ====================
+# ATTENDANCE CONFIGURATION API
+# ====================
+
+@api_router.get("/attendance/config")
+async def get_attendance_config(
+    current_user: User = Depends(get_super_admin_user)
+):
+    """الحصول على إعدادات نظام الحضور"""
+    
+    config_doc = await db.attendance_config.find_one({})
+    if config_doc:
+        config = AttendanceSystemConfig(**parse_from_mongo(config_doc))
+        return {"config": config.dict()}
+    else:
+        # إرجاع الإعدادات الافتراضية
+        default_config = AttendanceSystemConfig()
+        return {"config": default_config.dict()}
+
+@api_router.put("/attendance/config")
+async def update_attendance_config(
+    config_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تحديث إعدادات نظام الحضور"""
+    
+    # الحصول على الإعدادات الحالية أو إنشاء جديدة
+    existing_config = await db.attendance_config.find_one({})
+    
+    if existing_config:
+        config = AttendanceSystemConfig(**parse_from_mongo(existing_config))
+        # تحديث الحقول المتاحة
+        for field, value in config_data.items():
+            if hasattr(config, field):
+                setattr(config, field, value)
+    else:
+        config = AttendanceSystemConfig(**config_data)
+    
+    config.updated_by = current_user.id
+    config.updated_at = datetime.now(timezone.utc)
+    
+    # حفظ الإعدادات
+    config_dict = prepare_for_mongo(config.dict())
+    await db.attendance_config.replace_one({}, config_dict, upsert=True)
+    
+    # إعادة تحميل إعدادات المحرك
+    await attendance_engine._load_system_config()
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "attendance_config_updated",
+        f"تحديث إعدادات نظام الحضور"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تحديث إعدادات الحضور بنجاح",
+        "config": config.dict()
+    }
+
+# ====================
+# SCHEDULED TASKS API
+# ====================
+
+@api_router.post("/attendance/scheduler/check-missing-checkouts")
+async def trigger_missing_checkout_check(
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تشغيل فحص عدم تسجيل الانصراف"""
+    
+    try:
+        scheduler = AttendanceScheduler(attendance_engine)
+        await scheduler.check_missing_checkouts_warning()
+        
+        return {
+            "success": True,
+            "message": "تم تشغيل فحص عدم تسجيل الانصراف بنجاح"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في تشغيل الفحص: {str(e)}")
+
+@api_router.post("/attendance/scheduler/apply-daily-deductions")
+async def trigger_daily_deductions(
+    target_date: Optional[str] = None,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تطبيق خصومات يومية"""
+    
+    try:
+        scheduler = AttendanceScheduler(attendance_engine)
+        
+        if target_date:
+            from datetime import datetime
+            process_date = datetime.fromisoformat(target_date).date()
+        else:
+            process_date = date.today()
+        
+        await scheduler.apply_daily_deductions(process_date)
+        
+        return {
+            "success": True,
+            "message": f"تم تطبيق خصومات يوم {process_date} بنجاح"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في تطبيق الخصومات: {str(e)}")
+
+@api_router.get("/attendance/scheduler/status")
+async def get_scheduler_status(
+    current_user: User = Depends(get_super_admin_user)
+):
+    """حالة مُجدول المهام"""
+    
+    return {
+        "scheduler_running": True,
+        "system_config": {
+            "auto_processing_enabled": attendance_engine.config.auto_processing_enabled if attendance_engine.config else True,
+            "notifications_enabled": attendance_engine.config.notifications_enabled if attendance_engine.config else True,
+        },
+        "scheduled_tasks": {
+            "missing_checkout_warning": "18:10 daily",
+            "missing_checkout_deadline": "23:59 daily",
+            "monthly_reset": "00:01 on 1st of each month"
+        },
+        "last_check": datetime.now(timezone.utc).isoformat()
+    }
+
 async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
     """إرسال إشعار للسوبر أدمن عند إكمال الزيارة"""
     
