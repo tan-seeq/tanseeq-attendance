@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # MongoDB connection
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/tanseeq_hr")
+MONGO_URL = os.environ.get("MONGO_URL")
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8001/api")  # Internal backend URL
 
 class AutomationScheduler:
