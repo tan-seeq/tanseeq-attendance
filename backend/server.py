@@ -2981,10 +2981,10 @@ async def get_attendance_stats(
 @app.post("/api/attendance/recompute")
 async def recompute_attendance(
     recompute_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Recompute attendance for specific date/month (Super Admin only)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
