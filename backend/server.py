@@ -1874,7 +1874,6 @@ async def initialize_attendance_engine():
     await attendance_engine.initialize()
 
 @api_router.get("/attendance/policies/{employee_id}")
-@api_router.get("/attendance/policies/{employee_id}")
 async def get_employee_attendance_policy(
     employee_id: str,
     current_user: User = Depends(get_current_user)
