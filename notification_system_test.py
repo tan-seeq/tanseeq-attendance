@@ -558,7 +558,8 @@ class NotificationSystemTester:
                 
                 # Test acknowledging a mandatory notification if any exist
                 if mandatory_notifications and len(mandatory_notifications) > 0:
-                    notif_id = mandatory_notifications[0].get('id')
+                    first_notif = mandatory_notifications[0]
+                    notif_id = first_notif.get('id') if isinstance(first_notif, dict) else None
                     if notif_id:
                         try:
                             ack_response = self.session.post(
