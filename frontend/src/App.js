@@ -450,6 +450,7 @@ const Layout = ({ children }) => {
     ...(user?.role === 'admin' || user?.role === 'super_admin' ? [
       { name: t('employees'), href: '/employees', icon: UserGroupIcon },
       { name: t('attendance'), href: '/attendance-management', icon: ClockIcon },
+      { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: CalculatorIcon },
       { name: t('leaves'), href: '/leave-management', icon: CalendarIcon },
       { name: t('field_exits'), href: '/field-exit-management', icon: DocumentTextIcon },
       { name: t('reports'), href: '/reports', icon: DocumentTextIcon },
