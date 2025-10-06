@@ -269,7 +269,16 @@ class NotificationSystemTester:
         try:
             response = self.session.get(f"{BACKEND_URL}/notifications/my", timeout=30)
             if response.status_code == 200:
-                notifications = response.json()
+                response_data = response.json()
+                
+                # Handle both direct list and wrapped response
+                if isinstance(response_data, list):
+                    notifications = response_data
+                elif isinstance(response_data, dict) and 'notifications' in response_data:
+                    notifications = response_data['notifications']
+                else:
+                    notifications = response_data if isinstance(response_data, list) else []
+                
                 self.log_test(
                     "GET /notifications/my",
                     True,
