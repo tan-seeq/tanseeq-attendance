@@ -24,13 +24,25 @@ from .payroll_models import (
     PayrollDB, get_month_boundaries, validate_deduction_ceiling
 )
 
-from .attendance_models import (
-    PayrollDeduction, DeductionType, DeductionCategory
-)
+try:
+    from .attendance_models import (
+        PayrollDeduction, DeductionType, DeductionCategory
+    )
+except ImportError:
+    # Handle case where attendance_models might not be available
+    PayrollDeduction = None
+    DeductionType = None  
+    DeductionCategory = None
 
-from .advances_model import (
-    AdvanceTransaction, TransactionType, TransactionStatus
-)
+try:
+    from .advances_model import (
+        AdvanceTransaction, TransactionType, TransactionStatus
+    )
+except ImportError:
+    # Handle case where advances_model might not be available
+    AdvanceTransaction = None
+    TransactionType = None
+    TransactionStatus = None
 
 class PayrollIntegrationEngine:
     """محرك الربط التكاملي للرواتب"""
