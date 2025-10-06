@@ -3458,7 +3458,7 @@ async def get_employee_payroll_history(
     """جلب تاريخ رواتب الموظف"""
     try:
         # التحقق من الصلاحيات - الموظف يمكنه رؤية راتبه فقط
-        if current_user.get("role") == "user" and employee_id != current_user["id"]:
+        if current_user.role == "user" and employee_id != current_user.id:
             raise HTTPException(status_code=403, detail="يمكنك رؤية راتبك فقط")
         
         summaries = await db.employee_payroll_summaries.find({
