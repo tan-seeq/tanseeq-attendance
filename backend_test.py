@@ -268,7 +268,7 @@ class AdvancesSystemTester:
             except Exception as e:
                 self.log_test("POST /advances/create", False, error=str(e))
 
-    def test_general_system_health(self):
+    def test_general_system_health(self, backend_url):
         """Test general system endpoints to verify overall health"""
         print("🏥 TESTING GENERAL SYSTEM HEALTH")
         print("=" * 60)
@@ -279,7 +279,7 @@ class AdvancesSystemTester:
         
         # Test dashboard/user info
         try:
-            response = self.session.get(f"{BACKEND_URL}/auth/me", timeout=30)
+            response = self.session.get(f"{backend_url}/auth/me", timeout=30)
             if response.status_code == 200:
                 user_data = response.json()
                 self.log_test(
