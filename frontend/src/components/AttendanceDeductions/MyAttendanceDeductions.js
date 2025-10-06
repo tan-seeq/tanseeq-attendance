@@ -44,11 +44,8 @@ const MyAttendanceDeductions = ({ currentUser }) => {
 
   const fetchMyAttendanceStats = async () => {
     try {
-      const response = await fetch(`/api/attendance/stats/${currentUser.id}/${selectedMonth}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setAttendanceStats(data);
+      const response = await axios.get(`${API}/attendance/stats/${currentUser.id}?month=${selectedMonth}`);
+      setAttendanceStats(response.data);
     } catch (error) {
       console.error('Error fetching attendance stats:', error);
     }
