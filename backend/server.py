@@ -2803,7 +2803,7 @@ async def create_manual_deduction(
             target_date=target_date,
             amount=float(deduction_data["amount"]),
             reason=deduction_data["reason"],
-            created_by=current_user["id"]
+            created_by=current_user.id
         )
         
         return {"message": "Manual deduction created successfully", "deduction": deduction}
