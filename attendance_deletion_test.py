@@ -148,7 +148,11 @@ class AttendanceDeletionTestSuite:
             
             if response.status_code == 200:
                 data = response.json()
-                return data.get('attendance_records', [])[:limit]
+                # API returns list directly, not wrapped in a dictionary
+                if isinstance(data, list):
+                    return data[:limit]
+                else:
+                    return data.get('attendance_records', [])[:limit]
             else:
                 print(f"Failed to get attendance records: {response.status_code}")
                 return []
