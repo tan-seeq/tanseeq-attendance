@@ -59,6 +59,9 @@ import AdminDashboard from './components/AdvancesLoans/AdminDashboard';
 import SubmitExpense from './components/AdvancesLoans/SubmitExpense';
 import MyTransactions from './components/AdvancesLoans/MyTransactions';
 
+// Import Notification Modal
+import NotificationModal from './components/NotificationModal';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
