@@ -120,8 +120,7 @@ class WorkingHoursTestSuite:
             response = self.session.get(f"{API_BASE}/attendance/with-absences", timeout=30)
             
             if response.status_code == 200:
-                data = response.json()
-                records = data.get('attendance_records', [])
+                records = response.json()  # API returns list directly
                 
                 self.log_test(
                     "Get Attendance Records",
