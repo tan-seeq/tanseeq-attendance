@@ -1873,6 +1873,509 @@ async def initialize_attendance_engine():
     """Initialize attendance engine on startup"""
     await attendance_engine.initialize()
 
+# ====================
+# MANUAL DEDUCTION CRUD ENDPOINTS
+# ====================
+
+@api_router.post("/deductions/manual")
+async def create_manual_deduction(
+    request: CreateDeductionRequest,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إنشاء خصم يدوي - Super Admin Only"""
+    
+    try:
+        deduction = await attendance_engine.create_manual_deduction(
+            employee_id=request.employee_id,
+            deduction_type=request.deduction_type,
+            category=request.category,
+            target_date=request.date,
+            minutes=request.minutes,
+            amount=request.amount,
+            reason=request.reason,
+            created_by=current_user.id,
+            attachments=request.attachments
+        )
+        
+        return {
+            "success": True,
+            "message": "تم إنشاء الخصم اليدوي بنجاح",
+            "deduction_id": deduction.id,
+            "amount": deduction.amount
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في إنشاء الخصم: {str(e)}")
+
+@api_router.get("/deductions")
+async def get_deductions(
+    employee_id: Optional[str] = None,
+    month: Optional[str] = None,
+    deduction_type: Optional[str] = None,
+    limit: int = 50,
+    current_user: User = Depends(get_admin_user)
+):
+    """قائمة الخصومات مع فلاتر"""
+    
+    filter_query = {"is_voided": False}
+    
+    # فلتر حسب الموظف (المستخدم العادي يرى خصوماته فقط)
+    if current_user.role == "user":
+        filter_query["employee_id"] = current_user.id
+    elif employee_id:
+        filter_query["employee_id"] = employee_id
+    
+    # فلتر حسب الشهر
+    if month:
+        year, month_num = month.split('-')
+        start_date = date(int(year), int(month_num), 1)
+        if int(month_num) == 12:
+            end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(int(year), int(month_num) + 1, 1) - timedelta(days=1)
+        
+        filter_query["date"] = {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
+        }
+    
+    # فلتر حسب نوع الخصم
+    if deduction_type:
+        filter_query["deduction_type"] = deduction_type
+    
+    deductions = await db.payroll_deductions.find(filter_query).sort("date", -1).limit(limit).to_list(limit)
+    
+    # إضافة الترجمات
+    for deduction in deductions:
+        if "_id" in deduction:
+            del deduction["_id"]
+        
+        if deduction.get("deduction_type"):
+            deduction["deduction_type_ar"] = DEDUCTION_TYPE_AR.get(
+                DeductionType(deduction["deduction_type"]), deduction["deduction_type"]
+            )
+        
+        if deduction.get("category"):
+            deduction["category_ar"] = DEDUCTION_CATEGORY_AR.get(
+                DeductionCategory(deduction["category"]), deduction["category"]
+            )
+    
+    return {"deductions": deductions}
+
+@api_router.put("/deductions/{deduction_id}")
+async def update_deduction(
+    deduction_id: str,
+    request: UpdateDeductionRequest,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تعديل خصم - Super Admin Only"""
+    
+    deduction = await db.payroll_deductions.find_one({"id": deduction_id, "is_voided": False})
+    if not deduction:
+        raise HTTPException(status_code=404, detail="الخصم غير موجود")
+    
+    # تحضير البيانات المحدثة
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    
+    if request.minutes is not None:
+        update_data["minutes"] = request.minutes
+    if request.amount is not None:
+        update_data["amount"] = request.amount
+    if request.reason is not None:
+        update_data["reason"] = request.reason
+    if request.notes is not None:
+        update_data["notes"] = request.notes
+    
+    update_data["updated_by"] = current_user.id
+    
+    result = await db.payroll_deductions.update_one(
+        {"id": deduction_id},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم التحديث")
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "deduction_updated",
+        f"تعديل خصم للموظف {deduction['employee_name']} - ID: {deduction_id}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تعديل الخصم بنجاح",
+        "deduction_id": deduction_id
+    }
+
+@api_router.delete("/deductions/{deduction_id}")
+async def void_deduction(
+    deduction_id: str,
+    request: VoidDeductionRequest,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إلغاء خصم (Soft Delete) - Super Admin Only"""
+    
+    deduction = await db.payroll_deductions.find_one({"id": deduction_id, "is_voided": False})
+    if not deduction:
+        raise HTTPException(status_code=404, detail="الخصم غير موجود")
+    
+    # إلغاء الخصم
+    update_data = {
+        "is_voided": True,
+        "voided_by": current_user.id,
+        "voided_by_name": current_user.name,
+        "void_reason": request.void_reason,
+        "voided_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.payroll_deductions.update_one(
+        {"id": deduction_id},
+        {"$set": update_data}
+    )
+    
+    # إرسال إشعار للموظف
+    notification = SystemNotification(
+        employee_id=deduction["employee_id"],
+        employee_name=deduction["employee_name"],
+        title="إلغاء خصم",
+        message=f"تم إلغاء خصم بمبلغ {deduction['amount']:.2f} درهم من قبل {current_user.name}. السبب: {request.void_reason}",
+        severity=NotificationSeverity.IMPORTANT,
+        must_acknowledge=True,
+        category="deduction_void",
+        reference_id=deduction_id
+    )
+    
+    await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "deduction_voided",
+        f"إلغاء خصم للموظف {deduction['employee_name']} - السبب: {request.void_reason}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إلغاء الخصم بنجاح",
+        "deduction_id": deduction_id
+    }
+
+# ====================
+# ENHANCED ADVANCES/LOANS MANAGEMENT
+# ====================
+
+@api_router.patch("/advances/transactions/{transaction_id}/status")
+async def update_transaction_status(
+    transaction_id: str,
+    status_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تحديث حالة المعاملة - Super Admin Only"""
+    
+    new_status = status_data.get("status")
+    notes = status_data.get("notes", "")
+    
+    if new_status not in ["pending", "approved", "rejected", "completed", "voided"]:
+        raise HTTPException(status_code=400, detail="حالة غير صحيحة")
+    
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    # تحديث الحالة
+    update_data = {
+        "status": new_status,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": current_user.id
+    }
+    
+    if notes:
+        update_data["admin_notes"] = notes
+    
+    # معالجة خاصة حسب الحالة
+    if new_status == "approved":
+        update_data["approved_by"] = current_user.id
+        update_data["approved_at"] = datetime.now(timezone.utc).isoformat()
+    elif new_status == "rejected":
+        update_data["rejected_by"] = current_user.id
+        update_data["rejected_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["rejection_reason"] = notes
+    elif new_status == "voided":
+        update_data["voided_by"] = current_user.id
+        update_data["voided_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["void_reason"] = notes
+    
+    await db.advance_transactions.update_one(
+        {"id": transaction_id},
+        {"$set": update_data}
+    )
+    
+    # تحديث الرصيد
+    await update_employee_balance(transaction["employee_id"])
+    
+    # إرسال إشعار
+    employee = await db.users.find_one({"id": transaction["employee_id"]})
+    if employee:
+        notification_title = f"تحديث حالة {TRANSACTION_TYPE_AR.get(TransactionType(transaction['transaction_type']))}"
+        notification_message = f"تم تحديث حالة معاملتك إلى: {TRANSACTION_STATUS_AR.get(TransactionStatus(new_status))}"
+        if notes:
+            notification_message += f"\n\nملاحظات الإدارة: {notes}"
+        
+        notification = Notification(
+            recipient_id=employee["id"],
+            recipient_name=employee["name"],
+            sender_id=current_user.id,
+            sender_name=current_user.name,
+            subject=notification_title,
+            message=notification_message,
+            type="info" if new_status == "approved" else "warning",
+            priority="normal",
+            sent_at=datetime.utcnow()
+        )
+        
+        await db.notifications.insert_one(notification.dict())
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "transaction_status_updated",
+        f"تحديث حالة معاملة {transaction['employee_name']} إلى {new_status}"
+    )
+    
+    return {
+        "success": True,
+        "message": f"تم تحديث حالة المعاملة إلى {TRANSACTION_STATUS_AR.get(TransactionStatus(new_status))}",
+        "transaction_id": transaction_id
+    }
+
+@api_router.post("/advances/transactions/{transaction_id}/attachments")
+async def add_transaction_attachments(
+    transaction_id: str,
+    attachment_files: List[UploadFile] = File(...),
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إضافة مرفقات لمعاملة - Super Admin Only"""
+    
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    try:
+        new_attachments = []
+        
+        for file in attachment_files:
+            if file.filename:
+                # التحقق من نوع الملف
+                allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']
+                if file.content_type not in allowed_types:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"نوع الملف {file.content_type} غير مدعوم"
+                    )
+                
+                # إنشاء مجلد الحفظ
+                upload_dir = f"/app/uploads/transactions/{transaction['employee_id']}"
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # إنشاء اسم ملف فريد
+                file_extension = os.path.splitext(file.filename)[1]
+                unique_filename = f"{uuid.uuid4()}{file_extension}"
+                file_path = f"{upload_dir}/{unique_filename}"
+                
+                # حفظ الملف
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+                
+                # إنشاء معلومات المرفق
+                attachment = Attachment(
+                    filename=unique_filename,
+                    original_filename=file.filename,
+                    file_path=file_path,
+                    file_size=os.path.getsize(file_path),
+                    file_type=file.content_type
+                )
+                new_attachments.append(attachment.dict())
+        
+        # إضافة المرفقات للمعاملة
+        existing_attachments = transaction.get("attachments", [])
+        all_attachments = existing_attachments + new_attachments
+        
+        await db.advance_transactions.update_one(
+            {"id": transaction_id},
+            {"$set": {
+                "attachments": all_attachments,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # تسجيل النشاط
+        await log_activity(
+            current_user.id,
+            "transaction_attachments_added",
+            f"إضافة {len(new_attachments)} مرفق لمعاملة {transaction['employee_name']}"
+        )
+        
+        return {
+            "success": True,
+            "message": f"تم إضافة {len(new_attachments)} مرفق بنجاح",
+            "attachments_count": len(all_attachments)
+        }
+        
+    except Exception as e:
+        # تنظيف الملفات في حالة الخطأ
+        for attachment in new_attachments:
+            try:
+                if os.path.exists(attachment["file_path"]):
+                    os.remove(attachment["file_path"])
+            except:
+                pass
+        raise HTTPException(status_code=500, detail=f"خطأ في رفع المرفقات: {str(e)}")
+
+@api_router.post("/advances/transactions/{transaction_id}/adjustments")
+async def create_transaction_adjustment(
+    transaction_id: str,
+    adjustment_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إنشاء تعديل على المعاملة - Super Admin Only"""
+    
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    adjustment_amount = adjustment_data.get("adjustment_amount", 0)
+    adjustment_reason = adjustment_data.get("reason", "")
+    adjustment_type = adjustment_data.get("type", "correction")  # correction, penalty, bonus
+    
+    if not adjustment_reason:
+        raise HTTPException(status_code=400, detail="يجب تحديد سبب التعديل")
+    
+    # إنشاء معاملة تعديل جديدة
+    adjustment_transaction = AdvanceTransaction(
+        employee_id=transaction["employee_id"],
+        employee_name=transaction["employee_name"],
+        transaction_type=TransactionType.ADJUSTMENT,
+        amount=abs(adjustment_amount),
+        description=f"تعديل على المعاملة {transaction_id}: {adjustment_reason}",
+        status=TransactionStatus.APPROVED,
+        approved_by=current_user.id,
+        approved_at=datetime.now(timezone.utc),
+        notes=f"تعديل {adjustment_type} - المرجع: {transaction_id}",
+        created_by=current_user.id,
+        reference_id=transaction_id,
+        reference_type="adjustment"
+    )
+    
+    # تعديل المبلغ حسب النوع
+    if adjustment_type == "penalty" and adjustment_amount > 0:
+        adjustment_transaction.amount = -adjustment_amount  # خصم
+    elif adjustment_type == "bonus" and adjustment_amount > 0:
+        adjustment_transaction.amount = adjustment_amount  # إضافة
+    
+    # حفظ معاملة التعديل
+    transaction_dict = AdvancesDB.transaction_to_dict(adjustment_transaction)
+    await db.advance_transactions.insert_one(transaction_dict)
+    
+    # تحديث رصيد الموظف
+    await update_employee_balance(transaction["employee_id"])
+    
+    # إرسال إشعار
+    employee = await db.users.find_one({"id": transaction["employee_id"]})
+    if employee:
+        notification = Notification(
+            recipient_id=employee["id"],
+            recipient_name=employee["name"],
+            sender_id=current_user.id,
+            sender_name=current_user.name,
+            subject=f"تعديل على معاملتك - {adjustment_type}",
+            message=f"تم إجراء تعديل بمبلغ {adjustment_transaction.amount:.2f} درهم\n\nالسبب: {adjustment_reason}",
+            type="info",
+            priority="normal",
+            sent_at=datetime.utcnow()
+        )
+        
+        await db.notifications.insert_one(notification.dict())
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "transaction_adjustment",
+        f"تعديل {adjustment_type} بمبلغ {adjustment_transaction.amount:.2f} للموظف {transaction['employee_name']}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إنشاء التعديل بنجاح",
+        "adjustment_id": adjustment_transaction.id,
+        "adjustment_amount": adjustment_transaction.amount
+    }
+
+@api_router.delete("/advances/transactions/{transaction_id}")
+async def soft_delete_transaction(
+    transaction_id: str,
+    delete_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """حذف معاملة (Soft Delete) - Super Admin Only"""
+    
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    delete_reason = delete_data.get("reason", "")
+    if not delete_reason:
+        raise HTTPException(status_code=400, detail="يجب تحديد سبب الحذف")
+    
+    # حذف المعاملة (soft delete)
+    update_data = {
+        "is_deleted": True,
+        "deleted_by": current_user.id,
+        "deleted_by_name": current_user.name,
+        "delete_reason": delete_reason,
+        "deleted_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.advance_transactions.update_one(
+        {"id": transaction_id},
+        {"$set": update_data}
+    )
+    
+    # تحديث الرصيد
+    await update_employee_balance(transaction["employee_id"])
+    
+    # إرسال إشعار
+    employee = await db.users.find_one({"id": transaction["employee_id"]})
+    if employee:
+        notification = Notification(
+            recipient_id=employee["id"],
+            recipient_name=employee["name"],
+            sender_id=current_user.id,
+            sender_name=current_user.name,
+            subject="حذف معاملة",
+            message=f"تم حذف معاملة بمبلغ {transaction['amount']:.2f} درهم\n\nالسبب: {delete_reason}",
+            type="warning",
+            priority="normal",
+            sent_at=datetime.utcnow()
+        )
+        
+        await db.notifications.insert_one(notification.dict())
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "transaction_deleted",
+        f"حذف معاملة للموظف {transaction['employee_name']} - السبب: {delete_reason}"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم حذف المعاملة بنجاح",
+        "transaction_id": transaction_id
+    }
 @api_router.get("/attendance/policies/{employee_id}")
 async def get_employee_attendance_policy(
     employee_id: str,
