@@ -3055,17 +3055,6 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   return children;
 };
 
-// Main App Component
-function App() {
-  return (
-    <AuthProvider>
-      <LanguageProvider>
-        <AppWithNotifications />
-      </LanguageProvider>
-    </AuthProvider>
-  );
-}
-
 // App with Notifications Component
 const AppWithNotifications = () => {
   const { showNotificationModal, setShowNotificationModal } = useAuth();
