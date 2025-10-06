@@ -2854,12 +2854,15 @@ async def update_deduction(
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Deduction not found or no changes made")
         
-        # Log activity
-        await log_activity(
-            user_id=current_user.id,
-            action=f"Updated deduction {deduction_id}",
-            details=f"Updated fields: {', '.join(update_fields.keys())}"
-        )
+        # Log activity (simplified for now)
+        await db.activity_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": current_user.id if hasattr(current_user, 'id') else current_user["id"],
+            "user_name": current_user.name if hasattr(current_user, 'name') else current_user["name"],
+            "action": f"Updated deduction {deduction_id}",
+            "details": f"Updated fields: {', '.join(update_fields.keys())}",
+            "timestamp": datetime.now().isoformat()
+        })
         
         # Send notification if amount changed
         if "amount" in update_fields:
