@@ -385,7 +385,7 @@ const AttendanceDeductionsAdmin = () => {
                   {deductions.map((deduction) => (
                     <tr key={deduction.id} className={deduction.is_voided ? 'bg-gray-50 opacity-60' : ''}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {deduction.employee_name}
+                        {deduction.employee_name || deduction.user_name || deduction.name || 'غير محدد'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(deduction.date).toLocaleDateString('ar-AE')}
