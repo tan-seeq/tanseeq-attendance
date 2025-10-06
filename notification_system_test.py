@@ -278,7 +278,7 @@ class NotificationSystemTester:
                 
                 # Store notification IDs for further testing
                 for notif in notifications:
-                    if notif.get('id'):
+                    if isinstance(notif, dict) and notif.get('id'):
                         self.notification_ids.append(notif['id'])
                         
             else:
