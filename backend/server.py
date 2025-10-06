@@ -2955,12 +2955,12 @@ async def void_deduction(
 async def get_attendance_stats(
     employee_id: str,
     month: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Get attendance statistics for employee"""
     try:
         # Regular users can only see their own stats
-        if current_user.get("role") == "user" and employee_id != current_user["id"]:
+        if current_user.role == "user" and employee_id != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
         
         if not month:
