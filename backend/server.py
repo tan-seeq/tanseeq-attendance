@@ -3864,25 +3864,79 @@ async def edit_absence_record(attendance_id: str, attendance_data: dict, current
 
 @api_router.delete("/attendance/delete-absence/{attendance_id}")
 async def delete_absence_record(attendance_id: str, current_user: User = Depends(get_super_admin_user)):
-    """Delete absence record (Super Admin only)"""
-    attendance = await db.attendance.find_one({"id": attendance_id})
-    if not attendance:
-        raise HTTPException(status_code=404, detail="Attendance record not found")
-    
-    # Only allow deletion of absent records or manually created entries
-    if attendance.get("status") != "absent" and not attendance.get("is_manual_entry"):
-        raise HTTPException(status_code=400, detail="Can only delete absence records or manually created entries")
-    
-    # Delete the record
-    await db.attendance.delete_one({"id": attendance_id})
-    
-    await log_activity(
-        current_user.id, 
-        "absence_deleted", 
-        f"Deleted absence record for {attendance.get('user_name')} on {attendance.get('date')}"
-    )
-    
-    return {"message": "Absence record deleted successfully"}
+    """Delete an absence record completely (Super Admin only)"""
+    try:
+        # Find the record first
+        attendance = await db.attendance.find_one({"id": attendance_id})
+        if not attendance:
+            raise HTTPException(status_code=404, detail="Attendance record not found")
+        
+        # Check if it's an absence record
+        if attendance.get("status") != "absent":
+            raise HTTPException(status_code=400, detail="Can only delete absence records")
+        
+        # Delete the record
+        await db.attendance.delete_one({"id": attendance_id})
+        
+        # Log the activity (simplified)
+        await db.activity_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": current_user.id,
+            "user_name": current_user.name,
+            "action": f"Deleted absence record for {attendance.get('user_name')} on {attendance.get('date')}",
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        return {"message": "Absence record deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting absence record: {str(e)}")
+
+@api_router.delete("/attendance/{attendance_id}")
+async def delete_attendance_record(attendance_id: str, current_user: User = Depends(get_super_admin_user)):
+    """Delete any attendance record completely (Super Admin only)"""
+    try:
+        # Find the record first
+        attendance = await db.attendance.find_one({"id": attendance_id})
+        if not attendance:
+            raise HTTPException(status_code=404, detail="Attendance record not found")
+        
+        # Store info for logging
+        employee_name = attendance.get('user_name', 'Unknown')
+        date = attendance.get('date', 'Unknown')
+        status = attendance.get('status', 'Unknown')
+        
+        # Delete the record
+        result = await db.attendance.delete_one({"id": attendance_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Attendance record not found")
+        
+        # Log the activity
+        await db.activity_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": current_user.id,
+            "user_name": current_user.name,
+            "action": f"Deleted attendance record",
+            "details": f"Employee: {employee_name}, Date: {date}, Status: {status}",
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        return {
+            "message": "Attendance record deleted successfully",
+            "deleted_record": {
+                "employee_name": employee_name,
+                "date": date,
+                "status": status
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting attendance record: {str(e)}")
 
 @api_router.get("/attendance/with-absences")
 async def get_attendance_with_absences(current_user: User = Depends(get_current_user)):
