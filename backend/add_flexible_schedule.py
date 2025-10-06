@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 # MongoDB connection
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/tanseeq_hr")
+MONGO_URL = os.environ.get("MONGO_URL")
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[os.environ.get('DB_NAME', 'tanseeq_hr')]
 
