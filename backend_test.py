@@ -244,7 +244,7 @@ class AdvancesSystemTester:
                 }
                 
                 response = self.session.post(
-                    f"{BACKEND_URL}/advances/create",
+                    f"{backend_url}/advances/create",
                     json=create_data,
                     timeout=30
                 )
