@@ -1902,7 +1902,7 @@ async def initialize_attendance_engine():
     """Initialize attendance engine on startup"""
     global attendance_engine, payroll_engine
     from attendance_engine import AttendanceEngine
-    from .payroll_integration_engine import PayrollIntegrationEngine
+    from payroll_integration_engine import PayrollIntegrationEngine
     
     attendance_engine = AttendanceEngine(db)
     await attendance_engine.initialize()
