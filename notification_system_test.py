@@ -561,7 +561,16 @@ class NotificationSystemTester:
         try:
             response = self.session.get(f"{BACKEND_URL}/notifications/unread-mandatory", timeout=30)
             if response.status_code == 200:
-                mandatory_notifications = response.json()
+                response_data = response.json()
+                
+                # Handle both direct list and wrapped response
+                if isinstance(response_data, list):
+                    mandatory_notifications = response_data
+                elif isinstance(response_data, dict) and 'notifications' in response_data:
+                    mandatory_notifications = response_data['notifications']
+                else:
+                    mandatory_notifications = response_data if isinstance(response_data, list) else []
+                
                 self.log_test(
                     "GET /notifications/unread-mandatory",
                     True,
