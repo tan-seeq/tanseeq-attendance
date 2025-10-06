@@ -445,6 +445,10 @@ const Layout = ({ children }) => {
     { name: t('dashboard'), href: '/dashboard', icon: ChartBarIcon },
     // الزيارات الخارجية للجميع
     { name: 'الزيارات الخارجية التسويقية', href: '/marketing-visits', icon: BuildingOfficeIcon },
+    ...(user?.role === 'super_admin' ? [
+      { name: 'إدارة خصومات الحضور', href: '/attendance-deductions', icon: ExclamationTriangleIcon }
+    ] : []),
+    { name: 'خصوماتي', href: '/my-deductions', icon: ClockIcon },
     ...(user?.role === 'user' ? [
       { name: t('attendance'), href: '/attendance', icon: ClockIcon },
       { name: 'خصوماتي', href: '/my-deductions', icon: CalculatorIcon },
