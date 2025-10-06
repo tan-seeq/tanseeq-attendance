@@ -120,6 +120,7 @@ class PayrollSystemTester:
         # Test data for October 2025 as requested in review
         cycle_data = {
             "month": "2025-10",
+            "display_name": "دورة راتب أكتوبر 2025",
             "description": "دورة راتب أكتوبر 2025 - اختبار النظام المتكامل",
             "notes": "دورة اختبار للنظام المتكامل للرواتب والخصومات والسلف"
         }
