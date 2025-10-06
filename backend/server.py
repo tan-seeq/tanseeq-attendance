@@ -1858,6 +1858,554 @@ async def set_expense_deduction_source(
         "deduction_source": deduction_source
     }
 
+# ====================
+# ADVANCED ATTENDANCE & DEDUCTIONS API
+# ====================
+
+from attendance_models import *
+from attendance_engine import AttendanceEngine, AttendanceScheduler
+
+# Initialize Attendance Engine
+attendance_engine = AttendanceEngine(db)
+
+@app.on_event("startup")
+async def initialize_attendance_engine():
+    """Initialize attendance engine on startup"""
+    await attendance_engine.initialize()
+
+@api_router.get("/attendance/policies/{employee_id}")
+async def get_employee_attendance_policy(
+    employee_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على سياسة حضور الموظف"""
+    # التحقق من الصلاحية
+    if current_user.role not in ["admin", "super_admin"] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="غير مسموح")
+    
+    policy = await attendance_engine.get_employee_policy(employee_id)
+    return {"policy": policy.dict()}
+
+@api_router.post("/attendance/policies")
+async def create_attendance_policy(
+    policy_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إنشاء سياسة حضور جديدة (سوبر أدمن فقط)"""
+    
+    # Get employee info
+    employee = await db.users.find_one({"id": policy_data["employee_id"]})
+    if not employee:
+        raise HTTPException(status_code=404, detail="الموظف غير موجود")
+    
+    policy = AttendancePolicy(
+        employee_id=policy_data["employee_id"],
+        employee_name=employee["name"],
+        start_time=datetime.strptime(policy_data.get("start_time", "09:00"), "%H:%M").time(),
+        end_time=datetime.strptime(policy_data.get("end_time", "18:00"), "%H:%M").time(),
+        no_penalties=policy_data.get("no_penalties", False),
+        early_start_allowed=policy_data.get("early_start_allowed", False),
+        end_flexible=policy_data.get("end_flexible", False),
+        grace_period_minutes=policy_data.get("grace_period_minutes", 0),
+        effective_from=datetime.strptime(policy_data.get("effective_from", date.today().isoformat()), "%Y-%m-%d").date()
+    )
+    
+    await db.attendance_policies.insert_one(prepare_for_mongo(policy.dict()))
+    
+    return {
+        "success": True,
+        "message": "تم إنشاء سياسة الحضور بنجاح",
+        "policy_id": policy.id
+    }
+
+@api_router.get("/attendance/daily")
+async def get_daily_attendance(
+    employee_id: Optional[str] = None,
+    date: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على سجلات الحضور اليومية"""
+    
+    # إعداد المرشحات
+    if not employee_id:
+        employee_id = current_user.id
+    
+    # التحقق من الصلاحية  
+    if current_user.role not in ["admin", "super_admin"] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="غير مسموح")
+    
+    if not date:
+        date = datetime.now().date().isoformat()
+    
+    # البحث عن السجل
+    attendance_doc = await db.daily_attendance.find_one({
+        "employee_id": employee_id,
+        "date": date
+    })
+    
+    if attendance_doc:
+        attendance = DailyAttendance(**parse_from_mongo(attendance_doc))
+        return {"attendance": attendance.dict()}
+    else:
+        return {"attendance": None}
+
+@api_router.post("/attendance/check-in")
+async def check_in_attendance(
+    current_user: User = Depends(get_current_user)
+):
+    """تسجيل الحضور"""
+    
+    check_in_time = datetime.now()
+    today = check_in_time.date()
+    
+    # التحقق من عدم وجود تسجيل حضور مسبق اليوم
+    existing_attendance = await db.daily_attendance.find_one({
+        "employee_id": current_user.id,
+        "date": today.isoformat(),
+        "check_in": {"$exists": True}
+    })
+    
+    if existing_attendance:
+        raise HTTPException(status_code=400, detail="تم تسجيل الحضور مسبقاً اليوم")
+    
+    # معالجة الحضور
+    attendance = await attendance_engine.process_daily_attendance(
+        employee_id=current_user.id,
+        target_date=today,
+        check_in=check_in_time
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تسجيل الحضور بنجاح",
+        "check_in_time": check_in_time.isoformat(),
+        "attendance": attendance.dict()
+    }
+
+@api_router.post("/attendance/check-out") 
+async def check_out_attendance(
+    current_user: User = Depends(get_current_user)
+):
+    """تسجيل الانصراف"""
+    
+    check_out_time = datetime.now()
+    today = check_out_time.date()
+    
+    # البحث عن سجل الحضور
+    existing_attendance = await db.daily_attendance.find_one({
+        "employee_id": current_user.id,
+        "date": today.isoformat()
+    })
+    
+    if not existing_attendance:
+        raise HTTPException(status_code=400, detail="لم يتم العثور على تسجيل حضور اليوم")
+    
+    if existing_attendance.get("check_out"):
+        raise HTTPException(status_code=400, detail="تم تسجيل الانصراف مسبقاً")
+    
+    # معالجة الانصراف
+    attendance = await attendance_engine.process_daily_attendance(
+        employee_id=current_user.id,
+        target_date=today,
+        check_in=existing_attendance.get("check_in"),
+        check_out=check_out_time,
+        force_recompute=True
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تسجيل الانصراف بنجاح",
+        "check_out_time": check_out_time.isoformat(),
+        "attendance": attendance.dict()
+    }
+
+@api_router.post("/attendance/recompute")
+async def recompute_attendance(
+    month: Optional[str] = None,
+    employee_id: Optional[str] = None,
+    force: bool = False,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إعادة احتساب الحضور (سوبر أدمن فقط)"""
+    
+    if not month:
+        month = datetime.now().strftime('%Y-%m')
+    
+    # تحديد النطاق
+    if employee_id:
+        employee_ids = [employee_id]
+    else:
+        # جميع الموظفين
+        users = await db.users.find({}).to_list(None)
+        employee_ids = [user["id"] for user in users]
+    
+    # إعادة احتساب لكل موظف
+    recomputed_count = 0
+    for emp_id in employee_ids:
+        year, month_num = month.split('-')
+        start_date = date(int(year), int(month_num), 1)
+        
+        # آخر يوم في الشهر
+        if int(month_num) == 12:
+            end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(int(year), int(month_num) + 1, 1) - timedelta(days=1)
+        
+        # إعادة احتساب كل يوم
+        current_date = start_date
+        while current_date <= end_date:
+            attendance_doc = await db.daily_attendance.find_one({
+                "employee_id": emp_id,
+                "date": current_date.isoformat()
+            })
+            
+            if attendance_doc:
+                await attendance_engine.process_daily_attendance(
+                    employee_id=emp_id,
+                    target_date=current_date,
+                    check_in=attendance_doc.get("check_in"),
+                    check_out=attendance_doc.get("check_out"),
+                    force_recompute=True
+                )
+                recomputed_count += 1
+            
+            current_date += timedelta(days=1)
+    
+    return {
+        "success": True,
+        "message": f"تم إعادة احتساب {recomputed_count} سجل حضور للشهر {month}",
+        "recomputed_count": recomputed_count
+    }
+
+# ====================
+# DEDUCTIONS MANAGEMENT API
+# ====================
+
+@api_router.get("/deductions/my")
+async def get_my_deductions(
+    month: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على خصومات الموظف"""
+    
+    query = {
+        "employee_id": current_user.id,
+        "is_voided": False
+    }
+    
+    if month:
+        year, month_num = month.split('-')
+        start_date = date(int(year), int(month_num), 1)
+        if int(month_num) == 12:
+            end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(int(year), int(month_num) + 1, 1) - timedelta(days=1)
+        
+        query["date"] = {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
+        }
+    
+    deductions = await db.payroll_deductions.find(query).sort("date", -1).to_list(None)
+    
+    # إضافة الترجمات
+    for deduction in deductions:
+        if "_id" in deduction:
+            del deduction["_id"]
+        
+        deduction["deduction_type_ar"] = DEDUCTION_TYPE_AR.get(
+            DeductionType(deduction["deduction_type"]), deduction["deduction_type"]
+        )
+        deduction["category_ar"] = DEDUCTION_CATEGORY_AR.get(
+            DeductionCategory(deduction["category"]), deduction["category"]
+        )
+    
+    return {"deductions": deductions}
+
+@api_router.post("/deductions/manual")
+async def create_manual_deduction(
+    deduction_request: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إنشاء خصم يدوي (سوبر أدمن فقط)"""
+    
+    deduction = await attendance_engine.create_manual_deduction(
+        employee_id=deduction_request["employee_id"],
+        deduction_type=DeductionType(deduction_request.get("deduction_type", "manual")),
+        category=DeductionCategory(deduction_request["category"]),
+        target_date=datetime.strptime(deduction_request["date"], "%Y-%m-%d").date(),
+        minutes=deduction_request.get("minutes"),
+        amount=deduction_request.get("amount"),
+        reason=deduction_request["reason"],
+        created_by=current_user.id,
+        attachments=deduction_request.get("attachments", [])
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إنشاء الخصم بنجاح",
+        "deduction_id": deduction.id,
+        "amount": deduction.amount
+    }
+
+@api_router.patch("/deductions/{deduction_id}")
+async def update_deduction(
+    deduction_id: str,
+    update_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تعديل خصم (سوبر أدمن فقط)"""
+    
+    # البحث عن الخصم
+    deduction_doc = await db.payroll_deductions.find_one({"id": deduction_id})
+    if not deduction_doc:
+        raise HTTPException(status_code=404, detail="الخصم غير موجود")
+    
+    if deduction_doc.get("is_voided"):
+        raise HTTPException(status_code=400, detail="لا يمكن تعديل خصم ملغي")
+    
+    # تحضير البيانات المحدثة
+    update_fields = {}
+    
+    if "minutes" in update_data:
+        update_fields["minutes"] = update_data["minutes"]
+    
+    if "amount" in update_data:
+        update_fields["amount"] = update_data["amount"]
+    
+    if "reason" in update_data:
+        update_fields["reason"] = update_data["reason"]
+    
+    if "notes" in update_data:
+        update_fields["notes"] = update_data["notes"]
+    
+    update_fields["updated_by"] = current_user.id
+    update_fields["updated_at"] = datetime.now().isoformat()
+    
+    # تحديث الخصم
+    result = await db.payroll_deductions.update_one(
+        {"id": deduction_id},
+        {"$set": update_fields}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم التحديث")
+    
+    # إنشاء إشعار للموظف
+    notification = SystemNotification(
+        employee_id=deduction_doc["employee_id"],
+        employee_name=deduction_doc["employee_name"],
+        title="تم تعديل خصم",
+        message=f"تم تعديل خصم بتاريخ {deduction_doc['date']} من قبل الإدارة",
+        severity=NotificationSeverity.IMPORTANT,
+        must_acknowledge=True,
+        category="deduction_updated",
+        reference_id=deduction_id
+    )
+    
+    await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
+    
+    return {
+        "success": True,
+        "message": "تم تعديل الخصم بنجاح"
+    }
+
+@api_router.delete("/deductions/{deduction_id}")
+async def void_deduction(
+    deduction_id: str,
+    void_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إلغاء خصم (Soft Delete - سوبر أدمن فقط)"""
+    
+    # البحث عن الخصم
+    deduction_doc = await db.payroll_deductions.find_one({"id": deduction_id})
+    if not deduction_doc:
+        raise HTTPException(status_code=404, detail="الخصم غير موجود")
+    
+    if deduction_doc.get("is_voided"):
+        raise HTTPException(status_code=400, detail="الخصم ملغي مسبقاً")
+    
+    # إلغاء الخصم (Soft Delete)
+    void_fields = {
+        "is_voided": True,
+        "voided_by": current_user.id,
+        "voided_by_name": current_user.name,
+        "void_reason": void_data.get("void_reason", ""),
+        "voided_at": datetime.now().isoformat()
+    }
+    
+    result = await db.payroll_deductions.update_one(
+        {"id": deduction_id},
+        {"$set": void_fields}
+    )
+    
+    # إنشاء إشعار للموظف
+    notification = SystemNotification(
+        employee_id=deduction_doc["employee_id"],
+        employee_name=deduction_doc["employee_name"],
+        title="تم إلغاء خصم",
+        message=f"تم إلغاء خصم بمبلغ {deduction_doc['amount']:.2f} درهم. السبب: {void_data.get('void_reason', 'غير محدد')}",
+        severity=NotificationSeverity.IMPORTANT,
+        must_acknowledge=True,
+        category="deduction_voided",
+        reference_id=deduction_id
+    )
+    
+    await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
+    
+    return {
+        "success": True,
+        "message": "تم إلغاء الخصم بنجاح"
+    }
+
+@api_router.get("/deductions/admin/all")
+async def get_all_deductions_admin(
+    employee_id: Optional[str] = None,
+    month: Optional[str] = None,
+    include_voided: bool = False,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """جميع الخصومات للإدارة (سوبر أدمن فقط)"""
+    
+    query = {}
+    
+    if employee_id:
+        query["employee_id"] = employee_id
+    
+    if month:
+        year, month_num = month.split('-')
+        start_date = date(int(year), int(month_num), 1)
+        if int(month_num) == 12:
+            end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(int(year), int(month_num) + 1, 1) - timedelta(days=1)
+        
+        query["date"] = {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
+        }
+    
+    if not include_voided:
+        query["is_voided"] = False
+    
+    deductions = await db.payroll_deductions.find(query).sort("date", -1).to_list(None)
+    
+    # إضافة الترجمات
+    for deduction in deductions:
+        if "_id" in deduction:
+            del deduction["_id"]
+        
+        deduction["deduction_type_ar"] = DEDUCTION_TYPE_AR.get(
+            DeductionType(deduction["deduction_type"]), deduction["deduction_type"]
+        )
+        deduction["category_ar"] = DEDUCTION_CATEGORY_AR.get(
+            DeductionCategory(deduction["category"]), deduction["category"]
+        )
+    
+    return {"deductions": deductions}
+
+# ====================
+# NOTIFICATIONS API
+# ====================
+
+@api_router.get("/notifications/my")
+async def get_my_notifications(
+    limit: int = 20,
+    unread_only: bool = False,
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على إشعارات الموظف"""
+    
+    query = {"employee_id": current_user.id}
+    
+    if unread_only:
+        query["acknowledged_at"] = None
+    
+    notifications = await db.system_notifications.find(query).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # تنظيف البيانات
+    for notification in notifications:
+        if "_id" in notification:
+            del notification["_id"]
+        
+        notification["severity_ar"] = NOTIFICATION_SEVERITY_AR.get(
+            NotificationSeverity(notification["severity"]), notification["severity"]
+        )
+    
+    return {"notifications": notifications}
+
+@api_router.get("/notifications/unread-mandatory")
+async def get_unread_mandatory_notifications(
+    current_user: User = Depends(get_current_user)
+):
+    """الحصول على الإشعارات الإجبارية غير المقروءة"""
+    
+    notifications = await db.system_notifications.find({
+        "employee_id": current_user.id,
+        "must_acknowledge": True,
+        "acknowledged_at": None
+    }).sort("created_at", -1).to_list(None)
+    
+    # تنظيف البيانات
+    for notification in notifications:
+        if "_id" in notification:
+            del notification["_id"]
+        
+        notification["severity_ar"] = NOTIFICATION_SEVERITY_AR.get(
+            NotificationSeverity(notification["severity"]), notification["severity"]
+        )
+    
+    return {"notifications": notifications}
+
+@api_router.post("/notifications/{notification_id}/acknowledge")
+async def acknowledge_notification(
+    notification_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """تأكيد الاطلاع على إشعار"""
+    
+    # البحث عن الإشعار
+    notification = await db.system_notifications.find_one({
+        "id": notification_id,
+        "employee_id": current_user.id
+    })
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="الإشعار غير موجود")
+    
+    # تأكيد الاطلاع
+    result = await db.system_notifications.update_one(
+        {"id": notification_id},
+        {"$set": {
+            "acknowledged_at": datetime.now().isoformat(),
+            "read_at": datetime.now().isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تأكيد الاطلاع على الإشعار"
+    }
+
+@api_router.get("/attendance/stats/{employee_id}")
+async def get_attendance_stats(
+    employee_id: str,
+    month: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """إحصائيات الحضور"""
+    
+    # التحقق من الصلاحية
+    if current_user.role not in ["admin", "super_admin"] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="غير مسموح")
+    
+    if not month:
+        month = datetime.now().strftime('%Y-%m')
+    
+    stats = await attendance_engine.get_attendance_stats(employee_id, month)
+    return {"stats": stats.dict()}
+
 async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
     """إرسال إشعار للسوبر أدمن عند إكمال الزيارة"""
     
