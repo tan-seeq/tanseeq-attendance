@@ -2857,7 +2857,6 @@ async def update_deduction(
         # Log activity
         await log_activity(
             user_id=current_user.id,
-            user_name=current_user.name,
             action=f"Updated deduction {deduction_id}",
             details=f"Updated fields: {', '.join(update_fields.keys())}"
         )
