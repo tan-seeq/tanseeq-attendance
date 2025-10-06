@@ -207,19 +207,26 @@ const AttachmentPreview = ({ attachment, onError, onLoad }) => {
 
   // Handle different file types
   if (fileType.includes('image') && !imageError) {
+    // For images, we need to handle authentication by opening in new tab
     return (
-      <div className="flex justify-center">
-        <img
-          src={fileUrl}
-          alt={attachment.original_filename || attachment.filename}
-          className="max-w-full max-h-80 object-contain rounded"
-          onLoad={onLoad}
-          onError={(e) => {
-            console.error('Image load error:', e);
-            setImageError(true);
-            onError('لا يمكن عرض الصورة. قد يكون الملف تالف أو غير متوفر.');
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <PhotoIcon className="h-16 w-16 text-green-600 mb-4" />
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          {attachment.original_filename || attachment.filename}
+        </h3>
+        <p className="text-gray-500 mb-4">
+          صورة - انقر لعرضها في نافذة جديدة
+        </p>
+        <button
+          onClick={() => {
+            const token = localStorage.getItem('token');
+            window.open(`${fileUrl}?token=${token}`, '_blank');
           }}
-        />
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center"
+        >
+          <EyeIcon className="h-4 w-4 ml-2" />
+          عرض الصورة
+        </button>
       </div>
     );
   } else if (fileType.includes('pdf')) {
