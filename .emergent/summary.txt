@@ -1,88 +1,89 @@
 <analysis>
-The trajectory chronicles the development of the TANSEEQ HR application through multiple iterations and significant refactoring. Initially, the AI engineer addressed core system stability, including a complex permissions and encryption system which was later entirely removed at the user's request, shifting to plain-text passwords and unrestricted access. A major phase involved migrating the  module from SQLite to MongoDB, resolving a critical production deployment blocker, alongside extensive debugging of authentication and API issues.
-
-Subsequent work focused on enhancing core HR functionalities: refining payroll calculations, implementing new attendance rules (no early clock-in penalty, only early clock-out), and adding a robust Super Admin notification system. The AI also developed a comprehensive  module, complete with server-side time tracking, mandatory reports, and admin notifications. The final segment of the trajectory shows the AI actively beginning the implementation of an  management system, including data models and API endpoints, demonstrating a continuous build-out of complex HR features while simultaneously addressing deployment and UI integration challenges.
+The trajectory details the evolution of the TANSEEQ HR application. Initially, the AI engineer addressed core stability and security (later reversed to plain text passwords). A significant effort involved migrating the Work Reports module from SQLite to MongoDB to resolve deployment issues. Subsequent phases introduced a Super Admin notification system and a comprehensive Marketing Visits module with server-side time tracking and mandatory reports. The most recent major feature developed and iteratively refined was the Advances and Loans system, including backend models, APIs, and a complete frontend UI, alongside fixing persistent attachment display and authentication issues. The engineer has now begun implementing a complex new set of requirements for advanced attendance policies, deductions, enhanced notifications, and expanded Super Admin permissions, having just created initial files for this new phase.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application is a bilingual (Arabic/English) system for HR management, covering employees, attendance, leave, and payroll. Key requirements evolved:
-1.  **Work Reports + Clients Master:** Initially required secure, AES-256-GCM encrypted client credentials and role-based access control (RBAC). This was later reversed; all users now require full, unrestricted access, and passwords are to be stored in plain text.
-2.  **Notification System:** Super Admins need to send private notifications/warnings to specific employees. Employees should receive approval/rejection notifications for leave/field exit requests.
-3.  **Attendance Policy:** No penalties for clocking in before 9 AM; penalties apply only for clocking out before 6 PM.
-4.  **Payroll & Reporting Overhaul:** Fix incorrect payroll calculation logic, and professionally redesign PDF reports for A4 printing with improved bilingual support.
-5.  **Marketing/Client Visits:** A system for employees to record client visits, including start/end times (server-generated), client details, location, and purpose. It requires a mandatory report at visit conclusion, automatic duration calculation, Super Admin notifications upon completion, prevention of concurrent visits, and optional GPS support.
-6.  **Advances and Loans:** A system to manage employee advances or loans, allowing attachment of invoices, automatic deduction of invoice amounts, and displaying the remaining loan balance to Super Admins.
+The TANSEEQ HR application is a bilingual system for HR management. Key requirements:
+1.  **Work Reports + Clients Master:** Originally had AES-256-GCM encryption and RBAC, later reversed to plain-text passwords and unrestricted access for all users.
+2.  **Notification System:** Super Admins send private notifications; employees receive status updates on requests.
+3.  **Attendance Policy (Previous):** No penalties for early clock-in; penalties only for early clock-out (before 6 PM).
+4.  **Payroll & Reporting:** Fixed incorrect payroll logic and redesigned bilingual PDF reports.
+5.  **Marketing/Client Visits:** System for employees to log visits (start/end times, client details, location, purpose), requiring mandatory reports, automatic duration, Super Admin notifications, and preventing concurrent visits. Optional GPS support.
+6.  **Advances and Loans:** System to manage employee advances/loans, allowing invoice attachments, automatic deduction (initially, then revised), and displaying remaining balance to Super Admins. This feature was significantly refined to distinguish between advances (settled against salary) and custody (deducted from expenses), with Super Admin control over deduction source and full CRUD operations.
+7.  **New Attendance Policies (October 2025):** Advanced deduction rules for lateness (free occurrences, cumulative minutes, half/full-day deductions), early leave, and missing check-outs. Specific exceptions for Hatem (no penalties) and Tareq (flexible end time).
+8.  **Enhanced Notifications:** Automatic notifications for attendance issues, deductions, and Super Admin actions. Mandatory in-app modal display for unread notifications.
+9.  **Expanded Super Admin Powers:** Full CRUD (create, edit, delete with soft delete/audit log) for manual deductions and full control (edit, adjust, attach, close, void) over Advances/Loans after approval, with robust RBAC and audit logging.
 </product_requirements>
 
 <key_technical_concepts>
-- **Backend:** FastAPI (Python), Motor (async MongoDB driver), SQLAlchemy (historically for Work Reports), Pydantic.
-- **Frontend:** React.js, React Router, Tailwind CSS, Axios.
-- **Databases:** MongoDB (main HR system and now Work Reports), SQLite (deprecated for Work Reports).
-- **Authentication:** JWT-based authentication.
-- **Deployment:** Kubernetes (production environment), backend                          RUNNING   pid 26, uptime 0:00:06
-code-server                      RUNNING   pid 28, uptime 0:00:06
-frontend                         STOPPED   Oct 05 07:57 AM
-mongodb                          RUNNING   pid 33, uptime 0:00:06
+- **Backend:** FastAPI (Python), Motor (async MongoDB driver), Pydantic for data validation.
+- **Frontend:** React.js, React Router, Axios for API calls, Tailwind CSS for styling.
+- **Databases:** MongoDB for main data and Work Reports (replaced SQLite).
+- **Authentication:** JWT-based.
+- **Deployment:** Kubernetes (container environment), backend                          RUNNING   pid 27, uptime 0:00:05
+code-server                      RUNNING   pid 29, uptime 0:00:05
+frontend                         RUNNING   pid 30, uptime 0:00:05
+mongodb                          RUNNING   pid 33, uptime 0:00:05
 supervisor>  for service management.
-- **Security (Historical):** AES-256-GCM encryption and Role-Based Access Control (RBAC) were implemented and then explicitly removed.
+- **File Management:** Handling file uploads and serving attachments.
 </key_technical_concepts>
 
 <code_architecture>
-The application uses a monorepo structure, separating the React frontend and FastAPI backend.
+The application employs a monorepo architecture, comprising a React frontend and a FastAPI backend.
 
 
 
 -   ****
-    -   **Importance:** Main FastAPI application. Contains all API routes for HR, auth, Work Reports, Notifications, Payroll, Field Exits, and Marketing Visits.
-    -   **Summary of Changes:** Underwent massive refactoring. Initially had permissions/encryption, which were removed. Payroll calculation logic was fixed and simplified. Attendance rules updated. Notification endpoints created/integrated. Work Reports API endpoints migrated from SQLAlchemy/SQLite to Motor/MongoDB. New endpoints for  (start, end, report, history) and  were added. Startup events were optimized to prevent deployment timeouts.
-
+    -   **Importance:** Central FastAPI application, houses all API routes.
+    -   **Changes:** Major refactoring; removal of old permission/encryption logic. Payroll and attendance rule updates. Integration of Notification, Marketing Visits, and Advances/Loans endpoints. Recently, significant updates for , , and new endpoints for Super Admin transaction views, advance settlement, and attachment viewing (including query parameter for JWT). Also, new endpoints for Marketing Visits editing.
 -   ****
-    -   **Importance:** Root React component managing routes, navigation, and global .
-    -   **Summary of Changes:** Integrated  and . Enhanced  for session persistence. Modified navigation to include  for all roles. Fixed attachment viewer logic for leave requests to handle various file types (images, PDFs) correctly.
-
+    -   **Importance:** Root React component, manages routing, navigation, and .
+    -   **Changes:** Integrated , , and  components. Navigation menu entries were pruned based on user request (e.g., Work Reports related items removed).
 -   ****
-    -   **Importance:** Previously defined SQLAlchemy models for Work Reports. Now largely deprecated.
-    -   **Summary of Changes:** Was the source of the SQLite deployment blocker. Its usage was replaced by .
-
+    -   **Importance:** MongoDB models and operations for Work Reports, replaced SQLite.
+    -   **Changes:** Newly created, optimized for production startup.
 -   ****
-    -   **Importance:** New module defining MongoDB models and operations for the Work Reports module.
-    -   **Summary of Changes:** Newly created to replace SQLite. Contains logic for collections, index creation, and initial data seeding, optimized for production startup.
-
+    -   **Importance:** Pydantic models for Marketing Visits.
+    -   **Changes:** Newly created.
 -   ****
-    -   **Importance:** UI for Super Admin to send notifications and for users to view them.
-    -   **Summary of Changes:** Newly created. Enhanced with improved error handling, loading states, and API URL configuration. Refactored to consolidate employee messages and system notifications.
-
+    -   **Importance:** UI for managing marketing visits.
+    -   **Changes:** Newly created, currently awaiting Super Admin edit functionality implementation.
 -   ****
-    -   **Importance:** Defines the Pydantic models for the new Marketing Visits feature.
-    -   **Summary of Changes:** Newly created to support the Marketing Visits feature.
-
+    -   **Importance:** Pydantic models for Advances and Loans.
+    -   **Changes:** Newly created. Received updates for transaction types (including SETTLEMENT_WITH_SALARY),  model, and refined balance calculation logic (distinguishing advances vs. custody deductions), and  in .
 -   ****
-    -   **Importance:** UI component for employees to manage their marketing visits.
-    -   **Summary of Changes:** Newly created, includes start/end visit functionality, report submission, and visit history display. Integrated into the main application layout.
-
+    -   **Importance:** Admin UI for managing advances/loans.
+    -   **Changes:** Newly created. Multiple fixes including correcting form data submission ( vs. ), improving error handling, and adding the All Transactions tab with  function.
 -   ****
-    -   **Importance:** Defines the Pydantic models for the new Advances and Loans feature.
-    -   **Summary of Changes:** Newly created as part of the most recent user request.
-
+    -   **Importance:** Centralized component for displaying various attachment types.
+    -   **Changes:** Newly created. Enhanced to correctly handle authentication for displaying images and PDFs via signed URLs, embedding the JWT token in the query parameter for backend access.
+-   **** (New)
+    -   **Importance:** Will define models for the new attendance and deduction system.
+    -   **Changes:** Newly created as part of the latest user request.
+-   **** (New)
+    -   **Importance:** Will encapsulate the complex logic for calculating attendance deductions.
+    -   **Changes:** Newly created as part of the latest user request.
+-   **** (New)
+    -   **Importance:** Will provide the mandatory in-app modal for unread notifications.
+    -   **Changes:** Newly created as part of the latest user request.
 </code_architecture>
 
 <pending_tasks>
-- Integrate GPS support for Marketing Visits (start/end) if available and required.
-- Conduct thorough end-to-end testing of the integrated Advances and Loans system (both backend and frontend).
-- Implement the UI for the Advances and Loans system.
-- Implement the logic for automatic deduction and display of remaining loan balance.
+- Implement advanced attendance deduction logic ().
+- Implement the mandatory in-app notification modal and notification display logic.
+- Implement Super Admin full CRUD for manual deductions.
+- Implement Super Admin comprehensive control (edit, reject, delete, adjust, attach, close) for Advances/Loans.
+- Implement scheduled jobs for attendance warnings and automatic deductions.
+- Implement , , ,  endpoints.
+- Develop UI for attendance policy settings and deduction management for Super Admin.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was actively working on implementing the Advances and Loans system. This new feature was explicitly requested by the user to manage employee advances or loans, including invoice attachments and automatic deductions.
+Immediately before this summary, the AI engineer had successfully resolved a critical issue where attachments were not displaying correctly due to authentication problems with the frontend's  and the backend's file serving endpoint. The fix involved modifying  to correctly pass the JWT token as a query parameter in attachment URLs and updating 's  endpoint to accept and validate the token from the query string.
 
-The engineer had just started the backend implementation:
-1.  **Created **: This file contains the Pydantic models defining the data structure for advances and loans, which will be stored in MongoDB.
-2.  **Added initial APIs to **: Basic FastAPI endpoints are being set up to handle operations related to the advances and loans (e.g., creating, retrieving). The next logical steps would be to define the full CRUD operations and integrate file upload for invoices.
-
-This work follows a series of successful feature additions and fixes, including a comprehensive Marketing Visits system, a robust notification system, payroll and attendance rule corrections, and the resolution of critical deployment issues related to hardcoded URLs and MongoDB startup procedures. The current focus is on building out this new financial management module.
+Following this, the user provided a comprehensive new set of requirements for an advanced attendance and deduction system, expanded notification functionalities, and enhanced Super Admin permissions for both deductions and advances/loans. The AI engineer has initiated the implementation of this large request by establishing the foundational database and logic files:  (for data structures),  (for deduction logic), and  (for the new notification UI). The immediate next step is to add the corresponding API endpoints to .
 </current_work>
 
 <optional_next_step>
-Define the complete set of backend APIs (CRUD) for the Advances and Loans system in .
+Add the new attendance and deduction related API endpoints to .
 </optional_next_step>

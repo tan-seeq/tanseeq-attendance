@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://visits-tracking.preview.emergentagent.com",
+			"value": "https://hr-management-11.preview.emergentagent.com",
 			"type": "string"
 		}
 	],
