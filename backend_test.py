@@ -132,7 +132,7 @@ class AdvancesSystemTester:
         print(f"✅ Authentication successful with: {working_credentials['name']}")
         return True
 
-    def test_advances_endpoints(self):
+    def test_advances_endpoints(self, backend_url):
         """Test all advances system endpoints"""
         print("💰 TESTING ADVANCES SYSTEM ENDPOINTS")
         print("=" * 60)
