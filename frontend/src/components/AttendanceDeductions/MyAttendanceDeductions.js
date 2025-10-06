@@ -120,7 +120,7 @@ const MyAttendanceDeductions = () => {
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600">الموظف</p>
-              <p className="text-lg font-semibold text-gray-900">{currentUser.name}</p>
+              <p className="text-lg font-semibold text-gray-900">{currentUser?.name || 'المستخدم'}</p>
             </div>
           </div>
         </div>
