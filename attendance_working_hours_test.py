@@ -168,7 +168,7 @@ class AttendanceWorkingHoursTestSuite:
                 # Verify the record was updated
                 updated_response = self.session.get(f"{API_BASE}/attendance/with-absences", timeout=30)
                 if updated_response.status_code == 200:
-                    updated_records = updated_response.json().get('attendance_records', [])
+                    updated_records = updated_response.json()  # API returns direct array
                     updated_record = next((r for r in updated_records if r.get('id') == attendance_id), None)
                     
                     if updated_record:
@@ -279,7 +279,7 @@ class AttendanceWorkingHoursTestSuite:
                 # Verify the record was updated
                 updated_response = self.session.get(f"{API_BASE}/attendance/with-absences", timeout=30)
                 if updated_response.status_code == 200:
-                    updated_records = updated_response.json().get('attendance_records', [])
+                    updated_records = updated_response.json()  # API returns direct array
                     updated_record = next((r for r in updated_records if r.get('id') == attendance_id), None)
                     
                     if updated_record:
@@ -379,7 +379,7 @@ class AttendanceWorkingHoursTestSuite:
                     # Verify the record was updated
                     updated_response = self.session.get(f"{API_BASE}/attendance/with-absences", timeout=30)
                     if updated_response.status_code == 200:
-                        updated_records = updated_response.json().get('attendance_records', [])
+                        updated_records = updated_response.json()  # API returns direct array
                         updated_record = next((r for r in updated_records if r.get('id') == attendance_id), None)
                         
                         if updated_record and updated_record.get('working_hours') is not None:
