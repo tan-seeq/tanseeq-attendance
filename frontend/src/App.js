@@ -66,6 +66,9 @@ import NotificationModal from './components/NotificationModal';
 import AttendanceDeductionsAdmin from './components/AttendanceDeductions/AttendanceDeductionsAdmin';
 import MyAttendanceDeductions from './components/AttendanceDeductions/MyAttendanceDeductions';
 
+// Import Integrated Payroll Components
+import PayrollCycleManagement from './components/IntegratedPayroll/PayrollCycleManagement';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
