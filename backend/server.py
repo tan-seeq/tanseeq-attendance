@@ -2767,6 +2767,13 @@ async def send_visit_completion_notification(visit_data, report, employee, durat
 
 # Attendance engine is already initialized above
 
+# ================================
+# INTEGRATED PAYROLL SYSTEM
+# ================================
+
+# Initialize payroll integration engine
+payroll_engine = None
+
 @app.get("/api/deductions")
 async def get_deductions(
     employee_id: Optional[str] = None,
