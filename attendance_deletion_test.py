@@ -261,7 +261,8 @@ class AttendanceDeletionTestSuite:
                     
                     if verify_response.status_code == 200:
                         verify_data = verify_response.json()
-                        remaining_records = verify_data.get('attendance_records', [])
+                        # API returns list directly
+                        remaining_records = verify_data if isinstance(verify_data, list) else verify_data.get('attendance_records', [])
                         record_still_exists = any(r.get('id') == record_id for r in remaining_records)
                         
                         if not record_still_exists:
