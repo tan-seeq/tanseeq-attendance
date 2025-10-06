@@ -2783,7 +2783,7 @@ async def create_manual_deduction(
     
     try:
         global attendance_engine
-        from .attendance_models import DeductionType, DeductionCategory
+        from attendance_models import DeductionType, DeductionCategory
         from datetime import date
         
         # Validate required fields
