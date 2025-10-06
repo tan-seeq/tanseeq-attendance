@@ -3110,7 +3110,7 @@ const AppWithNotifications = () => {
               </ProtectedRoute>
             } />
             <Route path="/attendance-management" element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole="super_admin">
                 <Layout>
                   <AttendanceManagement />
                 </Layout>
