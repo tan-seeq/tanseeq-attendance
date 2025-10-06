@@ -2968,8 +2968,8 @@ async def get_attendance_stats(
         
         global attendance_engine
         
-        # Get monthly deductions summary
-        summary = await attendance_engine.get_monthly_deductions_summary(employee_id, month)
+        # Get attendance statistics
+        summary = await attendance_engine.get_attendance_stats(employee_id, month)
         
         return summary
         
