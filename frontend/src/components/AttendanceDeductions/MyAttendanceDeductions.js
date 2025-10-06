@@ -16,6 +16,9 @@ import {
   MinusIcon as Minus
 } from '@heroicons/react/24/outline';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
 const MyAttendanceDeductions = () => {
   const { user: currentUser } = useContext(AuthContext);
   const [deductions, setDeductions] = useState([]);
