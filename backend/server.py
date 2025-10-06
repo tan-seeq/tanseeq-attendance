@@ -2841,7 +2841,7 @@ async def update_deduction(
             raise HTTPException(status_code=400, detail="No valid fields to update")
         
         # Add audit information
-        update_fields["updated_by"] = current_user["id"]
+        update_fields["updated_by"] = current_user.id
         update_fields["updated_at"] = datetime.now().isoformat()
         
         # Update deduction
