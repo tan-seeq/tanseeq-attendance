@@ -16,7 +16,7 @@ import shutil
 from pathlib import Path
 
 # MongoDB connection
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/tanseeq_hr")
+MONGO_URL = os.environ.get("MONGO_URL")
 BACKUP_DIR = "/app/backups"
 
 # Create backups directory
