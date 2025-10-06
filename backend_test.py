@@ -208,7 +208,7 @@ class AdvancesSystemTester:
 
             # Test pending approvals
             try:
-                response = self.session.get(f"{BACKEND_URL}/advances/admin/pending-approvals", timeout=30)
+                response = self.session.get(f"{backend_url}/advances/admin/pending-approvals", timeout=30)
                 if response.status_code == 200:
                     pending_data = response.json()
                     pending_count = len(pending_data.get('pending_transactions', []))
