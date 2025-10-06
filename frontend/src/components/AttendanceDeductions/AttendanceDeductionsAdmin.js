@@ -63,14 +63,13 @@ const AttendanceDeductionsAdmin = () => {
       const params = new URLSearchParams();
       if (selectedMonth) params.append('month', selectedMonth);
       if (selectedEmployee) params.append('employee_id', selectedEmployee);
+      if (selectedType) params.append('deduction_type', selectedType);
 
-      const response = await fetch(`/api/deductions?${params}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setDeductions(data.deductions || []);
+      const response = await axios.get(`${API}/deductions?${params}`);
+      setDeductions(response.data || []);
     } catch (error) {
       console.error('Error fetching deductions:', error);
+      alert('خطأ في جلب الخصومات');
     } finally {
       setLoading(false);
     }
