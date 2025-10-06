@@ -17,7 +17,7 @@ import uuid
 import calendar
 from dateutil.relativedelta import relativedelta
 
-from .payroll_models import (
+from payroll_models import (
     PayrollCycle, PayrollStatus, PayrollLineItem, PayrollItemType,
     InstallmentSchedule, IndividualInstallment, InstallmentStatus,
     EmployeePayrollSummary, DeductionCeiling, EmployeeDeductionCeiling,
