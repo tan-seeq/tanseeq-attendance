@@ -3288,6 +3288,16 @@ const AppWithNotifications = () => {
       </>
     );
   };
+
+// Main App Component
+function App() {
+  return (
+    <AuthProvider>
+      <LanguageProvider>
+        <AppWithNotifications />
+      </LanguageProvider>
+    </AuthProvider>
+  );
 }
 
 // Payroll Management Component
