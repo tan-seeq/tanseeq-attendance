@@ -3147,7 +3147,7 @@ async def create_payroll_cycle(
     current_user: dict = Depends(get_current_user)
 ):
     """إنشاء دورة راتب جديدة (سوبر أدمن فقط)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
@@ -3214,7 +3214,7 @@ async def lock_payroll_cycle(
     current_user: dict = Depends(get_current_user)
 ):
     """قفل دورة راتب (سوبر أدمن فقط)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
@@ -3244,7 +3244,7 @@ async def unlock_payroll_cycle(
     current_user: dict = Depends(get_current_user)
 ):
     """فتح دورة راتب مقفولة (سوبر أدمن فقط)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
@@ -3275,7 +3275,7 @@ async def create_installment_schedule(
     current_user: dict = Depends(get_current_user)
 ):
     """إنشاء جدولة أقساط للسلفة (سوبر أدمن فقط)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
