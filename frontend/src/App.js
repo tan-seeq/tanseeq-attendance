@@ -3052,8 +3052,20 @@ function App() {
   return (
     <AuthProvider>
       <LanguageProvider>
-        <Router>
-          <Routes>
+        <AppWithNotifications />
+      </LanguageProvider>
+    </AuthProvider>
+  );
+}
+
+// App with Notifications Component
+const AppWithNotifications = () => {
+  const { showNotificationModal, setShowNotificationModal } = useAuth();
+  
+  return (
+    <>
+      <Router>
+        <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
