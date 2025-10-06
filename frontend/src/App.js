@@ -62,6 +62,10 @@ import MyTransactions from './components/AdvancesLoans/MyTransactions';
 // Import Notification Modal
 import NotificationModal from './components/NotificationModal';
 
+// Import Attendance Deductions Components
+import AttendanceDeductionsAdmin from './components/AttendanceDeductions/AttendanceDeductionsAdmin';
+import MyAttendanceDeductions from './components/AttendanceDeductions/MyAttendanceDeductions';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
