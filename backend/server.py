@@ -2259,6 +2259,55 @@ async def void_deduction(
         "message": "تم إلغاء الخصم بنجاح"
     }
 
+@api_router.post("/deductions/{deduction_id}/void")
+async def void_deduction_post(
+    deduction_id: str,
+    void_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """إلغاء خصم (POST method - سوبر أدمن فقط)"""
+    
+    # البحث عن الخصم
+    deduction_doc = await db.payroll_deductions.find_one({"id": deduction_id})
+    if not deduction_doc:
+        raise HTTPException(status_code=404, detail="الخصم غير موجود")
+    
+    if deduction_doc.get("is_voided"):
+        raise HTTPException(status_code=400, detail="الخصم ملغي مسبقاً")
+    
+    # إلغاء الخصم (Soft Delete)
+    void_fields = {
+        "is_voided": True,
+        "voided_by": current_user.id,
+        "voided_by_name": current_user.name,
+        "void_reason": void_data.get("void_reason", ""),
+        "voided_at": datetime.now().isoformat()
+    }
+    
+    result = await db.payroll_deductions.update_one(
+        {"id": deduction_id},
+        {"$set": void_fields}
+    )
+    
+    # إنشاء إشعار للموظف
+    notification = SystemNotification(
+        employee_id=deduction_doc["employee_id"],
+        employee_name=deduction_doc["employee_name"],
+        title="تم إلغاء خصم",
+        message=f"تم إلغاء خصم بمبلغ {deduction_doc['amount']:.2f} درهم. السبب: {void_data.get('void_reason', 'غير محدد')}",
+        severity=NotificationSeverity.IMPORTANT,
+        must_acknowledge=True,
+        category="deduction_voided",
+        reference_id=deduction_id
+    )
+    
+    await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
+    
+    return {
+        "success": True,
+        "message": "تم إلغاء الخصم بنجاح"
+    }
+
 @api_router.get("/deductions/admin/all")
 async def get_all_deductions_admin(
     employee_id: Optional[str] = None,
