@@ -34,7 +34,7 @@ logging.basicConfig(
 Path('/app/logs').mkdir(exist_ok=True)
 
 # MongoDB connection
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/tanseeq_hr")
+MONGO_URL = os.environ.get("MONGO_URL")
 API_BASE_URL = os.environ.get("BACKEND_URL", "http://localhost:8001/api")
 
 client = AsyncIOMotorClient(MONGO_URL)
