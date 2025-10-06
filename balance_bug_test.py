@@ -487,7 +487,7 @@ startxref
 
 def main():
     # Get backend URL from environment
-    backend_url = "https://hr-management-11.preview.emergentagent.com"
+    backend_url = "https://advanced-hr.preview.emergentagent.com"
     
     print(f"🔧 Backend URL: {backend_url}")
     

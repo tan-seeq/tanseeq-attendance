@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://hr-management-11.preview.emergentagent.com",
+			"value": "https://advanced-hr.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

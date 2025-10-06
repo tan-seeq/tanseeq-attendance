@@ -1,31 +1,31 @@
 <analysis>
-The trajectory details the evolution of the TANSEEQ HR application. Initially, the AI engineer addressed core stability and security (later reversed to plain text passwords). A significant effort involved migrating the Work Reports module from SQLite to MongoDB to resolve deployment issues. Subsequent phases introduced a Super Admin notification system and a comprehensive Marketing Visits module with server-side time tracking and mandatory reports. The most recent major feature developed and iteratively refined was the Advances and Loans system, including backend models, APIs, and a complete frontend UI, alongside fixing persistent attachment display and authentication issues. The engineer has now begun implementing a complex new set of requirements for advanced attendance policies, deductions, enhanced notifications, and expanded Super Admin permissions, having just created initial files for this new phase.
+The trajectory details the progressive development of the TANSEEQ HR application. Initially, the AI engineer focused on core functionalities, including Work Reports and a basic notification system, and addressed foundational issues like migrating Work Reports to MongoDB. Subsequent efforts expanded to a comprehensive Marketing Visits module and the Advances and Loans system, which involved iterative refinements for both backend and frontend. The latest phase commenced with a broad set of new requirements: advanced attendance policies with complex deduction rules, an enhanced notification system requiring a mandatory in-app modal, and expanded Super Admin permissions. The engineer has successfully resolved attachment display issues, established core backend files (, ) and a frontend component (), and substantially implemented new API endpoints in  for attendance, deductions, and notifications. The immediate next step is the full integration of the  into the main application.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application is a bilingual system for HR management. Key requirements:
-1.  **Work Reports + Clients Master:** Originally had AES-256-GCM encryption and RBAC, later reversed to plain-text passwords and unrestricted access for all users.
-2.  **Notification System:** Super Admins send private notifications; employees receive status updates on requests.
-3.  **Attendance Policy (Previous):** No penalties for early clock-in; penalties only for early clock-out (before 6 PM).
-4.  **Payroll & Reporting:** Fixed incorrect payroll logic and redesigned bilingual PDF reports.
-5.  **Marketing/Client Visits:** System for employees to log visits (start/end times, client details, location, purpose), requiring mandatory reports, automatic duration, Super Admin notifications, and preventing concurrent visits. Optional GPS support.
-6.  **Advances and Loans:** System to manage employee advances/loans, allowing invoice attachments, automatic deduction (initially, then revised), and displaying remaining balance to Super Admins. This feature was significantly refined to distinguish between advances (settled against salary) and custody (deducted from expenses), with Super Admin control over deduction source and full CRUD operations.
-7.  **New Attendance Policies (October 2025):** Advanced deduction rules for lateness (free occurrences, cumulative minutes, half/full-day deductions), early leave, and missing check-outs. Specific exceptions for Hatem (no penalties) and Tareq (flexible end time).
-8.  **Enhanced Notifications:** Automatic notifications for attendance issues, deductions, and Super Admin actions. Mandatory in-app modal display for unread notifications.
-9.  **Expanded Super Admin Powers:** Full CRUD (create, edit, delete with soft delete/audit log) for manual deductions and full control (edit, adjust, attach, close, void) over Advances/Loans after approval, with robust RBAC and audit logging.
+The TANSEEQ HR application is a bilingual system for HR management, addressing several key areas:
+1.  **Work Reports + Clients Master:** Initially featured AES-256-GCM encryption and RBAC, later simplified to plain-text passwords and universal access.
+2.  **Notification System:** Allows Super Admins to send private notifications and employees to receive status updates.
+3.  **Attendance Policy (Previous):** Penalized only early clock-out (before 6 PM); no penalties for early clock-in.
+4.  **Payroll & Reporting:** Corrected payroll logic and generated bilingual PDF reports.
+5.  **Marketing/Client Visits:** Enables employees to log visits with start/end times, client details, location, and purpose. Requires mandatory reports, automatic duration calculation, Super Admin notifications, and prevents concurrent visits, with optional GPS support.
+6.  **Advances and Loans:** Manages employee advances/loans, including invoice attachments, automatic deduction (revised to distinguish advances from custody), and remaining balance display for Super Admins, with full CRUD operations and deduction source control.
+7.  **New Attendance Policies (October 2025):** Introduces advanced deduction rules for lateness (free occurrences, cumulative minutes, half/full-day), early leave, and missing check-outs, with specific exceptions for Hatem (no penalties) and Tareq (flexible end time).
+8.  **Enhanced Notifications:** Automatic notifications for attendance issues, deductions, and Super Admin actions. A mandatory in-app modal for unread notifications is required.
+9.  **Expanded Super Admin Powers:** Full CRUD (create, edit, delete with soft delete/audit log) for manual deductions and comprehensive control (edit, adjust, attach, close, void) over Advances/Loans after approval, supported by robust RBAC and audit logging.
 </product_requirements>
 
 <key_technical_concepts>
-- **Backend:** FastAPI (Python), Motor (async MongoDB driver), Pydantic for data validation.
-- **Frontend:** React.js, React Router, Axios for API calls, Tailwind CSS for styling.
-- **Databases:** MongoDB for main data and Work Reports (replaced SQLite).
-- **Authentication:** JWT-based.
-- **Deployment:** Kubernetes (container environment), backend                          RUNNING   pid 27, uptime 0:00:05
-code-server                      RUNNING   pid 29, uptime 0:00:05
-frontend                         RUNNING   pid 30, uptime 0:00:05
-mongodb                          RUNNING   pid 33, uptime 0:00:05
-supervisor>  for service management.
-- **File Management:** Handling file uploads and serving attachments.
+-   **Backend:** FastAPI (Python), Motor (async MongoDB driver), Pydantic for data validation.
+-   **Frontend:** React.js, React Router, Axios for API calls, Tailwind CSS.
+-   **Databases:** MongoDB for main data and Work Reports.
+-   **Authentication:** JWT-based.
+-   **Deployment:** Kubernetes container environment, backend                          RUNNING   pid 27, uptime 0:00:04
+code-server                      RUNNING   pid 29, uptime 0:00:04
+frontend                         STOPPING  
+mongodb                          RUNNING   pid 35, uptime 0:00:04
+supervisor> .
+-   **File Management:** Handling file uploads and serving attachments.
 </key_technical_concepts>
 
 <code_architecture>
@@ -35,12 +35,16 @@ The application employs a monorepo architecture, comprising a React frontend and
 
 -   ****
     -   **Importance:** Central FastAPI application, houses all API routes.
-    -   **Changes:** Major refactoring; removal of old permission/encryption logic. Payroll and attendance rule updates. Integration of Notification, Marketing Visits, and Advances/Loans endpoints. Recently, significant updates for , , and new endpoints for Super Admin transaction views, advance settlement, and attachment viewing (including query parameter for JWT). Also, new endpoints for Marketing Visits editing.
+    -   **Changes:** Major refactoring; removal of old permission/encryption logic. Payroll and attendance rule updates. Integration of Notification, Marketing Visits, and Advances/Loans endpoints. Recently, significant updates for , , and new endpoints for Super Admin transaction views, advance settlement, and attachment viewing (including query parameter for JWT). Also, new endpoints for Marketing Visits editing. Most recently, numerous API endpoints have been added for:
+        *   Attendance Policies: , , , 
+        *   Manual Deductions: , , , , 
+        *   Attendance Statistics: 
+        *   Notifications: , , , , , .
 -   ****
     -   **Importance:** Root React component, manages routing, navigation, and .
-    -   **Changes:** Integrated , , and  components. Navigation menu entries were pruned based on user request (e.g., Work Reports related items removed).
+    -   **Changes:** Integrated , , and  components. Navigation menu entries were pruned. Currently being prepared for  integration and mandatory notification checks on login.
 -   ****
-    -   **Importance:** MongoDB models and operations for Work Reports, replaced SQLite.
+    -   **Importance:** MongoDB models and operations for Work Reports, replacing SQLite.
     -   **Changes:** Newly created, optimized for production startup.
 -   ****
     -   **Importance:** Pydantic models for Marketing Visits.
@@ -58,20 +62,21 @@ The application employs a monorepo architecture, comprising a React frontend and
     -   **Importance:** Centralized component for displaying various attachment types.
     -   **Changes:** Newly created. Enhanced to correctly handle authentication for displaying images and PDFs via signed URLs, embedding the JWT token in the query parameter for backend access.
 -   **** (New)
-    -   **Importance:** Will define models for the new attendance and deduction system.
-    -   **Changes:** Newly created as part of the latest user request.
+    -   **Importance:** Defines Pydantic models for the new advanced attendance and deduction system.
+    -   **Changes:** Newly created. Contains models like , , , , , and .
 -   **** (New)
-    -   **Importance:** Will encapsulate the complex logic for calculating attendance deductions.
-    -   **Changes:** Newly created as part of the latest user request.
+    -   **Importance:** Encapsulates the complex logic for calculating attendance deductions.
+    -   **Changes:** Newly created; implementation of deduction logic is pending.
 -   **** (New)
-    -   **Importance:** Will provide the mandatory in-app modal for unread notifications.
-    -   **Changes:** Newly created as part of the latest user request.
+    -   **Importance:** Provides the mandatory in-app modal for unread notifications.
+    -   **Changes:** Newly created. Implements the UI and basic logic for fetching and displaying notifications, including a Mark as Read functionality.
+
 </code_architecture>
 
 <pending_tasks>
 - Implement advanced attendance deduction logic ().
-- Implement the mandatory in-app notification modal and notification display logic.
-- Implement Super Admin full CRUD for manual deductions.
+- Complete integration of the mandatory in-app notification modal (UI created, integration into  pending).
+- Implement Super Admin full CRUD for manual deductions (API endpoints implemented, frontend UI pending).
 - Implement Super Admin comprehensive control (edit, reject, delete, adjust, attach, close) for Advances/Loans.
 - Implement scheduled jobs for attendance warnings and automatic deductions.
 - Implement , , ,  endpoints.
@@ -79,11 +84,19 @@ The application employs a monorepo architecture, comprising a React frontend and
 </pending_tasks>
 
 <current_work>
-Immediately before this summary, the AI engineer had successfully resolved a critical issue where attachments were not displaying correctly due to authentication problems with the frontend's  and the backend's file serving endpoint. The fix involved modifying  to correctly pass the JWT token as a query parameter in attachment URLs and updating 's  endpoint to accept and validate the token from the query string.
+Immediately before this summary, the AI engineer resolved a critical issue with attachment display, which involved modifying  to correctly pass the JWT token as a query parameter in attachment URLs and updating 's file serving endpoint to accept and validate this token.
 
-Following this, the user provided a comprehensive new set of requirements for an advanced attendance and deduction system, expanded notification functionalities, and enhanced Super Admin permissions for both deductions and advances/loans. The AI engineer has initiated the implementation of this large request by establishing the foundational database and logic files:  (for data structures),  (for deduction logic), and  (for the new notification UI). The immediate next step is to add the corresponding API endpoints to .
+Following this fix, a comprehensive new set of requirements for an advanced attendance and deduction system, expanded notification functionalities, and enhanced Super Admin permissions was introduced. The AI engineer initiated this large request by creating foundational files:  (for data structures),  (for deduction logic), and  (for the new notification UI).
+
+Significant progress has been made on the backend, with numerous new API endpoints added to . These endpoints cover:
+- CRUD operations for attendance policies.
+- CRUD operations for manual deduction policies.
+- Endpoints for retrieving employee attendance statistics.
+- Comprehensive notification management, including fetching, posting, counting unread, marking as read (single and all), and deleting notifications.
+
+On the frontend, the  component has been fully created, providing the UI and initial logic for displaying unread notifications. The immediate work involves integrating this  into the main  component to make it functional within the application flow, especially around user login.
 </current_work>
 
 <optional_next_step>
-Add the new attendance and deduction related API endpoints to .
+Integrate the  component into  and set up initial fetching of unread notifications upon user login.
 </optional_next_step>

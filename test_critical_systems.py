@@ -330,7 +330,7 @@ class CriticalSystemsTester:
 
 if __name__ == "__main__":
     # Use the backend URL from frontend/.env
-    backend_url = "https://hr-management-11.preview.emergentagent.com"
+    backend_url = "https://advanced-hr.preview.emergentagent.com"
     
     tester = CriticalSystemsTester(backend_url)
     success = tester.run_tests()
