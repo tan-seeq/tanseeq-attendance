@@ -28,8 +28,14 @@ const NotificationModal = ({ isOpen, onClose }) => {
   const fetchUnreadNotifications = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/notifications/unread-mandatory`);
-      setNotifications(response.data.notifications || []);
+      const response = await axios.get(`${API}/notifications/unread`);
+      
+      // Filter for mandatory notifications only
+      const mandatoryNotifications = response.data.notifications?.filter(
+        notification => notification.must_acknowledge
+      ) || [];
+      
+      setNotifications(mandatoryNotifications);
       setCurrentIndex(0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
