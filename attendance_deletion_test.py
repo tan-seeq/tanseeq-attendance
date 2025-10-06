@@ -661,7 +661,11 @@ class AttendanceDeletionTestSuite:
             
             if response.status_code == 200:
                 data = response.json()
-                activity_logs = data.get('activity_logs', [])
+                # Handle both list and dict responses
+                if isinstance(data, list):
+                    activity_logs = data
+                else:
+                    activity_logs = data.get('activity_logs', [])
                 
                 # Look for deletion-related activities
                 deletion_logs = [
