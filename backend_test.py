@@ -143,7 +143,7 @@ class AdvancesSystemTester:
         
         # Test 1: Get my balance
         try:
-            response = self.session.get(f"{BACKEND_URL}/advances/my-balance", timeout=30)
+            response = self.session.get(f"{backend_url}/advances/my-balance", timeout=30)
             if response.status_code == 200:
                 balance_data = response.json()
                 self.log_test(
