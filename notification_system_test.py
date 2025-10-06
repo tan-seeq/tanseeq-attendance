@@ -24,9 +24,9 @@ BACKEND_URL = "https://advanced-hr.preview.emergentagent.com/api"
 
 print(f"🔗 Testing Backend URL: {BACKEND_URL}")
 
-# Test credentials from review request
+# Test credentials from review request and previous testing
 TEST_CREDENTIALS = [
-    {"email": "hatem@tanseeq.com", "password": "hatem123", "role": "super_admin", "name": "Hatem (Super Admin)"},
+    {"email": "hatem@tan-seeq.co", "password": "hatem123", "role": "super_admin", "name": "Hatem (Super Admin)"},
     {"email": "mahmoud@tanseeq.com", "password": "mahmoud123", "role": "admin", "name": "Mahmoud (Admin)"},
     {"email": "jihad@tanseeq.com", "password": "jihad123", "role": "user", "name": "Jihad (Regular User)"}
 ]
