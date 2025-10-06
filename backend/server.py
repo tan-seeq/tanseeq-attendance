@@ -3110,6 +3110,343 @@ async def recompute_attendance(
         raise HTTPException(status_code=500, detail=f"Error recomputing attendance: {str(e)}")
 
 # ================================
+# INTEGRATED PAYROLL ENDPOINTS
+# ================================
+
+@app.post("/api/payroll/cycles")
+async def create_payroll_cycle(
+    cycle_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """إنشاء دورة راتب جديدة (سوبر أدمن فقط)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        global payroll_engine
+        
+        month = cycle_data.get("month")
+        notes = cycle_data.get("notes")
+        
+        if not month:
+            raise HTTPException(status_code=400, detail="Month is required (YYYY-MM format)")
+        
+        cycle = await payroll_engine.create_payroll_cycle(
+            month=month,
+            created_by=current_user["id"],
+            created_by_name=current_user["name"],
+            notes=notes
+        )
+        
+        return {
+            "message": f"تم إنشاء دورة راتب {month} بنجاح",
+            "cycle_id": cycle.id,
+            "display_name": cycle.display_name
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating payroll cycle: {str(e)}")
+
+@app.get("/api/payroll/cycles")
+async def get_payroll_cycles(
+    status: Optional[str] = None,
+    year: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """جلب دورات الراتب مع التصفية"""
+    try:
+        filters = {}
+        
+        if status:
+            filters["status"] = status
+        if year:
+            filters["year"] = year
+        
+        cycles = await db.payroll_cycles.find(filters).sort([("year", -1), ("month", -1)]).to_list(100)
+        
+        # تنسيق البيانات
+        for cycle in cycles:
+            cycle["_id"] = str(cycle["_id"])
+            if "created_at" in cycle:
+                cycle["created_at"] = cycle["created_at"]
+            if "locked_at" in cycle:
+                cycle["locked_at"] = cycle["locked_at"]
+        
+        return cycles
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching payroll cycles: {str(e)}")
+
+@app.post("/api/payroll/cycles/{cycle_id}/lock")
+async def lock_payroll_cycle(
+    cycle_id: str,
+    lock_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """قفل دورة راتب (سوبر أدمن فقط)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        global payroll_engine
+        
+        lock_reason = lock_data.get("lock_reason", "قفل دورة الراتب")
+        
+        success = await payroll_engine.lock_payroll_cycle(
+            cycle_id=cycle_id,
+            locked_by=current_user["id"],
+            locked_by_name=current_user["name"],
+            lock_reason=lock_reason
+        )
+        
+        if success:
+            return {"message": "تم قفل دورة الراتب بنجاح"}
+        else:
+            raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة أو مقفولة بالفعل")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error locking payroll cycle: {str(e)}")
+
+@app.post("/api/payroll/cycles/{cycle_id}/unlock")
+async def unlock_payroll_cycle(
+    cycle_id: str,
+    unlock_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """فتح دورة راتب مقفولة (سوبر أدمن فقط)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        global payroll_engine
+        
+        unlock_reason = unlock_data.get("reason")
+        if not unlock_reason:
+            raise HTTPException(status_code=400, detail="Unlock reason is required")
+        
+        success = await payroll_engine.unlock_payroll_cycle(
+            cycle_id=cycle_id,
+            unlocked_by=current_user["id"],
+            unlock_reason=unlock_reason
+        )
+        
+        if success:
+            return {"message": "تم فتح دورة الراتب بنجاح"}
+        else:
+            raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error unlocking payroll cycle: {str(e)}")
+
+@app.post("/api/advances/{advance_id}/installments")
+async def create_installment_schedule(
+    advance_id: str,
+    schedule_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """إنشاء جدولة أقساط للسلفة (سوبر أدمن فقط)"""
+    if current_user.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        global payroll_engine
+        
+        # جلب معلومات السلفة
+        advance = await db.advance_transactions.find_one({"id": advance_id})
+        if not advance:
+            raise HTTPException(status_code=404, detail="السلفة غير موجودة")
+        
+        # التحقق من المعاملات المطلوبة
+        installment_amount = schedule_data.get("installment_amount")
+        number_of_installments = schedule_data.get("number_of_installments")
+        start_date_str = schedule_data.get("start_date")
+        
+        if not all([installment_amount, number_of_installments, start_date_str]):
+            raise HTTPException(status_code=400, detail="جميع الحقول مطلوبة")
+        
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        
+        # تحويل البيانات لنموذج السلفة
+        from .advances_model import AdvancesDB
+        advance_obj = AdvancesDB.dict_to_transaction(advance)
+        
+        # إنشاء الجدولة
+        schedule = await payroll_engine.create_installment_schedule(
+            advance=advance_obj,
+            installment_amount=float(installment_amount),
+            number_of_installments=int(number_of_installments),
+            start_date=start_date,
+            created_by=current_user["id"],
+            created_by_name=current_user["name"],
+            respect_ceiling=schedule_data.get("respect_ceiling", True)
+        )
+        
+        return {
+            "message": "تم إنشاء جدولة الأقساط بنجاح",
+            "schedule_id": schedule.id,
+            "total_amount": schedule.total_amount,
+            "installment_amount": schedule.installment_amount,
+            "number_of_installments": schedule.number_of_installments
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating installment schedule: {str(e)}")
+
+@app.get("/api/advances/{advance_id}/installments")
+async def get_installment_schedule(
+    advance_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """جلب جدولة أقساط السلفة"""
+    try:
+        # البحث عن الجدولة
+        schedule = await db.installment_schedules.find_one({
+            "advance_transaction_id": advance_id,
+            "is_active": True
+        })
+        
+        if not schedule:
+            raise HTTPException(status_code=404, detail="لا توجد جدولة أقساط لهذه السلفة")
+        
+        # جلب الأقساط الفردية
+        installments = await db.individual_installments.find({
+            "schedule_id": schedule["id"]
+        }).sort([("installment_number", 1)]).to_list(100)
+        
+        # تنسيق البيانات
+        schedule["_id"] = str(schedule["_id"])
+        for installment in installments:
+            installment["_id"] = str(installment["_id"])
+        
+        return {
+            "schedule": schedule,
+            "installments": installments
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching installment schedule: {str(e)}")
+
+@app.get("/api/payroll/cycles/{cycle_id}/calculate")
+async def calculate_payroll_cycle(
+    cycle_id: str,
+    employee_ids: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """حساب رواتب دورة معينة"""
+    if current_user.get("role") not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        global payroll_engine
+        
+        # تحويل employee_ids من string إلى list
+        employee_list = None
+        if employee_ids:
+            employee_list = employee_ids.split(",")
+        
+        # جلب جميع الموظفين إذا لم يحدد موظفين معينين
+        if not employee_list:
+            employees = await db.users.find({
+                "role": "user",
+                "is_active": True
+            }).to_list(1000)
+            employee_list = [emp["id"] for emp in employees]
+        
+        # حساب رواتب الموظفين
+        results = []
+        for employee_id in employee_list:
+            try:
+                summary = await payroll_engine.calculate_employee_payroll(
+                    employee_id=employee_id,
+                    payroll_cycle_id=cycle_id
+                )
+                results.append({
+                    "employee_id": employee_id,
+                    "employee_name": summary.employee_name,
+                    "gross_salary": summary.gross_salary,
+                    "total_deductions": summary.total_deductions,
+                    "net_salary": summary.net_salary,
+                    "status": "calculated"
+                })
+            except Exception as emp_error:
+                results.append({
+                    "employee_id": employee_id,
+                    "status": "error",
+                    "error": str(emp_error)
+                })
+        
+        # تحديث إجماليات الدورة
+        await payroll_engine.update_payroll_cycle_totals(cycle_id)
+        
+        return {
+            "message": f"تم حساب رواتب {len(results)} موظف",
+            "results": results
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating payroll: {str(e)}")
+
+@app.get("/api/payroll/cycles/{cycle_id}/summary")
+async def get_payroll_cycle_summary(
+    cycle_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """جلب ملخص دورة الراتب"""
+    try:
+        # جلب دورة الراتب
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
+        
+        # جلب ملخصات الموظفين
+        summaries = await db.employee_payroll_summaries.find({
+            "payroll_cycle_id": cycle_id
+        }).to_list(1000)
+        
+        # تنسيق البيانات
+        cycle["_id"] = str(cycle["_id"])
+        for summary in summaries:
+            summary["_id"] = str(summary["_id"])
+        
+        return {
+            "cycle": cycle,
+            "employee_summaries": summaries,
+            "total_employees": len(summaries)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
+
+@app.get("/api/payroll/employee/{employee_id}")
+async def get_employee_payroll_history(
+    employee_id: str,
+    limit: int = 12,
+    current_user: dict = Depends(get_current_user)
+):
+    """جلب تاريخ رواتب الموظف"""
+    try:
+        # التحقق من الصلاحيات - الموظف يمكنه رؤية راتبه فقط
+        if current_user.get("role") == "user" and employee_id != current_user["id"]:
+            raise HTTPException(status_code=403, detail="يمكنك رؤية راتبك فقط")
+        
+        summaries = await db.employee_payroll_summaries.find({
+            "employee_id": employee_id
+        }).sort([("payroll_cycle_id", -1)]).limit(limit).to_list(limit)
+        
+        # تنسيق البيانات
+        for summary in summaries:
+            summary["_id"] = str(summary["_id"])
+        
+        return summaries
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching employee payroll history: {str(e)}")
+
+# ================================
 # NOTIFICATION SYSTEM ENDPOINTS
 # ================================
 
