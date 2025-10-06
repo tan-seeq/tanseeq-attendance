@@ -12,7 +12,7 @@ from datetime import datetime
 # MongoDB connection
 MONGO_URL = os.environ.get("MONGO_URL")
 client = AsyncIOMotorClient(MONGO_URL)
-db = client[os.environ.get('DB_NAME', 'tanseeq_hr')]
+db = client[os.environ.get('DB_NAME')]
 
 async def add_flexible_schedule_to_all_employees():
     """Add flexible schedule to all existing employees"""
