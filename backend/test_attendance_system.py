@@ -114,6 +114,7 @@ async def test_attendance_system():
     print("   • الاستثناءات: حاتم (بدون خصومات)، طارق (نهاية مرنة)")
     
     # تنظيف البيانات التجريبية
+    await db.users.delete_many({"id": test_employee_id})
     await db.attendance_policies.delete_many({"employee_id": test_employee_id})
     await db.payroll_deductions.delete_many({"employee_id": test_employee_id})
     await db.monthly_lateness_counters.delete_many({"employee_id": test_employee_id})
