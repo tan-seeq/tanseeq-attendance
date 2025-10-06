@@ -53,11 +53,8 @@ const MyAttendanceDeductions = ({ currentUser }) => {
 
   const fetchMyNotifications = async () => {
     try {
-      const response = await fetch(`/api/notifications?category=deduction&limit=10`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setNotifications(data.notifications || []);
+      const response = await axios.get(`${API}/notifications?category=deduction&limit=10`);
+      setNotifications(response.data || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
