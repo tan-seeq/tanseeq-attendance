@@ -50,11 +50,8 @@ const AttendanceDeductionsAdmin = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch('/api/users', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setEmployees(data.users || []);
+      const response = await axios.get(`${API}/users`);
+      setEmployees(response.data.filter(emp => emp.role !== 'super_admin'));
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
