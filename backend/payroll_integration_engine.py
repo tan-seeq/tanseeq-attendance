@@ -658,3 +658,45 @@ class PayrollIntegrationEngine:
         
         # إنشاء عناصر الراتب الأساسية للموظفين
         await self.generate_base_salary_items(cycle.id)
+    
+    async def generate_base_salary_items(self, cycle_id: str):
+        """إنشاء عناصر الراتب الأساسية للموظفين"""
+        
+        # جلب جميع الموظفين النشطين
+        employees = await self.db.users.find({
+            "role": "user",
+            "is_active": True
+        }).to_list(1000)
+        
+        for employee in employees:
+            # التحقق من عدم وجود راتب أساسي مسبقاً
+            existing = await self.db.payroll_line_items.find_one({
+                "payroll_cycle_id": cycle_id,
+                "employee_id": employee["id"],
+                "item_type": PayrollItemType.BASE_SALARY.value
+            })
+            
+            if existing:
+                continue
+            
+            # إنشاء عنصر الراتب الأساسي
+            base_salary_item = PayrollLineItem(
+                payroll_cycle_id=cycle_id,
+                employee_id=employee["id"],
+                employee_name=employee.get("name", ""),
+                item_type=PayrollItemType.BASE_SALARY,
+                source_type="employee_contract",
+                source_id=employee["id"],
+                description="الراتب الأساسي",
+                description_ar="الراتب الأساسي",
+                amount=employee.get("monthly_salary", 0),
+                is_recurring=True,
+                is_system_generated=True,
+                is_editable=False,
+                created_by="system",
+                created_by_name="النظام"
+            )
+            
+            # حفظ العنصر
+            item_data = PayrollDB.prepare_for_mongo(base_salary_item.dict())
+            await self.db.payroll_line_items.insert_one(item_data)
