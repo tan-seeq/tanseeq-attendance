@@ -3282,9 +3282,15 @@ const AppWithNotifications = () => {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
-      </LanguageProvider>
-    </AuthProvider>
-  );
+        
+        {/* Notification Modal */}
+        <NotificationModal 
+          isOpen={showNotificationModal}
+          onClose={() => setShowNotificationModal(false)}
+        />
+      </>
+    );
+  };
 }
 
 // Payroll Management Component
