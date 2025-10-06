@@ -23,6 +23,7 @@ import shutil
 from pathlib import Path
 import requests
 import openpyxl
+import calendar
 from io import BytesIO
 
 # Import Work Reports Database Module - MongoDB version
