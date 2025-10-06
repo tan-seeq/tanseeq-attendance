@@ -193,7 +193,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
                   <div className="flex items-center">
                     <ClockIcon className="h-4 w-4 ml-1" />
                     <span>
-                      {new Date(currentNotification.created_at).toLocaleString('ar-SA', {
+                      {new Date(currentNotification.sent_at || currentNotification.created_at).toLocaleString('ar-SA', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
