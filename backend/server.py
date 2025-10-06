@@ -3365,7 +3365,7 @@ async def calculate_payroll_cycle(
     current_user: dict = Depends(get_current_user)
 ):
     """حساب رواتب دورة معينة"""
-    if current_user.get("role") not in ["admin", "super_admin"]:
+    if current_user.role not in ["admin", "super_admin"]:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     try:
