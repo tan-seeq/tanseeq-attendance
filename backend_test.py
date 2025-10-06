@@ -294,7 +294,7 @@ class AdvancesSystemTester:
 
         # Test attendance endpoint
         try:
-            response = self.session.get(f"{BACKEND_URL}/attendance", timeout=30)
+            response = self.session.get(f"{backend_url}/attendance", timeout=30)
             if response.status_code == 200:
                 attendance_data = response.json()
                 self.log_test(
