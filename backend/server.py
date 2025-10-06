@@ -1900,7 +1900,15 @@ attendance_engine = AttendanceEngine(db)
 @app.on_event("startup")
 async def initialize_attendance_engine():
     """Initialize attendance engine on startup"""
+    global attendance_engine, payroll_engine
+    from .attendance_engine import AttendanceEngine
+    from .payroll_integration_engine import PayrollIntegrationEngine
+    
+    attendance_engine = AttendanceEngine(db)
     await attendance_engine.initialize()
+    
+    payroll_engine = PayrollIntegrationEngine(db)
+    print("✅ Payroll integration engine initialized successfully")
 
 @api_router.get("/attendance/policies/{employee_id}")
 async def get_employee_attendance_policy(
