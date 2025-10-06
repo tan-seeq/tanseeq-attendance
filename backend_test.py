@@ -225,7 +225,7 @@ class AdvancesSystemTester:
             # Test advance creation (the critical endpoint from review)
             try:
                 # Get a valid employee ID first
-                users_response = self.session.get(f"{BACKEND_URL}/users", timeout=30)
+                users_response = self.session.get(f"{backend_url}/users", timeout=30)
                 if users_response.status_code == 200:
                     users_data = users_response.json()
                     if users_data and len(users_data) > 0:
