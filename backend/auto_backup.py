@@ -40,7 +40,7 @@ class AutoBackupService:
             Path(backup_folder).mkdir(exist_ok=True)
             
             # Get database name from URL
-            db_name = MONGO_URL.split('/')[-1] if '/' in MONGO_URL else 'tanseeq_hr'
+            db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
             
             # Use mongodump to create backup
             dump_command = [
