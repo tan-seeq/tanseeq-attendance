@@ -67,10 +67,7 @@ const MyAttendanceDeductions = () => {
 
   const acknowledgeNotification = async (notificationId) => {
     try {
-      await fetch(`/api/notifications/${notificationId}/acknowledge`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
+      await axios.patch(`${API}/notifications/read/${notificationId}`);
       fetchMyNotifications();
     } catch (error) {
       console.error('Error acknowledging notification:', error);
