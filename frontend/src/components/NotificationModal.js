@@ -110,7 +110,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
       // تأكيد جميع الإشعارات
       await Promise.all(
         notifications.map(notification => 
-          axios.post(`${API}/notifications/${notification.id}/acknowledge`)
+          axios.patch(`${API}/notifications/read/${notification.id}`)
         )
       );
       
