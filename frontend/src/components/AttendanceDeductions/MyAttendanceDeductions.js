@@ -28,10 +28,12 @@ const MyAttendanceDeductions = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    fetchMyDeductions();
-    fetchMyAttendanceStats();
-    fetchMyNotifications();
-  }, [selectedMonth]);
+    if (currentUser) {
+      fetchMyDeductions();
+      fetchMyAttendanceStats();
+      fetchMyNotifications();
+    }
+  }, [selectedMonth, currentUser]);
 
   const fetchMyDeductions = async () => {
     setLoading(true);
