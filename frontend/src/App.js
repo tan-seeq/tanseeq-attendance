@@ -3819,11 +3819,11 @@ const AttendanceManagement = () => {
                           >
                             <PencilIcon className="h-4 w-4" />
                           </button>
-                          {record.is_manual_entry && user?.role === 'super_admin' && (
+                          {user?.role === 'super_admin' && (
                             <button
-                              onClick={() => handleDeleteAbsence(record.id)}
+                              onClick={() => handleDeleteAttendance(record.id, record)}
                               className="text-red-600 hover:text-red-900"
-                              title="حذف سجل الغياب"
+                              title="حذف سجل الحضور"
                             >
                               <TrashIcon className="h-4 w-4" />
                             </button>
