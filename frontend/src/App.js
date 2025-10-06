@@ -503,7 +503,7 @@ const Layout = ({ children }) => {
           </button>
         </div>
         
-        <nav className="mt-8">
+        <nav className="mt-8 h-full overflow-y-auto pb-8">
           <div className="px-4 space-y-2">
             {navigation.map((item) => (
               <button
