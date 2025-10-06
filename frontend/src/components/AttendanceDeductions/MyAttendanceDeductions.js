@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, Clock, AlertTriangle, DollarSign, 
-  Eye, Download, Info, CheckCircle, XCircle,
-  TrendingUp, TrendingDown, Minus
-} from 'lucide-react';
+import {
+  CalendarIcon as Calendar,
+  ClockIcon as Clock,
+  ExclamationTriangleIcon as AlertTriangle,
+  CurrencyDollarIcon as DollarSign,
+  EyeIcon as Eye,
+  ArrowDownTrayIcon as Download,
+  InformationCircleIcon as Info,
+  CheckCircleIcon as CheckCircle,
+  XCircleIcon as XCircle,
+  ArrowTrendingUpIcon as TrendingUp,
+  ArrowTrendingDownIcon as TrendingDown,
+  MinusIcon as Minus
+} from '@heroicons/react/24/outline';
 
 const MyAttendanceDeductions = ({ currentUser }) => {
   const [deductions, setDeductions] = useState([]);
