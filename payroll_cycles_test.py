@@ -324,7 +324,9 @@ class PayrollSystemTester:
             "GET", "/api/users", self.super_admin_token
         )
         
-        if status == 200 and users_response.get("users"):
+        if status == 200 and isinstance(users_response, list) and len(users_response) > 0:
+            test_employee = users_response[0]
+        elif status == 200 and isinstance(users_response, dict) and users_response.get("users"):
             test_employee = users_response["users"][0]
             employee_id = test_employee["id"]
             
