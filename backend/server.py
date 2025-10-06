@@ -2924,12 +2924,15 @@ async def void_deduction(
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Deduction not found")
         
-        # Log activity
-        await log_activity(
-            user_id=current_user.id,
-            action=f"Voided deduction {deduction_id}",
-            details=f"Reason: {void_reason}"
-        )
+        # Log activity (simplified for now)
+        await db.activity_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": current_user.id if hasattr(current_user, 'id') else current_user["id"],
+            "user_name": current_user.name if hasattr(current_user, 'name') else current_user["name"],
+            "action": f"Voided deduction {deduction_id}",
+            "details": f"Reason: {void_reason}",
+            "timestamp": datetime.now().isoformat()
+        })
         
         # Send notification
         notification = {
