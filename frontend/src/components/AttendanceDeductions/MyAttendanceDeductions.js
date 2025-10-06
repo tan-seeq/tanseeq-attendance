@@ -16,7 +16,8 @@ import {
   MinusIcon as Minus
 } from '@heroicons/react/24/outline';
 
-const MyAttendanceDeductions = ({ currentUser }) => {
+const MyAttendanceDeductions = () => {
+  const { user: currentUser } = useContext(AuthContext);
   const [deductions, setDeductions] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
