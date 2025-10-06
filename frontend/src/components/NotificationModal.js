@@ -83,7 +83,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
   const acknowledgeNotification = async (notificationId) => {
     try {
       setAcknowledging(true);
-      await axios.post(`${API}/notifications/${notificationId}/acknowledge`);
+      await axios.patch(`${API}/notifications/read/${notificationId}`);
       
       // إزالة الإشعار من القائمة
       const updatedNotifications = notifications.filter(n => n.id !== notificationId);
