@@ -3661,6 +3661,26 @@ const AttendanceManagement = () => {
     }
   };
 
+  const handleDeleteAttendance = async (id, record) => {
+    const employeeName = record.user_name || 'غير محدد';
+    const date = record.date || 'غير محدد';
+    const status = record.status || 'غير محدد';
+    
+    const confirmMessage = `هل أنت متأكد من حذف سجل الحضور؟\n\nالموظف: ${employeeName}\nالتاريخ: ${date}\nالحالة: ${status}`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        await axios.delete(`${API}/attendance/${id}`);
+        fetchAllAttendance();
+        alert('تم حذف سجل الحضور بنجاح');
+      } catch (error) {
+        console.error('Error deleting attendance:', error);
+        const errorMessage = error.response?.data?.detail || 'حدث خطأ في حذف سجل الحضور';
+        alert(errorMessage);
+      }
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
   }
