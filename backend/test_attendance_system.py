@@ -25,8 +25,19 @@ async def test_attendance_system():
     
     print("✅ تم تهيئة محرك الحضور بنجاح")
     
-    # اختبار إنشاء سياسة حضور
+    # إنشاء موظف تجريبي
     test_employee_id = "test_employee_001"
+    test_employee = {
+        "id": test_employee_id,
+        "name": "موظف تجريبي",
+        "email": "test@example.com",
+        "monthly_salary": 3000
+    }
+    
+    # إدراج الموظف التجريبي
+    await db.users.insert_one(test_employee)
+    
+    # اختبار إنشاء سياسة حضور
     policy = await engine.get_employee_policy(test_employee_id)
     print(f"✅ تم إنشاء سياسة الحضور للموظف: {test_employee_id}")
     
