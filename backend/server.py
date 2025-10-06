@@ -1249,12 +1249,32 @@ async def view_attachment(
 ):
     """عرض مرفق (فاتورة)"""
     
+    # Authentication check - support both header and query token
+    authenticated_user = None
+    
+    if current_user:
+        authenticated_user = current_user
+    elif token:
+        try:
+            from jose import jwt
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = payload.get("sub")
+            if user_id:
+                user_doc = await db.users.find_one({"id": user_id})
+                if user_doc:
+                    authenticated_user = User(**user_doc)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    
+    if not authenticated_user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     transaction = await db.advance_transactions.find_one({"id": transaction_id})
     if not transaction:
         raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
     
     # التحقق من الصلاحية
-    if current_user.role != "super_admin" and transaction["employee_id"] != current_user.id:
+    if authenticated_user.role != "super_admin" and transaction["employee_id"] != authenticated_user.id:
         raise HTTPException(status_code=403, detail="غير مسموح")
     
     # البحث عن المرفق
