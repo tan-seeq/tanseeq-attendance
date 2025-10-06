@@ -280,6 +280,9 @@ class NotificationSystemTester:
                 for notif in notifications:
                     if isinstance(notif, dict) and notif.get('id'):
                         self.notification_ids.append(notif['id'])
+                    elif isinstance(notif, dict) and notif.get('_id'):
+                        # Handle MongoDB ObjectId format
+                        self.notification_ids.append(str(notif['_id']))
                         
             else:
                 self.log_test(
