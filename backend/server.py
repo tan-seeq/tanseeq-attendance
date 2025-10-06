@@ -2924,7 +2924,6 @@ async def void_deduction(
         # Log activity
         await log_activity(
             user_id=current_user.id,
-            user_name=current_user.name,
             action=f"Voided deduction {deduction_id}",
             details=f"Reason: {void_reason}"
         )
