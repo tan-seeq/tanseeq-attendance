@@ -1244,7 +1244,8 @@ async def approve_transaction(
 async def view_attachment(
     transaction_id: str,
     attachment_id: str,
-    current_user: User = Depends(get_current_user)
+    token: Optional[str] = Query(None),
+    current_user: Optional[User] = Depends(lambda: None)
 ):
     """عرض مرفق (فاتورة)"""
     
