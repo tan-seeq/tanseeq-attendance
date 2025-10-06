@@ -57,9 +57,9 @@ class AdvancesSystemTester:
             print(f"   ⚠️  {error}")
         print()
 
-    def test_authentication(self):
+    def test_authentication(self, backend_url):
         """Test authentication with all available credentials"""
-        print("🔐 TESTING AUTHENTICATION WITH PRODUCTION URL")
+        print(f"🔐 TESTING AUTHENTICATION WITH {backend_url}")
         print("=" * 60)
         
         auth_success = False
