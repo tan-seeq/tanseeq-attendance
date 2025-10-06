@@ -2908,7 +2908,7 @@ async def void_deduction(
         # Mark as voided
         void_fields = {
             "is_voided": True,
-            "voided_by": current_user["id"],
+            "voided_by": current_user.id,
             "voided_at": datetime.now().isoformat(),
             "void_reason": void_reason
         }
