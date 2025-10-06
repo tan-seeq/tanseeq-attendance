@@ -3285,6 +3285,15 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
+            
+            {/* Integrated Payroll System */}
+            <Route path="/payroll-cycles" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <PayrollCycleManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
             {/* Advances & Loans Routes */}
             <Route path="/advances" element={
               <ProtectedRoute>
