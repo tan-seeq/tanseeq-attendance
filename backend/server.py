@@ -2888,10 +2888,10 @@ async def update_deduction(
 async def void_deduction(
     deduction_id: str,
     void_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Void/cancel a deduction (Super Admin only)"""
-    if current_user.get("role") != "super_admin":
+    if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
