@@ -33,11 +33,8 @@ const MyAttendanceDeductions = () => {
   const fetchMyDeductions = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/deductions?employee_id=${currentUser.id}&month=${selectedMonth}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const data = await response.json();
-      setDeductions(data.deductions || []);
+      const response = await axios.get(`${API}/deductions?employee_id=${currentUser.id}&month=${selectedMonth}`);
+      setDeductions(response.data || []);
     } catch (error) {
       console.error('Error fetching my deductions:', error);
     } finally {
