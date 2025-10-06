@@ -2736,16 +2736,7 @@ async def send_visit_completion_notification(visit_data, report, employee, durat
 # ATTENDANCE DEDUCTIONS SYSTEM
 # ================================
 
-# Initialize attendance engine
-attendance_engine = None
-
-@app.on_event("startup")
-async def initialize_attendance_engine():
-    """Initialize attendance engine on startup"""
-    global attendance_engine
-    from .attendance_engine import AttendanceEngine
-    attendance_engine = AttendanceEngine(db)
-    await attendance_engine.initialize()
+# Attendance engine is already initialized above
 
 @app.get("/api/deductions")
 async def get_deductions(
