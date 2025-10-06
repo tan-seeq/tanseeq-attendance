@@ -307,7 +307,7 @@ class AdvancesSystemTester:
         except Exception as e:
             self.log_test("GET /attendance", False, error=str(e))
 
-    def test_database_connectivity(self):
+    def test_database_connectivity(self, backend_url):
         """Test database connectivity through API calls"""
         print("🗄️  TESTING DATABASE CONNECTIVITY")
         print("=" * 60)
@@ -318,7 +318,7 @@ class AdvancesSystemTester:
         
         # Test that we can retrieve data (indicates DB connection works)
         try:
-            response = self.session.get(f"{BACKEND_URL}/advances/my-balance", timeout=30)
+            response = self.session.get(f"{backend_url}/advances/my-balance", timeout=30)
             if response.status_code == 200:
                 self.log_test(
                     "Database Connection via Advances",
