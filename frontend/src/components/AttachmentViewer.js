@@ -223,15 +223,32 @@ const AttachmentPreview = ({ attachment, onError, onLoad }) => {
       </div>
     );
   } else if (fileType.includes('pdf')) {
+    // For PDFs, we need to handle authentication properly
+    // Since iframe can't pass custom headers, we'll show download option instead
     return (
-      <div className="w-full h-80">
-        <iframe
-          src={fileUrl}
-          className="w-full h-full border rounded"
-          title={attachment.original_filename || attachment.filename}
-          onLoad={onLoad}
-          onError={() => onError('لا يمكن عرض ملف PDF. يرجى تحميل الملف لعرضه.')}
-        />
+      <div className="flex flex-col items-center justify-center h-64 text-center">
+        <DocumentTextIcon className="h-16 w-16 text-red-600 mb-4" />
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          {attachment.original_filename || attachment.filename}
+        </h3>
+        <p className="text-gray-500 mb-4">
+          ملف PDF - يرجى تحميل الملف لعرضه
+        </p>
+        <button
+          onClick={() => {
+            // Create authenticated download
+            const token = localStorage.getItem('token');
+            const link = document.createElement('a');
+            link.href = `${fileUrl}?token=${token}`;
+            link.download = attachment.original_filename || attachment.filename;
+            link.target = '_blank';
+            link.click();
+          }}
+          className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 flex items-center"
+        >
+          <ArrowDownTrayIcon className="h-4 w-4 ml-2" />
+          تحميل ملف PDF
+        </button>
       </div>
     );
   } else {
