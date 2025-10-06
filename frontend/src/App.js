@@ -123,6 +123,17 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const checkMandatoryNotifications = async () => {
+    try {
+      const response = await axios.get(`${API}/notifications/count`);
+      if (response.data.unread_count > 0) {
+        setShowNotificationModal(true);
+      }
+    } catch (error) {
+      console.error('Error checking notifications:', error);
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const response = await axios.post(`${API}/auth/login`, { email, password });
@@ -132,6 +143,11 @@ const AuthProvider = ({ children }) => {
       setUser(user);
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      
+      // Check for mandatory notifications after successful login
+      setTimeout(() => {
+        checkMandatoryNotifications();
+      }, 1000);
       
       return { success: true };
     } catch (error) {
