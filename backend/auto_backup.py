@@ -25,7 +25,7 @@ Path(BACKUP_DIR).mkdir(exist_ok=True)
 class AutoBackupService:
     def __init__(self):
         self.client = AsyncIOMotorClient(MONGO_URL)
-        self.db = self.client[os.environ.get('DB_NAME', 'tanseeq_hr')]
+        self.db = self.client[os.environ.get('DB_NAME')]
         
     async def create_backup(self):
         """Create daily backup of the database"""
