@@ -655,7 +655,7 @@ class AttendanceScheduler:
             missing_minutes = self.engine.calculate_early_leave_minutes(policy_end, policy)
             
             if missing_minutes > 0:
-                deduction = await self.engine.create_manual_deduction(
+                await self.engine.create_manual_deduction(
                     employee_id=employee_id,
                     deduction_type=DeductionType.MISSING_CHECKOUT,
                     category=DeductionCategory.MINUTES,
