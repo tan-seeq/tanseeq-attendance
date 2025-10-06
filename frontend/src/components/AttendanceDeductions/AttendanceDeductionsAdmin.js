@@ -11,6 +11,7 @@ import {
   CheckCircleIcon as CheckCircle,
   XCircleIcon as XCircle,
   InformationCircleIcon as Info,
+  InformationCircleIcon as AlertCircle,
   CalendarIcon as Calendar,
   ClockIcon as Clock,
   CurrencyDollarIcon as DollarSign,
