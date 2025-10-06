@@ -3257,10 +3257,28 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
+            {/* Marketing Visits */}
             <Route path="/marketing-visits" element={
               <ProtectedRoute>
                 <Layout>
                   <MarketingVisits />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* Attendance Deductions */}
+            <Route path="/attendance-deductions" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AttendanceDeductionsAdmin />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/my-deductions" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MyAttendanceDeductions />
                 </Layout>
               </ProtectedRoute>
             } />
