@@ -448,6 +448,9 @@ const Layout = ({ children }) => {
       { name: 'إدارة خصومات الحضور', href: '/attendance-deductions', icon: ExclamationTriangleIcon }
     ] : []),
     { name: 'خصوماتي', href: '/my-deductions', icon: ClockIcon },
+    ...(user?.role === 'super_admin' ? [
+      { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon }
+    ] : []),
     ...(user?.role === 'user' ? [
       { name: t('attendance'), href: '/attendance', icon: ClockIcon },
       { name: 'خصوماتي', href: '/my-deductions', icon: CalculatorIcon },
