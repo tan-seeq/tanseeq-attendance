@@ -608,7 +608,7 @@ class NotificationSystemTester:
             if response.status_code == 200:
                 notifications = response.json()
                 if notifications and len(notifications) > 0:
-                    notification = notifications[0]
+                    notification = notifications[0] if isinstance(notifications[0], dict) else {}
                     
                     # Expected fields from review request
                     expected_fields = ['id', 'title', 'message', 'severity', 'is_read', 'sent_at', 
