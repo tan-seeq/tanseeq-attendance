@@ -176,7 +176,7 @@ class AdvancesSystemTester:
         if self.current_user.get('role') == 'super_admin':
             # Test all balances
             try:
-                response = self.session.get(f"{BACKEND_URL}/advances/admin/all-balances", timeout=30)
+                response = self.session.get(f"{backend_url}/advances/admin/all-balances", timeout=30)
                 if response.status_code == 200:
                     balances_data = response.json()
                     employee_count = len(balances_data.get('employee_balances', []))
