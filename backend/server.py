@@ -3049,13 +3049,15 @@ async def recompute_attendance(
         else:
             raise HTTPException(status_code=400, detail="Either 'date' or 'month' is required")
         
-        # Log activity
-        await log_activity(
-            user_id=current_user["id"],
-            user_name=current_user["name"],
-            action="Recomputed attendance",
-            details=message
-        )
+        # Log activity (simplified for now)
+        await db.activity_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": current_user.id if hasattr(current_user, 'id') else current_user["id"],
+            "user_name": current_user.name if hasattr(current_user, 'name') else current_user["name"],
+            "action": "Recomputed attendance",
+            "details": message,
+            "timestamp": datetime.now().isoformat()
+        })
         
         return {"message": message}
         
