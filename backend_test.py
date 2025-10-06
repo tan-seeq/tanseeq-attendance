@@ -10,9 +10,12 @@ import os
 from datetime import datetime, timedelta
 import uuid
 
-# Configuration
-BACKEND_URL = "https://hrapp-tanseeq.emergent.host/api"
-print(f"🔗 Testing Backend URL: {BACKEND_URL}")
+# Configuration - Test both local and production
+LOCAL_BACKEND_URL = "http://localhost:8001/api"
+PRODUCTION_BACKEND_URL = "https://hrapp-tanseeq.emergent.host/api"
+
+print(f"🔗 Testing Local Backend URL: {LOCAL_BACKEND_URL}")
+print(f"🔗 Testing Production Backend URL: {PRODUCTION_BACKEND_URL}")
 
 # Test credentials from previous testing history
 TEST_CREDENTIALS = [
