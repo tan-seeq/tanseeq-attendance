@@ -2433,6 +2433,35 @@ async def get_unread_notifications(
     
     return {"notifications": notifications}
 
+@api_router.post("/notifications/{notification_id}/acknowledge")
+async def acknowledge_notification(
+    notification_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """إقرار إشعار"""
+    
+    notification = await db.system_notifications.find_one({
+        "id": notification_id,
+        "employee_id": current_user.id
+    })
+    
+    if not notification:
+        raise HTTPException(status_code=404, detail="الإشعار غير موجود")
+    
+    # تحديث الإشعار
+    await db.system_notifications.update_one(
+        {"id": notification_id},
+        {"$set": {
+            "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+            "read_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إقرار الإشعار بنجاح"
+    }
+
 @api_router.post("/notifications/system")
 async def create_system_notification(
     notification_data: dict,
