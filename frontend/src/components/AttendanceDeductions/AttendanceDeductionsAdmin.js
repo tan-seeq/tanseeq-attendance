@@ -102,6 +102,31 @@ const AttendanceDeductionsAdmin = () => {
     setLoading(true);
 
     try {
+      const response = await axios.post(`${API}/deductions/manual`, {
+        employee_id: formData.employee_id,
+        amount: parseFloat(formData.amount),
+        reason: formData.reason,
+        date: formData.date
+      });
+      
+      alert('تم إنشاء الخصم اليدوي بنجاح');
+      setShowModal(false);
+      setFormData({ employee_id: '', amount: '', reason: '', date: new Date().toISOString().split('T')[0] });
+      fetchDeductions();
+    } catch (error) {
+      console.error('Error creating deduction:', error);
+      alert(error.response?.data?.detail || 'خطأ في إنشاء الخصم اليدوي');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // إزالة الكود القديم
+  const oldHandleCreateDeduction = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
       const response = await fetch('/api/deductions/manual', {
         method: 'POST',
         headers: {
