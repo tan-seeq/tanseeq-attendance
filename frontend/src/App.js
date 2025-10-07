@@ -502,8 +502,8 @@ const Layout = ({ children }) => {
           </button>
         </div>
         
-        <nav className="mt-8 flex-1 overflow-y-auto">
-          <div className="px-4 space-y-2">
+        <nav className="mt-8 flex-1 overflow-y-auto overflow-x-hidden" style={{scrollbarWidth: 'thin'}}>
+          <div className="px-4 space-y-2 pb-8">
             {navigation.map((item) => (
               <button
                 key={item.name}
@@ -514,8 +514,8 @@ const Layout = ({ children }) => {
                 {item.name}
               </button>
             ))}
-            {/* مساحة فارغة 3 سم في الأسفل */}
-            <div className="h-24"></div>
+            {/* مساحة فارغة إضافية 3 سم في الأسفل لضمان ظهور جميع القوائم */}
+            <div className="h-32"></div>
           </div>
         </nav>
       </div>
