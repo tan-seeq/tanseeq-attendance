@@ -45,6 +45,7 @@ class WorkReportsLogsTester:
         self.created_clients = []
         self.created_activities = []
         self.created_logs = []
+        self.activity_rate = 150.0  # Default rate
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
