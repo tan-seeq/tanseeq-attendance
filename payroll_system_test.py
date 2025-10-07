@@ -247,7 +247,7 @@ class PayrollSystemTestSuite:
             
             if response.status_code in [200, 201]:
                 result = response.json()
-                self.created_deduction_id = result.get("deduction_id")
+                self.created_deduction_id = result.get("deduction_id") or result.get("id")
                 
                 self.log_test(
                     "إنشاء خصم يدوي جديد",
