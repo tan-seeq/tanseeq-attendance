@@ -3338,6 +3338,11 @@ async def get_installment_schedule(
 ):
     """جلب جدولة أقساط السلفة"""
     try:
+        # التحقق من وجود السلفة أولاً
+        advance = await db.advance_transactions.find_one({"id": advance_id})
+        if not advance:
+            raise HTTPException(status_code=404, detail="السلفة غير موجودة")
+        
         # البحث عن الجدولة
         schedule = await db.installment_schedules.find_one({
             "advance_transaction_id": advance_id,
