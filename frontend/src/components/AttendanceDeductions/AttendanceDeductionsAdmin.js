@@ -580,9 +580,6 @@ const AttendanceDeductionsAdmin = () => {
             </div>
           </div>
         </>
-
-          </div>
-        </div>
       )}
 
       {/* Edit Deduction Modal */}
