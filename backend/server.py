@@ -3556,6 +3556,22 @@ async def get_payroll_cycle_summary(
             "cycle": cycle,
             "employee_summaries": summaries,
             "total_employees": len(summaries)
+
+@api_router.get("/payroll/cycles/{cycle_id}")
+async def get_payroll_cycle_detail(cycle_id: str, current_user: dict = Depends(get_current_user)):
+    """Fetch a single payroll cycle by id with basic aggregate fields if present."""
+    try:
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        # Normalize Mongo _id
+        cycle.pop("_id", None)
+        return cycle
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching payroll cycle: {str(e)}")
+
         }
         
     except Exception as e:
