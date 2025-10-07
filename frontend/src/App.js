@@ -3318,6 +3318,14 @@ const AppWithNotifications = () => {
                 <Layout>
                   <SubmitExpense />
                 </Layout>
+            } />
+            <Route path="/payroll-summary/:id" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <PayrollSummary />
+                </Layout>
+              </ProtectedRoute>
+            } />
               </ProtectedRoute>
             } />
             <Route path="/advances/my-transactions" element={
