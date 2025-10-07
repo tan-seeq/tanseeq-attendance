@@ -1,53 +1,78 @@
 #!/usr/bin/env python3
 """
-Advanced Attendance Deductions System Testing
-اختبار نظام الخصومات المتقدم للحضور - أكتوبر 2025
+Comprehensive Backend Testing for Installment Scheduling System
+Testing the completed installment scheduling system for advances and loans within the integrated payroll system.
 
-Testing the new advanced attendance deductions system with:
-- GET /api/deductions - Get deductions with filters
-- POST /api/deductions/manual - Create manual deduction (Super Admin only)
-- PATCH /api/deductions/{id} - Update deduction (Super Admin only)
-- POST /api/deductions/{id}/void - Void/cancel deduction (Super Admin only)
-- GET /api/attendance/stats/{employee_id} - Get attendance statistics
-- POST /api/attendance/recompute - Recompute attendance (Super Admin only)
+Priority Testing Areas:
+1. Installment Scheduling Endpoints (NEW)
+2. Integration Testing
+3. Data Validation
+4. Error Handling
+5. Database Verification
 """
 
-import requests
+import asyncio
+import aiohttp
 import json
 import os
 from datetime import datetime, date, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, List, Any, Optional
+import uuid
 
 # Configuration
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hr-attendance-2.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-# Test credentials from review request
-SUPER_ADMIN_CREDENTIALS = {
-    "email": "hatem@tan-seeq.co",
-    "password": "hatem123"
+# Test credentials
+TEST_CREDENTIALS = {
+    'super_admin': {
+        'email': 'hatem@tan-seeq.co',
+        'password': 'hatem123'
+    },
+    'admin': {
+        'email': 'mahmoud@tanseeq.com', 
+        'password': 'mahmoud123'
+    },
+    'user': {
+        'email': 'jihad@tanseeq.com',
+        'password': 'jihad123'
+    }
 }
 
-REGULAR_USER_CREDENTIALS = {
-    "email": "jihad@tanseeq.com", 
-    "password": "jihad123"
-}
-
-class AttendanceDeductionsTestSuite:
-    """Test suite for Advanced Attendance Deductions System"""
-    
+class InstallmentSchedulingTester:
     def __init__(self):
-        self.super_admin_token = None
-        self.regular_user_token = None
-        self.super_admin_user = None
-        self.regular_user = None
+        self.session = None
+        self.tokens = {}
         self.test_results = []
-        self.created_deductions = []  # Track created deductions for cleanup
+        self.created_advances = []
+        self.created_schedules = []
         
-    def log_test(self, test_name: str, success: bool, details: str = "", response_data: Any = None):
-        """Log test result"""
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status} {test_name}")
+    async def __aenter__(self):
+        self.session = aiohttp.ClientSession()
+        return self
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.session:
+            await self.session.close()
+    
+    def log_test(self, test_name: str, status: str, details: str = "", response_data: Any = None):
+        """Log test results"""
+        result = {
+            'test': test_name,
+            'status': status,
+            'details': details,
+            'timestamp': datetime.now().isoformat(),
+            'response_data': response_data
+        }
+        self.test_results.append(result)
+        
+        status_emoji = "✅" if status == "PASS" else "❌" if status == "FAIL" else "⚠️"
+        print(f"{status_emoji} {test_name}: {status}")
+        if details:
+            print(f"   Details: {details}")
+        if response_data and status == "FAIL":
+            print(f"   Response: {response_data}")
+        print()
         if details:
             print(f"   Details: {details}")
         if response_data and not success:
