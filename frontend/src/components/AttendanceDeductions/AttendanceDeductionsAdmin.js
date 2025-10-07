@@ -121,46 +121,7 @@ const AttendanceDeductionsAdmin = () => {
     }
   };
 
-  // إزالة الكود القديم
-  const oldHandleCreateDeduction = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/deductions/manual', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(newDeduction)
-      });
-
-      if (response.ok) {
-        alert('تم إنشاء الخصم بنجاح');
-        setShowCreateModal(false);
-        setNewDeduction({
-          employee_id: '',
-          deduction_type: 'manual',
-          category: 'minutes',
-          date: new Date().toISOString().slice(0, 10),
-          minutes: '',
-          amount: '',
-          reason: '',
-          attachments: []
-        });
-        fetchDeductions();
-      } else {
-        const error = await response.json();
-        alert(`خطأ: ${error.detail}`);
-      }
-    } catch (error) {
-      console.error('Error creating deduction:', error);
-      alert('حدث خطأ في إنشاء الخصم');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // تم إزالة الكود القديم
 
   const handleEditDeduction = async (e) => {
     e.preventDefault();
