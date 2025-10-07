@@ -189,13 +189,22 @@ const PayrollCycleManagement = () => {
             </div>
           </div>
           
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <PlusIcon className="h-5 w-5 ml-2" />
-            إنشاء دورة جديدة
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => window.location.href = '/installment-schedules'}
+              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <CalendarIcon className="h-5 w-5 ml-2" />
+              إدارة الأقساط
+            </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <PlusIcon className="h-5 w-5 ml-2" />
+              إنشاء دورة جديدة
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
