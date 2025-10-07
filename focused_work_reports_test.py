@@ -112,8 +112,13 @@ class FocusedWorkReportsLogsTester:
             async with self.session.get(f"{API_BASE}/work-reports/clients", headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
-                    clients = data.get('items', [])
-                    if clients:
+                    # Handle both list and dict responses
+                    if isinstance(data, list):
+                        clients = data
+                    else:
+                        clients = data.get('items', data.get('clients', []))
+                    
+                    if clients and len(clients) > 0:
                         self.client_id = clients[0]['id']
                         self.log_result("Setup Test Client", True, f"Using existing client ID: {self.client_id}")
                     else:
@@ -131,8 +136,13 @@ class FocusedWorkReportsLogsTester:
             async with self.session.get(f"{API_BASE}/work-reports/activity-types", headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
-                    activities = data.get('items', [])
-                    if activities:
+                    # Handle both list and dict responses
+                    if isinstance(data, list):
+                        activities = data
+                    else:
+                        activities = data.get('items', data.get('activity_types', []))
+                    
+                    if activities and len(activities) > 0:
                         self.activity_id = activities[0]['id']
                         rate = activities[0].get('default_rate', 200.0)
                         self.log_result("Setup Test Activity", True, f"Using existing activity ID: {self.activity_id}, Rate: {rate}")
