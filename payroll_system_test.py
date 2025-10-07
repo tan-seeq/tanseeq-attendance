@@ -119,7 +119,8 @@ class PayrollSystemTestSuite:
             existing_response = self.session.get(f"{API_BASE}/payroll/cycles", timeout=30)
             if existing_response.status_code == 200:
                 cycles = existing_response.json()
-                for cycle in cycles.get("cycles", []):
+                # cycles is a list, not an object with "cycles" key
+                for cycle in cycles:
                     if cycle.get("month") == "2025-11":
                         self.created_cycle_id = cycle.get("id")
                         self.log_test(
