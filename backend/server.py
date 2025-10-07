@@ -9040,15 +9040,22 @@ async def update_client(
         {"id": client_id},
         {"$set": update_data}
     )
-    db.refresh(client)
     
-    log_work_reports_activity(
-        db, current_user.id, current_user.name, "update_client",
-        table_name="clients", record_id=str(client.id),
-        before_value=original_data, after_value=update_data
+    # Get updated client
+    updated_client = await work_reports_db.clients.find_one({"id": client_id})
+    
+    # Log activity
+    await log_work_reports_activity(
+        current_user.id, "update_client", 
+        f"Updated client {updated_client['company_name']}", 
+        target_id=client_id,
+        before_value=json.dumps(original_data),
+        after_value=json.dumps(update_data)
     )
     
-    return client
+    # Remove _id for response
+    updated_client.pop("_id", None)
+    return updated_client
 
 @api_router.delete("/work-reports/clients/{client_id}")
 async def delete_client(
