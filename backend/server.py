@@ -3556,6 +3556,7 @@ async def get_payroll_cycle_summary(
             "cycle": cycle,
             "employee_summaries": summaries,
             "total_employees": len(summaries)
+        }
 
 @api_router.get("/payroll/cycles/{cycle_id}")
 async def get_payroll_cycle_detail(cycle_id: str, current_user: dict = Depends(get_current_user)):
