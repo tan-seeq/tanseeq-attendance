@@ -76,8 +76,14 @@ class BackendTester:
             response = self.session.get(f"{BASE_URL}/payroll/cycles")
             if response.status_code == 200:
                 cycles = response.json()
+                # Handle both list and object formats
+                if isinstance(cycles, list):
+                    cycle_count = len(cycles)
+                else:
+                    cycle_count = len(cycles.get('cycles', []))
+                
                 self.log_result("Payroll Cycles - List", "PASS", 
-                              f"Retrieved {len(cycles.get('cycles', []))} cycles")
+                              f"Retrieved {cycle_count} cycles")
                 
                 # Test with filters
                 response = self.session.get(f"{BASE_URL}/payroll/cycles?status=open&year=2025")
