@@ -9405,14 +9405,6 @@ async def delete_work_log(
         f"Deleted work log {log_id}",
         target_id=log_id
     )
-    db.delete(work_log)
-    db.commit()
-    
-    log_work_reports_activity(
-        db, current_user.id, current_user.name, "delete_work_log",
-        table_name="work_logs", record_id=str(log_id)
-    )
-    
     return {"message": "Work log deleted successfully"}
 
 # ============ CLIENT DATA IMPORT ENDPOINT ============
