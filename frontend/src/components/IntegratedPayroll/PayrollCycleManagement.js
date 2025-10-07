@@ -402,6 +402,7 @@ const PayrollCycleManagement = () => {
                           onClick={() => setExportDropdown(exportDropdown === cycle.id ? null : cycle.id)}
                           className="text-gray-700 hover:text-gray-900"
                           title="تصدير"
+                          data-testid={`export-btn-${cycle.id}`}
                         >
                           <DocumentArrowDownIcon className="h-5 w-5" />
                         </button>
