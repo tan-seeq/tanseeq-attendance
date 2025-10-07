@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 class TanseeqScreenshotSuite:
     def __init__(self):
-        self.base_url = "https://hrms-tanseeq.preview.emergentagent.com"
+        self.base_url = "https://payroll-fix-1.preview.emergentagent.com"
         self.evidence_dir = "/app/evidence"
         self.viewport = {"width": 1920, "height": 800}
         self.screenshot_quality = 20

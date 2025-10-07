@@ -12,7 +12,7 @@ import os
 import sys
 
 # Backend URL from environment
-BACKEND_URL = "https://hrms-tanseeq.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-fix-1.preview.emergentagent.com/api"
 
 # Test credentials as requested
 TEST_CREDENTIALS = [

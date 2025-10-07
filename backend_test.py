@@ -12,7 +12,7 @@ from pathlib import Path
 import time
 
 # Configuration
-BASE_URL = "https://hrms-tanseeq.preview.emergentagent.com/api"
+BASE_URL = "https://payroll-fix-1.preview.emergentagent.com/api"
 
 # Test accounts
 TEST_ACCOUNTS = {

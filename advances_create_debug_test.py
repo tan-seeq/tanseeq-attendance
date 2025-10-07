@@ -343,7 +343,7 @@ class AdvancesCreateDebugTester:
 
 def main():
     # Use the exact backend URL from frontend/.env
-    backend_url = "https://hrms-tanseeq.preview.emergentagent.com"
+    backend_url = "https://payroll-fix-1.preview.emergentagent.com"
     
     tester = AdvancesCreateDebugTester(backend_url)
     success = tester.run_debug_test()

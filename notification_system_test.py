@@ -20,7 +20,7 @@ import uuid
 import time
 
 # Configuration
-BACKEND_URL = "https://hrms-tanseeq.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-fix-1.preview.emergentagent.com/api"
 
 print(f"🔗 Testing Backend URL: {BACKEND_URL}")
 
