@@ -1211,6 +1211,17 @@ frontend:
     working: true
     file: "AttachmentViewer.js, AdminDashboard.js"
     stuck_count: 0
+  - task: "Frontend E2E Playwright Suite – Priority Round (admin + user)"
+    implemented: false
+    working: "NA"
+    file: "tests/frontend_playwright"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Run E2E on Preview/Staging: payroll-cycles → payroll-summary/:id (view/calc/lock-unlock/export), attendance-deductions (employee names + manual CRUD), reports exports parity, sidebar RTL highlight/scroll, marketing visits (end with mandatory report + super admin notification), Work Reports Logs CRUD with filters/search/pagination. Save evidence under evidence/<route> with screenshots 1920x800 quality 20 and downloads. Produce evidence/test_report.json & evidence/summary_report.md. Use QA_ prefixed data and list for cleanup later."
     priority: "high"
     needs_retesting: false
     status_history:
