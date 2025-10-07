@@ -1210,3 +1210,88 @@ frontend:
     message: "✅ PAYROLL CALCULATION SYSTEM REFACTOR TESTING COMPLETED - COMPREHENSIVE REVIEW REQUEST VERIFICATION: Successfully conducted complete end-to-end testing of the refactored payroll calculation system as specifically requested in review. CRITICAL VERIFICATION RESULTS: 1) ✅ PAYROLL CALCULATION ENDPOINT: GET /api/payroll/calculate/2024-12 working perfectly with admin credentials, processes 6 employees successfully with 100% data structure integrity 2) ✅ NO UNDEFINED VARIABLES: All required fields present and properly defined (user_id, name, monthly_salary, daily_rate, working_days, final_salary, present_days, total_hours, late_incidents, early_departure_incidents, approved_leaves, approved_field_exits, unauthorized_absences, earned_salary, gross_salary, total_deductions) - ZERO undefined variables detected 3) ✅ MATHEMATICAL CALCULATIONS VERIFIED: Daily rate calculation (monthly_salary/22) accurate, working days calculation (present_days + approved_leaves + approved_field_exits) correct, final salary calculations mathematically sound, no negative final salaries, deductions properly calculated 4) ✅ MULTIPLE EMPLOYEES TESTED: System handles different attendance patterns correctly, all employees have valid salary data, calculations work for employees with varying attendance records 5) ✅ EDGE CASES HANDLED: System gracefully handles months with no attendance data, employees with no salary data processed correctly, missing data scenarios handled without errors 6) ✅ EXPORT FUNCTIONALITY FIXED: Both Excel and PDF export endpoints now working correctly after fixing undefined variable issues (basic_salary -> monthly_salary, late_days -> late_incidents), professional formatting with TANSEEQ branding maintained. COMPREHENSIVE TESTING RESULTS: 7/7 focused payroll tests passed with 100% success rate. The refactored payroll calculation system is mathematically accurate, handles all edge cases properly, and is ready for production use. KEY IMPROVEMENTS MADE: Fixed undefined variables (working_days, total_hours, late_days, basic_salary, late_deductions, absence_deductions), added proper calculation of approved leaves and field exits, simplified and corrected salary calculation logic, proper handling of deductions and final salary calculation. System is now working correctly and ready for production use."
   - agent: "testing"
     message: "✅ ADVANCES AND LOANS MANAGEMENT SYSTEM COMPREHENSIVE BACKEND TESTING COMPLETED: Successfully conducted complete end-to-end testing of the newly implemented Advances and Loans Management System backend APIs with 100% success rate (23/23 tests passed). AUTHENTICATION & ACCESS CONTROL: ✅ All user roles tested successfully - Regular User (tarek.wazzan@tanseeq.com), Admin (admin@tanseeq.com), Super Admin (hatem@tan-seeq.co) with proper JWT authentication, ✅ Role-based access control working perfectly with proper 403 errors for unauthorized access. COMPREHENSIVE API TESTING: ✅ POST /api/advances/create (Super Admin only) - Creates advances/custody with automatic approval and balance updates, ✅ POST /api/advances/expense (with file upload) - File upload working with PDF support and proper validation, ✅ GET /api/advances/my-balance - Personal balance retrieval with accurate calculations, ✅ GET /api/advances/my-transactions - Transaction history with Arabic translations, ✅ GET /api/advances/admin/all-balances (Super Admin only) - All employee balances with proper access control, ✅ GET /api/advances/admin/pending-approvals (Super Admin only) - Pending approvals listing working correctly, ✅ POST /api/advances/{transaction_id}/approve - Approval/rejection workflow with status updates and notifications, ✅ GET /api/advances/attachment/{transaction_id}/{attachment_id} - Attachment viewing with proper file serving. CRITICAL FUNCTIONALITY VERIFIED: ✅ File Upload System - PDF/image support with MIME validation and UUID filenames, ✅ Balance Calculation Logic - Accurate automatic calculations for all balance types, ✅ Approval Workflow - Complete expense submission to approval cycle working, ✅ Data Validation - All form validation working with proper error messages, ✅ Arabic Translations - All transaction types, statuses, and categories properly translated, ✅ Notification System Integration - Automatic notifications for employees and Super Admins working. SECURITY & PERFORMANCE: ✅ Proper authentication/authorization for all endpoints, ✅ File storage security with user-specific directories, ✅ Input validation and sanitization, ✅ Error handling with proper HTTP status codes, ✅ Efficient MongoDB integration. The Advances and Loans Management System is fully operational and ready for production use."
+
+
+backend:
+  - task: "Ensure test Super Admin account exists (admin@tanseeq.com / ADMIN)"
+    implemented: true
+    working: "NA"
+    file: "server.py (/@app.on_event startup ensure_test_super_admin)"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added startup hook to auto-create/verify Super Admin test account admin@tanseeq.com / ADMIN. Also instruct testing agent to create via POST /api/users if startup did not run (idempotent)."
+
+frontend:
+  - task: "20-page comprehensive UI QA and fixes (Arabic RTL, exports, sidebar scroll, active highlight)"
+    implemented: false
+    working: "NA"
+    file: "All UI routes"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User approved full automated + manual QA for 20 pages with screenshots. Proceed to run automated UI tests and document issues, fix immediately." 
+
+test_plan:
+  current_focus:
+    - "/dashboard"
+    - "/attendance"
+    - "/leaves"
+    - "/field-exits"
+    - "/marketing-visits"
+    - "/my-deductions"
+    - "/employees"
+    - "/attendance-management"
+    - "/leave-management"
+    - "/field-exit-management"
+    - "/reports"
+    - "/payroll"
+    - "/attendance-deductions"
+    - "/payroll-cycles"
+    - "/installment-schedules"
+    - "/backup-management"
+    - "/advances"
+    - "/advances/admin"
+    - "/notifications"
+    - "/work-reports/clients"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+agent_communication:
+  - agent: "main"
+    message: |
+      TESTING REQUEST (AR): يرجى تنفيذ فحص شامل Backend + Frontend للـ 20 صفحة المذكورة في test_plan.current_focus مع لقطات شاشة لكل صفحة وزر/نموذج رئيسي. 
+      • الحسابات: 
+        - Super Admin 1: hatem@tan-seeq.co / hatem123
+        - Super Admin 2 (جديد): admin@tanseeq.com / ADMIN  (إن لم يوجد، سجّله أولاً عبر POST /api/users كـ super_admin) 
+        - User: jihad@tanseeq.com / jihad123
+      • تحقق Backend (عينات أساسية):
+        - Auth: /api/auth/login, /api/auth/me
+        - Attendance: /api/attendance/check-in, /api/attendance/check-out, /api/attendance/with-absences, create/edit/delete absence, admin listing
+        - Leaves: POST /api/leaves و /api/leaves/json، GET /api/leaves، موافقات الإدارة إن وجدت
+        - Field Exits: start/active/complete، تحقق من تدفق التقرير الإلزامي
+        - Marketing Visits: start/edit/complete/history/admin/all
+        - Advances & Custody: create/expense/approve/admin listings/attachments/all-balances/all-transactions
+        - Installments & Payroll: /api/advances/{advance_id}/installments (create/get)، /api/payroll/installment-schedules، /api/payroll/cycles/* بما فيها التصدير PDF/Excel وقفل/فتح الدورة مع Log
+        - Notifications: /api/notifications/* بما فيها unread-mandatory و /notifications/my
+        - Employees: /api/users CRUD + /api/employees/list
+        - Reports: جميع نقاط التصدير المضافة في server.py
+        - Work Reports/Clients (Mongo module): clients/credentials/activity-types/logs/dashboard/import-clients
+      • تحقق Frontend:
+        - الدخول بالحسابات أعلاه، تصفح كل Route، فحص الأزرار، النماذج، الفلاتر، البحث، الجداول، التصدير PDF/Excel، ظهور أسماء الموظفين، RTL، إبراز الصفحة النشطة، سكرول القائمة الجانبية
+        - تأكيد عدم وجود صفحات بيضاء خاصة في /payroll-cycles، وأن أزرار التعديل/التصدير تعمل
+        - خصومات متقدمة: تحقق من ظهور أسماء الموظفين وربطها، وتطبيق الاستثناءات (حاتم بلا خصومات، طارق 08:00 خروج مرن، غيرهم 09:00–18:00، والدخول المبكر لا يعوّض التأخير) وانعكاسها على كشف الرواتب
+      • وثّق أي خلل مع صور شاشة وخطوات إعادة، وسنقوم بإصلاح فوري.
