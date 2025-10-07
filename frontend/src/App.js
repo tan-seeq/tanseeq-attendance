@@ -68,6 +68,7 @@ import MyAttendanceDeductions from './components/AttendanceDeductions/MyAttendan
 
 // Import Integrated Payroll Components
 import PayrollCycleManagement from './components/IntegratedPayroll/PayrollCycleManagement';
+import InstallmentScheduleManager from './components/IntegratedPayroll/InstallmentScheduleManager';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
