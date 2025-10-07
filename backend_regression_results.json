@@ -3,150 +3,132 @@
     "test": "Authentication - super_admin",
     "status": "PASS",
     "details": "Successfully authenticated admin@tanseeq.com",
-    "timestamp": "2025-10-07T07:23:45.145068"
+    "timestamp": "2025-10-07T07:25:07.433055"
   },
   {
     "test": "Authentication - user",
     "status": "PASS",
     "details": "Successfully authenticated jihad@tanseeq.com",
-    "timestamp": "2025-10-07T07:23:45.388085"
+    "timestamp": "2025-10-07T07:25:07.682148"
   },
   {
     "test": "Authentication - hatem",
     "status": "PASS",
     "details": "Successfully authenticated hatem@tan-seeq.co",
-    "timestamp": "2025-10-07T07:23:45.638905"
+    "timestamp": "2025-10-07T07:25:07.928735"
   },
   {
     "test": "Payroll Cycles - List",
-    "status": "FAIL",
-    "details": "Exception: 'list' object has no attribute 'get'",
-    "timestamp": "2025-10-07T07:23:45.650596"
+    "status": "PASS",
+    "details": "Retrieved 3 cycles",
+    "timestamp": "2025-10-07T07:25:07.942088"
+  },
+  {
+    "test": "Payroll Cycles - Filters",
+    "status": "PASS",
+    "details": "Filters working",
+    "timestamp": "2025-10-07T07:25:07.958979"
   },
   {
     "test": "Payroll Cycles - Create",
-    "status": "PASS",
-    "details": "Created cycle: 3130de4c-b8bb-46ba-8e77-bb3d83298c93",
-    "timestamp": "2025-10-07T07:23:45.660141"
-  },
-  {
-    "test": "Payroll Cycles - Lock",
-    "status": "PASS",
-    "details": "Cycle locked successfully",
-    "timestamp": "2025-10-07T07:23:45.687861"
-  },
-  {
-    "test": "Payroll Cycles - Unlock",
-    "status": "PASS",
-    "details": "Cycle unlocked successfully",
-    "timestamp": "2025-10-07T07:23:45.738161"
-  },
-  {
-    "test": "Payroll Cycles - Calculate",
-    "status": "PASS",
-    "details": "Calculation successful, totals returned: 0 items",
-    "timestamp": "2025-10-07T07:23:45.781747"
-  },
-  {
-    "test": "Payroll Cycles - PDF Export",
-    "status": "PASS",
-    "details": "PDF exported successfully, size: 1736 bytes",
-    "timestamp": "2025-10-07T07:23:45.802836"
-  },
-  {
-    "test": "Payroll Cycles - Excel Export",
-    "status": "PASS",
-    "details": "Excel exported successfully, size: 332 bytes",
-    "timestamp": "2025-10-07T07:23:45.813991"
+    "status": "FAIL",
+    "details": "Failed: 400 - {\"detail\":\"\u062f\u0648\u0631\u0629 \u0631\u0627\u062a\u0628 \u0644\u0634\u0647\u0631 2025-01 \u0645\u0648\u062c\u0648\u062f\u0629 \u0628\u0627\u0644\u0641\u0639\u0644\"}",
+    "timestamp": "2025-10-07T07:25:08.012755"
   },
   {
     "test": "Employees List",
-    "status": "FAIL",
-    "details": "No employees returned",
-    "timestamp": "2025-10-07T07:23:45.821760"
+    "status": "PASS",
+    "details": "Retrieved 8 employees with id+name",
+    "timestamp": "2025-10-07T07:25:08.029661"
   },
   {
     "test": "Deductions List",
     "status": "PASS",
     "details": "Retrieved 12 deductions with employee_name",
-    "timestamp": "2025-10-07T07:23:45.840889"
+    "timestamp": "2025-10-07T07:25:08.051114"
   },
   {
-    "test": "Manual Deductions",
-    "status": "SKIP",
-    "details": "No employee ID available",
-    "timestamp": "2025-10-07T07:23:45.840922"
+    "test": "Manual Deductions - Create",
+    "status": "PASS",
+    "details": "Created deduction: None",
+    "timestamp": "2025-10-07T07:25:08.065774"
   },
   {
     "test": "Attendance Policy - hatem@tan-seeq.co",
-    "status": "FAIL",
-    "details": "Exception: 'str' object has no attribute 'get'",
-    "timestamp": "2025-10-07T07:23:45.848726"
+    "status": "SKIP",
+    "details": "Employee hatem@tan-seeq.co not found in system",
+    "timestamp": "2025-10-07T07:25:08.118553"
   },
   {
     "test": "Attendance Policy - tarek.wazzan@company.com",
-    "status": "FAIL",
-    "details": "Exception: 'str' object has no attribute 'get'",
-    "timestamp": "2025-10-07T07:23:45.898211"
+    "status": "SKIP",
+    "details": "Employee tarek.wazzan@company.com not found in system",
+    "timestamp": "2025-10-07T07:25:08.130916"
   },
   {
     "test": "Work Reports - Create Log",
     "status": "FAIL",
     "details": "Failed: 404 - {\"detail\":\"Client not found\"}",
-    "timestamp": "2025-10-07T07:23:45.907153"
+    "timestamp": "2025-10-07T07:25:08.183467"
   },
   {
     "test": "Work Reports - Search/Filter",
     "status": "PASS",
     "details": "Search successful, found 0 logs",
-    "timestamp": "2025-10-07T07:23:45.918362"
+    "timestamp": "2025-10-07T07:25:08.197727"
   },
   {
     "test": "Marketing Visits - Start",
     "status": "PASS",
-    "details": "Visit started: 27a9d9eb-94ec-4cca-8e01-aa8643477062",
-    "timestamp": "2025-10-07T07:23:45.928855"
+    "details": "Visit started: d79ca0fc-0e29-43f8-ad79-9f03ed5e27b9",
+    "timestamp": "2025-10-07T07:25:08.211625"
   },
   {
     "test": "Marketing Visits - Get Active",
     "status": "PASS",
-    "details": "Active visit retrieved: 27a9d9eb-94ec-4cca-8e01-aa8643477062",
-    "timestamp": "2025-10-07T07:23:45.977041"
+    "details": "Active visit retrieved: d79ca0fc-0e29-43f8-ad79-9f03ed5e27b9",
+    "timestamp": "2025-10-07T07:25:08.263591"
   },
   {
     "test": "Marketing Visits - Complete",
     "status": "PASS",
     "details": "Visit completed with mandatory report",
-    "timestamp": "2025-10-07T07:23:47.993639"
+    "timestamp": "2025-10-07T07:25:10.282929"
   },
   {
     "test": "Marketing Visits - Super Admin Notification",
     "status": "FAIL",
-    "details": "Exception: 'str' object has no attribute 'get'",
-    "timestamp": "2025-10-07T07:23:48.003012"
+    "details": "No marketing visit notifications found",
+    "timestamp": "2025-10-07T07:25:10.334614"
   },
   {
     "test": "Notifications - super_admin",
     "status": "PASS",
-    "details": "Retrieved 1 scoped notifications",
-    "timestamp": "2025-10-07T07:23:48.011841"
+    "details": "Retrieved 0 scoped notifications",
+    "timestamp": "2025-10-07T07:25:10.386454"
   },
   {
     "test": "Notifications - user",
     "status": "PASS",
-    "details": "Retrieved 1 scoped notifications",
-    "timestamp": "2025-10-07T07:23:48.020824"
+    "details": "Retrieved 12 scoped notifications",
+    "timestamp": "2025-10-07T07:25:10.398189"
   },
   {
     "test": "Notifications - hatem",
     "status": "PASS",
     "details": "Retrieved 1 scoped notifications",
-    "timestamp": "2025-10-07T07:23:48.070341"
+    "timestamp": "2025-10-07T07:25:10.449573"
   },
   {
-    "test": "Export Parity",
+    "test": "Export Parity - PDF",
+    "status": "PASS",
+    "details": "PDF export contains data (size: 1738 bytes)",
+    "timestamp": "2025-10-07T07:25:10.550045"
+  },
+  {
+    "test": "Export Parity - Excel",
     "status": "FAIL",
-    "details": "Exception: 'list' object has no attribute 'get'",
-    "timestamp": "2025-10-07T07:23:48.081309"
+    "details": "Excel export appears empty or failed",
+    "timestamp": "2025-10-07T07:25:10.603094"
   }
 ]
