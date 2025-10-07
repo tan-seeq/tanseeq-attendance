@@ -9326,73 +9326,49 @@ async def create_work_log(
     work_log.pop("_id", None)
     return work_log
 
-@api_router.put("/work-reports/logs/{log_id}", response_model=WorkLogResponse)
+@api_router.put("/work-reports/logs/{log_id}")
 async def update_work_log(
     log_id: str,
     log_update: WorkLogUpdate,
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    current_user: User = Depends(get_current_user)
 ):
-    """Update work log entry"""
-    work_log = db.query(WorkLog).filter(WorkLog.id == log_id).first()
-    if not work_log:
+    """Update work log entry (MongoDB)"""
+    doc = await work_reports_db.work_logs.find_one({"id": log_id})
+    if not doc:
         raise HTTPException(status_code=404, detail="Work log not found")
-    
-    # Check permissions - users can only edit their own logs
-    if current_user.role == "user" and work_log.user_id != current_user.id:
+    if current_user.role == "user" and doc.get("created_by") != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
-    # Store original values for audit
-    original_data = {
-        "duration_minutes": work_log.duration_minutes,
-        "total_amount": work_log.total_amount,
-        "description": work_log.description
-    }
-    
-    # Update work log
-    update_data = log_update.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(work_log, key, value)
-    
-    # Recalculate duration and total if times are updated
-    if work_log.start_time and work_log.end_time:
-        duration = work_log.end_time - work_log.start_time
-        work_log.duration_minutes = int(duration.total_seconds() / 60)
-    
-    if work_log.duration_minutes and work_log.hourly_rate:
-        work_log.total_amount = (work_log.duration_minutes / 60) * work_log.hourly_rate
-    
-    work_log.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(work_log)
-    
-    log_work_reports_activity(
-        db, current_user.id, current_user.name, "update_work_log",
-        table_name="work_logs", record_id=str(work_log.id),
-        before_value=original_data, after_value=update_data
+    original = {k: doc.get(k) for k in ["start_time","end_time","duration_minutes","total_amount","description","notes"]}
+    update_data = {k: v for k, v in log_update.dict(exclude_unset=True).items()}
+    # Recompute duration and amounts if times changed
+    start_time = update_data.get("start_time", doc.get("start_time"))
+    end_time = update_data.get("end_time", doc.get("end_time"))
+    date_str = update_data.get("date", doc.get("date"))
+    duration_minutes = doc.get("duration_minutes", 0)
+    hourly_rate = doc.get("hourly_rate", 0)
+    try:
+        if start_time and end_time and date_str:
+            start_dt = datetime.strptime(f"{date_str} {start_time}", "%Y-%m-%d %H:%M")
+            end_dt = datetime.strptime(f"{date_str} {end_time}", "%Y-%m-%d %H:%M")
+            duration_minutes = int((end_dt - start_dt).total_seconds() // 60)
+            update_data["duration_minutes"] = duration_minutes
+            update_data["start_at"] = start_dt.isoformat()
+            update_data["end_at"] = end_dt.isoformat()
+            update_data["total_amount"] = round((duration_minutes / 60) * hourly_rate, 2) if hourly_rate else doc.get("total_amount", 0)
+    except Exception:
+        pass
+    update_data["updated_at"] = datetime.utcnow()
+    await work_reports_db.work_logs.update_one({"id": log_id}, {"$set": update_data})
+    await log_work_reports_activity(
+        current_user.id,
+        "update_work_log",
+        f"Updated work log {log_id}",
+        target_id=log_id,
+        before_value=json.dumps(original),
+        after_value=json.dumps(update_data)
     )
-    
-    return {
-        "id": str(work_log.id),
-        "client_id": str(work_log.client_id),
-        "activity_type_id": str(work_log.activity_type_id),
-        "user_id": work_log.user_id,
-        "user_name": work_log.user_name,
-        "date": work_log.date,
-        "start_time": work_log.start_time,
-        "end_time": work_log.end_time,
-        "duration_minutes": work_log.duration_minutes,
-        "description": work_log.description,
-        "notes": work_log.notes,
-        "is_billable": work_log.is_billable,
-        "hourly_rate": work_log.hourly_rate,
-        "total_amount": work_log.total_amount,
-        "status": work_log.status,
-        "created_at": work_log.created_at,
-        "updated_at": work_log.updated_at,
-        "client_name": work_log.client.company_name if work_log.client else "",
-        "activity_name": work_log.activity_type.name if work_log.activity_type else ""
-    }
+    doc = await work_reports_db.work_logs.find_one({"id": log_id}, {"_id": 0})
+    return doc
 
 @api_router.delete("/work-reports/logs/{log_id}")
 async def delete_work_log(
