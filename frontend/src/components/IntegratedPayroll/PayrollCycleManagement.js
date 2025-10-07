@@ -23,6 +23,7 @@ const PayrollCycleManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showLockModal, setShowLockModal] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState(null);
+  const [exportDropdown, setExportDropdown] = useState(null);
   
   // Filters
   const [statusFilter, setStatusFilter] = useState('');
