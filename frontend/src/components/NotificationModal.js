@@ -28,11 +28,11 @@ const NotificationModal = ({ isOpen, onClose }) => {
   const fetchUnreadNotifications = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/notifications`);
+      const response = await axios.get(`${API}/notifications/my?unread_only=true`);
       
-      // Filter for unread and mandatory notifications only
-      const mandatoryNotifications = response.data.filter(
-        notification => !notification.is_read && (notification.must_acknowledge || notification.severity === 'urgent')
+      // Filter for mandatory notifications only (الموظف الحالي فقط)
+      const mandatoryNotifications = response.data.notifications.filter(
+        notification => notification.must_acknowledge || notification.severity === 'urgent'
       ) || [];
       
       setNotifications(mandatoryNotifications);
