@@ -73,393 +73,490 @@ class InstallmentSchedulingTester:
         if response_data and status == "FAIL":
             print(f"   Response: {response_data}")
         print()
-        if details:
-            print(f"   Details: {details}")
-        if response_data and not success:
-            print(f"   Response: {response_data}")
-        print()
-        
-        self.test_results.append({
-            "test": test_name,
-            "success": success,
-            "details": details,
-            "response": response_data
-        }
-        self.test_results.append(result)
-        print(f"{status}: {test_name}")
-        if details:
-            print(f"   📋 {details}")
-        if error:
-            print(f"   ⚠️  {error}")
-        print()
 
-    def test_authentication(self, backend_url):
-        """Test authentication with all available credentials"""
-        print(f"🔐 TESTING AUTHENTICATION WITH {backend_url}")
-        print("=" * 60)
-        
-        auth_success = False
-        working_credentials = None
-        
-        for cred in TEST_CREDENTIALS:
-            try:
-                print(f"🧪 Testing login: {cred['email']} ({cred['name']})")
-                
-                response = self.session.post(
-                    f"{backend_url}/auth/login",
-                    json={
-                        "email": cred["email"],
-                        "password": cred["password"]
-                    },
-                    timeout=30
-                )
-                
-                print(f"   Status Code: {response.status_code}")
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    if "access_token" in data:
-                        self.auth_token = data["access_token"]
-                        self.current_user = data.get("user", {})
-                        self.session.headers.update({
-                            'Authorization': f'Bearer {self.auth_token}'
-                        })
-                        
-                        working_credentials = cred
-                        auth_success = True
-                        
-                        self.log_test(
-                            f"Authentication - {cred['name']}", 
-                            True,
-                            f"Successfully authenticated as {self.current_user.get('name', 'Unknown')} ({self.current_user.get('role', 'Unknown')})"
-                        )
-                        break
-                    else:
-                        self.log_test(
-                            f"Authentication - {cred['name']}", 
-                            False,
-                            error="No access token in response"
-                        )
+    async def authenticate_user(self, role: str) -> Optional[str]:
+        """Authenticate user and return token"""
+        try:
+            credentials = TEST_CREDENTIALS[role]
+            async with self.session.post(
+                f"{API_BASE}/auth/login",
+                json=credentials
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    token = data.get('access_token')
+                    self.tokens[role] = token
+                    self.log_test(f"Authentication - {role}", "PASS", f"Successfully authenticated {credentials['email']}")
+                    return token
                 else:
-                    error_msg = f"HTTP {response.status_code}"
-                    try:
-                        error_data = response.json()
-                        error_msg += f" - {error_data.get('detail', 'Unknown error')}"
-                    except:
-                        error_msg += f" - {response.text[:100]}"
-                    
-                    self.log_test(
-                        f"Authentication - {cred['name']}", 
-                        False,
-                        error=error_msg
-                    )
-                        
-            except Exception as e:
-                self.log_test(
-                    f"Authentication - {cred['name']}", 
-                    False,
-                    error=f"Connection error: {str(e)}"
-                )
-        
-        if not auth_success:
-            print("🚨 CRITICAL: No working authentication credentials found!")
-            return False
+                    error_text = await response.text()
+                    self.log_test(f"Authentication - {role}", "FAIL", f"Status: {response.status}, Error: {error_text}")
+                    return None
+        except Exception as e:
+            self.log_test(f"Authentication - {role}", "FAIL", f"Exception: {str(e)}")
+            return None
+
+    async def create_test_advance(self, token: str) -> Optional[str]:
+        """Create a test advance for installment scheduling"""
+        try:
+            # Get a test employee (jihad)
+            employee_id = None
+            async with self.session.get(
+                f"{API_BASE}/auth/me",
+                headers={'Authorization': f'Bearer {self.tokens["user"]}'}
+            ) as response:
+                if response.status == 200:
+                    user_data = await response.json()
+                    employee_id = user_data.get('id')
             
-        print(f"✅ Authentication successful with: {working_credentials['name']}")
-        return True
-
-    def test_advances_endpoints(self, backend_url):
-        """Test all advances system endpoints"""
-        print("💰 TESTING ADVANCES SYSTEM ENDPOINTS")
-        print("=" * 60)
-        
-        if not self.auth_token:
-            self.log_test("Advances Endpoints", False, error="No authentication token available")
-            return
-        
-        # Test 1: Get my balance
-        try:
-            response = self.session.get(f"{backend_url}/advances/my-balance", timeout=30)
-            if response.status_code == 200:
-                balance_data = response.json()
-                self.log_test(
-                    "GET /advances/my-balance",
-                    True,
-                    f"Total Available: {balance_data.get('total_available', 0)} AED, Advances: {balance_data.get('remaining_advance', 0)}, Custody: {balance_data.get('remaining_custody', 0)}"
-                )
-            else:
-                self.log_test("GET /advances/my-balance", False, error=f"HTTP {response.status_code}")
+            if not employee_id:
+                self.log_test("Create Test Advance", "FAIL", "Could not get employee ID")
+                return None
+            
+            advance_data = {
+                "employee_id": employee_id,
+                "transaction_type": "advance",
+                "amount": 5000.0,
+                "description": "Test advance for installment scheduling",
+                "category": "personal",
+                "expense_date": datetime.now().strftime("%Y-%m-%d"),
+                "notes": "Created for testing installment scheduling system"
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/create",
+                json=advance_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    advance_id = data.get('transaction_id')
+                    self.created_advances.append(advance_id)
+                    self.log_test("Create Test Advance", "PASS", f"Created advance ID: {advance_id}, Amount: {advance_data['amount']}")
+                    return advance_id
+                else:
+                    error_text = await response.text()
+                    self.log_test("Create Test Advance", "FAIL", f"Status: {response.status}, Error: {error_text}")
+                    return None
         except Exception as e:
-            self.log_test("GET /advances/my-balance", False, error=str(e))
+            self.log_test("Create Test Advance", "FAIL", f"Exception: {str(e)}")
+            return None
 
-        # Test 2: Get my transactions
+    async def test_create_installment_schedule(self, token: str, advance_id: str):
+        """Test POST /api/advances/{advance_id}/installments - Create installment schedule"""
         try:
-            response = self.session.get(f"{backend_url}/advances/my-transactions", timeout=30)
-            if response.status_code == 200:
-                transactions_data = response.json()
-                transaction_count = len(transactions_data.get('transactions', []))
-                self.log_test(
-                    "GET /advances/my-transactions",
-                    True,
-                    f"Found {transaction_count} transactions"
-                )
-            else:
-                self.log_test("GET /advances/my-transactions", False, error=f"HTTP {response.status_code}")
-        except Exception as e:
-            self.log_test("GET /advances/my-transactions", False, error=str(e))
-
-        # Test 3: Admin endpoints (if super admin)
-        if self.current_user.get('role') == 'super_admin':
-            # Test all balances
-            try:
-                response = self.session.get(f"{backend_url}/advances/admin/all-balances", timeout=30)
-                if response.status_code == 200:
-                    balances_data = response.json()
-                    employee_count = len(balances_data.get('employee_balances', []))
-                    self.log_test(
-                        "GET /advances/admin/all-balances",
-                        True,
-                        f"Found balances for {employee_count} employees"
-                    )
-                else:
-                    self.log_test("GET /advances/admin/all-balances", False, error=f"HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("GET /advances/admin/all-balances", False, error=str(e))
-
-            # Test all transactions
-            try:
-                response = self.session.get(f"{backend_url}/advances/admin/all-transactions", timeout=30)
-                if response.status_code == 200:
-                    transactions_data = response.json()
-                    transaction_count = len(transactions_data.get('transactions', []))
-                    self.log_test(
-                        "GET /advances/admin/all-transactions",
-                        True,
-                        f"Found {transaction_count} total transactions across all employees"
-                    )
-                else:
-                    self.log_test("GET /advances/admin/all-transactions", False, error=f"HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("GET /advances/admin/all-transactions", False, error=str(e))
-
-            # Test pending approvals
-            try:
-                response = self.session.get(f"{backend_url}/advances/admin/pending-approvals", timeout=30)
-                if response.status_code == 200:
-                    pending_data = response.json()
-                    pending_count = len(pending_data.get('pending_transactions', []))
-                    self.log_test(
-                        "GET /advances/admin/pending-approvals",
-                        True,
-                        f"Found {pending_count} pending transactions"
-                    )
-                else:
-                    self.log_test("GET /advances/admin/pending-approvals", False, error=f"HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("GET /advances/admin/pending-approvals", False, error=str(e))
-
-            # Test advance creation (the critical endpoint from review)
-            try:
-                # Get a valid employee ID first
-                users_response = self.session.get(f"{backend_url}/users", timeout=30)
-                if users_response.status_code == 200:
-                    users_data = users_response.json()
-                    if users_data and len(users_data) > 0:
-                        test_employee_id = users_data[0].get('id')
+            schedule_data = {
+                "installment_amount": 500.0,
+                "number_of_installments": 10,
+                "start_date": (date.today() + timedelta(days=30)).strftime("%Y-%m-%d"),
+                "respect_ceiling": True
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/{advance_id}/installments",
+                json=schedule_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                response_data = await response.json()
+                
+                if response.status == 200:
+                    schedule_id = response_data.get('schedule_id')
+                    if schedule_id:
+                        self.created_schedules.append(schedule_id)
+                    
+                    # Validate response structure
+                    required_fields = ['message', 'schedule_id', 'total_amount', 'installment_amount', 'number_of_installments']
+                    missing_fields = [field for field in required_fields if field not in response_data]
+                    
+                    if not missing_fields:
+                        self.log_test(
+                            "Create Installment Schedule", 
+                            "PASS", 
+                            f"Schedule created successfully. ID: {schedule_id}, Amount: {response_data.get('installment_amount')}, Installments: {response_data.get('number_of_installments')}"
+                        )
                     else:
-                        test_employee_id = self.current_user.get('id')
+                        self.log_test(
+                            "Create Installment Schedule", 
+                            "FAIL", 
+                            f"Missing required fields: {missing_fields}",
+                            response_data
+                        )
                 else:
-                    test_employee_id = self.current_user.get('id')
+                    self.log_test(
+                        "Create Installment Schedule", 
+                        "FAIL", 
+                        f"Status: {response.status}",
+                        response_data
+                    )
+        except Exception as e:
+            self.log_test("Create Installment Schedule", "FAIL", f"Exception: {str(e)}")
 
-                create_data = {
-                    "employee_id": test_employee_id,
-                    "transaction_type": "custody",
-                    "amount": 50.0,
-                    "description": "Test custody for system verification after URL fix",
-                    "notes": "Environment fix verification test"
+    async def test_get_installment_schedule(self, token: str, advance_id: str):
+        """Test GET /api/advances/{advance_id}/installments - Get specific installment schedule details"""
+        try:
+            async with self.session.get(
+                f"{API_BASE}/advances/{advance_id}/installments",
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                response_data = await response.json()
+                
+                if response.status == 200:
+                    # Validate response structure
+                    if 'schedule' in response_data and 'installments' in response_data:
+                        schedule = response_data['schedule']
+                        installments = response_data['installments']
+                        
+                        # Check schedule fields
+                        schedule_fields = ['id', 'advance_transaction_id', 'employee_id', 'total_amount', 'installment_amount', 'number_of_installments']
+                        missing_schedule_fields = [field for field in schedule_fields if field not in schedule]
+                        
+                        # Check installments structure
+                        installment_count = len(installments)
+                        expected_count = schedule.get('number_of_installments', 0)
+                        
+                        if not missing_schedule_fields and installment_count == expected_count:
+                            self.log_test(
+                                "Get Installment Schedule", 
+                                "PASS", 
+                                f"Retrieved schedule with {installment_count} installments. Total: {schedule.get('total_amount')}"
+                            )
+                        else:
+                            issues = []
+                            if missing_schedule_fields:
+                                issues.append(f"Missing schedule fields: {missing_schedule_fields}")
+                            if installment_count != expected_count:
+                                issues.append(f"Installment count mismatch: got {installment_count}, expected {expected_count}")
+                            
+                            self.log_test(
+                                "Get Installment Schedule", 
+                                "FAIL", 
+                                "; ".join(issues),
+                                response_data
+                            )
+                    else:
+                        self.log_test(
+                            "Get Installment Schedule", 
+                            "FAIL", 
+                            "Missing 'schedule' or 'installments' in response",
+                            response_data
+                        )
+                else:
+                    self.log_test(
+                        "Get Installment Schedule", 
+                        "FAIL", 
+                        f"Status: {response.status}",
+                        response_data
+                    )
+        except Exception as e:
+            self.log_test("Get Installment Schedule", "FAIL", f"Exception: {str(e)}")
+
+    async def test_get_all_installment_schedules(self, token: str):
+        """Test GET /api/payroll/installment-schedules - Get all installment schedules (super admin only)"""
+        try:
+            async with self.session.get(
+                f"{API_BASE}/payroll/installment-schedules",
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                response_data = await response.json()
+                
+                if response.status == 200:
+                    if 'schedules' in response_data:
+                        schedules = response_data['schedules']
+                        schedule_count = len(schedules)
+                        
+                        # Validate schedule structure if any exist
+                        if schedule_count > 0:
+                            first_schedule = schedules[0]
+                            required_fields = ['id', 'advance_transaction_id', 'employee_id', 'total_amount', 'installment_amount']
+                            missing_fields = [field for field in required_fields if field not in first_schedule]
+                            
+                            if not missing_fields:
+                                self.log_test(
+                                    "Get All Installment Schedules", 
+                                    "PASS", 
+                                    f"Retrieved {schedule_count} installment schedules"
+                                )
+                            else:
+                                self.log_test(
+                                    "Get All Installment Schedules", 
+                                    "FAIL", 
+                                    f"Schedule missing required fields: {missing_fields}",
+                                    response_data
+                                )
+                        else:
+                            self.log_test(
+                                "Get All Installment Schedules", 
+                                "PASS", 
+                                "Retrieved 0 installment schedules (empty result is valid)"
+                            )
+                    else:
+                        self.log_test(
+                            "Get All Installment Schedules", 
+                            "FAIL", 
+                            "Missing 'schedules' field in response",
+                            response_data
+                        )
+                else:
+                    self.log_test(
+                        "Get All Installment Schedules", 
+                        "FAIL", 
+                        f"Status: {response.status}",
+                        response_data
+                    )
+        except Exception as e:
+            self.log_test("Get All Installment Schedules", "FAIL", f"Exception: {str(e)}")
+
+    async def test_data_validation(self, token: str, advance_id: str):
+        """Test data validation for installment scheduling"""
+        
+        # Test 1: Invalid installment amount (negative)
+        try:
+            invalid_data = {
+                "installment_amount": -100.0,
+                "number_of_installments": 5,
+                "start_date": (date.today() + timedelta(days=30)).strftime("%Y-%m-%d")
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/{advance_id}/installments",
+                json=invalid_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status >= 400:
+                    self.log_test("Validation - Negative Amount", "PASS", "Correctly rejected negative installment amount")
+                else:
+                    self.log_test("Validation - Negative Amount", "FAIL", "Should reject negative installment amount")
+        except Exception as e:
+            self.log_test("Validation - Negative Amount", "FAIL", f"Exception: {str(e)}")
+        
+        # Test 2: Invalid number of installments (too high)
+        try:
+            invalid_data = {
+                "installment_amount": 100.0,
+                "number_of_installments": 100,  # Should be max 60
+                "start_date": (date.today() + timedelta(days=30)).strftime("%Y-%m-%d")
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/{advance_id}/installments",
+                json=invalid_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status >= 400:
+                    self.log_test("Validation - Too Many Installments", "PASS", "Correctly rejected >60 installments")
+                else:
+                    self.log_test("Validation - Too Many Installments", "FAIL", "Should reject >60 installments")
+        except Exception as e:
+            self.log_test("Validation - Too Many Installments", "FAIL", f"Exception: {str(e)}")
+        
+        # Test 3: Invalid date format
+        try:
+            invalid_data = {
+                "installment_amount": 100.0,
+                "number_of_installments": 5,
+                "start_date": "invalid-date"
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/{advance_id}/installments",
+                json=invalid_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status >= 400:
+                    self.log_test("Validation - Invalid Date", "PASS", "Correctly rejected invalid date format")
+                else:
+                    self.log_test("Validation - Invalid Date", "FAIL", "Should reject invalid date format")
+        except Exception as e:
+            self.log_test("Validation - Invalid Date", "FAIL", f"Exception: {str(e)}")
+
+    async def test_error_handling(self, token: str):
+        """Test error handling scenarios"""
+        
+        # Test 1: Non-existent advance
+        try:
+            fake_advance_id = str(uuid.uuid4())
+            schedule_data = {
+                "installment_amount": 500.0,
+                "number_of_installments": 10,
+                "start_date": (date.today() + timedelta(days=30)).strftime("%Y-%m-%d")
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/{fake_advance_id}/installments",
+                json=schedule_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status == 404:
+                    self.log_test("Error Handling - Non-existent Advance", "PASS", "Correctly returned 404 for non-existent advance")
+                else:
+                    self.log_test("Error Handling - Non-existent Advance", "FAIL", f"Expected 404, got {response.status}")
+        except Exception as e:
+            self.log_test("Error Handling - Non-existent Advance", "FAIL", f"Exception: {str(e)}")
+        
+        # Test 2: Unauthorized access (non-super_admin)
+        if 'user' in self.tokens:
+            try:
+                schedule_data = {
+                    "installment_amount": 500.0,
+                    "number_of_installments": 10,
+                    "start_date": (date.today() + timedelta(days=30)).strftime("%Y-%m-%d")
                 }
                 
-                response = self.session.post(
-                    f"{backend_url}/advances/create",
-                    json=create_data,
-                    timeout=30
-                )
-                
-                if response.status_code in [200, 201]:
-                    create_result = response.json()
-                    self.log_test(
-                        "POST /advances/create",
-                        True,
-                        f"Successfully created custody: {create_result.get('message', 'Success')} - Transaction ID: {create_result.get('transaction_id', 'N/A')}"
-                    )
-                else:
-                    error_msg = f"HTTP {response.status_code}"
-                    try:
-                        error_data = response.json()
-                        error_msg += f" - {error_data.get('detail', 'Unknown error')}"
-                    except:
-                        error_msg += f" - {response.text[:200]}"
-                    self.log_test("POST /advances/create", False, error=error_msg)
-                    
+                async with self.session.post(
+                    f"{API_BASE}/advances/{self.created_advances[0] if self.created_advances else 'test'}/installments",
+                    json=schedule_data,
+                    headers={'Authorization': f'Bearer {self.tokens["user"]}'}
+                ) as response:
+                    if response.status == 403:
+                        self.log_test("Error Handling - Unauthorized Access", "PASS", "Correctly denied access to regular user")
+                    else:
+                        self.log_test("Error Handling - Unauthorized Access", "FAIL", f"Expected 403, got {response.status}")
             except Exception as e:
-                self.log_test("POST /advances/create", False, error=str(e))
+                self.log_test("Error Handling - Unauthorized Access", "FAIL", f"Exception: {str(e)}")
 
-    def test_general_system_health(self, backend_url):
-        """Test general system endpoints to verify overall health"""
-        print("🏥 TESTING GENERAL SYSTEM HEALTH")
-        print("=" * 60)
-        
-        if not self.auth_token:
-            self.log_test("System Health Check", False, error="No authentication token available")
-            return
-        
-        # Test dashboard/user info
+    async def test_duplicate_schedule_prevention(self, token: str, advance_id: str):
+        """Test prevention of duplicate schedules for same advance"""
         try:
-            response = self.session.get(f"{backend_url}/auth/me", timeout=30)
-            if response.status_code == 200:
-                user_data = response.json()
-                self.log_test(
-                    "GET /auth/me",
-                    True,
-                    f"User: {user_data.get('name')} ({user_data.get('role')}) - Active: {user_data.get('is_active')}"
-                )
-            else:
-                self.log_test("GET /auth/me", False, error=f"HTTP {response.status_code}")
+            schedule_data = {
+                "installment_amount": 300.0,
+                "number_of_installments": 8,
+                "start_date": (date.today() + timedelta(days=60)).strftime("%Y-%m-%d")
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/advances/{advance_id}/installments",
+                json=schedule_data,
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status >= 400:
+                    self.log_test("Duplicate Schedule Prevention", "PASS", "Correctly prevented duplicate schedule creation")
+                else:
+                    self.log_test("Duplicate Schedule Prevention", "FAIL", "Should prevent duplicate schedule creation")
         except Exception as e:
-            self.log_test("GET /auth/me", False, error=str(e))
+            self.log_test("Duplicate Schedule Prevention", "FAIL", f"Exception: {str(e)}")
 
-        # Test attendance endpoint
+    async def test_integration_workflow(self):
+        """Test complete workflow: create advance → approve → create installment schedule"""
         try:
-            response = self.session.get(f"{backend_url}/attendance", timeout=30)
-            if response.status_code == 200:
-                attendance_data = response.json()
-                self.log_test(
-                    "GET /attendance",
-                    True,
-                    f"Attendance system accessible"
-                )
-            else:
-                self.log_test("GET /attendance", False, error=f"HTTP {response.status_code}")
+            # Authenticate super admin
+            super_admin_token = await self.authenticate_user('super_admin')
+            if not super_admin_token:
+                self.log_test("Integration Workflow", "FAIL", "Could not authenticate super admin")
+                return
+            
+            # Authenticate regular user
+            user_token = await self.authenticate_user('user')
+            if not user_token:
+                self.log_test("Integration Workflow", "FAIL", "Could not authenticate user")
+                return
+            
+            # Create advance
+            advance_id = await self.create_test_advance(super_admin_token)
+            if not advance_id:
+                self.log_test("Integration Workflow", "FAIL", "Could not create test advance")
+                return
+            
+            # Create installment schedule
+            await self.test_create_installment_schedule(super_admin_token, advance_id)
+            
+            # Get installment schedule details
+            await self.test_get_installment_schedule(super_admin_token, advance_id)
+            
+            # Get all installment schedules
+            await self.test_get_all_installment_schedules(super_admin_token)
+            
+            # Test data validation
+            await self.test_data_validation(super_admin_token, advance_id)
+            
+            # Test error handling
+            await self.test_error_handling(super_admin_token)
+            
+            # Test duplicate prevention
+            await self.test_duplicate_schedule_prevention(super_admin_token, advance_id)
+            
+            self.log_test("Integration Workflow", "PASS", "Completed full integration workflow testing")
+            
         except Exception as e:
-            self.log_test("GET /attendance", False, error=str(e))
+            self.log_test("Integration Workflow", "FAIL", f"Exception: {str(e)}")
 
-    def test_database_connectivity(self, backend_url):
-        """Test database connectivity through API calls"""
-        print("🗄️  TESTING DATABASE CONNECTIVITY")
-        print("=" * 60)
-        
-        if not self.auth_token:
-            self.log_test("Database Connectivity", False, error="No authentication token available")
-            return
-        
-        # Test that we can retrieve data (indicates DB connection works)
-        try:
-            response = self.session.get(f"{backend_url}/advances/my-balance", timeout=30)
-            if response.status_code == 200:
-                self.log_test(
-                    "Database Connection via Advances",
-                    True,
-                    "Successfully retrieved balance data from database"
-                )
-            else:
-                self.log_test("Database Connection via Advances", False, error=f"HTTP {response.status_code}")
-        except Exception as e:
-            self.log_test("Database Connection via Advances", False, error=str(e))
-
-    def run_comprehensive_test(self):
-        """Run all tests in sequence"""
-        print("🚀 STARTING COMPREHENSIVE SYSTEM HEALTH CHECK")
-        print("🔧 Environment Fix Verification: REACT_APP_BACKEND_URL = hrapp-tanseeq.emergent.host")
+    async def run_all_tests(self):
+        """Run all installment scheduling tests"""
+        print("🚀 Starting Comprehensive Installment Scheduling System Testing")
         print("=" * 80)
         print()
         
-        # Test both local and production environments
-        for backend_name, backend_url in [("LOCAL", LOCAL_BACKEND_URL), ("PRODUCTION", PRODUCTION_BACKEND_URL)]:
-            print(f"\n🌐 TESTING {backend_name} ENVIRONMENT: {backend_url}")
-            print("=" * 80)
-            
-            # Reset authentication for each environment
-            self.auth_token = None
-            self.current_user = None
-            if 'Authorization' in self.session.headers:
-                del self.session.headers['Authorization']
-            
-            # Step 1: Test Authentication
-            if not self.test_authentication(backend_url):
-                print(f"🚨 CRITICAL FAILURE: Authentication failed for {backend_name} - skipping other tests")
-                continue
-            
-            # Step 2: Test Advances System
-            self.test_advances_endpoints(backend_url)
-            
-            # Step 3: Test General System Health
-            self.test_general_system_health(backend_url)
-            
-            # Step 4: Test Database Connectivity
-            self.test_database_connectivity(backend_url)
+        await self.test_integration_workflow()
         
-        return self.generate_summary()
-
-    def generate_summary(self):
-        """Generate comprehensive test summary"""
-        print("\n" + "=" * 80)
-        print("📊 COMPREHENSIVE TEST RESULTS SUMMARY")
+        # Generate summary
+        print("=" * 80)
+        print("📊 TEST SUMMARY")
         print("=" * 80)
         
         total_tests = len(self.test_results)
-        passed_tests = len([r for r in self.test_results if r['success']])
-        failed_tests = total_tests - passed_tests
-        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
+        passed_tests = len([r for r in self.test_results if r['status'] == 'PASS'])
+        failed_tests = len([r for r in self.test_results if r['status'] == 'FAIL'])
         
-        print(f"📈 Overall Results: {passed_tests}/{total_tests} tests passed ({success_rate:.1f}% success rate)")
+        print(f"Total Tests: {total_tests}")
+        print(f"Passed: {passed_tests} ✅")
+        print(f"Failed: {failed_tests} ❌")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%" if total_tests > 0 else "0%")
         print()
         
         if failed_tests > 0:
             print("❌ FAILED TESTS:")
             for result in self.test_results:
-                if not result['success']:
-                    print(f"   • {result['test']}: {result['error']}")
+                if result['status'] == 'FAIL':
+                    print(f"  - {result['test']}: {result['details']}")
             print()
         
-        print("✅ PASSED TESTS:")
-        for result in self.test_results:
-            if result['success']:
-                print(f"   • {result['test']}: {result['details']}")
+        print("🎯 CRITICAL FINDINGS:")
         
-        print("\n" + "=" * 80)
+        # Check for critical issues
+        critical_issues = []
         
-        # Critical assessment
-        auth_working = any(r['success'] and 'Authentication' in r['test'] for r in self.test_results)
-        advances_working = any(r['success'] and 'advances' in r['test'].lower() for r in self.test_results)
+        # Check if basic endpoints are working
+        endpoint_tests = [r for r in self.test_results if 'Installment Schedule' in r['test']]
+        if not any(r['status'] == 'PASS' for r in endpoint_tests):
+            critical_issues.append("❌ CRITICAL: No installment scheduling endpoints are working")
         
-        if auth_working and advances_working:
-            print("🎉 ENVIRONMENT FIX VERIFICATION: SUCCESS")
-            print("✅ Authentication working with production URL")
-            print("✅ Advances system endpoints accessible")
-            print("✅ System appears to be fully operational")
+        # Check authentication
+        auth_tests = [r for r in self.test_results if 'Authentication' in r['test']]
+        if not any(r['status'] == 'PASS' for r in auth_tests):
+            critical_issues.append("❌ CRITICAL: Authentication system not working")
+        
+        # Check data validation
+        validation_tests = [r for r in self.test_results if 'Validation' in r['test']]
+        if not any(r['status'] == 'PASS' for r in validation_tests):
+            critical_issues.append("⚠️ WARNING: Data validation may not be working properly")
+        
+        if critical_issues:
+            for issue in critical_issues:
+                print(f"  {issue}")
         else:
-            print("🚨 ENVIRONMENT FIX VERIFICATION: ISSUES DETECTED")
-            if not auth_working:
-                print("❌ Authentication issues persist")
-            if not advances_working:
-                print("❌ Advances system still has issues")
+            print("  ✅ No critical issues found - Core installment scheduling functionality is operational")
+        
+        print()
+        print("🔍 DETAILED TEST RESULTS:")
+        for result in self.test_results:
+            status_emoji = "✅" if result['status'] == "PASS" else "❌"
+            print(f"  {status_emoji} {result['test']}")
+            if result['details']:
+                print(f"      {result['details']}")
         
         return {
             'total_tests': total_tests,
             'passed_tests': passed_tests,
             'failed_tests': failed_tests,
-            'success_rate': success_rate,
-            'auth_working': auth_working,
-            'advances_working': advances_working,
-            'results': self.test_results
+            'success_rate': (passed_tests/total_tests*100) if total_tests > 0 else 0,
+            'critical_issues': critical_issues,
+            'test_results': self.test_results
         }
 
+async def main():
+    """Main test execution"""
+    async with InstallmentSchedulingTester() as tester:
+        results = await tester.run_all_tests()
+        return results
+
 if __name__ == "__main__":
-    tester = AdvancesSystemTester()
-    summary = tester.run_comprehensive_test()
-    
-    # Exit with appropriate code
-    if summary['success_rate'] >= 80 and summary['auth_working']:
-        exit(0)  # Success
-    else:
-        exit(1)  # Failure
+    results = asyncio.run(main())
