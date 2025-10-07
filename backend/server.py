@@ -9366,11 +9366,23 @@ async def update_work_log(
     try:
         # Accept both 'YYYY-MM-DD' with 'HH:MM' and ISO 'YYYY-MM-DDTHH:MM:SS' inputs
         if start_time and end_time and date_str:
-            # Normalize time strings
-            def norm_time(t: str) -> str:
-                return t.split('T')[1][:5] if 'T' in t else t[:5]
-            def norm_date(d: str) -> str:
-                return d.split('T')[0]
+            # Normalize time strings - handle both string and datetime inputs
+            def norm_time(t) -> str:
+                if isinstance(t, datetime):
+                    return t.strftime("%H:%M")
+                elif isinstance(t, str):
+                    return t.split('T')[1][:5] if 'T' in t else t[:5]
+                else:
+                    return str(t)[:5]
+            
+            def norm_date(d) -> str:
+                if isinstance(d, datetime):
+                    return d.strftime("%Y-%m-%d")
+                elif isinstance(d, str):
+                    return d.split('T')[0]
+                else:
+                    return str(d)[:10]
+            
             start_dt = datetime.strptime(f"{norm_date(date_str)} {norm_time(start_time)}", "%Y-%m-%d %H:%M")
             end_dt = datetime.strptime(f"{norm_date(date_str)} {norm_time(end_time)}", "%Y-%m-%d %H:%M")
             duration_minutes = max(0, int((end_dt - start_dt).total_seconds() // 60))
