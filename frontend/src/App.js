@@ -502,7 +502,7 @@ const Layout = ({ children }) => {
           </button>
         </div>
         
-        <nav className="mt-8 h-full overflow-y-auto pb-8">
+        <nav className="mt-8 flex-1 overflow-y-auto">
           <div className="px-4 space-y-2">
             {navigation.map((item) => (
               <button
@@ -514,6 +514,8 @@ const Layout = ({ children }) => {
                 {item.name}
               </button>
             ))}
+            {/* مساحة فارغة 3 سم في الأسفل */}
+            <div className="h-24"></div>
           </div>
         </nav>
       </div>
