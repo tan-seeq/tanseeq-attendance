@@ -3296,9 +3296,16 @@ async def create_installment_schedule(
         
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         
-        # تحويل البيانات لنموذج السلفة
-        from .advances_model import AdvancesDB
-        advance_obj = AdvancesDB.dict_to_transaction(advance)
+        # تحويل البيانات لنموذج السلفة - استخدام البيانات مباشرة
+        class MockAdvance:
+            def __init__(self, data):
+                self.id = data["id"]
+                self.employee_id = data["employee_id"]
+                self.employee_name = data.get("employee_name", "")
+                self.amount = data["amount"]
+                self.status = data["status"]
+        
+        advance_obj = MockAdvance(advance)
         
         # إنشاء الجدولة
         schedule = await payroll_engine.create_installment_schedule(
