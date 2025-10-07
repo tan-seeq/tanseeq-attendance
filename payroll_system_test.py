@@ -220,6 +220,7 @@ class PayrollSystemTestSuite:
                 "amount": 150.0,
                 "reason": "خصم يدوي - اختبار الربط التلقائي",
                 "deduction_type": "manual",
+                "date": "2025-11-15",  # Required field
                 "notes": "اختبار النظام المتكامل للرواتب"
             }
             
