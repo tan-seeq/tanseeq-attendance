@@ -488,10 +488,10 @@ const Layout = ({ children }) => {
     }
   };
 
-  return (
   const location = useLocation();
   const isActive = (href) => location.pathname === href;
 
+  return (
     <div className={`min-h-screen bg-gray-100 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Sidebar */}
       <div className={`fixed inset-y-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isRTL ? 'right-0' : 'left-0'} ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0 flex flex-col`}>
