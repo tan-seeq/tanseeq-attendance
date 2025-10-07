@@ -100,8 +100,11 @@ class BackendTester:
         
         # 2. POST /api/payroll/cycles (create)
         try:
+            # Use a unique month to avoid conflicts
+            import random
+            test_month = f"2025-{random.randint(2, 10):02d}"
             cycle_data = {
-                "month": "2025-01",
+                "month": test_month,
                 "notes": "Test cycle for regression testing"
             }
             response = self.session.post(f"{BASE_URL}/payroll/cycles", json=cycle_data)
