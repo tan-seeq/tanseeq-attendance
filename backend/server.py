@@ -8971,40 +8971,43 @@ async def get_clients(current_user = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting clients: {str(e)}")
 
-@api_router.post("/work-reports/clients", response_model=ClientResponse)
+@api_router.post("/work-reports/clients")
 async def create_client(
     client_data: ClientCreate,
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    current_user: User = Depends(get_current_user)
 ):
-    """Create new client"""
+    """Create new client (MongoDB)"""
     # Generate client code if not provided
     if not client_data.client_code:
         company_initials = ''.join([word[0].upper() for word in client_data.company_name.split()[:3]])
         timestamp = datetime.now().strftime("%y%m")
         client_data.client_code = f"{company_initials}{timestamp}"
-    
     # Check for duplicate client code
-    existing_client = db.query(Client).filter(Client.client_code == client_data.client_code).first()
-    if existing_client:
+    dup = await work_reports_db.clients.find_one({"client_code": client_data.client_code})
+    if dup:
         raise HTTPException(status_code=400, detail="Client code already exists")
-    
-    # Create client
-    client = Client(
-        **client_data.dict(),
-        created_by=current_user.name
-    )
-    db.add(client)
-    db.commit()
-    db.refresh(client)
-    
-    log_work_reports_activity(
-        db, current_user.id, current_user.name, "create_client",
-        table_name="clients", record_id=str(client.id),
-        after_value=client_data.dict()
-    )
-    
-    return client
+    client_doc = {
+        "id": str(uuid.uuid4()),
+        "company_name": client_data.company_name,
+        "company_name_ar": client_data.company_name_ar,
+        "client_code": client_data.client_code,
+        "industry": client_data.industry,
+        "contact_person": client_data.contact_person,
+        "phone": client_data.phone,
+        "email": client_data.email,
+        "address": client_data.address,
+        "tax_number": client_data.tax_number,
+        "commercial_registration": client_data.commercial_registration,
+        "is_active": True,
+        "created_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat(),
+        "created_by": current_user.id,
+        "created_by_name": current_user.name
+    }
+    await work_reports_db.clients.insert_one(client_doc)
+    await log_work_reports_activity(current_user.id, "create_client", f"Created client {client_doc['company_name']}", target_id=client_doc["id"], after_value=json.dumps(client_doc))
+    client_doc.pop("_id", None)
+    return client_doc
 
 @api_router.put("/work-reports/clients/{client_id}", response_model=ClientResponse)
 async def update_client(
