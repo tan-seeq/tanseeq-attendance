@@ -302,8 +302,7 @@ class ComprehensiveBackendTester:
                 headers={'Authorization': f'Bearer {token}'}
             ) as response:
                 if response.status == 200:
-                    data = await response.json()
-                    deductions = data.get('deductions', [])
+                    deductions = await response.json()  # API returns list directly
                     if deductions and len(deductions) > 0:
                         first_deduction = deductions[0]
                         if 'employee_name' in first_deduction:
