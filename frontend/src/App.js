@@ -28,6 +28,7 @@ import {
   BellIcon,
   ChevronDownIcon,
   XMarkIcon,
+  ServerIcon,
   ShieldCheckIcon,
   FolderIcon,
   ServerIcon,
