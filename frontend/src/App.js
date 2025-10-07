@@ -3287,7 +3287,7 @@ const AppWithNotifications = () => {
             <Route path="/payroll-cycles" element={
               <ProtectedRoute requiredRole="super_admin">
                 <Layout>
-                  <PayrollCycleManagement />
+                  <ErrorBoundary><PayrollCycleManagement /></ErrorBoundary>
                 </Layout>
               </ProtectedRoute>
             } />
