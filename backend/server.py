@@ -3513,6 +3513,113 @@ async def get_payroll_cycle_summary(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
 
+@app.get("/api/payroll/cycles/{cycle_id}/export/pdf")
+async def export_payroll_pdf(
+    cycle_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """تصدير كشف الراتب كـ PDF"""
+    try:
+        from fastapi.responses import StreamingResponse
+        import io
+        
+        # جلب بيانات دورة الراتب
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        
+        summaries = await db.employee_payroll_summaries.find({
+            "payroll_cycle_id": cycle_id
+        }).to_list(1000)
+        
+        # إنشاء محتوى PDF بسيط (يمكن تحسينه لاحقاً)
+        pdf_content = f"""
+        كشف الراتب - {cycle.get('display_name', 'غير محدد')}
+        
+        تاريخ الإنشاء: {cycle.get('created_at', '')}
+        
+        تفاصيل الموظفين:
+        """
+        
+        for summary in summaries:
+            pdf_content += f"""
+        الموظف: {summary.get('employee_name', 'غير محدد')}
+        الراتب الأساسي: {summary.get('basic_salary', 0)} درهم
+        البدلات: {summary.get('allowances', 0)} درهم
+        الخصومات: {summary.get('total_deductions', 0)} درهم
+        الصافي: {summary.get('net_salary', 0)} درهم
+        _______________________________________________
+        """
+        
+        # تحويل النص إلى bytes
+        pdf_bytes = pdf_content.encode('utf-8')
+        pdf_buffer = io.BytesIO(pdf_bytes)
+        
+        return StreamingResponse(
+            io.BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=payroll_{cycle_id}.pdf"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error exporting PDF: {str(e)}")
+
+@app.get("/api/payroll/cycles/{cycle_id}/export/excel")
+async def export_payroll_excel(
+    cycle_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """تصدير كشف الراتب كـ Excel"""
+    try:
+        from fastapi.responses import StreamingResponse
+        import io
+        import csv
+        
+        # جلب بيانات دورة الراتب
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        
+        summaries = await db.employee_payroll_summaries.find({
+            "payroll_cycle_id": cycle_id
+        }).to_list(1000)
+        
+        # إنشاء CSV content
+        csv_content = io.StringIO()
+        writer = csv.writer(csv_content)
+        
+        # كتابة العناوين
+        writer.writerow([
+            'اسم الموظف',
+            'الراتب الأساسي',
+            'البدلات',
+            'إجمالي الراتب',
+            'الخصومات',
+            'صافي الراتب'
+        ])
+        
+        # كتابة البيانات
+        for summary in summaries:
+            writer.writerow([
+                summary.get('employee_name', 'غير محدد'),
+                summary.get('basic_salary', 0),
+                summary.get('allowances', 0),
+                summary.get('gross_salary', 0),
+                summary.get('total_deductions', 0),
+                summary.get('net_salary', 0)
+            ])
+        
+        csv_content.seek(0)
+        
+        return StreamingResponse(
+            io.BytesIO(csv_content.getvalue().encode('utf-8-sig')),
+            media_type="application/vnd.ms-excel",
+            headers={"Content-Disposition": f"attachment; filename=payroll_{cycle_id}.csv"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error exporting Excel: {str(e)}")
+
 @app.get("/api/payroll/employee/{employee_id}")
 async def get_employee_payroll_history(
     employee_id: str,
