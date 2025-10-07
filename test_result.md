@@ -154,6 +154,18 @@ backend:
         agent: "testing"
         comment: "✅ PAYROLL SYSTEM IS NOW FULLY OPERATIONAL - No further fixes needed. All undefined variables have been fixed (basic_salary → monthly_salary, late_days → late_incidents). Export endpoints are working correctly with professional TANSEEQ branding. Mathematical calculations are accurate and handle all edge cases properly. System is ready for production use with 100% test success rate (7/7 tests passed)."
 
+  - task: "Complete installment scheduling logic for Advances/Loans within payroll"
+    implemented: false
+    working: false
+    file: "PayrollCycleManagement.js, server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTATION NEEDED: Backend has installment scheduling models and endpoints (payroll_models.py, payroll_integration_engine.py, server.py lines 3271-3366) but frontend PayrollCycleManagement.js lacks UI for: 1) Creating installment schedules for approved advances 2) Viewing existing installment schedules 3) Managing individual installments 4) Linking installments to payroll cycles. Need to complete frontend integration to achieve 100% payroll integration."
+
   - task: "Migrate Work Reports from SQLite to MongoDB"  
     implemented: true
     working: true
