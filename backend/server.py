@@ -3568,7 +3568,7 @@ async def get_payroll_cycle_detail(cycle_id: str, current_user: dict = Depends(g
 
         }
 
-@app.get("/api/payroll/cycles/{cycle_id}/export/pdf")
+
 async def export_payroll_pdf(
     cycle_id: str,
     current_user: dict = Depends(get_current_user)
