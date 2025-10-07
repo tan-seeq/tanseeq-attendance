@@ -138,10 +138,10 @@ class ComprehensiveBackendTester:
     async def test_payroll_cycle_create(self, token: str):
         """Test payroll cycle creation"""
         try:
+            # Use correct format based on API error message
+            next_month = datetime.now() + timedelta(days=32)
             cycle_data = {
-                "period_name": f"Test Cycle {datetime.now().strftime('%Y-%m')}",
-                "start_date": datetime.now().strftime('%Y-%m-%d'),
-                "end_date": (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d'),
+                "month": next_month.strftime('%Y-%m'),  # API requires YYYY-MM format
                 "description": "Test payroll cycle for backend testing"
             }
             
