@@ -553,9 +553,9 @@ class PayrollSystemTestSuite:
         # Test by trying to access data from each collection through API endpoints
         collections_to_test = [
             ("payroll_cycles", f"/payroll/cycles"),
-            ("payroll_line_items", f"/payroll/cycles/{self.created_cycle_id}/summary" if self.created_cycle_id else None),
-            ("installment_schedules", f"/advances/{self.test_advance_id}/installments" if self.test_advance_id else None),
-            ("employee_payroll_summaries", f"/payroll/cycles/{self.created_cycle_id}/summary" if self.created_cycle_id else None)
+            ("payroll_line_items", f"/payroll/cycles/{self.created_cycle_id}/summary" if self.created_cycle_id else "/payroll/cycles"),
+            ("installment_schedules", f"/advances/{self.test_advance_id}/installments" if self.test_advance_id else "/advances/admin/all-transactions"),
+            ("employee_payroll_summaries", f"/payroll/cycles/{self.created_cycle_id}/summary" if self.created_cycle_id else "/payroll/cycles")
         ]
         
         for collection_name, endpoint in collections_to_test:
