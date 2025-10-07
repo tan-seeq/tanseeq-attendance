@@ -400,8 +400,9 @@ class PayrollSystemTestSuite:
         try:
             # Create installment schedule
             schedule_data = {
-                "number_of_installments": 6,
-                "start_month": "2025-12",
+                "installment_amount": 166.67,  # Required field
+                "number_of_installments": 6,   # Required field
+                "start_date": "2025-12-01",    # Required field (not start_month)
                 "notes": "جدولة أقساط - اختبار النظام المتكامل"
             }
             
