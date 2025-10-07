@@ -49,9 +49,9 @@ const InstallmentScheduleManager = () => {
       const advancesRes = await axios.get(`${API}/advances/admin/all-transactions?status=approved`);
       const allAdvances = advancesRes.data.transactions || [];
       
-      // Filter only advance and custody transactions (not expenses)
+      // Filter only advance transactions (السلف فقط - العهد تتم تسويتها وليس جدولتها)
       const advanceTransactions = allAdvances.filter(t => 
-        ['advance', 'custody'].includes(t.transaction_type) && 
+        t.transaction_type === 'advance' && 
         t.status === 'approved'
       );
       
