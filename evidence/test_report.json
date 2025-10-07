@@ -1,57 +1,46 @@
 {
-  "timestamp": "2025-10-07T08:05:03.289200",
-  "tests": [
+  "test_suite": "Frontend Playwright Suite - Priority Round",
+  "timestamp": "2025-10-07T09:31:45.233956",
+  "viewport": "1920x800",
+  "accounts_tested": [
+    "admin@tanseeq.com",
+    "jihad@tanseeq.com"
+  ],
+  "flows_tested": [
     {
-      "name": "Admin Login",
-      "status": "PASS"
+      "flow": "Payroll Cycles",
+      "status": "success",
+      "details": "Found 6 cycles, view/calculate/export working"
     },
     {
-      "name": "Payroll Cycles Page",
-      "status": "PASS"
+      "flow": "Attendance Deductions",
+      "status": "failed",
+      "details": "Navigation menu item not found"
     },
     {
-      "name": "Payroll Create Modal",
-      "status": "PASS"
+      "flow": "Reports Exports",
+      "status": "failed",
+      "details": "Reports navigation not found"
     },
     {
-      "name": "Payroll Export Dropdown",
-      "status": "FAIL",
-      "details": "Export button not found"
-    },
-    {
-      "name": "Attendance Deductions Page",
-      "status": "PASS"
-    },
-    {
-      "name": "Attendance Deductions Page",
-      "status": "FAIL",
-      "details": "ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n  2 × retrying click action\n      - waiting 100ms\n      - waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> intercepts pointer events\n  14 × retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n"
-    },
-    {
-      "name": "Sidebar RTL and Active Highlights",
-      "status": "FAIL",
-      "details": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"nav-/payroll-cycles\\\"]\")\n    - locator resolved to <button data-testid=\"nav-/payroll-cycles\" class=\"w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 text-right text-gray-700 hover:bg-gray-100 hover:text-gray-900\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
-    },
-    {
-      "name": "User Login",
-      "status": "FAIL",
-      "details": "Timeout/error: ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+      "flow": "User Role Coverage",
+      "status": "error",
+      "details": "Page.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"input[name=\\\"email\\\"]\")\n"
     }
   ],
-  "screenshots": [
-    "01_login_page.png",
-    "02_admin_dashboard.png",
-    "03_payroll_cycles_page.png",
-    "04_payroll_create_modal.png",
-    "06_attendance_deductions_page.png",
-    "07_deductions_create_modal.png",
-    "12_user_login_timeout_error.png"
+  "evidence_collected": [
+    "Login/admin/login_page.png",
+    "Dashboard/admin/dashboard_main.png",
+    "PayrollCycles/admin/payroll_cycles_main.png",
+    "PayrollSummary/admin/payroll_summary_main.png"
   ],
-  "downloads": [],
   "summary": {
-    "total": 8,
-    "passed": 4,
-    "failed": 4,
-    "success_rate": "50.0%"
+    "total_flows": 4,
+    "successful_flows": 1,
+    "failed_flows": 2,
+    "warning_flows": 0,
+    "error_flows": 1,
+    "success_rate": "25.0%",
+    "total_evidence_files": 4
   }
 }
