@@ -9270,85 +9270,61 @@ async def get_work_logs(
         "page_size": page_size
     }
 
-@api_router.post("/work-reports/logs", response_model=WorkLogResponse)
+@api_router.post("/work-reports/logs")
 async def create_work_log(
     log_data: WorkLogCreate,
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    current_user: User = Depends(get_current_user)
 ):
-    """Create new work log entry"""
-    # Validate client and activity type exist
-    client = db.query(Client).filter(Client.id == log_data.client_id).first()
+    """Create new work log entry (MongoDB)"""
+    # Validate referenced data
+    client = await work_reports_db.clients.find_one({"id": log_data.client_id})
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
-    
-    activity_type = db.query(ActivityType).filter(ActivityType.id == log_data.activity_type_id).first()
-    if not activity_type:
+    activity = await work_reports_db.activity_types.find_one({"id": log_data.activity_type_id})
+    if not activity:
         raise HTTPException(status_code=404, detail="Activity type not found")
-    
-    # Calculate duration and total amount
-    duration_minutes = 0
-    if log_data.start_time and log_data.end_time:
-        duration = log_data.end_time - log_data.start_time
-        duration_minutes = int(duration.total_seconds() / 60)
-    
-    hourly_rate = log_data.hourly_rate or activity_type.default_rate or 0
-    total_amount = (duration_minutes / 60) * hourly_rate if duration_minutes and hourly_rate else 0
-    
-    # Create work log
-    work_log = WorkLog(
-        client_id=log_data.client_id,
-        activity_type_id=log_data.activity_type_id,
-        user_id=current_user.id,
-        user_name=current_user.name,
-        date=log_data.date,
-        start_time=log_data.start_time,
-        end_time=log_data.end_time,
-        duration_minutes=duration_minutes,
-        description=log_data.description,
-        notes=log_data.notes,
-        is_billable=log_data.is_billable,
-        hourly_rate=hourly_rate,
-        total_amount=total_amount
-    )
-    
-    db.add(work_log)
-    db.commit()
-    db.refresh(work_log)
-    
-    log_work_reports_activity(
-        db, current_user.id, current_user.name, "create_work_log",
-        table_name="work_logs", record_id=str(work_log.id),
-        after_value={
-            "client_id": str(log_data.client_id),
-            "activity_type_id": str(log_data.activity_type_id),
-            "duration_minutes": duration_minutes,
-            "total_amount": total_amount
-        }
-    )
-    
-    # Return enhanced response
-    return {
-        "id": str(work_log.id),
-        "client_id": str(work_log.client_id),
-        "activity_type_id": str(work_log.activity_type_id),
-        "user_id": work_log.user_id,
-        "user_name": work_log.user_name,
-        "date": work_log.date,
-        "start_time": work_log.start_time,
-        "end_time": work_log.end_time,
-        "duration_minutes": work_log.duration_minutes,
-        "description": work_log.description,
-        "notes": work_log.notes,
-        "is_billable": work_log.is_billable,
-        "hourly_rate": work_log.hourly_rate,
-        "total_amount": work_log.total_amount,
-        "status": work_log.status,
-        "created_at": work_log.created_at,
-        "updated_at": work_log.updated_at,
-        "client_name": client.company_name,
-        "activity_name": activity_type.name
+    # Compute duration in minutes
+    try:
+        start_dt = datetime.strptime(f"{log_data.date} {log_data.start_time}", "%Y-%m-%d %H:%M")
+        end_dt = datetime.strptime(f"{log_data.date} {log_data.end_time}", "%Y-%m-%d %H:%M")
+        duration_minutes = int((end_dt - start_dt).total_seconds() // 60)
+    except Exception:
+        duration_minutes = 0
+    hourly_rate = (activity.get("hourly_rate") or 0)
+    total_amount = round((duration_minutes / 60) * hourly_rate, 2) if duration_minutes and hourly_rate else 0
+    work_log = {
+        "id": str(uuid.uuid4()),
+        "client_id": log_data.client_id,
+        "client_name": client.get("company_name"),
+        "activity_type_id": log_data.activity_type_id,
+        "activity_name": activity.get("name"),
+        "created_by": current_user.id,
+        "created_by_name": current_user.name,
+        "date": log_data.date,
+        "start_time": log_data.start_time,
+        "end_time": log_data.end_time,
+        "start_at": start_dt.isoformat() if duration_minutes else None,
+        "end_at": end_dt.isoformat() if duration_minutes else None,
+        "duration_minutes": duration_minutes,
+        "description": log_data.description,
+        "notes": None,
+        "is_billable": True,
+        "hourly_rate": hourly_rate,
+        "total_amount": total_amount,
+        "status": "open",
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow()
     }
+    await work_reports_db.work_logs.insert_one(work_log)
+    await log_work_reports_activity(
+        current_user.id,
+        "create_work_log",
+        f"Created work log for client {client.get('company_name')}",
+        target_id=work_log["id"],
+        after_value=json.dumps({"duration_minutes": duration_minutes, "total_amount": total_amount})
+    )
+    work_log.pop("_id", None)
+    return work_log
 
 @api_router.put("/work-reports/logs/{log_id}", response_model=WorkLogResponse)
 async def update_work_log(
