@@ -357,6 +357,13 @@ const PayrollCycleManagement = () => {
                       {!cycle.is_locked && (
                         <>
                           <button
+                            onClick={() => handleEditCycle(cycle)}
+                            className="text-yellow-600 hover:text-yellow-900"
+                            title="تعديل الدورة"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+                          <button
                             onClick={() => handleCalculatePayroll(cycle)}
                             className="text-green-600 hover:text-green-900"
                             title="حساب الرواتب"
