@@ -133,6 +133,11 @@ const PayrollCycleManagement = () => {
     }
   };
 
+  const handleEditCycle = (cycle) => {
+    // توجيه لصفحة التفاصيل مع إمكانية التعديل
+    window.location.href = `/payroll-summary/${cycle.id}?edit=true`;
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       'open': 'bg-green-100 text-green-800',
