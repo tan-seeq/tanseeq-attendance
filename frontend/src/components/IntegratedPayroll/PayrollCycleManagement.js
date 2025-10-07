@@ -459,10 +459,6 @@ const PayrollCycleManagement = () => {
             </div>
           </div>
         </>
-
-            </form>
-          </div>
-        </div>
       )}
 
       {/* Lock Cycle Modal */}
