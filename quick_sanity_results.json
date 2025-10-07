@@ -1,0 +1,128 @@
+[
+  {
+    "test": "Auth Login - admin",
+    "status": "PASS",
+    "details": "Login successful for admin@tanseeq.com, role: super_admin",
+    "timestamp": "2025-10-07T08:55:11.956818"
+  },
+  {
+    "test": "Auth Me - admin",
+    "status": "PASS",
+    "details": "User info retrieved: \u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645 (admin@tanseeq.com)",
+    "timestamp": "2025-10-07T08:55:11.967126"
+  },
+  {
+    "test": "Auth Login - user",
+    "status": "PASS",
+    "details": "Login successful for jihad@tanseeq.com, role: user",
+    "timestamp": "2025-10-07T08:55:12.209670"
+  },
+  {
+    "test": "Auth Me - user",
+    "status": "PASS",
+    "details": "User info retrieved: Jihad (jihad@tanseeq.com)",
+    "timestamp": "2025-10-07T08:55:12.218148"
+  },
+  {
+    "test": "401 Check - /auth/me",
+    "status": "FAIL",
+    "details": "Expected 401, got 403",
+    "timestamp": "2025-10-07T08:55:12.226674"
+  },
+  {
+    "test": "401 Check - /payroll/cycles",
+    "status": "FAIL",
+    "details": "Expected 401, got 403",
+    "timestamp": "2025-10-07T08:55:12.273184"
+  },
+  {
+    "test": "401 Check - /employees/list",
+    "status": "FAIL",
+    "details": "Expected 401, got 403",
+    "timestamp": "2025-10-07T08:55:12.279208"
+  },
+  {
+    "test": "401 Check - /deductions",
+    "status": "FAIL",
+    "details": "Expected 401, got 403",
+    "timestamp": "2025-10-07T08:55:12.284903"
+  },
+  {
+    "test": "401 Check - /marketing-visits/active",
+    "status": "FAIL",
+    "details": "Expected 401, got 403",
+    "timestamp": "2025-10-07T08:55:12.332403"
+  },
+  {
+    "test": "Token Validation - admin",
+    "status": "PASS",
+    "details": "Token valid for admin@tanseeq.com (super_admin)",
+    "timestamp": "2025-10-07T08:55:12.339816"
+  },
+  {
+    "test": "Token Validation - user",
+    "status": "PASS",
+    "details": "Token valid for jihad@tanseeq.com (user)",
+    "timestamp": "2025-10-07T08:55:12.346785"
+  },
+  {
+    "test": "Payroll Cycles - List",
+    "status": "PASS",
+    "details": "Retrieved 5 cycles",
+    "timestamp": "2025-10-07T08:55:12.358027"
+  },
+  {
+    "test": "Payroll Cycles - Single",
+    "status": "FAIL",
+    "details": "Failed: 405 - {\"detail\":\"Method Not Allowed\"}",
+    "timestamp": "2025-10-07T08:55:12.405103"
+  },
+  {
+    "test": "Payroll Cycles - Calculate",
+    "status": "PASS",
+    "details": "Calculation successful, 0 employee totals",
+    "timestamp": "2025-10-07T08:55:12.434358"
+  },
+  {
+    "test": "Payroll Cycles - PDF Export",
+    "status": "PASS",
+    "details": "PDF exported: content-type=application/pdf, size=1738 bytes",
+    "timestamp": "2025-10-07T08:55:12.488490"
+  },
+  {
+    "test": "Payroll Cycles - Excel Export",
+    "status": "PASS",
+    "details": "Excel exported: content-type=application/vnd.ms-excel, size=332 bytes",
+    "timestamp": "2025-10-07T08:55:12.500609"
+  },
+  {
+    "test": "Employees List - admin",
+    "status": "PASS",
+    "details": "Retrieved 8 employees with names",
+    "timestamp": "2025-10-07T08:55:12.508789"
+  },
+  {
+    "test": "Deductions List - admin",
+    "status": "PASS",
+    "details": "Retrieved 15 deductions with employee_name",
+    "timestamp": "2025-10-07T08:55:12.531311"
+  },
+  {
+    "test": "Employees List - user",
+    "status": "PASS",
+    "details": "Retrieved 8 employees with names",
+    "timestamp": "2025-10-07T08:55:12.539663"
+  },
+  {
+    "test": "Deductions List - user",
+    "status": "PASS",
+    "details": "Retrieved 14 deductions with employee_name",
+    "timestamp": "2025-10-07T08:55:12.561268"
+  },
+  {
+    "test": "Manual Deductions - Create",
+    "status": "PASS",
+    "details": "Created deduction: None",
+    "timestamp": "2025-10-07T08:55:12.614279"
+  }
+]
