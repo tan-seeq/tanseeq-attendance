@@ -3298,6 +3298,13 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/installment-schedules" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <InstallmentScheduleManager />
+                </Layout>
+              </ProtectedRoute>
+            } />
             {/* Advances & Loans Routes */}
             <Route path="/advances" element={
               <ProtectedRoute>
