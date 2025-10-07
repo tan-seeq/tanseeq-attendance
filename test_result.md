@@ -1211,6 +1211,35 @@ frontend:
   - agent: "testing"
     message: "✅ ARABIC REVIEW REQUEST FOCUSED TESTING COMPLETED: اختبار سريع للإصلاحات الجديدة successfully completed with 19/20 tests passed. SPECIFIC REQUIREMENTS VERIFIED: 1) تقرير الرواتب الجديد بدون Position: Both Excel and PDF payroll exports confirmed to exclude Position column, proper formatting maintained 2) إزالة الرموز الغريبة: All reports (attendance, leaves, field-exits, payroll) completely clean of ■■■■■■ symbols with professional TANSEEQ branding 3) اختبار عام للخدمات: Login, dashboard stats, attendance check-in all working correctly 4) Enhanced field exit management with expected times, departure/return tracking, and admin notes fully functional. Only minor issue: No pending leaves available for approval testing (expected behavior). All Arabic review requirements successfully implemented and verified."
   - agent: "testing"
+  - task: "Bugfix: Attendance Deductions Admin — employee names not showing + manual form missing employee list"
+    implemented: true
+    working: true
+    file: "frontend/src/components/AttendanceDeductions/AttendanceDeductionsAdmin.js, backend/server.py (/api/employees/list, /api/deductions)"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "لا يوجد أسماء الموظفين في نظام الخصومات المتقدم والخصم اليدوي"
+      - working: true
+        agent: "main"
+        comment: "Frontend: إضافة API ثابت، جلب القائمة من /api/employees/list مع fallback إلى /api/users، إظهار القائمة في نموذج الخصم اليدوي، إظهار employee_name في الجدول. Backend: تأكيد إرجاع employee_name لكل خصم."
+  - task: "Bugfix: Payroll Cycles page — white page / render error"
+    implemented: true
+    working: true
+    file: "frontend/src/components/IntegratedPayroll/PayrollCycleManagement.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "صفحة إدارة دورات الرواتب تظهر صفحة بيضاء"
+      - working: true
+        agent: "main"
+        comment: "إعادة كتابة المكون بشكل كامل مع import صحيح، وتحميل الدورات، أزرار عرض/تعديل/حساب/قفل/فتح، وقائمة تصدير PDF/Excel."
+
     message: "✅ FIELD EXIT TIME ISSUES COMPREHENSIVE TESTING COMPLETED: اختبار مشكلة أوقات الزيارات الخارجية - All specific Arabic review requirements successfully verified with 15/15 tests passed (100% success rate): 1) ACTUAL TIMES DISPLAY: Both /field-exits and /field-exits/all endpoints correctly return actual_start_time, actual_end_time, expected_start_time, and expected_end_time fields 2) NEW FIELD EXIT CREATION: Field exits properly save expected times and initialize actual times as null 3) DEPARTURE/RETURN TRACKING: /field-exits/{id}/start and /field-exits/{id}/end endpoints working perfectly - record actual departure and return times correctly 4) DASHBOARD FUNCTIONALITY: Dashboard stats and buttons working correctly for all user roles 5) ADMIN FEATURES: Field exit approval/rejection with admin notes fully functional. Backend implementation is complete and all time-related functionality is working perfectly."
   - agent: "testing"
     message: "✅ FLEXIBLE SCHEDULE SYSTEM COMPREHENSIVE TESTING COMPLETED: اختبار النظام الجديد للدوام المرن - All Arabic review requirements successfully verified with 22/23 tests passed (95.7% success rate): 1) HATEM LOGIN TESTING: Successfully tested with hatem@tanseeq.com as specifically requested 2) ALL EMPLOYEES FLEXIBLE: Verified all employees have has_flexible_schedule = true 3) FLEXIBLE CHECK-IN: Check-in working at different times without strict time restrictions 4) FLEXIBLE CHECK-OUT: Check-out working after 6 PM with full flexibility for all employees 5) USER INFORMATION: All user profiles correctly show has_flexible_schedule = true 6) API RESPONSES: System properly handles flexible schedule information 7) NO TIME RESTRICTIONS: System allows flexible attendance without strict time constraints 8) ATTENDANCE MANAGEMENT: Super admin can clear/update attendance records as needed for testing. Only minor issue: attendance records don't include flexible_schedule field in response (doesn't affect core functionality). The flexible schedule system (الدوام المرن) is fully operational and working exactly as requested in the Arabic review. Backend implementation is complete and ready for production use."
