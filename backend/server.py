@@ -3574,9 +3574,6 @@ async def get_payroll_cycle_detail(cycle_id: str, current_user: dict = Depends(g
         raise HTTPException(status_code=500, detail=f"Error fetching payroll cycle: {str(e)}")
 
         }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
 
 @app.get("/api/payroll/cycles/{cycle_id}/export/pdf")
 async def export_payroll_pdf(
