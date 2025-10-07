@@ -650,6 +650,7 @@ const AttendanceDeductionsAdmin = () => {
             </form>
           </div>
         </div>
+        </>
       )}
     </div>
   );
