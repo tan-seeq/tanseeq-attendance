@@ -41,6 +41,7 @@ import {
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import Work Reports Components
 import WorkReportsDashboard from './WorkReports/WorkReportsDashboard';
