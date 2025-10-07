@@ -320,7 +320,7 @@ class BackendTester:
         print("\n⚡ Testing Advanced Attendance Policy Exceptions...")
         
         # Test policy retrieval for specific employees
-        test_employees = ["hatem@tan-seeq.co", "tarek.wazzan@company.com"]  # Based on review requirements
+        test_employees = ["hatem@tan-seeq.co", "tarek.wazzan@tanseeq.com"]  # Based on review requirements
         
         for email in test_employees:
             try:
