@@ -223,8 +223,7 @@ class ComprehensiveBackendTester:
                 headers={'Authorization': f'Bearer {token}'}
             ) as response:
                 if response.status == 200:
-                    data = await response.json()
-                    cycles = data.get('cycles', [])
+                    cycles = await response.json()  # API returns list directly
                     if cycles:
                         cycle_id = cycles[0].get('id')
                         
