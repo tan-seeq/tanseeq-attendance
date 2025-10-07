@@ -557,7 +557,13 @@ class BackendTester:
                 
                 response = self.session.get(f"{BASE_URL}/notifications/my")
                 if response.status_code == 200:
-                    notifications = response.json()
+                    data = response.json()
+                    # Handle both direct list and object format
+                    if isinstance(data, list):
+                        notifications = data
+                    else:
+                        notifications = data.get('notifications', [])
+                    
                     self.log_result(f"Notifications - {role}", "PASS", 
                                   f"Retrieved {len(notifications)} scoped notifications")
                 else:
