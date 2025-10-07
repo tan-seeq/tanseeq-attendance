@@ -3558,6 +3558,9 @@ async def get_payroll_cycle_summary(
             "total_employees": len(summaries)
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
+
 @api_router.get("/payroll/cycles/{cycle_id}")
 async def get_payroll_cycle_detail(cycle_id: str, current_user: dict = Depends(get_current_user)):
     cycle = await db.payroll_cycles.find_one({"id": cycle_id})
