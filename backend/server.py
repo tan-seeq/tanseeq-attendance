@@ -9011,33 +9011,35 @@ async def create_client(
     client_doc.pop("_id", None)
     return client_doc
 
-@api_router.put("/work-reports/clients/{client_id}", response_model=ClientResponse)
+@api_router.put("/work-reports/clients/{client_id}")
 async def update_client(
     client_id: str,
     client_update: ClientUpdate,
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    current_user: User = Depends(get_current_user)
 ):
-    """Update client information"""
-    client = db.query(Client).filter(Client.id == client_id).first()
+    """Update client information (MongoDB)"""
+    # Find existing client
+    client = await work_reports_db.clients.find_one({"id": client_id})
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
     
     # Store original values for audit
     original_data = {
-        "company_name": client.company_name,
-        "client_code": client.client_code,
-        "email": client.email,
-        "phone": client.phone
+        "company_name": client.get("company_name"),
+        "client_code": client.get("client_code"),
+        "email": client.get("email"),
+        "phone": client.get("phone")
     }
     
-    # Update client
+    # Prepare update data
     update_data = client_update.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(client, key, value)
+    update_data["updated_at"] = datetime.utcnow().isoformat()
     
-    client.updated_at = datetime.utcnow()
-    db.commit()
+    # Update client in MongoDB
+    await work_reports_db.clients.update_one(
+        {"id": client_id},
+        {"$set": update_data}
+    )
     db.refresh(client)
     
     log_work_reports_activity(
