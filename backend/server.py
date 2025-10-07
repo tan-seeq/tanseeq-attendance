@@ -2914,6 +2914,11 @@ async def create_manual_deduction(
             if field not in deduction_data:
                 raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
         
+        # Validate amount
+        amount = float(deduction_data["amount"])
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="مبلغ الخصم يجب أن يكون أكبر من صفر")
+        
         # Parse date
         target_date = datetime.strptime(deduction_data["date"], "%Y-%m-%d").date()
         
@@ -2923,7 +2928,7 @@ async def create_manual_deduction(
             deduction_type=DeductionType.MANUAL,
             category=DeductionCategory.CUSTOM,
             target_date=target_date,
-            amount=float(deduction_data["amount"]),
+            amount=amount,
             reason=deduction_data["reason"],
             created_by=current_user.id
         )
