@@ -9364,16 +9364,22 @@ async def update_work_log(
     duration_minutes = doc.get("duration_minutes", 0)
     hourly_rate = doc.get("hourly_rate", 0)
     try:
+        # Accept both 'YYYY-MM-DD' with 'HH:MM' and ISO 'YYYY-MM-DDTHH:MM:SS' inputs
         if start_time and end_time and date_str:
-            start_dt = datetime.strptime(f"{date_str} {start_time}", "%Y-%m-%d %H:%M")
-            end_dt = datetime.strptime(f"{date_str} {end_time}", "%Y-%m-%d %H:%M")
-            duration_minutes = int((end_dt - start_dt).total_seconds() // 60)
+            # Normalize time strings
+            def norm_time(t: str) -> str:
+                return t.split('T')[1][:5] if 'T' in t else t[:5]
+            def norm_date(d: str) -> str:
+                return d.split('T')[0]
+            start_dt = datetime.strptime(f"{norm_date(date_str)} {norm_time(start_time)}", "%Y-%m-%d %H:%M")
+            end_dt = datetime.strptime(f"{norm_date(date_str)} {norm_time(end_time)}", "%Y-%m-%d %H:%M")
+            duration_minutes = max(0, int((end_dt - start_dt).total_seconds() // 60))
             update_data["duration_minutes"] = duration_minutes
             update_data["start_at"] = start_dt.isoformat()
             update_data["end_at"] = end_dt.isoformat()
             update_data["total_amount"] = round((duration_minutes / 60) * hourly_rate, 2) if hourly_rate else doc.get("total_amount", 0)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(f"Work log recompute failed for {log_id}: {e}")
     update_data["updated_at"] = datetime.utcnow()
     await work_reports_db.work_logs.update_one({"id": log_id}, {"$set": update_data})
     await log_work_reports_activity(
