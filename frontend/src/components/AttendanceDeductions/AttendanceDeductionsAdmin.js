@@ -51,10 +51,17 @@ const AttendanceDeductionsAdmin = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get(`${API}/users`);
-      setEmployees(response.data.filter(emp => emp.role !== 'super_admin'));
+      const response = await axios.get(`${API}/employees/list`);
+      setEmployees(response.data.employees || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
+      // Fallback إلى API القديم إذا فشل الجديد
+      try {
+        const fallbackResponse = await axios.get(`${API}/users`);
+        setEmployees(fallbackResponse.data.filter(emp => emp.role !== 'super_admin'));
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+      }
     }
   };
 
