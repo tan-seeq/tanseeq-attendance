@@ -360,7 +360,6 @@ const PayrollCycleManagement = () => {
                       >
                         <EyeIcon className="h-4 w-4" />
                       </button>
-                      
                       {!cycle.is_locked && (
                         <>
                           <button
@@ -389,7 +388,6 @@ const PayrollCycleManagement = () => {
                           </button>
                         </>
                       )}
-                      
                       {cycle.is_locked && (
                         <button
                           onClick={() => handleUnlockCycle(cycle)}
@@ -399,35 +397,20 @@ const PayrollCycleManagement = () => {
                           <LockOpenIcon className="h-4 w-4" />
                         </button>
                       )}
-                      
-                      <div className="relative">
+                      <div className="relative inline-block text-left">
                         <button
                           onClick={() => setExportDropdown(exportDropdown === cycle.id ? null : cycle.id)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-gray-700 hover:text-gray-900"
                           title="تصدير"
                         >
-                          <DocumentArrowDownIcon className="h-4 w-4" />
+                          <DocumentArrowDownIcon className="h-5 w-5" />
                         </button>
                         {exportDropdown === cycle.id && (
-                          <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border z-10">
-                            <button
-                              onClick={() => {
-                                window.open(`${API}/payroll/cycles/${cycle.id}/export/pdf`, '_blank');
-                                setExportDropdown(null);
-                              }}
-                              className="block w-full text-right px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              PDF تصدير
-                            </button>
-                            <button
-                              onClick={() => {
-                                window.open(`${API}/payroll/cycles/${cycle.id}/export/excel`, '_blank');
-                                setExportDropdown(null);
-                              }}
-                              className="block w-full text-right px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              Excel تصدير
-                            </button>
+                          <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                            <div className="py-1">
+                              <a href={`${API}/payroll/cycles/${cycle.id}/export/pdf`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" target="_blank" rel="noreferrer">تحميل PDF</a>
+                              <a href={`${API}/payroll/cycles/${cycle.id}/export/excel`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" target="_blank" rel="noreferrer">تحميل Excel</a>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -437,145 +420,65 @@ const PayrollCycleManagement = () => {
               ))}
             </tbody>
           </table>
-          
-          {cycles.length === 0 && (
-            <div className="text-center py-12">
-              <CalendarIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-500">لا توجد دورات رواتب</p>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Create Cycle Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  إنشاء دورة راتب جديدة
-                </h3>
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XCircleIcon className="h-6 w-6" />
-                </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">إنشاء دورة راتب جديدة</h3>
+            <form onSubmit={handleCreateCycle} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                <input
+                  type="month"
+                  value={createData.month}
+                  onChange={(e) => setCreateData({ ...createData, month: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
+                />
               </div>
-              
-              <form onSubmit={handleCreateCycle} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الشهر *
-                  </label>
-                  <input
-                    type="month"
-                    value={createData.month}
-                    onChange={(e) => setCreateData({...createData, month: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ملاحظات
-                  </label>
-                  <textarea
-                    value={createData.notes}
-                    onChange={(e) => setCreateData({...createData, notes: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    rows={3}
-                    placeholder="ملاحظات اختيارية..."
-                  />
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    إنشاء الدورة
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                <textarea
+                  value={createData.notes}
+                  onChange={(e) => setCreateData({ ...createData, notes: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  rows="3"
+                  placeholder="اكتب أي ملاحظات"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">إنشاء</button>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">إلغاء</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* Lock Cycle Modal */}
       {showLockModal && selectedCycle && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  قفل دورة الراتب - {selectedCycle.display_name}
-                </h3>
-                <button
-                  onClick={() => setShowLockModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <XCircleIcon className="h-6 w-6" />
-                </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">قفل دورة الراتب</h3>
+            <form onSubmit={handleLockCycle} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">سبب القفل</label>
+                <textarea
+                  value={lockData.lock_reason}
+                  onChange={(e) => setLockData({ lock_reason: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  rows="3"
+                  required
+                />
               </div>
-              
-              <form onSubmit={handleLockCycle} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    سبب القفل
-                  </label>
-                  <textarea
-                    value={lockData.lock_reason}
-                    onChange={(e) => setLockData({...lockData, lock_reason: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    rows={3}
-                    placeholder="سبب قفل دورة الراتب..."
-                  />
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                  <div className="flex">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
-                    <div className="mr-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                        تحذير
-                      </h3>
-                      <div className="mt-2 text-sm text-yellow-700">
-                        <p>
-                          بعد قفل الدورة، لن يمكن تعديل أي بيانات إلا بصلاحية السوبر أدمن وتسجيل السبب.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
-                  >
-                    قفل الدورة
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowLockModal(false)}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="flex gap-3 pt-4">
+                <button type="submit" className="flex-1 bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700">قفل</button>
+                <button type="button" onClick={() => setShowLockModal(false)} className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400">إلغاء</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

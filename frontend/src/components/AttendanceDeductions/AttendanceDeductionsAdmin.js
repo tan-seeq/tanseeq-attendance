@@ -19,6 +19,9 @@ import {
   UserGroupIcon as Users
 } from '@heroicons/react/24/outline';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
 const AttendanceDeductionsAdmin = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [employees, setEmployees] = useState([]);
@@ -26,6 +29,7 @@ const AttendanceDeductionsAdmin = () => {
   const [attendanceStats, setAttendanceStats] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [selectedEmployee, setSelectedEmployee] = useState('');
+  const [selectedType, setSelectedType] = useState('');
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -58,7 +62,9 @@ const AttendanceDeductionsAdmin = () => {
       // Fallback إلى API القديم إذا فشل الجديد
       try {
         const fallbackResponse = await axios.get(`${API}/users`);
-        setEmployees(fallbackResponse.data.filter(emp => emp.role !== 'super_admin'));
+        // /api/users قد يُرجع مصفوفة مباشرة
+        const arr = Array.isArray(fallbackResponse.data) ? fallbackResponse.data : (fallbackResponse.data.users || []);
+        setEmployees(arr.filter(emp => emp.role !== 'super_admin'));
       } catch (fallbackError) {
         console.error('Fallback also failed:', fallbackError);
       }
@@ -100,16 +106,26 @@ const AttendanceDeductionsAdmin = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API}/deductions/manual`, {
-        employee_id: formData.employee_id,
-        amount: parseFloat(formData.amount),
-        reason: formData.reason,
-        date: formData.date
+      await axios.post(`${API}/deductions/manual`, {
+        employee_id: newDeduction.employee_id,
+        amount: newDeduction.category === 'minutes' ? 0 : parseFloat(newDeduction.amount || 0),
+        minutes: newDeduction.category === 'minutes' ? parseInt(newDeduction.minutes || 0) : 0,
+        reason: newDeduction.reason,
+        category: newDeduction.category,
+        date: newDeduction.date
       });
-      
       alert('تم إنشاء الخصم اليدوي بنجاح');
-      setShowModal(false);
-      setFormData({ employee_id: '', amount: '', reason: '', date: new Date().toISOString().split('T')[0] });
+      setShowCreateModal(false);
+      setNewDeduction({
+        employee_id: '',
+        deduction_type: 'manual',
+        category: 'minutes',
+        date: new Date().toISOString().slice(0, 10),
+        minutes: '',
+        amount: '',
+        reason: '',
+        attachments: []
+      });
       fetchDeductions();
     } catch (error) {
       console.error('Error creating deduction:', error);
@@ -118,8 +134,6 @@ const AttendanceDeductionsAdmin = () => {
       setLoading(false);
     }
   };
-
-  // تم إزالة الكود القديم
 
   const handleEditDeduction = async (e) => {
     e.preventDefault();
@@ -145,8 +159,8 @@ const AttendanceDeductionsAdmin = () => {
         setEditingDeduction(null);
         fetchDeductions();
       } else {
-        const error = await response.json();
-        alert(`خطأ: ${error.detail}`);
+        const err = await response.json();
+        alert(`خطأ: ${err.detail}`);
       }
     } catch (error) {
       console.error('Error updating deduction:', error);
@@ -176,8 +190,8 @@ const AttendanceDeductionsAdmin = () => {
         alert('تم إلغاء الخصم بنجاح');
         fetchDeductions();
       } else {
-        const error = await response.json();
-        alert(`خطأ: ${error.detail}`);
+        const err = await response.json();
+        alert(`خطأ: ${err.detail}`);
       }
     } catch (error) {
       console.error('Error voiding deduction:', error);
@@ -206,8 +220,8 @@ const AttendanceDeductionsAdmin = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  const totalDeductions = deductions.reduce((sum, d) => sum + (d.is_voided ? 0 : d.amount), 0);
-  const totalMinutes = deductions.reduce((sum, d) => sum + (d.is_voided ? 0 : d.minutes), 0);
+  const totalDeductions = deductions.reduce((sum, d) => sum + (d.is_voided ? 0 : (d.amount || 0)), 0);
+  const totalMinutes = deductions.reduce((sum, d) => sum + (d.is_voided ? 0 : (d.minutes || 0)), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
@@ -396,7 +410,7 @@ const AttendanceDeductionsAdmin = () => {
                         {deduction.minutes}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
-                        {deduction.amount.toFixed(2)} درهم
+                        {(deduction.amount || 0).toFixed(2)} درهم
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                         {deduction.reason}
@@ -572,7 +586,7 @@ const AttendanceDeductionsAdmin = () => {
             
             <form onSubmit={handleEditDeduction} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">الدقائق</label>
+                <label className="block text_sm font-medium text-gray-700 mb-1">الدقائق</label>
                 <input
                   type="number"
                   value={editingDeduction.minutes}
