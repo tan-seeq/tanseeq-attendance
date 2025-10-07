@@ -1,0 +1,58 @@
+{
+  "test_suite": "Comprehensive Frontend Testing - Issue Resolution",
+  "timestamp": "2025-10-07T09:34:34.721266",
+  "viewport": "1920x800",
+  "issues_addressed": [],
+  "flows_tested": [
+    {
+      "flow": "Admin Navigation Discovery",
+      "status": "success",
+      "details": "Found 13 accessible routes: إدارة دورات الرواتب, نظام الخصومات المتقدم, التقارير, الموظفين, إدارة الحضور, إدارة الإجازات, إدارة الزيارات الخارجية, كشف الرواتب, جدولة الأقساط, السُلف والعُهد, إدارة السُلف والعُهد, نظام الإشعارات, إدارة العملاء"
+    },
+    {
+      "flow": "Marketing/Field Visits",
+      "status": "error",
+      "details": "Page.query_selector: Unexpected token \"*=\" while parsing css selector \"[class*=\"timer\"], [id*=\"timer\"], text*=\"00:\"\". Did you mean to CSS.escape it?"
+    },
+    {
+      "flow": "Work Reports Logs",
+      "status": "error",
+      "details": "ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "flow": "User Role Coverage",
+      "status": "error",
+      "details": "User testing retry failed: ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+    }
+  ],
+  "evidence_collected": [
+    "Navigation/admin/admin_dashboard_full.png",
+    "Navigation/admin/sidebar_scrolled_bottom.png",
+    "Navigation/admin/sidebar_scrolled_top.png",
+    "إدارة_دورات_الرواتب/admin/إدارة_دورات_الرواتب_main.png",
+    "نظام_الخصومات_المتقدم/admin/نظام_الخصومات_المتقدم_main.png",
+    "التقارير/admin/التقارير_main.png",
+    "الموظفين/admin/الموظفين_main.png",
+    "إدارة_الحضور/admin/إدارة_الحضور_main.png",
+    "إدارة_الإجازات/admin/إدارة_الإجازات_main.png",
+    "إدارة_الزيارات_الخارجية/admin/إدارة_الزيارات_الخارجية_main.png",
+    "كشف_الرواتب/admin/كشف_الرواتب_main.png",
+    "جدولة_الأقساط/admin/جدولة_الأقساط_main.png",
+    "السُلف_والعُهد/admin/السُلف_والعُهد_main.png",
+    "إدارة_السُلف_والعُهد/admin/إدارة_السُلف_والعُهد_main.png",
+    "نظام_الإشعارات/admin/نظام_الإشعارات_main.png",
+    "إدارة_العملاء/admin/إدارة_العملاء_main.png",
+    "MarketingVisits/admin/marketing_visits_main.png",
+    "MarketingVisits/admin/visit_started.png"
+  ],
+  "critical_findings": [],
+  "summary": {
+    "total_flows": 4,
+    "successful_flows": 1,
+    "failed_flows": 0,
+    "error_flows": 3,
+    "success_rate": "25.0%",
+    "total_evidence_files": 18,
+    "critical_findings_count": 0
+  }
+}
