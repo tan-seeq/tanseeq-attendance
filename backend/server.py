@@ -9210,60 +9210,65 @@ async def create_activity_type(
 
 # ============ WORK LOG MANAGEMENT ============
 
-@api_router.get("/work-reports/logs", response_model=List[WorkLogResponse])
+@api_router.get("/work-reports/logs")
 async def get_work_logs(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     client_id: Optional[str] = None,
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    employee_id: Optional[str] = None,
+    q: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 20,
+    current_user: User = Depends(get_current_user)
 ):
-    """Get work logs with filtering options"""
-    query = db.query(WorkLog)
-    
-    # Filter by user for non-admin users
+    """Get work logs (MongoDB) with filters, search, and pagination.
+    Returns: { items: [...], total: int, page: int, page_size: int }
+    """
+    coll = work_reports_db.work_logs
+    # Build filter
+    filter_query: Dict[str, Any] = {}
+    # RBAC: regular users only see their own logs
     if current_user.role == "user":
-        query = query.filter(WorkLog.user_id == current_user.id)
-    
-    # Date filters
-    if start_date:
-        query = query.filter(WorkLog.date >= datetime.strptime(start_date, "%Y-%m-%d"))
-    if end_date:
-        query = query.filter(WorkLog.date <= datetime.strptime(end_date, "%Y-%m-%d"))
-    
+        filter_query["created_by"] = current_user.id
+    elif employee_id:
+        filter_query["created_by"] = employee_id
+    # Date range using start_at
+    try:
+        if start_date:
+            start_dt = datetime.strptime(start_date + " 00:00", "%Y-%m-%d %H:%M")
+            filter_query.setdefault("start_at", {})["$gte"] = start_dt
+        if end_date:
+            end_dt = datetime.strptime(end_date + " 23:59:59", "%Y-%m-%d %H:%M:%S")
+            filter_query.setdefault("start_at", {})["$lte"] = end_dt
+    except Exception:
+        pass
     # Client filter
     if client_id:
-        query = query.filter(WorkLog.client_id == client_id)
-    
-    work_logs = query.order_by(WorkLog.date.desc()).all()
-    
-    # Enhance response with client and activity names
-    enhanced_logs = []
-    for log in work_logs:
-        log_dict = {
-            "id": str(log.id),
-            "client_id": str(log.client_id),
-            "activity_type_id": str(log.activity_type_id),
-            "user_id": log.user_id,
-            "user_name": log.user_name,
-            "date": log.date,
-            "start_time": log.start_time,
-            "end_time": log.end_time,
-            "duration_minutes": log.duration_minutes,
-            "description": log.description,
-            "notes": log.notes,
-            "is_billable": log.is_billable,
-            "hourly_rate": log.hourly_rate,
-            "total_amount": log.total_amount,
-            "status": log.status,
-            "created_at": log.created_at,
-            "updated_at": log.updated_at,
-            "client_name": log.client.company_name if log.client else "",
-            "activity_name": log.activity_type.name if log.activity_type else ""
-        }
-        enhanced_logs.append(log_dict)
-    
-    return enhanced_logs
+        filter_query["client_id"] = client_id
+    # Text search over description/notes/client_name/activity_name
+    if q:
+        filter_query["$text"] = {"$search": q}
+    # Pagination params
+    page = max(1, page)
+    page_size = max(1, min(100, page_size))
+    skip = (page - 1) * page_size
+    # Count total
+    total = await coll.count_documents(filter_query)
+    # Query items sorted by start_at desc then created_at desc
+    cursor = coll.find(filter_query).sort([
+        ("start_at", -1),
+        ("created_at", -1)
+    ]).skip(skip).limit(page_size)
+    items = []
+    async for doc in cursor:
+        doc.pop("_id", None)
+        items.append(doc)
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
 
 @api_router.post("/work-reports/logs", response_model=WorkLogResponse)
 async def create_work_log(
