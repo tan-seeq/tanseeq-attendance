@@ -3,132 +3,162 @@
     "test": "Authentication - super_admin",
     "status": "PASS",
     "details": "Successfully authenticated admin@tanseeq.com",
-    "timestamp": "2025-10-07T07:25:07.433055"
+    "timestamp": "2025-10-07T07:25:54.147267"
   },
   {
     "test": "Authentication - user",
     "status": "PASS",
     "details": "Successfully authenticated jihad@tanseeq.com",
-    "timestamp": "2025-10-07T07:25:07.682148"
+    "timestamp": "2025-10-07T07:25:54.411620"
   },
   {
     "test": "Authentication - hatem",
     "status": "PASS",
     "details": "Successfully authenticated hatem@tan-seeq.co",
-    "timestamp": "2025-10-07T07:25:07.928735"
+    "timestamp": "2025-10-07T07:25:54.660174"
   },
   {
     "test": "Payroll Cycles - List",
     "status": "PASS",
     "details": "Retrieved 3 cycles",
-    "timestamp": "2025-10-07T07:25:07.942088"
+    "timestamp": "2025-10-07T07:25:54.672669"
   },
   {
     "test": "Payroll Cycles - Filters",
     "status": "PASS",
     "details": "Filters working",
-    "timestamp": "2025-10-07T07:25:07.958979"
+    "timestamp": "2025-10-07T07:25:54.682357"
   },
   {
     "test": "Payroll Cycles - Create",
-    "status": "FAIL",
-    "details": "Failed: 400 - {\"detail\":\"\u062f\u0648\u0631\u0629 \u0631\u0627\u062a\u0628 \u0644\u0634\u0647\u0631 2025-01 \u0645\u0648\u062c\u0648\u062f\u0629 \u0628\u0627\u0644\u0641\u0639\u0644\"}",
-    "timestamp": "2025-10-07T07:25:08.012755"
+    "status": "PASS",
+    "details": "Created cycle: 5da0b17d-846a-4a0c-9191-8bbd7bc082b7",
+    "timestamp": "2025-10-07T07:25:54.692988"
+  },
+  {
+    "test": "Payroll Cycles - Lock",
+    "status": "PASS",
+    "details": "Cycle locked successfully",
+    "timestamp": "2025-10-07T07:25:54.701804"
+  },
+  {
+    "test": "Payroll Cycles - Unlock",
+    "status": "PASS",
+    "details": "Cycle unlocked successfully",
+    "timestamp": "2025-10-07T07:25:54.752323"
+  },
+  {
+    "test": "Payroll Cycles - Calculate",
+    "status": "PASS",
+    "details": "Calculation successful, totals returned: 0 items",
+    "timestamp": "2025-10-07T07:25:54.779130"
+  },
+  {
+    "test": "Payroll Cycles - PDF Export",
+    "status": "PASS",
+    "details": "PDF exported successfully, size: 1736 bytes",
+    "timestamp": "2025-10-07T07:25:54.801011"
+  },
+  {
+    "test": "Payroll Cycles - Excel Export",
+    "status": "PASS",
+    "details": "Excel exported successfully, size: 332 bytes",
+    "timestamp": "2025-10-07T07:25:54.813756"
   },
   {
     "test": "Employees List",
     "status": "PASS",
     "details": "Retrieved 8 employees with id+name",
-    "timestamp": "2025-10-07T07:25:08.029661"
+    "timestamp": "2025-10-07T07:25:54.824413"
   },
   {
     "test": "Deductions List",
     "status": "PASS",
-    "details": "Retrieved 12 deductions with employee_name",
-    "timestamp": "2025-10-07T07:25:08.051114"
+    "details": "Retrieved 13 deductions with employee_name",
+    "timestamp": "2025-10-07T07:25:54.845994"
   },
   {
     "test": "Manual Deductions - Create",
     "status": "PASS",
     "details": "Created deduction: None",
-    "timestamp": "2025-10-07T07:25:08.065774"
+    "timestamp": "2025-10-07T07:25:54.900092"
   },
   {
     "test": "Attendance Policy - hatem@tan-seeq.co",
     "status": "SKIP",
     "details": "Employee hatem@tan-seeq.co not found in system",
-    "timestamp": "2025-10-07T07:25:08.118553"
+    "timestamp": "2025-10-07T07:25:54.910395"
   },
   {
-    "test": "Attendance Policy - tarek.wazzan@company.com",
-    "status": "SKIP",
-    "details": "Employee tarek.wazzan@company.com not found in system",
-    "timestamp": "2025-10-07T07:25:08.130916"
+    "test": "Attendance Policy - tarek.wazzan@tanseeq.com",
+    "status": "PASS",
+    "details": "Policy retrieved: {\n  \"policy\": {\n    \"id\": \"ce63e6c0-911b-4e45-b946-0ca601de64f7\",\n    \"employee_id\": \"83da4c33-c9c2-42cd-9b82-dea36ff1f05d\",\n    \"employee_name\": \"Tarek Wazzan\",\n    \"start_time\": \"08:00:00\",\n    \"end_time\": \"18:00:00\",\n    \"no_penalties\": false,\n    \"early_start_allowed\": true,\n    \"end_flexible\": true,\n    \"grace_period_minutes\": 0,\n    \"custom_working_hours\": null,\n    \"effective_from\": \"2025-10-07\",\n    \"effective_until\": null,\n    \"created_at\": \"2025-10-07T07:04:52.836098\",\n    \"updated_at\": null\n  }\n}",
+    "timestamp": "2025-10-07T07:25:54.980962"
   },
   {
     "test": "Work Reports - Create Log",
     "status": "FAIL",
     "details": "Failed: 404 - {\"detail\":\"Client not found\"}",
-    "timestamp": "2025-10-07T07:25:08.183467"
+    "timestamp": "2025-10-07T07:25:55.031124"
   },
   {
     "test": "Work Reports - Search/Filter",
     "status": "PASS",
     "details": "Search successful, found 0 logs",
-    "timestamp": "2025-10-07T07:25:08.197727"
+    "timestamp": "2025-10-07T07:25:55.042844"
   },
   {
     "test": "Marketing Visits - Start",
     "status": "PASS",
-    "details": "Visit started: d79ca0fc-0e29-43f8-ad79-9f03ed5e27b9",
-    "timestamp": "2025-10-07T07:25:08.211625"
+    "details": "Visit started: 74d23a75-1b6a-499e-a9d5-2fa9114b41c2",
+    "timestamp": "2025-10-07T07:25:55.053184"
   },
   {
     "test": "Marketing Visits - Get Active",
     "status": "PASS",
-    "details": "Active visit retrieved: d79ca0fc-0e29-43f8-ad79-9f03ed5e27b9",
-    "timestamp": "2025-10-07T07:25:08.263591"
+    "details": "Active visit retrieved: 74d23a75-1b6a-499e-a9d5-2fa9114b41c2",
+    "timestamp": "2025-10-07T07:25:55.104112"
   },
   {
     "test": "Marketing Visits - Complete",
     "status": "PASS",
     "details": "Visit completed with mandatory report",
-    "timestamp": "2025-10-07T07:25:10.282929"
+    "timestamp": "2025-10-07T07:25:57.125418"
   },
   {
     "test": "Marketing Visits - Super Admin Notification",
     "status": "FAIL",
     "details": "No marketing visit notifications found",
-    "timestamp": "2025-10-07T07:25:10.334614"
+    "timestamp": "2025-10-07T07:25:57.133791"
   },
   {
     "test": "Notifications - super_admin",
     "status": "PASS",
     "details": "Retrieved 0 scoped notifications",
-    "timestamp": "2025-10-07T07:25:10.386454"
+    "timestamp": "2025-10-07T07:25:57.182231"
   },
   {
     "test": "Notifications - user",
     "status": "PASS",
-    "details": "Retrieved 12 scoped notifications",
-    "timestamp": "2025-10-07T07:25:10.398189"
+    "details": "Retrieved 13 scoped notifications",
+    "timestamp": "2025-10-07T07:25:57.192581"
   },
   {
     "test": "Notifications - hatem",
     "status": "PASS",
     "details": "Retrieved 1 scoped notifications",
-    "timestamp": "2025-10-07T07:25:10.449573"
+    "timestamp": "2025-10-07T07:25:57.201053"
   },
   {
     "test": "Export Parity - PDF",
     "status": "PASS",
     "details": "PDF export contains data (size: 1738 bytes)",
-    "timestamp": "2025-10-07T07:25:10.550045"
+    "timestamp": "2025-10-07T07:25:57.304195"
   },
   {
     "test": "Export Parity - Excel",
     "status": "FAIL",
     "details": "Excel export appears empty or failed",
-    "timestamp": "2025-10-07T07:25:10.603094"
+    "timestamp": "2025-10-07T07:25:57.316620"
   }
 ]
