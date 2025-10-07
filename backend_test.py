@@ -96,9 +96,47 @@ class InstallmentSchedulingTester:
             self.log_test(f"Authentication - {role}", "FAIL", f"Exception: {str(e)}")
             return None
 
+    async def get_existing_advance(self, token: str) -> Optional[str]:
+        """Get an existing approved advance for testing"""
+        try:
+            async with self.session.get(
+                f"{API_BASE}/advances/admin/all-transactions?status=approved&transaction_type=advance&limit=10",
+                headers={'Authorization': f'Bearer {token}'}
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    transactions = data.get('transactions', [])
+                    
+                    # Find an advance that doesn't have an installment schedule yet
+                    for transaction in transactions:
+                        advance_id = transaction.get('id')
+                        if advance_id:
+                            # Check if this advance already has a schedule
+                            async with self.session.get(
+                                f"{API_BASE}/advances/{advance_id}/installments",
+                                headers={'Authorization': f'Bearer {token}'}
+                            ) as schedule_response:
+                                if schedule_response.status == 404:  # No existing schedule
+                                    self.log_test("Get Existing Advance", "PASS", f"Found existing advance ID: {advance_id} without installment schedule")
+                                    return advance_id
+                    
+                    self.log_test("Get Existing Advance", "WARN", "No suitable existing advances found")
+                    return None
+                else:
+                    self.log_test("Get Existing Advance", "FAIL", f"Status: {response.status}")
+                    return None
+        except Exception as e:
+            self.log_test("Get Existing Advance", "FAIL", f"Exception: {str(e)}")
+            return None
+
     async def create_test_advance(self, token: str) -> Optional[str]:
         """Create a test advance for installment scheduling"""
         try:
+            # First try to get an existing advance
+            existing_advance = await self.get_existing_advance(token)
+            if existing_advance:
+                return existing_advance
+            
             # Get a test employee (jihad)
             employee_id = None
             async with self.session.get(
