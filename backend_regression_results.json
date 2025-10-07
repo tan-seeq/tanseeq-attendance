@@ -1,0 +1,152 @@
+[
+  {
+    "test": "Authentication - super_admin",
+    "status": "PASS",
+    "details": "Successfully authenticated admin@tanseeq.com",
+    "timestamp": "2025-10-07T07:23:45.145068"
+  },
+  {
+    "test": "Authentication - user",
+    "status": "PASS",
+    "details": "Successfully authenticated jihad@tanseeq.com",
+    "timestamp": "2025-10-07T07:23:45.388085"
+  },
+  {
+    "test": "Authentication - hatem",
+    "status": "PASS",
+    "details": "Successfully authenticated hatem@tan-seeq.co",
+    "timestamp": "2025-10-07T07:23:45.638905"
+  },
+  {
+    "test": "Payroll Cycles - List",
+    "status": "FAIL",
+    "details": "Exception: 'list' object has no attribute 'get'",
+    "timestamp": "2025-10-07T07:23:45.650596"
+  },
+  {
+    "test": "Payroll Cycles - Create",
+    "status": "PASS",
+    "details": "Created cycle: 3130de4c-b8bb-46ba-8e77-bb3d83298c93",
+    "timestamp": "2025-10-07T07:23:45.660141"
+  },
+  {
+    "test": "Payroll Cycles - Lock",
+    "status": "PASS",
+    "details": "Cycle locked successfully",
+    "timestamp": "2025-10-07T07:23:45.687861"
+  },
+  {
+    "test": "Payroll Cycles - Unlock",
+    "status": "PASS",
+    "details": "Cycle unlocked successfully",
+    "timestamp": "2025-10-07T07:23:45.738161"
+  },
+  {
+    "test": "Payroll Cycles - Calculate",
+    "status": "PASS",
+    "details": "Calculation successful, totals returned: 0 items",
+    "timestamp": "2025-10-07T07:23:45.781747"
+  },
+  {
+    "test": "Payroll Cycles - PDF Export",
+    "status": "PASS",
+    "details": "PDF exported successfully, size: 1736 bytes",
+    "timestamp": "2025-10-07T07:23:45.802836"
+  },
+  {
+    "test": "Payroll Cycles - Excel Export",
+    "status": "PASS",
+    "details": "Excel exported successfully, size: 332 bytes",
+    "timestamp": "2025-10-07T07:23:45.813991"
+  },
+  {
+    "test": "Employees List",
+    "status": "FAIL",
+    "details": "No employees returned",
+    "timestamp": "2025-10-07T07:23:45.821760"
+  },
+  {
+    "test": "Deductions List",
+    "status": "PASS",
+    "details": "Retrieved 12 deductions with employee_name",
+    "timestamp": "2025-10-07T07:23:45.840889"
+  },
+  {
+    "test": "Manual Deductions",
+    "status": "SKIP",
+    "details": "No employee ID available",
+    "timestamp": "2025-10-07T07:23:45.840922"
+  },
+  {
+    "test": "Attendance Policy - hatem@tan-seeq.co",
+    "status": "FAIL",
+    "details": "Exception: 'str' object has no attribute 'get'",
+    "timestamp": "2025-10-07T07:23:45.848726"
+  },
+  {
+    "test": "Attendance Policy - tarek.wazzan@company.com",
+    "status": "FAIL",
+    "details": "Exception: 'str' object has no attribute 'get'",
+    "timestamp": "2025-10-07T07:23:45.898211"
+  },
+  {
+    "test": "Work Reports - Create Log",
+    "status": "FAIL",
+    "details": "Failed: 404 - {\"detail\":\"Client not found\"}",
+    "timestamp": "2025-10-07T07:23:45.907153"
+  },
+  {
+    "test": "Work Reports - Search/Filter",
+    "status": "PASS",
+    "details": "Search successful, found 0 logs",
+    "timestamp": "2025-10-07T07:23:45.918362"
+  },
+  {
+    "test": "Marketing Visits - Start",
+    "status": "PASS",
+    "details": "Visit started: 27a9d9eb-94ec-4cca-8e01-aa8643477062",
+    "timestamp": "2025-10-07T07:23:45.928855"
+  },
+  {
+    "test": "Marketing Visits - Get Active",
+    "status": "PASS",
+    "details": "Active visit retrieved: 27a9d9eb-94ec-4cca-8e01-aa8643477062",
+    "timestamp": "2025-10-07T07:23:45.977041"
+  },
+  {
+    "test": "Marketing Visits - Complete",
+    "status": "PASS",
+    "details": "Visit completed with mandatory report",
+    "timestamp": "2025-10-07T07:23:47.993639"
+  },
+  {
+    "test": "Marketing Visits - Super Admin Notification",
+    "status": "FAIL",
+    "details": "Exception: 'str' object has no attribute 'get'",
+    "timestamp": "2025-10-07T07:23:48.003012"
+  },
+  {
+    "test": "Notifications - super_admin",
+    "status": "PASS",
+    "details": "Retrieved 1 scoped notifications",
+    "timestamp": "2025-10-07T07:23:48.011841"
+  },
+  {
+    "test": "Notifications - user",
+    "status": "PASS",
+    "details": "Retrieved 1 scoped notifications",
+    "timestamp": "2025-10-07T07:23:48.020824"
+  },
+  {
+    "test": "Notifications - hatem",
+    "status": "PASS",
+    "details": "Retrieved 1 scoped notifications",
+    "timestamp": "2025-10-07T07:23:48.070341"
+  },
+  {
+    "test": "Export Parity",
+    "status": "FAIL",
+    "details": "Exception: 'list' object has no attribute 'get'",
+    "timestamp": "2025-10-07T07:23:48.081309"
+  }
+]
