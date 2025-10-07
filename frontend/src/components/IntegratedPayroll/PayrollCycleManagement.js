@@ -425,8 +425,11 @@ const PayrollCycleManagement = () => {
 
       {/* Create Cycle Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style={{pointerEvents:'auto'}}> 
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" role="dialog" aria-modal="true" data-testid="create-cycle-modal">
+        <>
+          <div className="fixed inset-0 z-40 bg-black bg-opacity-50" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" role="dialog" aria-modal="true" data-testid="create-cycle-modal">
+
             <h3 className="text-lg font-semibold text-gray-900 mb-4">إنشاء دورة راتب جديدة</h3>
             <form onSubmit={handleCreateCycle} className="space-y-4">
               <div>
