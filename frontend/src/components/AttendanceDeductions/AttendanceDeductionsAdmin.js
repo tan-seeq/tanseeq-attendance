@@ -88,7 +88,7 @@ const AttendanceDeductionsAdmin = () => {
     
     try {
       const response = await axios.get(`${API}/attendance/stats/${selectedEmployee}/${selectedMonth}`);
-      const data = await response.json();
+      const data = response.data;
       setAttendanceStats(data);
     } catch (error) {
       console.error('Error fetching attendance stats:', error);
