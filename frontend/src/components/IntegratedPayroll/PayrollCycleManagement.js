@@ -398,13 +398,37 @@ const PayrollCycleManagement = () => {
                         </button>
                       )}
                       
-                      <button
-                        onClick={() => window.open(`${API}/payroll/cycles/${cycle.id}/export`, '_blank')}
-                        className="text-indigo-600 hover:text-indigo-900"
-                        title="تصدير"
-                      >
-                        <DocumentArrowDownIcon className="h-4 w-4" />
-                      </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => setExportDropdown(exportDropdown === cycle.id ? null : cycle.id)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title="تصدير"
+                        >
+                          <DocumentArrowDownIcon className="h-4 w-4" />
+                        </button>
+                        {exportDropdown === cycle.id && (
+                          <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border z-10">
+                            <button
+                              onClick={() => {
+                                window.open(`${API}/payroll/cycles/${cycle.id}/export/pdf`, '_blank');
+                                setExportDropdown(null);
+                              }}
+                              className="block w-full text-right px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              PDF تصدير
+                            </button>
+                            <button
+                              onClick={() => {
+                                window.open(`${API}/payroll/cycles/${cycle.id}/export/excel`, '_blank');
+                                setExportDropdown(null);
+                              }}
+                              className="block w-full text-right px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Excel تصدير
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
