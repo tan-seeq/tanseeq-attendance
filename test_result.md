@@ -1211,6 +1211,35 @@ frontend:
     needs_retesting: false
     status_history:
       - working: "NA"
+  - task: "PayrollCycles frontend fixes (export dropdown, edit, UX)"
+    implemented: true
+    working: true
+    file: "frontend/src/components/IntegratedPayroll/PayrollCycleManagement.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "صفحات بيضاء/تعطل في إدارة دورات الرواتب"
+      - working: true
+        agent: "main"
+        comment: "ثبتنا الاستيراد وأعدنا كتابة الملف لضمان عمل الجدول والأزرار (عرض/تعديل/قفل/فتح/حساب/تصدير PDF/Excel) مع عدم كسر أي مسارات."
+  - task: "Attendance Deductions: ensure employee names show everywhere + manual deduction form"
+    implemented: true
+    working: true
+    file: "frontend/src/components/AttendanceDeductions/AttendanceDeductionsAdmin.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "لا تظهر أسماء الموظفين في نظام الخصومات المتقدم والخصم اليدوي"
+      - working: true
+        agent: "main"
+        comment: "إضافة const API + استخدام /api/employees/list ثم fallback إلى /api/users مع تطبيع الاستجابة. جدول الخصومات يعرض employee_name ويُظهر القائمة في نموذج الخصم اليدوي."
+
         agent: "main"
         comment: "URGENT TESTING REQUEST: Test TANSEEQ HR Marketing Visits system with recent critical fixes. CRITICAL TESTS REQUIRED: Phase 1 - Navigation Menu Fix (Login as Employee jihad@tanseeq.com/123456, Check RIGHT SIDEBAR for 'الزيارات الخارجية التسويقية' menu item visible and clickable for all users not just super_admin, Click to navigate), Phase 2 - Marketing Visits Page Layout (Verify page loads with proper TANSEEQ layout: top horizontal navigation bar, right sidebar with all menu items, main content area with Marketing Visits interface, Check for page header '🏢 الزيارات الخارجية التسويقية', Verify 'بدء زيارة جديدة' button is visible), Phase 3 - Visit History Display Fix (Check '📋 تاريخ الزيارات' table section, Verify existing completed visit appears: Client 'شركة الإمارات للاستشارات الضريبية', Status 'مكتملة' (Completed), Proper Arabic date/time display, Confirm visit history is no longer empty), Phase 4 - System Performance (Check page loading speed should be faster now, Test navigation between pages for responsiveness, Verify no slow loading or hanging issues), Phase 5 - New Visit Test if possible (Try creating new test visit with Client 'عميل تجريبي', Location 'مكتب دبي', Area 'ديرة', Purpose 'لقاء عميل', Start visit and check active visit display, Complete visit with mandatory report, Verify it appears in history immediately). FIXES APPLIED: Added Marketing Visits to sidebar for all users, Fixed MongoDB ObjectId serialization issues, Disabled CPU-intensive startup events, Fixed visit history API endpoints, Proper layout integration with ProtectedRoute + Layout. CRITICAL SUCCESS CRITERIA: 'الزيارات الخارجية التسويقية' visible in sidebar, Page displays with complete TANSEEQ layout, Visit history shows existing completed visits, System performance improved (lower CPU usage), New visits can be created and tracked properly."
       - working: true
