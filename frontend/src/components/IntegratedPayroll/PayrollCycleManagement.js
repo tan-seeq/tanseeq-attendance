@@ -429,8 +429,8 @@ const PayrollCycleManagement = () => {
                         {exportDropdown === cycle.id && (
                           <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                             <div className="py-1">
-                              <a href={`${API}/payroll/cycles/${cycle.id}/export/pdf`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" target="_blank" rel="noreferrer">تحميل PDF</a>
-                              <a href={`${API}/payroll/cycles/${cycle.id}/export/excel`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" target="_blank" rel="noreferrer">تحميل Excel</a>
+                              <button onClick={() => downloadExport(cycle, 'pdf')} className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">تحميل PDF</button>
+                              <button onClick={() => downloadExport(cycle, 'excel')} className="block w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">تحميل Excel</button>
                             </div>
                           </div>
                         )}
