@@ -220,7 +220,7 @@ class WorkReportsLogsTester:
                     
                     # Validate recomputed values
                     expected_duration = 180  # 3 hours = 180 minutes
-                    expected_amount = 450.0  # 3 hours * 150 AED/hour
+                    expected_amount = round((180 / 60) * self.activity_rate, 2)  # 3 hours * activity_rate
                     
                     if duration_minutes == expected_duration and total_amount == expected_amount:
                         self.log_test(
