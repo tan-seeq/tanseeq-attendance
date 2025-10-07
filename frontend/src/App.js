@@ -442,32 +442,30 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
 
   const navigation = [
-    { name: t('dashboard'), href: '/dashboard', icon: ChartBarIcon },
-    // الزيارات الخارجية للجميع
-    { name: 'الزيارات الخارجية التسويقية', href: '/marketing-visits', icon: BuildingOfficeIcon },
-    ...(user?.role === 'super_admin' ? [
-      { name: 'إدارة خصومات الحضور', href: '/attendance-deductions', icon: ExclamationTriangleIcon }
-    ] : []),
-    { name: 'خصوماتي', href: '/my-deductions', icon: ClockIcon },
-    ...(user?.role === 'super_admin' ? [
-      { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
-      { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon }
-    ] : []),
-    ...(user?.role === 'user' ? [
-      { name: t('attendance'), href: '/attendance', icon: ClockIcon },
-      { name: 'خصوماتي', href: '/my-deductions', icon: CalculatorIcon },
-      { name: t('leaves'), href: '/leaves', icon: CalendarIcon },
-      { name: t('field_exits'), href: '/field-exits', icon: DocumentTextIcon },
-    ] : []),
+    { name: 'الرئيسية', href: '/dashboard', icon: ChartBarIcon },
+    
+    // قسم الموظفين - للجميع
+    { name: 'الحضور', href: '/attendance', icon: ClockIcon },
+    { name: 'الإجازات', href: '/leaves', icon: CalendarIcon },
+    { name: 'الزيارات الخارجية', href: '/field-exits', icon: DocumentTextIcon },
+    { name: 'الزيارات التسويقية', href: '/marketing-visits', icon: BuildingOfficeIcon },
+    { name: 'خصوماتي', href: '/my-deductions', icon: CalculatorIcon },
+    
+    // قسم الإدارة - للمديرين والسوبر أدمن
     ...(user?.role === 'admin' || user?.role === 'super_admin' ? [
-      { name: t('employees'), href: '/employees', icon: UserGroupIcon },
-      { name: t('attendance'), href: '/attendance-management', icon: ClockIcon },
-      { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: CalculatorIcon },
-      { name: t('leaves'), href: '/leave-management', icon: CalendarIcon },
-      { name: t('field_exits'), href: '/field-exit-management', icon: DocumentTextIcon },
-      { name: t('reports'), href: '/reports', icon: DocumentTextIcon },
-      { name: 'تقرير العمل الإضافي', href: '/overtime-report', icon: ClockIcon },
-      { name: t('payroll'), href: '/payroll', icon: CurrencyDollarIcon },
+      { name: 'الموظفين', href: '/employees', icon: UserGroupIcon },
+      { name: 'إدارة الحضور', href: '/attendance-management', icon: ClockIcon },
+      { name: 'إدارة الإجازات', href: '/leave-management', icon: CalendarIcon },
+      { name: 'إدارة الزيارات الخارجية', href: '/field-exit-management', icon: DocumentTextIcon },
+      { name: 'التقارير', href: '/reports', icon: DocumentTextIcon },
+      { name: 'كشف الرواتب', href: '/payroll', icon: CurrencyDollarIcon },
+    ] : []),
+    
+    // قسم السوبر أدمن فقط
+    ...(user?.role === 'super_admin' ? [
+      { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: ExclamationTriangleIcon },
+      { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
+      { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'عرض المرفقات', href: '/attachment-viewer', icon: FolderIcon },
     ] : []),
