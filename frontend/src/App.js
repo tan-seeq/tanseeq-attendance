@@ -31,7 +31,6 @@ import {
   ServerIcon,
   ShieldCheckIcon,
   FolderIcon,
-  ServerIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
   InformationCircleIcon,
