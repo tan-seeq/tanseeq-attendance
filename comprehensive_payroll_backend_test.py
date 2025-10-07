@@ -227,13 +227,15 @@ class ComprehensiveBackendTester:
                     if cycles:
                         cycle_id = cycles[0].get('id')
                         
-                        async with self.session.post(
+                        # Use GET method for calculation as per API
+                        async with self.session.get(
                             f"{API_BASE}/payroll/cycles/{cycle_id}/calculate",
                             headers={'Authorization': f'Bearer {token}'}
                         ) as calc_response:
                             if calc_response.status == 200:
                                 calc_data = await calc_response.json()
-                                self.log_test("Payroll - Calculate", "PASS", f"Calculation completed for cycle {cycle_id}")
+                                results = calc_data.get('results', [])
+                                self.log_test("Payroll - Calculate", "PASS", f"Calculation completed for cycle {cycle_id}, processed {len(results)} employees")
                             else:
                                 error_text = await calc_response.text()
                                 self.log_test("Payroll - Calculate", "FAIL", f"Status: {calc_response.status}, Error: {error_text}")
