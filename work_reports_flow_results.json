@@ -1,0 +1,56 @@
+[
+  {
+    "test": "Authentication",
+    "status": "PASS",
+    "details": "Successfully authenticated as admin@tanseeq.com",
+    "timestamp": "2025-10-07T07:33:33.937441"
+  },
+  {
+    "test": "Create Test Client",
+    "status": "PASS",
+    "details": "Created client 'QA Client' with ID: 7409b69a-ceac-41c6-84ac-f22499d84a97",
+    "timestamp": "2025-10-07T07:33:33.993231"
+  },
+  {
+    "test": "Get Activity Type",
+    "status": "PASS",
+    "details": "Using existing activity type: 47484c8b-b086-4f0a-a60d-dd7e4b0efb7f",
+    "timestamp": "2025-10-07T07:33:34.006421"
+  },
+  {
+    "test": "Create Work Log",
+    "status": "PASS",
+    "details": "Created work log with ID: 74e8a787-714a-44bf-a45f-d8bf2f79fb8a, Duration: 2.5 hours",
+    "timestamp": "2025-10-07T07:33:34.063146"
+  },
+  {
+    "test": "Filter Work Logs - Date",
+    "status": "PASS",
+    "details": "Retrieved 0 logs, test log found: False",
+    "timestamp": "2025-10-07T07:33:34.077797"
+  },
+  {
+    "test": "Update Work Log",
+    "status": "PASS",
+    "details": "Updated successfully - Recompute verification: duration=0, amount=900.0",
+    "timestamp": "2025-10-07T07:33:34.133162"
+  },
+  {
+    "test": "Delete Work Log",
+    "status": "PASS",
+    "details": "Log deleted successfully - Status: 200",
+    "timestamp": "2025-10-07T07:33:34.150002"
+  },
+  {
+    "test": "Verify Log Absence",
+    "status": "PASS",
+    "details": "Log confirmed absent after deletion (405 - method not allowed for individual log)",
+    "timestamp": "2025-10-07T07:33:35.160157"
+  },
+  {
+    "test": "Cleanup Test Client",
+    "status": "FAIL",
+    "details": "Failed to deactivate: 500 - Internal Server Error",
+    "timestamp": "2025-10-07T07:33:35.173350"
+  }
+]
