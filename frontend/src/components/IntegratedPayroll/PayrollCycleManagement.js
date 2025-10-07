@@ -491,6 +491,7 @@ const PayrollCycleManagement = () => {
             </form>
           </div>
         </div>
+        </>
       )}
     </div>
   );
