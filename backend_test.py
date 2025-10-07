@@ -522,11 +522,17 @@ class BackendTester:
                 
                 response = self.session.get(f"{BASE_URL}/notifications/my")
                 if response.status_code == 200:
-                    notifications = response.json()
+                    data = response.json()
+                    # Handle both direct list and object format
+                    if isinstance(data, list):
+                        notifications = data
+                    else:
+                        notifications = data.get('notifications', [])
+                    
                     # Look for recent marketing visit notification
                     recent_notifications = [n for n in notifications if 
-                                          'marketing' in n.get('subject', '').lower() or 
-                                          'visit' in n.get('subject', '').lower()]
+                                          'marketing' in str(n.get('subject', '')).lower() or 
+                                          'visit' in str(n.get('subject', '')).lower()]
                     
                     if recent_notifications:
                         self.log_result("Marketing Visits - Super Admin Notification", "PASS", 
