@@ -9382,13 +9382,24 @@ async def update_work_log(
         logger.warning(f"Work log recompute failed for {log_id}: {e}")
     update_data["updated_at"] = datetime.utcnow()
     await work_reports_db.work_logs.update_one({"id": log_id}, {"$set": update_data})
+    # Convert datetime objects to strings for JSON serialization
+    def serialize_for_json(data):
+        """Convert datetime objects to ISO format strings for JSON serialization"""
+        serialized = {}
+        for k, v in data.items():
+            if isinstance(v, datetime):
+                serialized[k] = v.isoformat()
+            else:
+                serialized[k] = v
+        return serialized
+    
     await log_work_reports_activity(
         current_user.id,
         "update_work_log",
         f"Updated work log {log_id}",
         target_id=log_id,
-        before_value=json.dumps(original),
-        after_value=json.dumps(update_data)
+        before_value=json.dumps(serialize_for_json(original)),
+        after_value=json.dumps(serialize_for_json(update_data))
     )
     doc = await work_reports_db.work_logs.find_one({"id": log_id}, {"_id": 0})
     return doc
