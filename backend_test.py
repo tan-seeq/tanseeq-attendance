@@ -210,8 +210,14 @@ class BackendTester:
         try:
             response = self.session.get(f"{BASE_URL}/employees/list")
             if response.status_code == 200:
-                employees = response.json()
-                if isinstance(employees, list) and len(employees) > 0:
+                data = response.json()
+                # Handle both direct list and object with employees key
+                if isinstance(data, list):
+                    employees = data
+                else:
+                    employees = data.get('employees', [])
+                
+                if len(employees) > 0:
                     # Check if employees have id and name
                     first_emp = employees[0]
                     if 'id' in first_emp and 'name' in first_emp:
