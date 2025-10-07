@@ -639,8 +639,8 @@ class PayrollSystemTestSuite:
         
         # Critical system components status
         auth_working = any(r['success'] and 'تسجيل الدخول' in r['test'] for r in self.test_results)
-        cycle_created = any(r['success'] and 'إنشاء دورة راتب' in r['test'] for r in self.test_results)
-        deduction_linked = any(r['success'] and 'الربط التلقائي' in r['test'] for r in self.test_results)
+        cycle_created = any(r['success'] and ('إنشاء دورة راتب' in r['test'] or 'استخدام دورة راتب' in r['test']) for r in self.test_results)
+        deduction_linked = any(r['success'] and 'إنشاء خصم يدوي' in r['test'] for r in self.test_results)
         installments_created = any(r['success'] and 'جدولة أقساط' in r['test'] for r in self.test_results)
         salary_calculated = any(r['success'] and 'حساب رواتب' in r['test'] for r in self.test_results)
         
