@@ -1,0 +1,86 @@
+{
+  "test_summary": {
+    "total_tests": 5,
+    "passed": 5,
+    "partial": 0,
+    "failed": 0,
+    "errors": 0,
+    "success_rate": "100.0%"
+  },
+  "test_results": [
+    {
+      "test": "GET /api/payroll/cycles",
+      "status": "PASS",
+      "details": "Retrieved 6 payroll cycles. First cycle ID: 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "timestamp": "2025-10-07T09:18:02.926797",
+      "response_headers": {
+        "Content-Length": "4742",
+        "Content-Type": "application/json",
+        "Date": "Tue, 07 Oct 2025 09:18:02 GMT",
+        "Server": "uvicorn",
+        "Via": "1.1 google",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      }
+    },
+    {
+      "test": "GET /api/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "status": "PASS",
+      "details": "Retrieved cycle detail. Keys: ['id', 'month', 'year', 'display_name', 'start_date']",
+      "timestamp": "2025-10-07T09:18:02.936929",
+      "response_headers": {
+        "Content-Length": "750",
+        "Content-Type": "application/json",
+        "Date": "Tue, 07 Oct 2025 09:18:02 GMT",
+        "Server": "uvicorn",
+        "Via": "1.1 google",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      }
+    },
+    {
+      "test": "GET /api/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f/summary",
+      "status": "PASS",
+      "details": "Retrieved summary with cycle and 6 employee summaries",
+      "timestamp": "2025-10-07T09:18:02.949556",
+      "response_headers": {
+        "Content-Length": "5599",
+        "Content-Type": "application/json",
+        "Date": "Tue, 07 Oct 2025 09:18:02 GMT",
+        "Server": "uvicorn",
+        "Via": "1.1 google",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      }
+    },
+    {
+      "test": "GET /api/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f/export/pdf",
+      "status": "PASS",
+      "details": "Downloaded PDF (1738 bytes). Content-Type: application/pdf. Saved to: /app/evidence/backend_exports_ret/payroll_026ce2ba-4471-482c-ac03-dbb8353ac13f.pdf",
+      "timestamp": "2025-10-07T09:18:03.007904",
+      "response_headers": {
+        "Content-Disposition": "attachment; filename=payroll_026ce2ba-4471-482c-ac03-dbb8353ac13f.pdf",
+        "Content-Type": "application/pdf",
+        "Date": "Tue, 07 Oct 2025 09:18:02 GMT",
+        "Server": "uvicorn",
+        "Via": "1.1 google",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "Transfer-Encoding": "chunked"
+      }
+    },
+    {
+      "test": "GET /api/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f/export/excel",
+      "status": "PASS",
+      "details": "Downloaded Excel/CSV (332 bytes). Content-Type: application/vnd.ms-excel. Saved to: /app/evidence/backend_exports_ret/payroll_026ce2ba-4471-482c-ac03-dbb8353ac13f.csv",
+      "timestamp": "2025-10-07T09:18:03.022223",
+      "response_headers": {
+        "Content-Disposition": "attachment; filename=payroll_026ce2ba-4471-482c-ac03-dbb8353ac13f.csv",
+        "Content-Type": "application/vnd.ms-excel",
+        "Date": "Tue, 07 Oct 2025 09:18:02 GMT",
+        "Server": "uvicorn",
+        "Via": "1.1 google",
+        "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "Transfer-Encoding": "chunked"
+      }
+    }
+  ],
+  "evidence_directory": "/app/evidence/backend_exports_ret",
+  "test_timestamp": "2025-10-07T09:18:03.022463"
+}
