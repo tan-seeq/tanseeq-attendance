@@ -1,0 +1,188 @@
+[
+  {
+    "test": "Authentication - super_admin",
+    "status": "PASS",
+    "details": "Successfully authenticated admin@tanseeq.com (Role: super_admin)",
+    "timestamp": "2025-10-07T09:53:58.433650"
+  },
+  {
+    "test": "Authentication - user",
+    "status": "PASS",
+    "details": "Successfully authenticated jihad@tanseeq.com (Role: user)",
+    "timestamp": "2025-10-07T09:53:58.681094"
+  },
+  {
+    "test": "Auth Me",
+    "status": "PASS",
+    "details": "User info retrieved: \u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645 (super_admin)",
+    "timestamp": "2025-10-07T09:53:58.694661"
+  },
+  {
+    "test": "Payroll Cycles - List All",
+    "status": "PASS",
+    "details": "Retrieved 6 cycles with proper JSON structure",
+    "timestamp": "2025-10-07T09:53:58.710713"
+  },
+  {
+    "test": "Payroll Cycles - Cycle ID Found",
+    "status": "PASS",
+    "details": "Using cycle ID: 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+    "timestamp": "2025-10-07T09:53:58.710750"
+  },
+  {
+    "test": "Payroll Cycles - Single Retrieval",
+    "status": "PASS",
+    "details": "Retrieved cycle details: 2025-12",
+    "timestamp": "2025-10-07T09:53:58.718718"
+  },
+  {
+    "test": "Payroll Cycles - Calculate",
+    "status": "FAIL",
+    "details": "Failed: 405 - {\"detail\":\"Method Not Allowed\"}",
+    "timestamp": "2025-10-07T09:53:58.725521"
+  },
+  {
+    "test": "Payroll Cycles - Lock",
+    "status": "PASS",
+    "details": "Cycle locked with audit reason",
+    "timestamp": "2025-10-07T09:53:58.776340"
+  },
+  {
+    "test": "Payroll Cycles - Unlock",
+    "status": "PASS",
+    "details": "Cycle unlocked (Super Admin only)",
+    "timestamp": "2025-10-07T09:53:58.810635"
+  },
+  {
+    "test": "Payroll Cycles - Summary",
+    "status": "PASS",
+    "details": "Retrieved detailed summary for PayrollSummary page",
+    "timestamp": "2025-10-07T09:53:58.826317"
+  },
+  {
+    "test": "Payroll Cycles - PDF Export",
+    "status": "PASS",
+    "details": "PDF exported and saved (size: 1738 bytes)",
+    "timestamp": "2025-10-07T09:53:58.895738"
+  },
+  {
+    "test": "Payroll Cycles - Excel Export",
+    "status": "PASS",
+    "details": "Excel exported and saved (size: 332 bytes)",
+    "timestamp": "2025-10-07T09:53:58.910212"
+  },
+  {
+    "test": "Attendance Deductions - Employee Name Field",
+    "status": "PASS",
+    "details": "employee_name field present in 21 deduction records",
+    "timestamp": "2025-10-07T09:53:58.950261"
+  },
+  {
+    "test": "Employees List - super_admin",
+    "status": "PASS",
+    "details": "Retrieved 8 active employees with id+name",
+    "timestamp": "2025-10-07T09:53:58.958177"
+  },
+  {
+    "test": "Employees List - user",
+    "status": "PASS",
+    "details": "Retrieved 8 active employees with id+name",
+    "timestamp": "2025-10-07T09:53:59.007171"
+  },
+  {
+    "test": "Manual Deductions - Create",
+    "status": "FAIL",
+    "details": "Failed: 405 - {\"detail\":\"Method Not Allowed\"}",
+    "timestamp": "2025-10-07T09:53:59.016363"
+  },
+  {
+    "test": "Work Reports - Filters/Search/Pagination",
+    "status": "PASS",
+    "details": "Filters working, found 0 logs",
+    "timestamp": "2025-10-07T09:53:59.041636"
+  },
+  {
+    "test": "Work Reports - Create Log",
+    "status": "FAIL",
+    "details": "Failed: 404 - {\"detail\":\"Client not found\"}",
+    "timestamp": "2025-10-07T09:53:59.059287"
+  },
+  {
+    "test": "Work Reports - Create Client",
+    "status": "PASS",
+    "details": "Created client (MongoDB fix verified): f98b9646-be46-4996-920d-755c88c575a9",
+    "timestamp": "2025-10-07T09:53:59.109434"
+  },
+  {
+    "test": "Marketing Visits - Start",
+    "status": "PASS",
+    "details": "Visit started: 54375a88-a799-4a62-a806-068ebc67e27f",
+    "timestamp": "2025-10-07T09:53:59.130227"
+  },
+  {
+    "test": "Marketing Visits - Get Active",
+    "status": "PASS",
+    "details": "Active visit found: 54375a88-a799-4a62-a806-068ebc67e27f",
+    "timestamp": "2025-10-07T09:53:59.141015"
+  },
+  {
+    "test": "Marketing Visits - Complete",
+    "status": "PASS",
+    "details": "Visit completed with mandatory report",
+    "timestamp": "2025-10-07T09:54:01.165956"
+  },
+  {
+    "test": "Marketing Visits - Super Admin Notification",
+    "status": "FAIL",
+    "details": "No marketing visit notifications found for Super Admin",
+    "timestamp": "2025-10-07T09:54:01.177391"
+  },
+  {
+    "test": "Attendance Policies - Retrieve All",
+    "status": "FAIL",
+    "details": "Failed: 404 - {\"detail\":\"Not Found\"}",
+    "timestamp": "2025-10-07T09:54:01.224277"
+  },
+  {
+    "test": "Notifications - User Scoping (super_admin)",
+    "status": "PASS",
+    "details": "Retrieved 0 user-specific notifications",
+    "timestamp": "2025-10-07T09:54:01.272880"
+  },
+  {
+    "test": "Notifications - User Scoping (user)",
+    "status": "PASS",
+    "details": "Retrieved 16 user-specific notifications",
+    "timestamp": "2025-10-07T09:54:01.286236"
+  },
+  {
+    "test": "Notifications - Role-based Access",
+    "status": "PASS",
+    "details": "Regular user has scoped notification access",
+    "timestamp": "2025-10-07T09:54:01.286271"
+  },
+  {
+    "test": "Auth - Super Admin Login",
+    "status": "PASS",
+    "details": "Successfully authenticated admin@tanseeq.com (Role: super_admin)",
+    "timestamp": "2025-10-07T09:54:01.526778"
+  },
+  {
+    "test": "Auth - User Login",
+    "status": "PASS",
+    "details": "Successfully authenticated jihad@tanseeq.com (Role: user)",
+    "timestamp": "2025-10-07T09:54:01.766129"
+  },
+  {
+    "test": "Auth - 401 Unauthenticated",
+    "status": "FAIL",
+    "details": "Expected 401, got 403",
+    "timestamp": "2025-10-07T09:54:01.782886"
+  },
+  {
+    "test": "Auth - 403 Unauthorized",
+    "status": "PASS",
+    "details": "Properly returns 403 for unauthorized requests",
+    "timestamp": "2025-10-07T09:54:01.840410"
+  }
+]
