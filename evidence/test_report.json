@@ -1,138 +1,57 @@
 {
-  "test_suite": "Frontend Playwright Suite - Priority Round 1 (Preview/Staging)",
-  "timestamp": "2025-01-07T07:42:34Z",
-  "environment": {
-    "url": "https://hrms-tanseeq.preview.emergentagent.com",
-    "viewport": "1920x800",
-    "screenshot_quality": 20
-  },
-  "credentials_tested": {
-    "admin": {
-      "email": "admin@tanseeq.com",
-      "password": "ADMIN",
-      "login_status": "success"
-    },
-    "user": {
-      "email": "jihad@tanseeq.com", 
-      "password": "jihad123",
-      "login_status": "failed_timeout"
-    }
-  },
-  "test_results": [
+  "timestamp": "2025-10-07T08:05:03.289200",
+  "tests": [
     {
-      "category": "authentication",
-      "test_name": "admin_login",
-      "status": "pass",
-      "details": "Admin login successful, redirected to dashboard",
-      "evidence": ["login_admin.png", "admin_dashboard.png"]
+      "name": "Admin Login",
+      "status": "PASS"
     },
     {
-      "category": "payroll_cycles",
-      "test_name": "page_load",
-      "status": "pass", 
-      "details": "Payroll cycles page loaded successfully with 5 table rows",
-      "evidence": ["landing_page.png"]
+      "name": "Payroll Cycles Page",
+      "status": "PASS"
     },
     {
-      "category": "payroll_cycles",
-      "test_name": "create_cycle_modal",
-      "status": "pass",
-      "details": "Create cycle button found and modal opened successfully",
-      "evidence": ["create_modal.png"]
+      "name": "Payroll Create Modal",
+      "status": "PASS"
     },
     {
-      "category": "payroll_cycles",
-      "test_name": "table_validation",
-      "status": "pass",
-      "details": "Table renders with 5 rows of payroll cycle data",
-      "evidence": ["landing_page.png"]
+      "name": "Payroll Export Dropdown",
+      "status": "FAIL",
+      "details": "Export button not found"
     },
     {
-      "category": "attendance_deductions", 
-      "test_name": "page_load",
-      "status": "pass",
-      "details": "Attendance deductions page loaded with 144 table cells",
-      "evidence": ["landing_page.png"]
+      "name": "Attendance Deductions Page",
+      "status": "PASS"
     },
     {
-      "category": "attendance_deductions",
-      "test_name": "new_deduction_modal",
-      "status": "pass",
-      "details": "New deduction button found and modal opened",
-      "evidence": ["new_deduction_modal.png"]
+      "name": "Attendance Deductions Page",
+      "status": "FAIL",
+      "details": "ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n  2 × retrying click action\n      - waiting 100ms\n      - waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> intercepts pointer events\n  14 × retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n       - waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div>…</div> from <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> subtree intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n"
     },
     {
-      "category": "attendance_deductions",
-      "test_name": "employee_dropdown_interaction",
-      "status": "fail",
-      "details": "Modal overlay blocking dropdown interaction - timeout after 30s",
-      "evidence": ["new_deduction_modal.png"],
-      "error": "Modal overlay intercepts pointer events preventing dropdown clicks"
+      "name": "Sidebar RTL and Active Highlights",
+      "status": "FAIL",
+      "details": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid=\\\"nav-/payroll-cycles\\\"]\")\n    - locator resolved to <button data-testid=\"nav-/payroll-cycles\" class=\"w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 text-right text-gray-700 hover:bg-gray-100 hover:text-gray-900\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <div class=\"lg:mr-64 min-h-screen\">…</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
     },
     {
-      "category": "authentication",
-      "test_name": "user_login",
-      "status": "fail", 
-      "details": "User login failed due to timeout on email field input",
-      "evidence": [],
-      "error": "Page.fill timeout 30000ms exceeded on email input field"
-    },
-    {
-      "category": "ui_responsiveness",
-      "test_name": "arabic_rtl_support",
-      "status": "pass",
-      "details": "Arabic RTL text rendering correctly across all tested pages",
-      "evidence": ["admin_dashboard.png", "landing_page.png", "create_modal.png", "new_deduction_modal.png"]
-    },
-    {
-      "category": "navigation",
-      "test_name": "sidebar_navigation", 
-      "status": "pass",
-      "details": "Sidebar navigation working with proper Arabic menu items",
-      "evidence": ["admin_dashboard.png"]
+      "name": "User Login",
+      "status": "FAIL",
+      "details": "Timeout/error: ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    58 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">…</div> from <main class=\"p-6\">…</main> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
     }
   ],
+  "screenshots": [
+    "01_login_page.png",
+    "02_admin_dashboard.png",
+    "03_payroll_cycles_page.png",
+    "04_payroll_create_modal.png",
+    "06_attendance_deductions_page.png",
+    "07_deductions_create_modal.png",
+    "12_user_login_timeout_error.png"
+  ],
+  "downloads": [],
   "summary": {
-    "total_tests": 10,
-    "passed_tests": 8,
-    "failed_tests": 2,
-    "success_rate": "80.0%",
-    "critical_issues": [
-      {
-        "issue": "Modal Overlay Blocking Interactions",
-        "severity": "high",
-        "description": "Modal overlays prevent proper interaction with form elements like dropdowns",
-        "affected_areas": ["attendance_deductions"],
-        "suggested_fix": "Review modal z-index and pointer-events CSS properties"
-      },
-      {
-        "issue": "User Authentication Timeout",
-        "severity": "high", 
-        "description": "User login form input fields not responding to fill operations",
-        "affected_areas": ["authentication"],
-        "suggested_fix": "Check for JavaScript errors or form validation blocking input"
-      }
-    ],
-    "working_features": [
-      "Admin authentication and dashboard access",
-      "Payroll cycles page loading and table display",
-      "Create payroll cycle modal functionality", 
-      "Attendance deductions page loading",
-      "Arabic RTL text rendering",
-      "Sidebar navigation and menu structure"
-    ]
-  },
-  "evidence_structure": {
-    "screenshots_captured": 5,
-    "downloads_attempted": 0,
-    "modals_tested": 2,
-    "pages_visited": 4
-  },
-  "recommendations": [
-    "Fix modal overlay z-index issues to enable proper form interactions",
-    "Investigate user authentication form input timeout issues",
-    "Add data-testid attributes to improve test reliability",
-    "Implement proper loading states to prevent interaction timeouts",
-    "Test export functionality once modal issues are resolved"
-  ]
+    "total": 8,
+    "passed": 4,
+    "failed": 4,
+    "success_rate": "50.0%"
+  }
 }
