@@ -511,7 +511,8 @@ const Layout = ({ children }) => {
               <button
                 key={item.name}
                 onClick={() => navigate(item.href)}
-                className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200 text-right"
+                className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 text-right ${isActive(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+                data-testid={`nav-${item.href}`}
               >
                 <item.icon className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`} />
                 <span className="truncate">{item.name}</span>
