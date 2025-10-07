@@ -89,8 +89,21 @@ const PayrollSummary = () => {
 
   if (!cycle) return null;
 
-  const exportPdfUrl = `${API}/payroll/cycles/${cycle.id}/export/pdf`;
-  const exportExcelUrl = `${API}/payroll/cycles/${cycle.id}/export/excel`;
+  const handleDownload = async (format) => {
+    try {
+      const url = `${API}/payroll/cycles/${cycle.id}/export/${format}`;
+      const response = await axios.get(url, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `payroll_${cycle.id}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      alert(e.response?.data?.detail || 'فشل تنزيل الملف');
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6" dir="rtl">
@@ -101,12 +114,12 @@ const PayrollSummary = () => {
             <p className="text-gray-600 mt-1">{cycle.display_name} — الحالة: {cycle.is_locked ? 'مقفولة' : 'مفتوحة'}</p>
           </div>
           <div className="flex items-center gap-2">
-            <a href={exportPdfUrl} className="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 inline-flex items-center" target="_blank" rel="noreferrer">
+            <button onClick={() => handleDownload('pdf')} className="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 inline-flex items-center">
               <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> PDF
-            </a>
-            <a href={exportExcelUrl} className="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 inline-flex items-center" target="_blank" rel="noreferrer">
+            </button>
+            <button onClick={() => handleDownload('excel')} className="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 inline-flex items-center">
               <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> Excel
-            </a>
+            </button>
             {!cycle.is_locked ? (
               <>
                 <button onClick={handleCalculate} className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 inline-flex items-center">
