@@ -398,6 +398,20 @@ class LockPayrollCycleRequest(BaseModel):
     """طلب قفل دورة الراتب"""
     lock_reason: Optional[str] = None
 
+class EditEmployeePayrollData(BaseModel):
+    """بيانات تعديل راتب موظف"""
+    employee_id: str
+    employee_name: str
+    base_salary: float = Field(ge=0)
+    allowances: float = Field(default=0.0, ge=0)
+    manual_deductions: float = Field(default=0.0, ge=0)
+    deduction_notes: Optional[str] = None
+
+class UpdatePayrollCycleRequest(BaseModel):
+    """طلب تعديل بيانات دورة الراتب"""
+    employees: List[EditEmployeePayrollData]
+    notes: Optional[str] = None
+
 # ====================
 # RESPONSE MODELS
 # ====================
