@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { EyeIcon, PencilIcon, DocumentArrowDownIcon, CalculatorIcon, LockClosedIcon, LockOpenIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
