@@ -98,85 +98,42 @@ class WorkReportsLogsTester:
     async def setup_test_data(self, token: str):
         """Setup test clients and activities for work logs testing"""
         try:
-            # Create test client
-            client_data = {
-                "company_name": "Test Client for Work Reports",
-                "company_name_ar": "عميل تجريبي لتقارير العمل",
-                "client_code": "TEST001",
-                "industry": "Technology",
-                "contact_person": "John Doe",
-                "phone": "+971501234567",
-                "email": "test@client.com",
-                "address": "Dubai, UAE"
-            }
-            
-            async with self.session.post(
+            # Get existing clients (clients endpoint returns array directly)
+            async with self.session.get(
                 f"{API_BASE}/work-reports/clients",
-                json=client_data,
                 headers={'Authorization': f'Bearer {token}'}
-            ) as response:
-                if response.status == 200:
-                    client_response = await response.json()
-                    client_id = client_response.get('id')
-                    self.created_clients.append(client_id)
-                    self.log_test("Setup Test Client", "PASS", f"Created test client ID: {client_id}")
+            ) as get_response:
+                if get_response.status == 200:
+                    clients = await get_response.json()  # Direct array
+                    if clients and len(clients) > 0:
+                        client_id = clients[0]['id']
+                        self.log_test("Setup Test Client", "PASS", f"Using existing client ID: {client_id}")
+                    else:
+                        self.log_test("Setup Test Client", "FAIL", "No clients available")
+                        return None, None
                 else:
-                    # Try to get existing clients
-                    async with self.session.get(
-                        f"{API_BASE}/work-reports/clients",
-                        headers={'Authorization': f'Bearer {token}'}
-                    ) as get_response:
-                        if get_response.status == 200:
-                            clients_data = await get_response.json()
-                            clients = clients_data.get('clients', [])
-                            if clients:
-                                client_id = clients[0]['id']
-                                self.log_test("Setup Test Client", "PASS", f"Using existing client ID: {client_id}")
-                            else:
-                                self.log_test("Setup Test Client", "FAIL", "No clients available")
-                                return None, None
-                        else:
-                            self.log_test("Setup Test Client", "FAIL", f"Could not create or get clients: {response.status}")
-                            return None, None
+                    self.log_test("Setup Test Client", "FAIL", f"Could not get clients: {get_response.status}")
+                    return None, None
             
-            # Create test activity type
-            activity_data = {
-                "name": "Development Work",
-                "name_ar": "أعمال التطوير",
-                "description": "Software development activities",
-                "hourly_rate": 150.0,
-                "is_billable": True,
-                "category": "development"
-            }
-            
-            async with self.session.post(
+            # Get existing activity types (activity-types endpoint returns array directly)
+            async with self.session.get(
                 f"{API_BASE}/work-reports/activity-types",
-                json=activity_data,
                 headers={'Authorization': f'Bearer {token}'}
-            ) as response:
-                if response.status == 200:
-                    activity_response = await response.json()
-                    activity_id = activity_response.get('id')
-                    self.created_activities.append(activity_id)
-                    self.log_test("Setup Test Activity", "PASS", f"Created test activity ID: {activity_id}")
+            ) as get_response:
+                if get_response.status == 200:
+                    activities = await get_response.json()  # Direct array
+                    if activities and len(activities) > 0:
+                        activity_id = activities[0]['id']
+                        activity_rate = activities[0].get('hourly_rate', 150.0)
+                        self.log_test("Setup Test Activity", "PASS", f"Using existing activity ID: {activity_id}, Rate: {activity_rate}")
+                        # Store the rate for calculation validation
+                        self.activity_rate = activity_rate
+                    else:
+                        self.log_test("Setup Test Activity", "FAIL", "No activities available")
+                        return client_id, None
                 else:
-                    # Try to get existing activities
-                    async with self.session.get(
-                        f"{API_BASE}/work-reports/activity-types",
-                        headers={'Authorization': f'Bearer {token}'}
-                    ) as get_response:
-                        if get_response.status == 200:
-                            activities_data = await get_response.json()
-                            activities = activities_data.get('activity_types', [])
-                            if activities:
-                                activity_id = activities[0]['id']
-                                self.log_test("Setup Test Activity", "PASS", f"Using existing activity ID: {activity_id}")
-                            else:
-                                self.log_test("Setup Test Activity", "FAIL", "No activities available")
-                                return client_id, None
-                        else:
-                            self.log_test("Setup Test Activity", "FAIL", f"Could not create or get activities: {response.status}")
-                            return client_id, None
+                    self.log_test("Setup Test Activity", "FAIL", f"Could not get activities: {get_response.status}")
+                    return client_id, None
             
             return client_id, activity_id
             
