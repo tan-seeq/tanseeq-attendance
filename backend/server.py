@@ -9373,18 +9373,21 @@ async def update_work_log(
 @api_router.delete("/work-reports/logs/{log_id}")
 async def delete_work_log(
     log_id: str,
-    current_user = Depends(get_current_user),
-    db = Depends(get_work_reports_db)
+    current_user: User = Depends(get_current_user)
 ):
-    """Delete work log entry"""
-    work_log = db.query(WorkLog).filter(WorkLog.id == log_id).first()
-    if not work_log:
+    """Delete work log entry (MongoDB)"""
+    log_doc = await work_reports_db.work_logs.find_one({"id": log_id})
+    if not log_doc:
         raise HTTPException(status_code=404, detail="Work log not found")
-    
-    # Check permissions - users can only delete their own logs, admins can delete any
-    if current_user.role == "user" and work_log.user_id != current_user.id:
+    if current_user.role == "user" and log_doc.get("created_by") != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
+    await work_reports_db.work_logs.delete_one({"id": log_id})
+    await log_work_reports_activity(
+        current_user.id,
+        "delete_work_log",
+        f"Deleted work log {log_id}",
+        target_id=log_id
+    )
     db.delete(work_log)
     db.commit()
     
