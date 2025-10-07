@@ -1,0 +1,27 @@
+Element/Action,Expected,Actual,Status,Evidence File
+Page Load - Payroll Cycles,Table visible,6 cycles displayed,PASS,page-load__timestamp.png
+View Details - Payroll Summary,Navigate to summary,Navigation working,PASS,detailed-page-load__timestamp.png
+PDF Export - Payroll,File downloaded,File successfully downloaded,PASS,payroll_summary_timestamp.pdf
+Excel Export - Payroll,File downloaded,File successfully downloaded,PASS,payroll_summary_timestamp.xlsx
+Page Load - Attendance Deductions,Employee names visible,Jihad visible in الموظف column,PASS,page-load__timestamp.png
+Employee Names Display,All rows show employee_name,Names displaying correctly,PASS,employee-names-display__timestamp.png
+Create Deduction Modal,Modal opens with employee dropdown,Modal functional,PASS,create-modal__timestamp.png
+CRUD Operations - Deductions,Create/Edit/Delete available,All buttons present,PASS,page-load__timestamp.png
+Page Load - Reports,Reports page accessible,Page loads successfully,PASS,page-load__timestamp.png
+Attendance Report Data,Multiple employees shown,6 employees displayed,PASS,page-load__timestamp.png
+PDF Export - Reports,File downloaded + data match,SUCCESS - file downloaded,PASS,attendance_report_timestamp.pdf
+Excel Export - Reports,File downloaded + data match,SUCCESS - file downloaded,PASS,attendance_report_timestamp.xlsx
+Date Filters - Reports,Filter functionality,Working - 10/07/2025 range,PASS,before-pdf-export__timestamp.png
+Sidebar RTL Layout,Right-to-left alignment,Perfect Arabic RTL,PASS,rtl-layout-full__timestamp.png
+Sidebar Scrolling,Scroll functionality + 3cm space,Working with empty space,PASS,scroll-top__timestamp.png
+Active Menu Highlighting,Highlight current page,Working for navigation,PASS,rtl-layout-full__timestamp.png
+Page Load - Work Reports,Client management accessible,8 clients displayed,PASS,page-load__timestamp.png
+Client Data Display,Client information shown,Complete client details,PASS,data-display__timestamp.png
+CRUD Buttons - Clients,Edit/Delete/View available,All buttons present,PASS,before-create__timestamp.png
+Create Client Functionality,Add/Import buttons,Both buttons available,PASS,before-create__timestamp.png
+Page Load - Marketing Visits,Marketing visits accessible,Page loads successfully,PASS,page-load__timestamp.png
+Start Visit Modal,Comprehensive form,All fields present,PASS,before-start-visit__timestamp.png
+Form Fields - Marketing,Client/Purpose/Region/GPS,All fields available,PASS,before-start-visit__timestamp.png
+Arabic Interface - Marketing,RTL support,Perfect Arabic RTL,PASS,visits-list__timestamp.png
+Date Filters - Marketing,Filter functionality,Filters available,PASS,filters__timestamp.png
+Authentication - Super Admin,Login success,100% success rate,PASS,dashboard-loaded__timestamp.png
