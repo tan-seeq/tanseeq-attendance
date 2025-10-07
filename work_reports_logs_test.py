@@ -168,7 +168,7 @@ class WorkReportsLogsTester:
                     
                     # Validate computed values
                     expected_duration = 150  # 2.5 hours = 150 minutes
-                    expected_amount = 375.0  # 2.5 hours * 150 AED/hour
+                    expected_amount = round((150 / 60) * self.activity_rate, 2)  # 2.5 hours * activity_rate
                     
                     if duration_minutes == expected_duration and total_amount == expected_amount:
                         self.created_logs.append(log_id)
