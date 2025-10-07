@@ -491,8 +491,8 @@ const Layout = ({ children }) => {
   return (
     <div className={`min-h-screen bg-gray-100 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isRTL ? 'right-0' : 'left-0'} ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0`}>
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className={`fixed inset-y-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isRTL ? 'right-0' : 'left-0'} ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} lg:translate-x-0 flex flex-col`}>
+        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
           <h1 className="text-xl font-bold text-gray-800">TANSEEQ</h1>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -502,21 +502,21 @@ const Layout = ({ children }) => {
           </button>
         </div>
         
-        <nav className="mt-8 flex-1 overflow-y-auto overflow-x-hidden" style={{scrollbarWidth: 'thin'}}>
-          <div className="px-4 space-y-2 pb-8">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4" style={{scrollbarWidth: 'thin', scrollbarColor: '#CBD5E0 transparent'}}>
+          <div className="px-4 space-y-1">
             {navigation.map((item) => (
               <button
                 key={item.name}
                 onClick={() => navigate(item.href)}
-                className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+                className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200 text-right"
               >
-                <item.icon className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                {item.name}
+                <item.icon className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`} />
+                <span className="truncate">{item.name}</span>
               </button>
             ))}
-            {/* مساحة فارغة إضافية 3 سم في الأسفل لضمان ظهور جميع القوائم */}
-            <div className="h-32"></div>
           </div>
+          {/* مساحة فارغة كبيرة في الأسفل لضمان ظهور جميع القوائم */}
+          <div className="h-20 flex-shrink-0"></div>
         </nav>
       </div>
 
