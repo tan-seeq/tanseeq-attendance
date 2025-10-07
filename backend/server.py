@@ -3365,6 +3365,28 @@ async def get_installment_schedule(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching installment schedule: {str(e)}")
 
+@app.get("/api/payroll/installment-schedules")
+async def get_all_installment_schedules(
+    current_user: dict = Depends(get_current_user)
+):
+    """جلب جميع جدولات الأقساط (سوبر أدمن فقط)"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        # جلب جميع جدولات الأقساط
+        schedules = await db.installment_schedules.find({}).sort([("created_at", -1)]).to_list(1000)
+        
+        # إزالة _id من MongoDB وتنسيق البيانات
+        for schedule in schedules:
+            if "_id" in schedule:
+                del schedule["_id"]
+        
+        return {"schedules": schedules}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching installment schedules: {str(e)}")
+
 @app.get("/api/payroll/cycles/{cycle_id}/calculate")
 async def calculate_payroll_cycle(
     cycle_id: str,
