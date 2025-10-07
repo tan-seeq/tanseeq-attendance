@@ -9005,7 +9005,9 @@ async def create_client(
         "created_by_name": current_user.name
     }
     await work_reports_db.clients.insert_one(client_doc)
-    await log_work_reports_activity(current_user.id, "create_client", f"Created client {client_doc['company_name']}", target_id=client_doc["id"], after_value=json.dumps(client_doc))
+    # Remove _id for JSON serialization in activity log
+    log_doc = {k: v for k, v in client_doc.items() if k != "_id"}
+    await log_work_reports_activity(current_user.id, "create_client", f"Created client {client_doc['company_name']}", target_id=client_doc["id"], after_value=json.dumps(log_doc))
     client_doc.pop("_id", None)
     return client_doc
 
