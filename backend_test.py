@@ -118,7 +118,7 @@ class InstallmentSchedulingTester:
                 "transaction_type": "advance",
                 "amount": 5000.0,
                 "description": "Test advance for installment scheduling",
-                "category": "personal",
+                "category": "other",
                 "expense_date": datetime.now().strftime("%Y-%m-%d"),
                 "notes": "Created for testing installment scheduling system"
             }
