@@ -85,6 +85,26 @@ const AuthProvider = ({ children }) => {
   const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   useEffect(() => {
+    // Always attach token via interceptor to avoid missing auth on deep links or new tabs
+    const reqId = axios.interceptors.request.use((config) => {
+      const t = localStorage.getItem('token');
+      if (t && !config.headers?.Authorization) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${t}`;
+      }
+      return config;
+    });
+    const resId = axios.interceptors.response.use(
+      (resp) => resp,
+      (err) => {
+        if (err?.response?.status === 401) {
+          // token invalid or expired
+          // do not hard redirect; allow ProtectedRoute to handle
+        }
+        return Promise.reject(err);
+      }
+    );
+
     if (token) {
       try {
         const decoded = jwt_decode(token);
@@ -100,6 +120,11 @@ const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
+
+    return () => {
+      axios.interceptors.request.eject(reqId);
+      axios.interceptors.response.eject(resId);
+    };
   }, [token]);
 
   const fetchUser = async () => {
