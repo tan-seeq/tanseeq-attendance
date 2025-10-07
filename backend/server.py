@@ -2825,6 +2825,27 @@ async def get_deductions(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching deductions: {str(e)}")
 
+@app.get("/api/employees/list")
+async def get_employees_list(current_user: User = Depends(get_current_user)):
+    """جلب قائمة الموظفين للاستخدام في النماذج"""
+    try:
+        # جلب جميع الموظفين النشطين
+        employees = await db.users.find({"role": {"$in": ["user", "admin"]}, "is_active": {"$ne": False}}).to_list(1000)
+        
+        employee_list = []
+        for emp in employees:
+            employee_list.append({
+                "id": emp["id"],
+                "name": emp["name"],
+                "email": emp.get("email", ""),
+                "role": emp.get("role", "user")
+            })
+        
+        return {"employees": employee_list}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching employees: {str(e)}")
+
 @app.post("/api/deductions/manual")
 async def create_manual_deduction(
     deduction_data: dict,
