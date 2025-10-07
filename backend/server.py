@@ -97,6 +97,53 @@ app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 #         print(f"Warning: Work Reports initialization failed: {e}")
 #         # Don't block server startup on initialization failures
 
+# Ensure test Super Admin user exists on startup
+@app.on_event("startup")
+async def ensure_test_super_admin():
+    try:
+        # Create default indexes lazily if needed
+        await db.users.create_index("email", unique=True)
+    except Exception:
+        pass
+    try:
+        admin_email = "admin@tanseeq.com"
+        existing = await db.users.find_one({"email": admin_email})
+        if not existing:
+            now = datetime.utcnow()
+            test_user = {
+                "id": str(uuid.uuid4()),
+                "name": "Admin QA",
+                "email": admin_email,
+                "role": "super_admin",
+                "position": "QA Super Admin",
+                "monthly_salary": 0.0,
+                "daily_rate": 0.0,
+                "working_hours_start": "09:00",
+                "working_hours_end": "18:00",
+                "phone": "",
+                "hire_date": now,
+                "is_active": True,
+                "has_flexible_schedule": False,
+                "flexible_hours_per_day": 8.0,
+                "flexible_start_range": "07:00-10:00",
+                "flexible_end_range": "16:00-19:00",
+                "flexible_core_hours": "10:00-15:00",
+                "flexible_days_per_week": 5,
+                "password": hash_password("ADMIN"),
+                "created_at": now,
+            }
+            await db.users.insert_one(test_user)
+            logger.info("Created test Super Admin user admin@tanseeq.com / ADMIN")
+        else:
+            # Ensure role and active status are correct
+            updates = {"role": "super_admin", "is_active": True}
+            if existing.get("password") is None:
+                updates["password"] = hash_password("ADMIN")
+            await db.users.update_one({"email": admin_email}, {"$set": updates})
+            logger.info("Verified test Super Admin user exists")
+    except Exception as e:
+        logger.error(f"Failed to ensure test Super Admin user: {e}")
+
 # Create uploads directory
 uploads_dir = ROOT_DIR / "uploads"
 uploads_dir.mkdir(exist_ok=True)
