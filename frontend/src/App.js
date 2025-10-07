@@ -467,21 +467,14 @@ const Layout = ({ children }) => {
       { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
       { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
-      { name: 'عرض المرفقات', href: '/attachment-viewer', icon: FolderIcon },
-    ] : []),
-    ...(user?.role === 'super_admin' ? [
-      { name: t('activity_logs'), href: '/activity-logs', icon: DocumentTextIcon },
-      { name: 'إنشاء طلبات للموظفين', href: '/admin-request-creation', icon: PlusIcon },
-    ] : []),
-    // Advances & Loans System
-    { name: '💰 السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
-    ...(user?.role === 'super_admin' ? [
-      { name: '👑 إدارة السُلف والعُهد', href: '/advances/admin', icon: UserIcon },
-    ] : []),
-    // Work Reports Module (Isolated) - Removed per user request
-    { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
-    ...(user?.role === 'super_admin' ? [
+      { name: 'السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
+      { name: 'إدارة السُلف والعُهد', href: '/advances/admin', icon: UserIcon },
       { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
+    ] : []),
+    
+    // قسم نظام العملاء (منفصل)
+    ...(user?.role === 'admin' || user?.role === 'super_admin' ? [
+      { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
     ] : []),
   ];
 
