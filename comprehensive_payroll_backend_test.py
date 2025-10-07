@@ -110,8 +110,7 @@ class ComprehensiveBackendTester:
                 headers={'Authorization': f'Bearer {token}'}
             ) as response:
                 if response.status == 200:
-                    data = await response.json()
-                    cycles = data.get('cycles', [])
+                    cycles = await response.json()  # API returns list directly
                     self.log_test("Payroll Cycles - List", "PASS", f"Retrieved {len(cycles)} payroll cycles")
                     
                     # Test filtering if cycles exist
