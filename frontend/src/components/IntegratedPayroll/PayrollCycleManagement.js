@@ -422,7 +422,6 @@ const PayrollCycleManagement = () => {
           </table>
         </div>
       </div>
-                      <div className="relative inline-block text-left" data-testid={`export-dropdown-${cycle.id}`}>
 
       {/* Create Cycle Modal */}
       {showCreateModal && (
