@@ -3346,6 +3346,100 @@ async def unlock_payroll_cycle(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error unlocking payroll cycle: {str(e)}")
 
+@app.put("/api/payroll/cycles/{cycle_id}/update-employees")
+async def update_payroll_cycle_employees(
+    cycle_id: str,
+    update_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """تعديل بيانات رواتب الموظفين في دورة معينة"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        # Check if cycle exists and is not locked
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
+        
+        if cycle.get("is_locked", False):
+            raise HTTPException(status_code=400, detail="لا يمكن التعديل على دورة مقفولة")
+        
+        employees = update_data.get("employees", [])
+        if not employees:
+            raise HTTPException(status_code=400, detail="لا توجد بيانات موظفين للتحديث")
+        
+        # Update each employee's summary
+        updated_count = 0
+        for emp_data in employees:
+            employee_id = emp_data.get("employee_id")
+            if not employee_id:
+                continue
+            
+            # Find and update employee summary
+            update_fields = {
+                "base_salary": emp_data.get("base_salary", 0),
+                "total_allowances": emp_data.get("allowances", 0),
+                "manual_deductions": emp_data.get("manual_deductions", 0),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Recalculate totals
+            base_salary = update_fields["base_salary"]
+            allowances = update_fields["total_allowances"]
+            manual_ded = update_fields["manual_deductions"]
+            
+            # Get existing deductions from DB
+            existing_summary = await db.employee_payroll_summaries.find_one({
+                "payroll_cycle_id": cycle_id,
+                "employee_id": employee_id
+            })
+            
+            attendance_ded = existing_summary.get("attendance_deductions", 0) if existing_summary else 0
+            advance_ded = existing_summary.get("advance_deductions", 0) if existing_summary else 0
+            
+            update_fields["gross_salary"] = base_salary + allowances
+            update_fields["total_deductions"] = manual_ded + attendance_ded + advance_ded
+            update_fields["net_salary"] = update_fields["gross_salary"] - update_fields["total_deductions"]
+            
+            result = await db.employee_payroll_summaries.update_one(
+                {
+                    "payroll_cycle_id": cycle_id,
+                    "employee_id": employee_id
+                },
+                {"$set": update_fields}
+            )
+            
+            if result.modified_count > 0:
+                updated_count += 1
+        
+        # Recalculate cycle totals
+        summaries = await db.employee_payroll_summaries.find({"payroll_cycle_id": cycle_id}).to_list(None)
+        
+        cycle_totals = {
+            "total_employees": len(summaries),
+            "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
+            "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
+            "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.payroll_cycles.update_one(
+            {"id": cycle_id},
+            {"$set": cycle_totals}
+        )
+        
+        return {
+            "message": f"تم تحديث {updated_count} موظف بنجاح",
+            "updated_count": updated_count,
+            "cycle_totals": cycle_totals
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating employees: {str(e)}")
+
 @app.post("/api/advances/{advance_id}/installments")
 async def create_installment_schedule(
     advance_id: str,
