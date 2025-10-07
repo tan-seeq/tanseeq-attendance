@@ -560,6 +560,18 @@ const AdminDashboard = () => {
                               <EyeIcon className="h-4 w-4" />
                               <span>التفاصيل</span>
                             </button>
+                            {/* Add installment schedule button for approved advances/custody */}
+                            {transaction.status === 'approved' && 
+                             ['advance', 'custody'].includes(transaction.transaction_type) && (
+                              <button
+                                onClick={() => window.location.href = '/installment-schedules'}
+                                className="bg-green-100 text-green-700 px-4 py-2 rounded-md hover:bg-green-200 transition-colors flex items-center space-x-1"
+                                title="إنشاء جدولة أقساط"
+                              >
+                                <CalendarIcon className="h-4 w-4" />
+                                <span>جدولة أقساط</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
