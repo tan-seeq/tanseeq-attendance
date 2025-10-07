@@ -2807,9 +2807,18 @@ async def get_deductions(
             filters
         ).sort([("date", -1)]).to_list(length=100)
         
-        # Convert ObjectId to string
+        # إضافة أسماء الموظفين
         for deduction in deductions:
-            deduction["_id"] = str(deduction["_id"])
+            if "_id" in deduction:
+                del deduction["_id"]
+            
+            # إضافة اسم الموظف
+            if deduction.get("employee_id"):
+                employee = await db.users.find_one({"id": deduction["employee_id"]})
+                if employee:
+                    deduction["employee_name"] = employee["name"]
+                else:
+                    deduction["employee_name"] = "غير محدد"
         
         return deductions
         
