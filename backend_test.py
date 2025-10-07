@@ -327,7 +327,13 @@ class BackendTester:
                 # First get employee by email to get ID
                 response = self.session.get(f"{BASE_URL}/employees/list")
                 if response.status_code == 200:
-                    employees = response.json()
+                    data = response.json()
+                    # Handle both direct list and object with employees key
+                    if isinstance(data, list):
+                        employees = data
+                    else:
+                        employees = data.get('employees', [])
+                    
                     employee = next((emp for emp in employees if emp.get('email', '').lower() == email.lower()), None)
                     
                     if employee:
