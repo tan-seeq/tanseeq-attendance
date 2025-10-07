@@ -450,7 +450,8 @@ const Layout = ({ children }) => {
     ] : []),
     { name: 'خصوماتي', href: '/my-deductions', icon: ClockIcon },
     ...(user?.role === 'super_admin' ? [
-      { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon }
+      { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
+      { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon }
     ] : []),
     ...(user?.role === 'user' ? [
       { name: t('attendance'), href: '/attendance', icon: ClockIcon },
