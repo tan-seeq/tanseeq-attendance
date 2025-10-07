@@ -21,15 +21,51 @@ TEST_ACCOUNTS = {
     "hatem": {"email": "hatem@tan-seeq.co", "password": "hatem123"}
 }
 
-class InstallmentSchedulingTester:
+class BackendTester:
     def __init__(self):
-        self.session = None
+        self.session = requests.Session()
         self.tokens = {}
         self.test_results = []
-        self.created_advances = []
-        self.created_schedules = []
+        self.evidence_dir = Path("./evidence/backend_exports")
+        self.evidence_dir.mkdir(parents=True, exist_ok=True)
         
-    async def __aenter__(self):
+    def log_result(self, test_name, status, details="", response_data=None):
+        """Log test result"""
+        result = {
+            "test": test_name,
+            "status": status,
+            "details": details,
+            "timestamp": datetime.now().isoformat()
+        }
+        if response_data:
+            result["response"] = response_data
+        self.test_results.append(result)
+        
+        status_icon = "✅" if status == "PASS" else "❌"
+        print(f"{status_icon} {test_name}: {details}")
+        
+    def authenticate(self, account_type):
+        """Authenticate and get JWT token"""
+        try:
+            account = TEST_ACCOUNTS[account_type]
+            response = self.session.post(f"{BASE_URL}/auth/login", json=account)
+            
+            if response.status_code == 200:
+                data = response.json()
+                token = data["access_token"]
+                self.tokens[account_type] = token
+                self.session.headers.update({"Authorization": f"Bearer {token}"})
+                self.log_result(f"Authentication - {account_type}", "PASS", 
+                              f"Successfully authenticated {account['email']}")
+                return True
+            else:
+                self.log_result(f"Authentication - {account_type}", "FAIL", 
+                              f"Failed to authenticate: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result(f"Authentication - {account_type}", "FAIL", f"Exception: {str(e)}")
+            return False
         self.session = aiohttp.ClientSession()
         return self
         
