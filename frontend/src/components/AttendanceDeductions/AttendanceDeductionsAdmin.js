@@ -87,9 +87,7 @@ const AttendanceDeductionsAdmin = () => {
     if (!selectedEmployee || !selectedMonth) return;
     
     try {
-      const response = await fetch(`/api/attendance/stats/${selectedEmployee}/${selectedMonth}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await axios.get(`${API}/attendance/stats/${selectedEmployee}/${selectedMonth}`);
       const data = await response.json();
       setAttendanceStats(data);
     } catch (error) {
