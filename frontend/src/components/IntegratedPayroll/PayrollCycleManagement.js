@@ -384,38 +384,31 @@ const PayrollCycleManagement = () => {
                       {!cycle.is_locked && (
                         <>
                           <button
-                            onClick={() => handleEditCycle(cycle)}
-                            className="text-yellow-600 hover:text-yellow-900"
-                            title="تعديل الدورة"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </button>
-                          <button
                             onClick={() => handleCalculatePayroll(cycle)}
-                            className="text-green-600 hover:text-green-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
                             title="حساب الرواتب"
                           >
-                            <CalculatorIcon className="h-4 w-4" />
+                            <CalculatorIcon className="h-5 w-5" />
                           </button>
                           <button
                             onClick={() => {
                               setSelectedCycle(cycle);
                               setShowLockModal(true);
                             }}
-                            className="text-orange-600 hover:text-orange-900"
+                            className="flex items-center gap-1 px-2 py-1.5 text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
                             title="قفل الدورة"
                           >
-                            <LockClosedIcon className="h-4 w-4" />
+                            <LockClosedIcon className="h-5 w-5" />
                           </button>
                         </>
                       )}
                       {cycle.is_locked && (
                         <button
                           onClick={() => handleUnlockCycle(cycle)}
-                          className="text-purple-600 hover:text-purple-900"
+                          className="flex items-center gap-1 px-2 py-1.5 text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
                           title="فتح الدورة"
                         >
-                          <LockOpenIcon className="h-4 w-4" />
+                          <LockOpenIcon className="h-5 w-5" />
                         </button>
                       )}
                       <div className="relative inline-block text-left">
