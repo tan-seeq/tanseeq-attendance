@@ -1211,6 +1211,21 @@ frontend:
   - agent: "testing"
     message: "✅ ARABIC REVIEW REQUEST FOCUSED TESTING COMPLETED: اختبار سريع للإصلاحات الجديدة successfully completed with 19/20 tests passed. SPECIFIC REQUIREMENTS VERIFIED: 1) تقرير الرواتب الجديد بدون Position: Both Excel and PDF payroll exports confirmed to exclude Position column, proper formatting maintained 2) إزالة الرموز الغريبة: All reports (attendance, leaves, field-exits, payroll) completely clean of ■■■■■■ symbols with professional TANSEEQ branding 3) اختبار عام للخدمات: Login, dashboard stats, attendance check-in all working correctly 4) Enhanced field exit management with expected times, departure/return tracking, and admin notes fully functional. Only minor issue: No pending leaves available for approval testing (expected behavior). All Arabic review requirements successfully implemented and verified."
   - agent: "testing"
+  - task: "Fix Work Reports Clients create endpoint to Mongo variant"
+    implemented: true
+    working: true
+    file: "backend/server.py (/work-reports/clients POST)"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "Create work log failed due to missing client; POST /work-reports/clients used SQLAlchemy path and failed under Mongo mode"
+      - working: true
+        agent: "main"
+        comment: "Replaced create client endpoint with pure Mongo insert + duplicate code check; added audit log. Now we can create a test client for logs API."
+
   - task: "Run Backend Regression with artifact capture"
     implemented: false
     working: "NA"
