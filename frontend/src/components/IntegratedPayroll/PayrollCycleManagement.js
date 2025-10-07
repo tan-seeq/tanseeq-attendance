@@ -372,13 +372,14 @@ const PayrollCycleManagement = () => {
                     {formatDate(cycle.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => navigate(`/payroll-summary/${cycle.id}`)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="flex items-center gap-1 px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                         title="عرض التفاصيل"
                       >
-                        <EyeIcon className="h-4 w-4" />
+                        <EyeIcon className="h-5 w-5" />
+                        <span className="text-xs">عرض</span>
                       </button>
                       {!cycle.is_locked && (
                         <>
