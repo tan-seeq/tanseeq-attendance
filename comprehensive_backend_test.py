@@ -498,7 +498,7 @@ class ComprehensiveTanseeqTester:
 
 if __name__ == "__main__":
     # Get backend URL from environment or use default
-    backend_url = "https://hr-attendance-2.preview.emergentagent.com"
+    backend_url = "https://hrms-tanseeq.preview.emergentagent.com"
     print(f"🔗 Using backend URL: {backend_url}")
     
     tester = ComprehensiveTanseeqTester(backend_url)

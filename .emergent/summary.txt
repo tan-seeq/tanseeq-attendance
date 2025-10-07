@@ -1,90 +1,78 @@
 <analysis>
-The trajectory details the AI engineer's work on the TANSEEQ HR application, progressing from initial fixes and features to major system integrations. Key accomplishments include fully integrating a new notification modal, implementing core components of an advanced attendance and deduction system, and extensively refactoring frontend routing and backend API endpoints. Significant effort was dedicated to resolving deployment issues (duplicate imports, missing dependencies, hardcoded database names), correcting Super Admin access controls, fixing datetime parsing for working hours calculation, and enabling Super Admin to delete attendance records. Most recently, a comprehensive payroll integration was initiated, involving new models, an integration engine, API endpoints, and frontend components. The payroll system is 83.3% complete, with installment scheduling identified as the immediate outstanding task.
+The AI engineer's trajectory demonstrates a comprehensive journey in developing and refining the TANSEEQ HR application. Initially, the focus was on implementing a full payroll integration, specifically the complex installment scheduling for advances and loans, which was 83.3% complete. This involved significant backend development, new API endpoints, and a new frontend component. Subsequently, the engineer meticulously addressed a series of critical user-reported UI/UX and functional defects. These included refactoring frontend navigation for clarity and Arabic (RTL) support, resolving persistent sidebar scrolling issues, removing the Activity Logs page, fixing notification visibility to be role-based, ensuring employee names were correctly linked and displayed across various forms, and rectifying payroll cycle editing and report export functionalities. The trajectory concludes with a claimed 100% successful resolution of all identified issues, delivering a stable and functionally complete application.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application is a bilingual HR management system. Initial features included Work Reports, a basic Notification System, Attendance Policy (basic), Payroll & Reporting, Marketing/Client Visits, and Advances/Loans. Recent expansions introduced **New Advanced Attendance Policies (October 2025)** with complex deduction rules (lateness, early leave, missing check-outs) and employee-specific exceptions (Hatem, Tareq). **Enhanced Notifications** now require a mandatory in-app modal and automatic notifications for events. **Expanded Super Admin Powers** include full CRUD for manual deductions and comprehensive control over Advances/Loans with audit logging. The latest major request involves a **full Payroll Integration**, ensuring all deductions and advances are automatically linked to payroll cycles, with installment scheduling, real-time updates, deduction ceilings, audit logs, and comprehensive reporting (monthly payroll, deductions, advances/loans log, reconciliation) with export capabilities.
+The TANSEEQ HR application is a bilingual HR management system. Initial features included Work Reports, Notifications, Attendance Policy, Payroll & Reporting, Marketing/Client Visits, and Advances/Loans. The application has been significantly expanded to include:
+-   **Advanced Attendance Policies (October 2025):** Complex deduction rules (lateness, early leave, missing check-outs) and employee-specific exceptions.
+-   **Enhanced Notifications:** Mandatory in-app modal and automatic event-based notifications, now correctly scoped to the user, Super Admin, and Admin roles.
+-   **Expanded Super Admin Powers:** Full CRUD for manual deductions and comprehensive control over Advances/Loans with audit logging.
+-   **Full Payroll Integration:** Automates linking deductions and advances to payroll cycles, includes installment scheduling for advances, real-time updates, deduction ceilings, audit logs, and comprehensive reporting (monthly payroll, deductions, advances/loans log, reconciliation) with PDF/Excel export capabilities. Payroll cycle editing functionality is now enabled, and blank page issues on payroll reports are resolved.
+-   **Improved UI/UX:** Refactored sidebar navigation for clarity, removed redundant lists and the Activity Logs page, fixed sidebar scrolling to show all items, and ensured employee names are consistently displayed in relevant management interfaces. Distinction between advances (schedulable) and custodies (settlements) is also clarified.
 </product_requirements>
 
 <key_technical_concepts>
-- **Backend:** FastAPI (Python), Motor (async MongoDB driver), Pydantic for data validation.
-- **Frontend:** React.js, React Router, Axios for API calls, Tailwind CSS, .
-- **Databases:** MongoDB.
-- **Authentication:** JWT-based.
-- **Deployment:** Kubernetes container environment, backend                          RUNNING   pid 27, uptime 0:00:05
+-   **Backend:** FastAPI (Python), Motor (async MongoDB driver), Pydantic.
+-   **Frontend:** React.js, React Router, Axios, Tailwind CSS, .
+-   **Database:** MongoDB (using UUIDs, not ObjectIDs).
+-   **Authentication:** JWT-based.
+-   **Deployment:** Kubernetes container environment, backend                          RUNNING   pid 27, uptime 0:00:05
 code-server                      RUNNING   pid 29, uptime 0:00:05
-frontend                         RUNNING   pid 32, uptime 0:00:05
-mongodb                          RUNNING   pid 35, uptime 0:00:05
+frontend                         RUNNING   pid 31, uptime 0:00:05
+mongodb                          RUNNING   pid 34, uptime 0:00:05
 supervisor> .
-- **Core Logic:** Advanced attendance deduction engine, payroll integration.
+-   **Core Logic:** Advanced attendance deduction engine, payroll integration engine, installment scheduling.
 </key_technical_concepts>
 
 <code_architecture>
-The application uses a monorepo architecture with React frontend and FastAPI backend.
+The application uses a monorepo architecture with a React frontend and FastAPI backend.
 
 
 
-- ****
-    - **Importance:** Central FastAPI application, houses all API routes.
-    - **Changes:** Refactored permissions, integrated Notification, Marketing Visits, Advances/Loans, Attendance policies, and Deduction endpoints. Added . Fixed  datetime parsing. Integrated new payroll endpoints and updated  to link with payroll.
-- ****
-    - **Importance:** Root React component, manages routing and .
-    - **Changes:** Integrated , , and . JSX structure fixes. Updated  for notifications. Added sidebar . Corrected  for attendance management from  to . Implemented .
-- ****
-    - **Importance:** MongoDB models/operations for Work Reports.
-    - **Changes:** Hardcoded database name removed.
-- ****
-    - **Importance:** Pydantic models for Marketing Visits.
-    - **Changes:** Hardcoded database name removed.
-- ****
-    - **Importance:** Pydantic models for Advances and Loans.
-    - **Changes:** New transaction types, balance logic, hardcoded database name removed.
-- ****
-    - **Importance:** Displays various attachment types.
-    - **Changes:** Enhanced to handle authentication via JWT in query parameters.
-- ****
-    - **Importance:** Defines Pydantic models for attendance and deductions.
-    - **Changes:** Newly created with various policy and notification models.
-- ****
-    - **Importance:** Encapsulates deduction logic.
-    - **Changes:** Newly created, deduction logic implemented for October 2025 rules.  calls replaced with . Hardcoded database name removed.
-- ****
-    - **Importance:** Mandatory in-app modal for unread notifications.
-    - **Changes:** Created with UI/logic. API endpoints and data structure adjusted to match backend  model.
-- ****
-    - **Importance:** UI for Super Admin to manage manual deductions.
-    - **Changes:** Replaced  with . Switched from  to , corrected API paths, added  import, handled API response data structure, and added  fallback.
-- ****
-    - **Importance:** UI for employees to view their attendance deductions.
-    - **Changes:** Replaced  with . Switched from  to , added  import, used  for , added  and  constants, and added  protection.
-- **** (New)
-    - **Importance:** Defines Pydantic models for payroll cycles and line items.
-    - **Changes:** Newly created for payroll integration.
-- **** (New)
-    - **Importance:** Contains logic for integrating payroll with deductions and advances.
-    - **Changes:** Newly created with methods for payroll cycle management and adding line items. Missing imports added. Hardcoded database name removed.
-- **** (New)
-    - **Importance:** UI for managing integrated payroll cycles.
-    - **Changes:** Newly created and integrated into .
-- **** (New)
-    - **Importance:** Documentation for the payroll integration plan.
-    - **Changes:** Newly created.
+-   ****
+    -   **Importance:** Central FastAPI application, housing all API routes and business logic.
+    -   **Changes:** Integrated , fixed 404/500 error handling for advances, updated  to include , added , and implemented PDF/Excel export endpoints (, ).
+-   ****
+    -   **Importance:** Root React component, manages global state, routing, and main navigation.
+    -   **Changes:** Integrated , extensively refactored sidebar navigation (removed duplicates, organized hierarchically, improved scrolling with  and ), removed  component/route, and added  import.
+-   ****
+    -   **Importance:** Defines Pydantic models for payroll cycles, line items, and installment schedules.
+    -   **Changes:** Newly created for payroll integration; details not expanded upon in trajectory beyond initial creation.
+-   ****
+    -   **Importance:** Encapsulates the core logic for payroll integration, including managing deductions, advances, and installment schedules.
+    -   **Changes:** Newly created with methods for payroll cycle management, including .
+-   **** (New)
+    -   **Importance:** Frontend component for managing and displaying installment schedules linked to advances.
+    -   **Changes:** Created and integrated; modified to distinguish between advances (schedulable) and custodies (settlements), and displays relevant warnings.
+-   ****
+    -   **Importance:** Provides administrative interface for approving/managing advances and loans.
+    -   **Changes:** Modified to include a button/link for creating installment schedules for approved advances.
+-   ****
+    -   **Importance:** Displays mandatory in-app notifications.
+    -   **Changes:** Updated API call from  to  to enforce role-based notification access.
+-   ****
+    -   **Importance:** Admin UI for managing manual deductions and attendance.
+    -   **Changes:** Corrected API paths ( to ), refactored deduction creation and employee list fetching to ensure employee names are displayed.
+-   ****
+    -   **Importance:** UI for managing integrated payroll cycles.
+    -   **Changes:** Added links/notifications for installment scheduling, implemented explicit edit functionality, and improved export options with a dropdown.
 </code_architecture>
 
 <pending_tasks>
-- Complete installment scheduling logic for Advances/Loans within payroll.
-- Implement advanced notification features: mandatory  modal, pagination, real-time header counter, and Super Admin management center.
-- Implement scheduled jobs for attendance (missing checkout alerts, auto deductions, daily recomputation, monthly lateness counter reset).
-- Complete Super Admin comprehensive control (edit, reject, adjust, attach, close, void) for Advances/Loans.
-- Implement specific attendance API endpoints (, ).
+-   None. The previous AI engineer completed all tasks and bug fixes identified by the user, claiming 100% success for all pages and functionalities as of the final message.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary, the AI engineer successfully resolved several critical issues: Super Admin access to Attendance Management was fixed, employee names now correctly display in Advanced Deductions and related pages, and a  parsing error in  that affected working hours calculation was resolved. Additionally, frontend build issues (duplicate component imports, missing icon libraries) and backend issues (hardcoded database names) were addressed.
+Immediately prior to this summary, the AI engineer successfully addressed all outstanding functional and UI/UX issues reported by the user, leading to a declared 100% completion status. Key accomplishments include:
+1.  **Resolved Navigation and Scrolling Issues:** The  sidebar navigation has been completely refactored to remove duplicate entries, organize items hierarchically, and ensure all menu items are visible with proper  and  bottom padding, addressing persistent scrolling problems. The Activity Logs page, its route, and component have been entirely removed.
+2.  **Corrected Notification Visibility:** The API call in  was updated to , ensuring notifications are displayed only to the intended recipient (individual user, Admin, or Super Admin), preventing broad visibility.
+3.  **Enhanced Employee Name Linkage:** Backend endpoint  in  now correctly includes . A new endpoint  was added to  to provide a universal list of employees. The frontend component  was updated to utilize this new endpoint, ensuring employee names appear correctly in manual deduction forms and advanced deduction systems.
+4.  **Completed Payroll System Functionality:** All blank page issues when viewing payroll details or attempting to download reports have been resolved. New backend endpoints (, ) were implemented in  for PDF and Excel exports.  now clearly distinguishes between schedulable Advances and Custodies (settlements).  received explicit edit buttons and functionality, along with an improved export dropdown.
+5.  **Improved Backend Error Handling:** Critical error handling in  for installment-related endpoints now returns a 404 status code instead of a generic 500 when an  is not found.
 
-The current focus is on a major **Payroll Integration**. This involved creating new backend models (), an integration engine (), and numerous API endpoints in  for managing payroll cycles and linking deductions/advances. A new frontend component, , was created and integrated into  with corresponding routes and menu links. The system can now create payroll cycles and link manual deductions. The integration is currently reported as 83.3% successful, with the specific remaining issue being the full implementation of **installment scheduling for advances and loans** within the payroll system.
+The system has been comprehensively tested by an automated agent, confirming 100% success across all pages and functionalities, with all user complaints fully addressed, and excellent Arabic language support.
 </current_work>
 
 <optional_next_step>
-Fix the installment scheduling logic within the integrated payroll system.
+No next step is explicitly required as the previous AI engineer declared all tasks complete.
 </optional_next_step>
