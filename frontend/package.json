@@ -18,7 +18,9 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:screenshots": "cd .. && python tests/playwright_screenshot_suite.py",
+    "test:screenshots:install": "cd .. && pip install playwright && playwright install chromium"
   },
   "browserslist": {
     "production": [
