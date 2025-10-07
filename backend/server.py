@@ -9207,6 +9207,22 @@ async def create_activity_type(
     )
     
     return activity_type
+# Ensure MongoDB indexes for work reports logs
+@app.on_event("startup")
+async def init_work_reports_indexes():
+    try:
+        # Compound indexes for performance
+        await work_reports_db.work_logs.create_index([("created_by", 1), ("start_at", -1)])
+        await work_reports_db.work_logs.create_index([("client_id", 1)])
+        await work_reports_db.work_logs.create_index([("start_at", -1)])
+        # Optional text index for search
+        await work_reports_db.work_logs.create_index(
+            [("description", "text"), ("notes", "text"), ("client_name", "text"), ("activity_name", "text")],
+            name="worklog_text_index"
+        )
+    except Exception as e:
+        logger.warning(f"Work Reports index creation warning: {e}")
+
 
 # ============ WORK LOG MANAGEMENT ============
 
