@@ -1,42 +1,24 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend Testing for Installment Scheduling System
-Testing the completed installment scheduling system for advances and loans within the integrated payroll system.
-
-Priority Testing Areas:
-1. Installment Scheduling Endpoints (NEW)
-2. Integration Testing
-3. Data Validation
-4. Error Handling
-5. Database Verification
+Backend Regression Testing - Priority Round 1
+Testing all priority endpoints as requested in review
 """
 
-import asyncio
-import aiohttp
+import requests
 import json
 import os
-from datetime import datetime, date, timedelta
-from typing import Dict, List, Any, Optional
-import uuid
+from datetime import datetime, timedelta
+from pathlib import Path
+import time
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hrms-tanseeq.preview.emergentagent.com')
-API_BASE = f"{BACKEND_URL}/api"
+BASE_URL = "https://hrms-tanseeq.preview.emergentagent.com/api"
 
-# Test credentials
-TEST_CREDENTIALS = {
-    'super_admin': {
-        'email': 'hatem@tan-seeq.co',
-        'password': 'hatem123'
-    },
-    'admin': {
-        'email': 'mahmoud@tanseeq.com', 
-        'password': 'mahmoud123'
-    },
-    'user': {
-        'email': 'jihad@tanseeq.com',
-        'password': 'jihad123'
-    }
+# Test accounts
+TEST_ACCOUNTS = {
+    "super_admin": {"email": "admin@tanseeq.com", "password": "ADMIN"},
+    "user": {"email": "jihad@tanseeq.com", "password": "jihad123"},
+    "hatem": {"email": "hatem@tan-seeq.co", "password": "hatem123"}
 }
 
 class InstallmentSchedulingTester:
