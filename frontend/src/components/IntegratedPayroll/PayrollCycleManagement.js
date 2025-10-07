@@ -177,6 +177,24 @@ const PayrollCycleManagement = () => {
     }
   };
 
+  const downloadExport = async (cycle, format) => {
+    try {
+      const url = `${API}/payroll/cycles/${cycle.id}/export/${format}`;
+      const response = await axios.get(url, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      const fileName = `payroll_${cycle.display_name || cycle.id}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      const msg = error.response?.data?.detail || 'فشل تنزيل الملف (تحقق من الصلاحيات)';
+      alert(msg);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
