@@ -582,7 +582,13 @@ class BackendTester:
             # Get a payroll cycle for comparison
             response = self.session.get(f"{BASE_URL}/payroll/cycles")
             if response.status_code == 200:
-                cycles = response.json().get('cycles', [])
+                data = response.json()
+                # Handle both direct list and object format
+                if isinstance(data, list):
+                    cycles = data
+                else:
+                    cycles = data.get('cycles', [])
+                
                 if cycles:
                     cycle_id = cycles[0].get('id')
                     if cycle_id:
