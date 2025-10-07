@@ -3159,13 +3159,7 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="/activity-logs" element={
-              <ProtectedRoute requiredRole="super_admin">
-                <Layout>
-                  <ActivityLogs />
-                </Layout>
-              </ProtectedRoute>
-            } />
+            {/* تم إزالة صفحة سجل الأنشطة بناء على طلب المستخدم */}
             <Route path="/payroll" element={
               <ProtectedRoute requiredRole="admin">
                 <Layout>
