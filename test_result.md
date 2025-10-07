@@ -1211,6 +1211,29 @@ frontend:
   - agent: "testing"
     message: "✅ ARABIC REVIEW REQUEST FOCUSED TESTING COMPLETED: اختبار سريع للإصلاحات الجديدة successfully completed with 19/20 tests passed. SPECIFIC REQUIREMENTS VERIFIED: 1) تقرير الرواتب الجديد بدون Position: Both Excel and PDF payroll exports confirmed to exclude Position column, proper formatting maintained 2) إزالة الرموز الغريبة: All reports (attendance, leaves, field-exits, payroll) completely clean of ■■■■■■ symbols with professional TANSEEQ branding 3) اختبار عام للخدمات: Login, dashboard stats, attendance check-in all working correctly 4) Enhanced field exit management with expected times, departure/return tracking, and admin notes fully functional. Only minor issue: No pending leaves available for approval testing (expected behavior). All Arabic review requirements successfully implemented and verified."
   - agent: "testing"
+  - task: "Run Backend Regression with artifact capture"
+    implemented: false
+    working: "NA"
+    file: "N/A"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Prepare to re-run backend regression on Preview/Staging using REACT_APP_BACKEND_URL. Capture sample export files and record results."
+  - task: "Run Frontend Playwright Suite to generate evidence/ (screenshots + exports)"
+    implemented: false
+    working: "NA"
+    file: "tests/playwright_screenshot_suite.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Execute full UI suite across 20 routes with two roles. Save screenshots under ./evidence/ and downloads PDF/Excel. Validate sidebar RTL/active, names in advanced deductions, payroll cycles page no blank pages."
+
   - task: "Bugfix: Attendance Deductions Admin — employee names not showing + manual form missing employee list"
     implemented: true
     working: true
