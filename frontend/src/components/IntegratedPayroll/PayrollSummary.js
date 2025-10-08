@@ -154,26 +154,6 @@ const PayrollSummary = () => {
     }
   };
 
-  const handleDownload = async (format) => {
-    try {
-      const url = `${API}/payroll/cycles/${id}/export/${format}`;
-      const response = await axios.get(url, { responseType: 'blob' });
-      const blob = new Blob([response.data], { 
-        type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-      });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `payroll_${cycle.month}_${cycle.id.substring(0, 8)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(link.href);
-    } catch (err) {
-      console.error('Download error:', err);
-      alert(err.response?.data?.detail || 'فشل تنزيل الملف');
-    }
-  };
-
   const handleStartEdit = () => {
     // Initialize edited data with current employee summaries
     const initialData = employeeSummaries.map(emp => ({
