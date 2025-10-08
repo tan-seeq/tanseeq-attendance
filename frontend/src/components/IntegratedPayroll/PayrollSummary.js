@@ -55,6 +55,50 @@ const PayrollSummary = () => {
     }
   };
 
+  const handleViewSalaryLetter = async (employeeId, format) => {
+    try {
+      const response = await axios.get(
+        `${API}/payroll/cycles/${id}/employees/${employeeId}/letter?format=${format}`,
+        { responseType: format === 'pdf' ? 'blob' : 'text' }
+      );
+      
+      if (format === 'html') {
+        // Open HTML in new window
+        const newWindow = window.open('', '_blank');
+        newWindow.document.write(response.data);
+        newWindow.document.close();
+      }
+    } catch (error) {
+      console.error('Error viewing salary letter:', error);
+      alert('حدث خطأ في عرض رسالة الراتب');
+    }
+  };
+
+  const handleDownloadSalaryLetter = async (employeeId, format) => {
+    try {
+      const response = await axios.get(
+        `${API}/payroll/cycles/${id}/employees/${employeeId}/letter?format=${format}`,
+        { responseType: 'blob' }
+      );
+      
+      // Create download link
+      const blob = new Blob([response.data], { 
+        type: format === 'pdf' ? 'application/pdf' : 'text/html' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `salary_letter_${employeeId.slice(0, 8)}_${id.slice(0, 8)}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading salary letter:', error);
+      alert('حدث خطأ في تحميل رسالة الراتب');
+    }
+  };
+
   const handleLock = async () => {
     const lock_reason = prompt('الرجاء إدخال سبب القفل (10 أحرف على الأقل):');
     if (!lock_reason || lock_reason.length < 10) {
