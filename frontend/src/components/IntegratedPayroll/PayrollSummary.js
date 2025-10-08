@@ -99,6 +99,31 @@ const PayrollSummary = () => {
     }
   };
 
+  const handleExportCycle = async (format) => {
+    try {
+      const response = await axios.get(
+        `${API}/payroll/cycles/${id}/export/${format}`,
+        { responseType: 'blob' }
+      );
+      
+      // Create download link
+      const blob = new Blob([response.data], { 
+        type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payroll_cycle_${cycle.month}_${id.slice(0, 8)}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting cycle:', error);
+      alert('حدث خطأ في تصدير الملف');
+    }
+  };
+
   const handleLock = async () => {
     const lock_reason = prompt('الرجاء إدخال سبب القفل (10 أحرف على الأقل):');
     if (!lock_reason || lock_reason.length < 10) {
