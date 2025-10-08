@@ -18,7 +18,10 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
     """Generate English-only salary letter PDF"""
     
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    # Reduced margins to fit content in one page
+    doc = SimpleDocTemplate(buffer, pagesize=A4, 
+                           rightMargin=1*cm, leftMargin=1*cm, 
+                           topMargin=1*cm, bottomMargin=1*cm)
     
     # Create styles
     styles = getSampleStyleSheet()
