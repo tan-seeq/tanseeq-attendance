@@ -4018,18 +4018,34 @@ async def update_payroll_cycle_employees(
         if not employees:
             raise HTTPException(status_code=400, detail="لا توجد بيانات موظفين للتحديث")
         
-        # Update each employee's summary
+        # Update each employee's summary AND create ledger entries
+        from payroll_ledger_service import PayrollLedgerService
+        ledger_service = PayrollLedgerService(db)
+        
         updated_count = 0
         for emp_data in employees:
             employee_id = emp_data.get("employee_id")
             if not employee_id:
                 continue
             
-            # Find and update employee summary
+            # Get current values to compare
+            current_summary = await db.employee_payroll_summaries.find_one({
+                "payroll_cycle_id": cycle_id,
+                "employee_id": employee_id
+            })
+            
+            if not current_summary:
+                continue
+            
+            # Extract new values
+            new_manual_ded = emp_data.get("manual_deductions", 0)
+            old_manual_ded = current_summary.get("manual_deductions", 0)
+            
+            # Update employee summary
             update_fields = {
                 "base_salary": emp_data.get("base_salary", 0),
                 "total_allowances": emp_data.get("allowances", 0),
-                "manual_deductions": emp_data.get("manual_deductions", 0),
+                "manual_deductions": new_manual_ded,
                 "attendance_deductions": emp_data.get("attendance_deductions", 0),
                 "advance_deductions": emp_data.get("advance_deductions", 0),
                 "updated_at": datetime.now(timezone.utc).isoformat()
@@ -4053,6 +4069,21 @@ async def update_payroll_cycle_employees(
                 },
                 {"$set": update_fields}
             )
+            
+            # CREATE/UPDATE LEDGER ENTRY for manual deductions if changed
+            if new_manual_ded != old_manual_ded:
+                # Create ledger entry for the new manual deduction
+                if new_manual_ded > 0:
+                    await ledger_service.create_ledger_entry(
+                        employee_id=employee_id,
+                        cycle_id=cycle_id,
+                        entry_type="MANUAL_DEDUCTION",
+                        amount=-new_manual_ded,  # Negative for deduction
+                        description=f"خصم يدوي تم تعديله بواسطة الإدارة - {new_manual_ded:.2f} درهم",
+                        source_type="manual_edit",
+                        source_id=f"manual_edit_{cycle_id}_{employee_id}",
+                        created_by=current_user.id
+                    )
             
             if result.modified_count > 0:
                 updated_count += 1
