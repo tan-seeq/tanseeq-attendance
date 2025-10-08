@@ -81,6 +81,9 @@ import DeductionsReport from './components/Reports/DeductionsReport';
 import AdvancesReport from './components/Reports/AdvancesReport';
 import AttendanceReport from './components/Reports/AttendanceReport';
 
+// Import Dashboard Components
+import HRDashboard from './components/Dashboard/HRDashboard';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
