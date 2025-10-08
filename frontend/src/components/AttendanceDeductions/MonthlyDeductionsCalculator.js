@@ -26,9 +26,7 @@ const MonthlyDeductionsCalculator = () => {
       setCalculating(true);
       setError('');
       
-      const response = await axios.post(`${API}/deductions/calculate-monthly`, {
-        month: selectedMonth
-      });
+      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${selectedMonth}`, {});
       
       if (response.data.success) {
         setCalculatedData(response.data);
