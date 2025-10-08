@@ -3357,6 +3357,13 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/payroll-ledger" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <ErrorBoundary><EmployeeLedger /></ErrorBoundary>
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/advances/my-transactions" element={
               <ProtectedRoute>
                 <Layout>
