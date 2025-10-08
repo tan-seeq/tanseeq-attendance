@@ -502,12 +502,13 @@ const Layout = ({ children }) => {
     
     // قسم السوبر أدمن فقط
     ...(user?.role === 'super_admin' ? [
+      { name: 'لوحة التحكم التحليلية', href: '/hr-dashboard', icon: ChartBarIcon },
       { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: ExclamationTriangleIcon },
       { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
       { name: 'سجل قيود الرواتب', href: '/payroll-ledger', icon: DocumentTextIcon },
       { name: 'تقارير الخصومات', href: '/reports/deductions', icon: ChartBarIcon },
       { name: 'تقرير السلف', href: '/reports/advances', icon: BanknotesIcon },
-      { name: 'تقرير الحضور', href: '/reports/attendance', icon: ChartBarIcon },
+      { name: 'تقرير الحضور', href: '/reports/attendance', icon: ClockIcon },
       { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
