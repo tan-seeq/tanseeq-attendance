@@ -38,7 +38,7 @@ ADMIN_PASSWORD="hatem123"  # ⚠️ CHANGE FOR PRODUCTION
 
 **Current Frontend ENV:**
 ```bash
-REACT_APP_BACKEND_URL=https://payroll-ledger-1.preview.emergentagent.com  # ⚠️ UPDATE TO PRODUCTION URL
+REACT_APP_BACKEND_URL=https://tanseeq-payroll.preview.emergentagent.com  # ⚠️ UPDATE TO PRODUCTION URL
 ```
 
 **🔴 CRITICAL - Must Change for Production:**

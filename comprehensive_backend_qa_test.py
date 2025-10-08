@@ -36,7 +36,7 @@ import uuid
 import io
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://payroll-ledger-1.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://tanseeq-payroll.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test credentials as per review request

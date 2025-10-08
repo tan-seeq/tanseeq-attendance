@@ -12,7 +12,7 @@ from pathlib import Path
 import time
 
 # Configuration
-BASE_URL = "https://payroll-ledger-1.preview.emergentagent.com/api"
+BASE_URL = "https://tanseeq-payroll.preview.emergentagent.com/api"
 
 class WorkReportsFlowTester:
     def __init__(self):

@@ -1,84 +1,105 @@
 <analysis>
-The AI engineer's work transitioned from an initial claim of 100% completion on payroll integration and UI/UX fixes to a comprehensive re-evaluation triggered by a user's detailed QA request. The trajectory reveals an iterative bug-fixing and validation process across various application modules. Key issues addressed include resolving white page errors on  and , fixing Not authenticated errors during PDF/Excel exports, ensuring employee names are displayed correctly, enhancing sidebar navigation with RTL support and proper scrolling, and refining Work Reports Logs and Marketing/Field Visits functionalities. The engineer meticulously applied fixes for modal overlay issues, implemented new  components, and prepared automated Playwright tests to generate detailed evidence, all while communicating progress and seeking user confirmation.
+The AI engineer's trajectory involved an iterative process of feature development and bug fixing. It began by addressing core application stability (white pages, authentication, error handling) and then moved to significant feature enhancements like a comprehensive payroll editing interface and a Payroll Ledger system. Key development cycles included implementing automatic deduction calculations, a detailed monthly salary letter, and various HR reports and dashboards. Throughout, the engineer demonstrated deep dives into the codebase, particularly , , and , and used debugging and testing extensively. The most recent phase focused on resolving a critical set of reported bugs, including UI rendering errors, Method Not Allowed issues on API calls, data inconsistencies in payroll summaries, and broken export functionalities, alongside ongoing architectural refinements. The work is still in progress, with multiple critical issues having been identified and systematically addressed.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application is a bilingual HR management system encompassing Work Reports, Notifications, Attendance Policy, Payroll & Reporting, Marketing/Client Visits, and Advances/Loans. The core problem is to ensure its 100% functionality and stability. Key requirements include:
--   **Advanced Attendance Policies:** Correct deduction rules and employee-specific exceptions.
--   **Enhanced Notifications:** Role-based mandatory in-app notifications.
--   **Full Payroll Integration:** Automation of deductions/advances, installment scheduling, real-time updates, reporting with PDF/Excel exports, and payroll cycle editing.
--   **Improved UI/UX:** Refactored sidebar navigation (RTL, scrolling, active page highlight), consistent employee name display, and clear distinction between advances and custodies.
--   **Comprehensive QA:** A full audit of 20 pages, covering all buttons, forms, data entry, CRUD operations, filters, search, table display, and export functionalities (PDF/Excel matching displayed data), with specific focus on fixing white pages, ensuring employee name visibility, and proper sidebar behavior.
+The TANSEEQ HR application is a bilingual HR management system with modules for Work Reports, Notifications, Attendance Policy, Payroll & Reporting, Marketing/Client Visits, and Advances/Loans. The primary goal is 100% functionality and stability. Key features and ongoing development include:
+
+-   **Payroll Integration & Reporting**: Automate deductions/advances, installment scheduling, and real-time updates. This escalated to a comprehensive Payroll Ledger system for zero-click automation of all entries (attendance, leaves, advances, custodies, manual deductions) and automatic net pay recalculation. Exports (PDF/Excel) must match screen data. A new requirement is a monthly downloadable salary letter per employee detailing all deductions, advances, and calculation methods, derived from the Payroll Ledger, accessible via view/download buttons on .
+-   **UI/UX Improvements**: Refactored sidebar navigation (RTL, scrolling, active page highlight), consistent employee name display, clear distinction between advances/custodies, and an interactive payroll editing table.
+-   **Attendance Policies**: Correct deduction rules for delays/absences, employee-specific exceptions.
+-   **Error Handling**: Robust error display (ErrorBoundary) and elimination of white page errors.
+-   **Comprehensive QA**: Full audit of 20 pages, covering all interactive elements, CRUD, filters, search, table display, and export functionalities with detailed visual evidence and defect logging.
+-   **Notification System**: Role-based in-app notifications with proper confirmation and automatic closure.
+-   **Advances/Loans/Custodies**: Editable and deletable from management pages, reflecting impacts in payroll.
+-   **Critical Bug Fixes**: Recent report highlights several critical issues across , , salary letters, monthly deduction calculations, and backend endpoints (, installment schedules, ). Also includes consolidation of sidebar menus.
 </product_requirements>
 
 <key_technical_concepts>
--   **Backend:** FastAPI (Python), Motor (async MongoDB driver), Pydantic.
--   **Frontend:** React.js, React Router, Axios, Tailwind CSS, .
--   **Database:** MongoDB (using UUIDs).
--   **Authentication:** JWT-based, Axios interceptors.
--   **Deployment/Testing:** Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:04
-code-server                      RUNNING   pid 29, uptime 0:00:04
-frontend                         RUNNING   pid 32, uptime 0:00:04
-mongodb                          RUNNING   pid 35, uptime 0:00:04
-supervisor> , Playwright (for E2E testing/screenshots).
--   **Error Handling:**  components for robust UI.
+-   **Backend**: FastAPI (Python), Motor (async MongoDB driver), Pydantic for data validation.
+-   **Frontend**: React.js, React Router, Axios for API calls, Tailwind CSS for styling,  for icons.
+-   **Database**: MongoDB, UUIDs for IDs.
+-   **Authentication**: JWT-based with Axios interceptors.
+-   **Error Handling**:  components.
+-   **Exporting**:  (PDF),  (Excel).
 </key_technical_concepts>
 
 <code_architecture>
-The application uses a monorepo architecture with a React frontend and FastAPI backend.
+The application uses a monorepo structure with a React frontend and FastAPI backend.
 
 
 
 -   ****
-    -   **Importance:** Main FastAPI application defining all API routes.
+    -   **Importance:** Core backend application.
     -   **Changes:**
-        -   Refined  to include .
-        -   Added .
-        -   Implemented  for single cycle retrieval.
-        -   Ensured payroll export endpoints (, ) are functional and authenticated, and handle errors robustly.
-        -   Fixed  routes (GET/POST/PUT/DELETE) to use MongoDB with filters, pagination, and indexing.
-        -   Updated  to a MongoDB version to prevent Client not found errors.
-        -   Ensured  is correctly invoked.
+        -   Fixed duplicate notification acknowledge endpoints.
+        -   Added DELETE endpoint for .
+        -   Added  and  for attendance/advance deductions.
+        -   Added  for individual salary letters.
+        -   Made  and  mandatory for payroll cycle lock/unlock.
+        -   Added  for employee-specific ledger view.
+        -   Integrated automatic ledger entries for monthly deductions and approved unpaid leaves.
+        -   Fixed HTML template logic for salary letters to prevent runtime errors when handling empty data.
+        -   Added  as an alias.
+        -   Fixed  to correctly expect  as a query parameter.
 -   ****
-    -   **Importance:** Global routing, state management, and main navigation.
+    -   **Importance:** Global routing and navigation.
     -   **Changes:**
-        -   Refactored sidebar navigation for RTL support, scrolling, and active page highlighting.
-        -   Integrated  route.
-        -   Implemented Axios interceptors to automatically include  headers for all API calls, especially for exports.
-        -   Integrated the new  component around main routes.
+        -   Integrated  and replaced  route for Super Admin.
+        -   Integrated , , , , and  routes.
+        -   Added these new components to the sidebar navigation.
+        -   Fixed  import.
 -   ****
-    -   **Importance:** Manages payroll cycles.
-    -   **Changes:** Rewritten/refactored to resolve white pages, improve export dropdown, use  for routing, and ensure proper modal control. Integrated .
--   ** (New)**
-    -   **Importance:** Displays detailed summary of a specific payroll cycle.
-    -   **Changes:** Created to resolve white page issues for payroll details. Uses / correctly and integrates . Supports authenticated PDF/Excel exports via Axios blob.
+    -   **Importance:** Payroll cycle summary display and editing.
+    -   **Changes:**
+        -   Added View Letter and Download PDF buttons for individual salary letters.
+        -   Implemented  and  to send authentication tokens.
+        -   Added Export PDF and Export Excel buttons for cycle-wide export.
+        -   Fixed  endpoint to call .
+        -   Removed duplicate  and  functions and unified calls to .
 -   ****
-    -   **Importance:** Admin UI for managing manual deductions.
-    -   **Changes:** Updated to fetch and display employee names correctly using  and ensured modal layering for proper interaction.
+    -   **Importance:** Manages advances and custodies.
+    -   **Changes:** Updated to include UI for edit and delete functionality for advances/custodies.
+-   ****
+    -   **Importance:** Handles in-app notifications.
+    -   **Changes:** Fixed  endpoint call to the correct .
 -   ** (New)**
-    -   **Importance:** Provides graceful error handling and displays user-friendly messages for React component errors.
-    -   **Changes:** Created and integrated into key frontend components like , , and .
+    -   **Importance:** Dedicated page for calculating and applying monthly attendance/advance deductions.
+    -   **Changes:** Initial creation. Fixed rendering of error objects.
+-   ** (New)**
+    -   **Importance:** Displays detailed payroll ledger entries for a specific employee.
+    -   **Changes:** Initial creation.
+-   ** (New)**
+    -   **Importance:** Page for general deductions reports.
+    -   **Changes:** Initial creation.
+-   ** (New)**
+    -   **Importance:** Page for advances reports.
+    -   **Changes:** Initial creation. Added null checks for  to prevent runtime errors.
+-   ** (New)**
+    -   **Importance:** Page for attendance reports.
+    -   **Changes:** Initial creation.
+-   ** (New)**
+    -   **Importance:** HR Analytics Dashboard.
+    -   **Changes:** Initial creation.
 </code_architecture>
 
 <pending_tasks>
-The previous AI engineer claimed 100% completion, but the user initiated a comprehensive QA. The pending tasks are:
--   Execute full E2E Playwright tests on 20 priority routes.
--   Validate specific deduction policies (Hatem, Tarek Wazzan) and their impact on payroll.
--   Confirm Super Admin notification for Marketing/Field Visits completion.
--   Verify RTL sidebar scrolling and active page highlighting.
--   Ensure all PDF/Excel exports match displayed data and are authenticated.
--   Fix any newly identified bugs and document them with before/after evidence.
+-   **Modal Overlay Fix**: The new  component has been created but not yet applied universally to all existing modals.
+-   **Payroll Ledger System - Phase B (remaining)**: Configurable exceptions (e.g., Tarek Wazzan exclusion), Light queue for events, Detailed ledger reports (beyond employee view).
+-   **System Stability**: The installment schedules endpoint still shows an unknown error.
+-   **Data Consistency**: Ensure payroll summary fully aggregates all deduction types (attendance, leaves, advances, manual, custodies) and calculates net pay accurately, matching reports and exports.
+-   **Sidebar Unification**: Unify sidebar menus and remove/redirect old or duplicate pages.
+-   **My Deductions (User Page)**: Investigate and fix the Timeout issue.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary, the AI engineer completed critical fixes identified through user feedback and initial testing.
-1.  **Payroll Pages Stability:** Resolved white page errors on  and . This involved creating a new  component, correctly implementing  for routing within  and  to preserve authentication context, and fixing a Preview Error caused by  being called outside a component.
-2.  **Authenticated Exports:** Addressed Not authenticated issues on PDF/Excel exports by reconfiguring frontend links to use  with , and implementing global Axios interceptors in  to automatically attach the  Bearer token to all requests. Backend export routes were verified to be secure and functional (, ).
-3.  **Error Handling & UI:** Integrated  into critical frontend components (, , ) to display user-friendly error messages instead of blank pages. Modal overlay and / issues affecting clickability were fixed.
-4.  **Work Reports Logs:** Backend GET/POST/PUT/DELETE functionality for Work Reports Logs was entirely rewritten to use MongoDB  with filters, pagination, and indexes.  was also adapted to MongoDB to ensure client lookup success.
-The AI engineer is currently initiating a full E2E Playwright test suite to validate all fixes and comprehensively cover the 20 priority routes and functionalities as per the user's detailed QA plan.
+Immediately prior to this summary, the AI engineer was deep into a critical bug-fixing phase, addressing a comprehensive list of user-reported issues. The most recent actions involved:
+
+1.  **Fixing  Red Screen**: Identified and corrected the frontend code in  to correctly display error messages instead of raw error objects, which caused a React rendering crash.
+2.  **Fixing Monthly Deductions Calculation Endpoint (405 Method Not Allowed)**: Corrected the backend endpoint definition in  for  to explicitly use  parameters, aligning with frontend expectations and resolving the Method Not Allowed error.
+3.  **Investigating Payroll Summary Data Aggregation**: The AI engineer is currently examining the  page, as it is reported not to include absence, late, and advance installments in its aggregation and net pay calculation. The focus is now on understanding how data is fetched and processed for the payroll summary to ensure all deduction types are correctly integrated.
 </current_work>
 
 <optional_next_step>
-Start running the Frontend Playwright E2E test suite on the Preview/Staging environment for the specified priority routes.
+Investigate and fix the issue where the payroll summary on  does not include absence, late, and advance installments.
 </optional_next_step>
