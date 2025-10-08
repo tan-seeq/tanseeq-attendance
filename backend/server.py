@@ -2483,7 +2483,7 @@ async def get_all_deductions_admin(
 
 @api_router.post("/deductions/calculate-monthly")
 async def calculate_monthly_deductions(
-    month: str,
+    month: str = Query(..., description="Month in YYYY-MM format"),
     current_user: User = Depends(get_super_admin_user)
 ):
     """
