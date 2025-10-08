@@ -4074,14 +4074,13 @@ async def update_payroll_cycle_employees(
             if new_manual_ded != old_manual_ded:
                 # Create ledger entry for the new manual deduction
                 if new_manual_ded > 0:
-                    await ledger_service.create_ledger_entry(
+                    await ledger_service.create_entry(
                         employee_id=employee_id,
                         cycle_id=cycle_id,
-                        entry_type="MANUAL_DEDUCTION",
+                        source_type="MANUAL_DEDUCTION",
+                        source_id=f"manual_edit_{cycle_id}_{employee_id}",
                         amount=-new_manual_ded,  # Negative for deduction
                         description=f"خصم يدوي تم تعديله بواسطة الإدارة - {new_manual_ded:.2f} درهم",
-                        source_type="manual_edit",
-                        source_id=f"manual_edit_{cycle_id}_{employee_id}",
                         created_by=current_user.id
                     )
             
