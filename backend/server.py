@@ -3654,27 +3654,38 @@ async def lock_payroll_cycle(
     lock_data: dict,
     current_user: dict = Depends(get_current_user)
 ):
-    """قفل دورة راتب (سوبر أدمن فقط)"""
+    """قفل دورة راتب (سوبر أدمن فقط) - السبب إلزامي"""
     if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
         global payroll_engine
         
-        lock_reason = lock_data.get("lock_reason", "قفل دورة الراتب")
+        # Make lock_reason mandatory
+        lock_reason = lock_data.get("lock_reason")
+        if not lock_reason or lock_reason.strip() == "":
+            raise HTTPException(status_code=400, detail="سبب القفل إلزامي. يجب توضيح سبب قفل دورة الراتب.")
+        
+        if len(lock_reason.strip()) < 10:
+            raise HTTPException(status_code=400, detail="سبب القفل يجب أن يكون 10 أحرف على الأقل")
         
         success = await payroll_engine.lock_payroll_cycle(
             cycle_id=cycle_id,
             locked_by=current_user.id,
             locked_by_name=current_user.name,
-            lock_reason=lock_reason
+            lock_reason=lock_reason.strip()
         )
         
         if success:
-            return {"message": "تم قفل دورة الراتب بنجاح"}
+            return {
+                "message": "تم قفل دورة الراتب بنجاح",
+                "lock_reason": lock_reason.strip()
+            }
         else:
             raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة أو مقفولة بالفعل")
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error locking payroll cycle: {str(e)}")
 
