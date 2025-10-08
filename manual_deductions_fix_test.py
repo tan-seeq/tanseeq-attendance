@@ -93,7 +93,7 @@ class ManualDeductionsFixTester:
             summary_data = response.json()
             
             # Find first employee with manual_deductions field
-            employees = summary_data.get('employees', [])
+            employees = summary_data.get('employee_summaries', [])
             if not employees:
                 print("❌ STILL BROKEN - No employees found in summary")
                 return False
