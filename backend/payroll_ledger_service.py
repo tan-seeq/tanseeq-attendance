@@ -67,7 +67,7 @@ class PayrollLedgerService:
             "description_ar": description,
             "metadata": metadata or {},
             "created_by": created_by,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": to_iso_string_uae(),
             "is_reversed": False,
             "reversed_by": None,
             "reversed_at": None,
