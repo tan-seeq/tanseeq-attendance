@@ -14,7 +14,9 @@ import {
   ChartBarIcon,
   CalendarIcon,
   ArrowUpIcon,
-  ArrowDownIcon
+  ArrowDownIcon,
+  PencilIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import AttachmentViewer from '../AttachmentViewer';
 
