@@ -96,8 +96,8 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f9ff')),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),  # Reduced
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # Reduced
     ]))
     story.append(basic_table)
     story.append(Spacer(1, 0.2*cm))
@@ -170,8 +170,8 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         ('TEXTCOLOR', (0, -1), (-1, -1), colors.white),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),  # Reduced
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # Reduced
     ]))
     story.append(deductions_table)
     story.append(Spacer(1, 0.2*cm))
