@@ -1,0 +1,26 @@
+{
+  "summary": {
+    "total_tests": 2,
+    "passed": 1,
+    "failed": 1,
+    "warnings": 0,
+    "success_rate": 50.0,
+    "test_time": "2025-10-08T12:52:44.564173"
+  },
+  "test_results": [
+    {
+      "test": "Authentication",
+      "status": "PASS",
+      "details": "Super Admin login successful: \u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645 (admin@tanseeq.com)",
+      "timestamp": "2025-10-08T12:52:44.544134",
+      "data": null
+    },
+    {
+      "test": "Get Payroll Cycles",
+      "status": "FAIL",
+      "details": "Error getting cycles: 'list' object has no attribute 'get'",
+      "timestamp": "2025-10-08T12:52:44.563338",
+      "data": null
+    }
+  ]
+}
