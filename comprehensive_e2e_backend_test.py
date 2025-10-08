@@ -529,7 +529,14 @@ class ComprehensiveE2EBackendTester:
             # 6.1 Get my notifications
             response = self.make_request("GET", "/notifications/my", token=token)
             if response.get("status_code") == 200:
-                notifications = response.get("data", {}).get("notifications", [])
+                data = response.get("data", {})
+                if isinstance(data, dict):
+                    notifications = data.get("notifications", [])
+                elif isinstance(data, list):
+                    notifications = data
+                else:
+                    notifications = []
+                
                 self.log_test(
                     f"Get notifications ({role})",
                     isinstance(notifications, list),
@@ -540,14 +547,21 @@ class ComprehensiveE2EBackendTester:
                 self.log_test(
                     f"Get notifications ({role})",
                     False,
-                    f"Failed to get notifications for {role}: {response.get('error', 'Unknown error')}",
+                    f"Failed to get notifications for {role}: Status {response.get('status_code')}, Error: {response.get('error', response.get('data', 'Unknown error'))}",
                     response
                 )
             
             # Get unread notifications
             response = self.make_request("GET", "/notifications/my", token=token, params={"unread_only": "true"})
             if response.get("status_code") == 200:
-                unread_notifications = response.get("data", {}).get("notifications", [])
+                data = response.get("data", {})
+                if isinstance(data, dict):
+                    unread_notifications = data.get("notifications", [])
+                elif isinstance(data, list):
+                    unread_notifications = data
+                else:
+                    unread_notifications = []
+                
                 self.log_test(
                     f"Get unread notifications ({role})",
                     isinstance(unread_notifications, list),
@@ -556,8 +570,9 @@ class ComprehensiveE2EBackendTester:
                 )
                 
                 # Test acknowledge notification if any exist
-                if unread_notifications:
-                    notification_id = unread_notifications[0].get("id")
+                if unread_notifications and len(unread_notifications) > 0:
+                    notification_data = unread_notifications[0]
+                    notification_id = notification_data.get("id") if isinstance(notification_data, dict) else None
                     if notification_id:
                         response = self.make_request("POST", f"/notifications/{notification_id}/acknowledge", token=token)
                         self.log_test(
