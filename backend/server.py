@@ -3879,6 +3879,78 @@ async def recalculate_payroll_cycle_from_ledger(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error recalculating payroll: {str(e)}")
 
+@app.get("/api/payroll/ledger/employee/{employee_id}")
+async def get_employee_ledger_entries(
+    employee_id: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    entry_type: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    الحصول على جميع قيود Payroll Ledger لموظف محدد
+    مع إمكانية التصفية حسب التاريخ والنوع
+    """
+    try:
+        # Regular users can only see their own ledger
+        if current_user.role == "user" and employee_id != current_user.id:
+            raise HTTPException(status_code=403, detail="لا يمكنك الاطلاع على قيود موظف آخر")
+        
+        # Build query
+        query = {"employee_id": employee_id}
+        
+        if entry_type:
+            query["entry_type"] = entry_type
+        
+        if start_date or end_date:
+            date_query = {}
+            if start_date:
+                date_query["$gte"] = start_date
+            if end_date:
+                date_query["$lte"] = end_date
+            query["created_at"] = date_query
+        
+        # Get entries
+        entries = await db.payroll_ledger.find(query).sort("created_at", -1).to_list(1000)
+        
+        # Get employee info
+        employee = await db.users.find_one({"id": employee_id})
+        employee_name = employee.get("name", "غير معروف") if employee else "غير معروف"
+        
+        # Calculate totals by type
+        totals_by_type = {}
+        for entry in entries:
+            entry_type_name = entry.get("entry_type", "UNKNOWN")
+            amount = entry.get("amount", 0)
+            
+            if entry_type_name not in totals_by_type:
+                totals_by_type[entry_type_name] = {"count": 0, "total_amount": 0}
+            
+            totals_by_type[entry_type_name]["count"] += 1
+            totals_by_type[entry_type_name]["total_amount"] += amount
+        
+        # Remove _id for JSON serialization
+        for entry in entries:
+            entry.pop("_id", None)
+        
+        return {
+            "employee_id": employee_id,
+            "employee_name": employee_name,
+            "total_entries": len(entries),
+            "entries": entries,
+            "totals_by_type": totals_by_type,
+            "filters": {
+                "start_date": start_date,
+                "end_date": end_date,
+                "entry_type": entry_type
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching employee ledger: {str(e)}")
+
 @app.put("/api/payroll/cycles/{cycle_id}/update-employees")
 async def update_payroll_cycle_employees(
     cycle_id: str,
