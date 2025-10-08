@@ -2729,6 +2729,55 @@ async def apply_monthly_deductions(
                 {"$set": update_fields}
             )
             
+            # 🆕 CREATE AUTOMATIC LEDGER ENTRIES
+            ledger_entries = []
+            
+            # 1. Attendance Deduction Ledger Entry
+            if late_deduction + absence_deduction > 0:
+                ledger_entry = {
+                    "id": str(uuid.uuid4()),
+                    "employee_id": employee_id,
+                    "employee_name": employee_name,
+                    "payroll_cycle_id": cycle_id,
+                    "entry_type": "ATTENDANCE_DEDUCTION",
+                    "amount": late_deduction + absence_deduction,
+                    "description": f"خصومات الحضور والتأخير - {month}: " + ", ".join([d for d in deduction_details if "تأخير" in d or "غياب" in d]),
+                    "reference_id": None,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_by": current_user.id,
+                    "is_system_generated": True
+                }
+                ledger_entries.append(ledger_entry)
+            
+            # 2. Advance Installment Ledger Entry
+            if advance_deduction > 0:
+                # Get installment details
+                installments = await db.individual_installments.find({
+                    "employee_id": employee_id,
+                    "due_date": {"$regex": f"^{month}"},
+                    "status": "pending"
+                }).to_list(None)
+                
+                for installment in installments:
+                    ledger_entry = {
+                        "id": str(uuid.uuid4()),
+                        "employee_id": employee_id,
+                        "employee_name": employee_name,
+                        "payroll_cycle_id": cycle_id,
+                        "entry_type": "ADVANCE_INSTALLMENT",
+                        "amount": installment.get("installment_amount", 0),
+                        "description": f"قسط سلفة رقم {installment.get('installment_number', 0)} - استحقاق {installment.get('due_date', '')[:10]}",
+                        "reference_id": installment.get("id"),
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "created_by": current_user.id,
+                        "is_system_generated": True
+                    }
+                    ledger_entries.append(ledger_entry)
+            
+            # Insert all ledger entries
+            if ledger_entries:
+                await db.payroll_ledger.insert_many(ledger_entries)
+            
             # Mark installments as applied
             await db.individual_installments.update_many(
                 {
