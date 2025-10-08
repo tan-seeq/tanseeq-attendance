@@ -202,12 +202,26 @@ class CriticalFixesTester:
                 elif 'line_items' in data and data['line_items']:
                     return data['line_items'][0].get('employee_id')
             
+            # Try payroll summary endpoint
+            response = self.session.get(f"{BACKEND_URL}/payroll/cycles/{cycle_id}/summary")
+            if response.status_code == 200:
+                data = response.json()
+                if 'employees' in data and data['employees']:
+                    return data['employees'][0].get('employee_id')
+            
             # Fallback: get any active employee
             response = self.session.get(f"{BACKEND_URL}/employees/list")
             if response.status_code == 200:
                 employees = response.json()
                 if employees:
                     return employees[0].get('id')
+            
+            # Try users endpoint as final fallback
+            response = self.session.get(f"{BACKEND_URL}/users")
+            if response.status_code == 200:
+                users = response.json()
+                if users:
+                    return users[0].get('id')
                     
             return None
             
