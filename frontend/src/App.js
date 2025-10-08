@@ -572,17 +572,61 @@ const Layout = ({ children }) => {
         
         <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4" style={{scrollbarWidth: 'thin', scrollbarColor: '#CBD5E0 transparent'}}>
           <div className="px-4 space-y-1">
-            {navigation.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => navigate(item.href)}
-                className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 text-right ${isActive(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
-                data-testid={`nav-${item.href}`}
-              >
-                <item.icon className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`} />
-                <span className="truncate">{item.name}</span>
-              </button>
-            ))}
+            {navigation.map((item) => {
+              // قائمة فرعية (section مع children)
+              if (item.isSection && item.children) {
+                const isOpen = openSections[item.name];
+                return (
+                  <div key={item.name} className="space-y-1">
+                    <button
+                      onClick={() => setOpenSections(prev => ({ ...prev, [item.name]: !prev[item.name] }))}
+                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-bold rounded-lg transition-colors duration-200 text-right bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
+                    >
+                      <div className="flex items-center">
+                        <item.icon className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`} />
+                        <span className="truncate">{item.name}</span>
+                      </div>
+                      <svg
+                        className={`h-4 w-4 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isOpen && (
+                      <div className="mr-4 space-y-1 border-r-2 border-blue-200 pr-2">
+                        {item.children.map((child) => (
+                          <button
+                            key={child.name}
+                            onClick={() => navigate(child.href)}
+                            className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 text-right ${isActive(child.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                            data-testid={`nav-${child.href}`}
+                          >
+                            <child.icon className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
+                            <span className="truncate text-xs">{child.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
+              // قائمة عادية (بدون children)
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => navigate(item.href)}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 text-right ${isActive(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+                  data-testid={`nav-${item.href}`}
+                >
+                  <item.icon className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`} />
+                  <span className="truncate">{item.name}</span>
+                </button>
+              );
+            })}
           </div>
           {/* مساحة فارغة كبيرة في الأسفل لضمان ظهور جميع القوائم */}
           <div className="h-20 flex-shrink-0"></div>
