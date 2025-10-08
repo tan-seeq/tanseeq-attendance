@@ -47,7 +47,7 @@ const PayrollSummary = () => {
 
   const handleCalculate = async () => {
     try {
-      await axios.post(`${API}/payroll/cycles/${id}/calculate`);
+      await axios.post(`${API}/payroll/cycles/${id}/recalculate`);
       alert('تم حساب الرواتب بنجاح');
       fetchCycleData();
     } catch (err) {
