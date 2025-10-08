@@ -38,7 +38,8 @@ import {
   PlayIcon,
   DocumentChartBarIcon,
   ArrowDownTrayIcon,
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  BanknotesIcon
 } from '@heroicons/react/24/outline';
 import './App.css';
 import ErrorBoundary from './components/ErrorBoundary';
