@@ -4747,17 +4747,17 @@ async def generate_salary_letter(
                     <div class="section">
                         <div class="section-title">2) بنود الإضافات/الخصومات</div>
                         
-                        {'<p><strong>• الغياب والتأخير:</strong></p><ul>' + ''.join([f'<li>{d["description"]}: {d["amount"]:.2f} درهم</li>' for d in letter_data['absence_summary']]) + '</ul>' if letter_data['absence_summary'] else ''}
+                        {"<p><strong>• الغياب والتأخير:</strong></p><ul>" + "".join([f"<li>{d['description']}: {d['amount']:.2f} درهم</li>" for d in letter_data["absence_summary"]]) + "</ul>" if letter_data["absence_summary"] and len(letter_data["absence_summary"]) > 0 else ""}
                         
-                        {'<p><strong>• خصومات يدوية:</strong> إجمالي ' + letter_data['manual_deductions_total'] + ' درهم</p><ul>' + ''.join([f'<li>{d["description"]}: {d["amount"]:.2f} درهم</li>' for d in letter_data['manual_lines']]) + '</ul>' if letter_data['manual_lines'] else ''}
+                        {"<p><strong>• خصومات يدوية:</strong> إجمالي " + letter_data["manual_deductions_total"] + " درهم</p><ul>" + "".join([f"<li>{d['description']}: {d['amount']:.2f} درهم</li>" for d in letter_data["manual_lines"]]) + "</ul>" if letter_data["manual_lines"] and len(letter_data["manual_lines"]) > 0 else ""}
                         
-                        {f'''<p><strong>• السُلف/الأقساط:</strong></p>
+                        {f"""<p><strong>• السُلف/الأقساط:</strong></p>
                         <ul>
-                            <li>إجمالي السُلفة: {letter_data['advance_details']['total_amount']:.2f} درهم</li>
-                            <li>عدد الأقساط: {letter_data['advance_details']['installments_count']}</li>
-                            <li>القسط الحالي: {letter_data['advance_details']['current_installment_amount']:.2f} درهم (تاريخ الاستحقاق: {letter_data['advance_details']['current_installment_date'][:10]})</li>
-                            <li>الأقساط المتبقية: {letter_data['advance_details']['remaining_installments']}</li>
-                        </ul>''' if letter_data['advance_details'] else ''}
+                            <li>إجمالي السُلفة: {letter_data["advance_details"]["total_amount"]:.2f} درهم</li>
+                            <li>عدد الأقساط: {letter_data["advance_details"]["installments_count"]}</li>
+                            <li>القسط الحالي: {letter_data["advance_details"]["current_installment_amount"]:.2f} درهم (تاريخ الاستحقاق: {letter_data["advance_details"]["current_installment_date"][:10]})</li>
+                            <li>الأقساط المتبقية: {letter_data["advance_details"]["remaining_installments"]}</li>
+                        </ul>""" if letter_data["advance_details"] else ""}
                     </div>
                     
                     <div class="section">
