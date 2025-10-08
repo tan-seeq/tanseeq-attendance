@@ -79,12 +79,10 @@ class MonthlyDeductionsTest:
     def test_calculate_monthly_deductions(self):
         """الاختبار 1: حساب الخصومات لشهر أكتوبر 2025"""
         try:
-            # Test data for October 2025
-            test_data = {"month": "2025-10"}
-            
+            # Test data for October 2025 - send as query parameter
             response = self.session.post(
-                f"{BASE_URL}/deductions/calculate-monthly",
-                json=test_data,
+                f"{BASE_URL}/deductions/calculate-monthly?month=2025-10",
+                json={},
                 timeout=60
             )
             
