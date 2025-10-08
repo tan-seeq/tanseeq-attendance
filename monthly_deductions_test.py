@@ -158,7 +158,8 @@ class MonthlyDeductionsTest:
                 "Mohamed AHMED MOHAMED MOSTAFA",
                 "محمد أحمد مصطفى", 
                 "Mohamed Ahmed Mostafa",
-                "MOHAMED AHMED MOHAMED MOSTAFA"
+                "MOHAMED AHMED MOHAMED MOSTAFA",
+                "Mohamed Mostafa"
             ]
             
             for employee in employees:
