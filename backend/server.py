@@ -4696,8 +4696,10 @@ async def generate_salary_letter(
                 }
             )
         else:
-            # Return HTML
-            html_template = f"""
+            # Return HTML with proper response type
+            from fastapi.responses import HTMLResponse
+            
+            html_content = f"""
             <!DOCTYPE html>
             <html dir="rtl" lang="ar">
             <head>
