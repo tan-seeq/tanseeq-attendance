@@ -1,0 +1,81 @@
+[
+  {
+    "test": "Super Admin Authentication",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:47.897451"
+  },
+  {
+    "test": "Regular User Authentication",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:48.186049"
+  },
+  {
+    "test": "Get Payroll Cycles",
+    "status": "✅ PASS",
+    "details": "Found 6 cycles, using cycle_id: 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+    "timestamp": "2025-10-08T10:10:48.229754"
+  },
+  {
+    "test": "Get Employee ID",
+    "status": "❌ FAIL",
+    "details": "Exception: 0",
+    "timestamp": "2025-10-08T10:10:48.260789"
+  },
+  {
+    "test": "POST /api/payroll/cycles/{cycle_id}/recalculate",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:48.327983",
+    "response_preview": "{\"message\":\"تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger\",\"cycle_id\":\"026ce2ba-4471-482c-ac03-dbb8353ac13f\",\"employees_updated\":6,\"totals\":{\"gross\":20200.0,\"deductions\":900.0,\"net\":19300.0}}"
+  },
+  {
+    "test": "POST /api/payroll/cycles/{cycle_id}/lock",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:48.356433",
+    "response_preview": "{\"message\":\"تم قفل دورة الراتب بنجاح\",\"lock_reason\":\"اختبار قفل الدورة\"}"
+  },
+  {
+    "test": "POST /api/payroll/cycles/{cycle_id}/unlock",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:48.399170",
+    "response_preview": "{\"message\":\"تم فتح دورة الراتب بنجاح\",\"unlock_reason\":\"اختبار فتح الدورة\"}"
+  },
+  {
+    "test": "GET /api/payroll/cycles/{cycle_id}/summary",
+    "status": "✅ PASS",
+    "details": "Status: 200, Required fields present: True, Employee fields valid: True",
+    "timestamp": "2025-10-08T10:10:48.442713",
+    "response_preview": "{'cycle': {'_id': '68e4bc1e9fc6f50b317e06ae', 'id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'month': '2025-12', 'year': 2025, 'display_name': 'دورة راتب ديسمبر 2025', 'start_date': '2025-12-01', 'end_date': '2025-12-31', 'cutoff_date': '2026-01-05', 'status': 'open', 'is_locked': False, 'total_employees': 6, 'total_gross_salary': 20200.0, 'total_allowances': 0.0, 'total_deductions': 900.0, 'total_net_salary': 19300.0, 'default_deduction_ceiling_type': 'percentage', 'default_deduction_ceiling_val..."
+  },
+  {
+    "test": "POST /api/deductions/calculate-monthly",
+    "status": "✅ PASS",
+    "details": "Status: 200 for month 2025-10",
+    "timestamp": "2025-10-08T10:10:48.533347",
+    "response_preview": "{\"success\":true,\"month\":\"2025-10\",\"employees\":[{\"employee_id\":\"33d2d833-f414-4b0c-920d-35e3ca4f853c\",\"employee_name\":\"Mohamed Mostafa\",\"late_deduction\":17.5,\"absence_deduction\":0,\"advance_deduction\":0"
+  },
+  {
+    "test": "GET /api/leaves/my (Regular User)",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:48.576651",
+    "response_preview": "[{\"id\":\"b32b2c10-b2e8-4e2c-8ba4-717d8df1ebf5\",\"user_id\":\"eed6d28b-7639-4d31-9386-4e99b9179d8f\",\"user_name\":\"Jihad\",\"start_date\":\"2025-03-10\",\"end_date\":\"2025-03-12\",\"reason\":\"إجازة شخصية للاختبار\",\"ty"
+  },
+  {
+    "test": "GET /api/payroll/installment-schedules",
+    "status": "✅ PASS",
+    "details": "Status: 200",
+    "timestamp": "2025-10-08T10:10:48.610385",
+    "response_preview": "{\"schedules\":[{\"id\":\"8f8022fb-957d-4dfd-8512-7575fd11750c\",\"advance_transaction_id\":\"6c66b70c-faea-4200-80ec-efca94d496fb\",\"employee_id\":\"83da4c33-c9c2-42cd-9b82-dea36ff1f05d\",\"employee_name\":\"Tarek W"
+  },
+  {
+    "test": "Salary Letters",
+    "status": "❌ FAIL",
+    "details": "Missing cycle_id or employee_id",
+    "timestamp": "2025-10-08T10:10:48.610706"
+  }
+]
