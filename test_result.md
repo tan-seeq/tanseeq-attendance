@@ -307,6 +307,14 @@ backend:
     stuck_count: 0
     priority: "high"
     needs_retesting: false
+  
+  - task: "Mohamed Mostafa Advances Investigation"
+    implemented: true
+    working: true
+    file: "advances_installments_investigation.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "user"
