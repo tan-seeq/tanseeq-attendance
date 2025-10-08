@@ -230,7 +230,7 @@ const AdvancesReport = () => {
                       {advance.employee_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                      {advance.amount?.toFixed(2)} درهم
+                      {(advance.amount || 0).toFixed(2)} درهم
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {new Date(advance.created_at).toLocaleDateString('ar-EG')}
