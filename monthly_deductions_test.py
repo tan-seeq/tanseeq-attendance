@@ -96,7 +96,7 @@ class MonthlyDeductionsTest:
                     return
                 
                 # Check for employees with deductions
-                employees_with_deductions = data.get("employees_with_deductions", [])
+                employees_with_deductions = data.get("employees", [])
                 if not employees_with_deductions:
                     self.log_result("Monthly Deductions Calculation", "FAIL", "No employees with deductions found")
                     return
@@ -106,13 +106,11 @@ class MonthlyDeductionsTest:
                 total_employees = len(employees_with_deductions)
                 
                 for employee in employees_with_deductions:
-                    deduction_details = employee.get("deduction_details", {})
-                    
-                    if deduction_details.get("late_deductions", 0) > 0:
+                    if employee.get("late_deduction", 0) > 0:
                         deduction_types_found.add("late")
-                    if deduction_details.get("absence_deductions", 0) > 0:
+                    if employee.get("absence_deduction", 0) > 0:
                         deduction_types_found.add("absence")
-                    if deduction_details.get("advance_deductions", 0) > 0:
+                    if employee.get("advance_deduction", 0) > 0:
                         deduction_types_found.add("advances")
                 
                 # Check that deduction_details exist
