@@ -102,7 +102,7 @@ class PayrollLedgerService:
                 "$set": {
                     "is_reversed": True,
                     "reversed_by": reversed_by,
-                    "reversed_at": datetime.now(timezone.utc).isoformat(),
+                    "reversed_at": to_iso_string_uae(),
                     "reversal_reason": reason
                 }
             }
