@@ -3821,11 +3821,13 @@ async def export_payroll_excel(
     cycle_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """تصدير كشف الراتب كـ Excel"""
+    """تصدير كشف الراتب كـ Excel باستخدام openpyxl"""
     try:
-        from fastapi.responses import StreamingResponse
+        from fastapi.responses import Response
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
         import io
-        import csv
+        from datetime import datetime
         
         # جلب بيانات دورة الراتب
         cycle = await db.payroll_cycles.find_one({"id": cycle_id})
@@ -3836,37 +3838,132 @@ async def export_payroll_excel(
             "payroll_cycle_id": cycle_id
         }).to_list(1000)
         
-        # إنشاء CSV content
-        csv_content = io.StringIO()
-        writer = csv.writer(csv_content)
+        if not summaries:
+            raise HTTPException(status_code=404, detail="No employee summaries found")
         
-        # كتابة العناوين
-        writer.writerow([
+        # إنشاء Workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "كشف الرواتب"
+        
+        # تنسيقات
+        header_fill = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        total_fill = PatternFill(start_color="10B981", end_color="10B981", fill_type="solid")
+        total_font = Font(bold=True, color="FFFFFF", size=11)
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # العنوان
+        ws.merge_cells('A1:I1')
+        title_cell = ws['A1']
+        title_cell.value = f"كشف الرواتب - {cycle.get('display_name', 'غير محدد')}"
+        title_cell.font = Font(bold=True, size=16, color="1E40AF")
+        title_cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # معلومات الدورة
+        ws.merge_cells('A2:I2')
+        info_cell = ws['A2']
+        info_cell.value = f"تاريخ الإصدار: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        info_cell.alignment = Alignment(horizontal='center')
+        
+        # Headers
+        headers = [
             'اسم الموظف',
             'الراتب الأساسي',
             'البدلات',
             'إجمالي الراتب',
-            'الخصومات',
+            'خصم يدوي',
+            'خصم حضور',
+            'خصم سلف',
+            'إجمالي الخصومات',
             'صافي الراتب'
-        ])
+        ]
         
-        # كتابة البيانات
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=4, column=col_num)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            cell.border = border
+        
+        # البيانات
+        row_num = 5
+        total_gross = 0
+        total_deductions = 0
+        total_net = 0
+        
         for summary in summaries:
-            writer.writerow([
-                summary.get('employee_name', 'غير محدد'),
-                summary.get('basic_salary', 0),
-                summary.get('allowances', 0),
-                summary.get('gross_salary', 0),
-                summary.get('total_deductions', 0),
-                summary.get('net_salary', 0)
-            ])
+            gross = summary.get('gross_salary', 0)
+            deductions = summary.get('total_deductions', 0)
+            net = summary.get('net_salary', 0)
+            
+            total_gross += gross
+            total_deductions += deductions
+            total_net += net
+            
+            ws.cell(row=row_num, column=1, value=summary.get('employee_name', 'غير محدد'))
+            ws.cell(row=row_num, column=2, value=summary.get('base_salary', 0))
+            ws.cell(row=row_num, column=3, value=summary.get('total_allowances', 0))
+            ws.cell(row=row_num, column=4, value=gross)
+            ws.cell(row=row_num, column=5, value=summary.get('manual_deductions', 0))
+            ws.cell(row=row_num, column=6, value=summary.get('attendance_deductions', 0))
+            ws.cell(row=row_num, column=7, value=summary.get('advance_deductions', 0))
+            ws.cell(row=row_num, column=8, value=deductions)
+            ws.cell(row=row_num, column=9, value=net)
+            
+            # تنسيق الصف
+            for col in range(1, 10):
+                cell = ws.cell(row=row_num, column=col)
+                cell.border = border
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                if col > 1:  # الأعمدة الرقمية
+                    cell.number_format = '#,##0.00'
+            
+            row_num += 1
         
-        csv_content.seek(0)
+        # صف الإجماليات
+        ws.cell(row=row_num, column=1, value='الإجمالي')
+        ws.cell(row=row_num, column=2, value='')
+        ws.cell(row=row_num, column=3, value='')
+        ws.cell(row=row_num, column=4, value=total_gross)
+        ws.cell(row=row_num, column=5, value='')
+        ws.cell(row=row_num, column=6, value='')
+        ws.cell(row=row_num, column=7, value='')
+        ws.cell(row=row_num, column=8, value=total_deductions)
+        ws.cell(row=row_num, column=9, value=total_net)
         
-        return StreamingResponse(
-            io.BytesIO(csv_content.getvalue().encode('utf-8-sig')),
-            media_type="application/vnd.ms-excel",
-            headers={"Content-Disposition": f"attachment; filename=payroll_{cycle_id}.csv"}
+        # تنسيق صف الإجماليات
+        for col in range(1, 10):
+            cell = ws.cell(row=row_num, column=col)
+            cell.fill = total_fill
+            cell.font = total_font
+            cell.border = border
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            if col > 1:
+                cell.number_format = '#,##0.00'
+        
+        # ضبط عرض الأعمدة
+        ws.column_dimensions['A'].width = 25
+        for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
+            ws.column_dimensions[col].width = 15
+        
+        # حفظ في الذاكرة
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        return Response(
+            content=buffer.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f"attachment; filename=payroll_{cycle.get('month', 'unknown')}_{cycle_id[:8]}.xlsx"
+            }
         )
         
     except Exception as e:
