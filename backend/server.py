@@ -4278,27 +4278,75 @@ async def get_payroll_cycle_summary(
     cycle_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """جلب ملخص دورة الراتب"""
+    """جلب ملخص دورة الراتب مع aggregation من Payroll Ledger"""
     try:
         # جلب دورة الراتب
         cycle = await db.payroll_cycles.find_one({"id": cycle_id})
         if not cycle:
             raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
         
-        # جلب ملخصات الموظفين
+        # جلب ملخصات الموظفين الأساسية
         summaries = await db.employee_payroll_summaries.find({
             "payroll_cycle_id": cycle_id
         }).to_list(1000)
         
-        # تنسيق البيانات
-        cycle["_id"] = str(cycle["_id"])
+        # تحديث كل ملخص موظف بالخصومات من Payroll Ledger
+        from payroll_ledger_service import PayrollLedgerService
+        ledger_service = PayrollLedgerService(db)
+        
+        enhanced_summaries = []
         for summary in summaries:
-            summary["_id"] = str(summary["_id"])
+            employee_id = summary.get("employee_id")
+            
+            # جلب ملخص القيود من Payroll Ledger
+            ledger_summary = await ledger_service.get_employee_summary(cycle_id, employee_id)
+            
+            # دمج البيانات - استخدام البيانات من Ledger للخصومات
+            enhanced_summary = {
+                "_id": str(summary["_id"]),
+                "employee_id": employee_id,
+                "employee_name": summary.get("employee_name", ""),
+                "payroll_cycle_id": cycle_id,
+                "base_salary": summary.get("base_salary", 0),
+                "total_allowances": summary.get("allowances", 0),
+                "gross_salary": summary.get("gross_salary", 0),
+                
+                # استخدام البيانات من Payroll Ledger
+                "attendance_deductions": ledger_summary["attendance_deductions"],
+                "manual_deductions": ledger_summary["manual_deductions"],
+                "advance_deductions": ledger_summary["advance_installments"],
+                "leave_adjustments": ledger_summary["leave_adjustments"],
+                "custody_adjustments": ledger_summary["custody_adjustments"],
+                
+                # حساب الإجماليات
+                "total_deductions": (
+                    ledger_summary["attendance_deductions"] +
+                    ledger_summary["manual_deductions"] +
+                    ledger_summary["advance_installments"]
+                ),
+                
+                # حساب صافي الراتب
+                "net_salary": max(0, 
+                    summary.get("gross_salary", 0) +
+                    ledger_summary["leave_adjustments"] +
+                    ledger_summary["custody_adjustments"] -
+                    (ledger_summary["attendance_deductions"] +
+                     ledger_summary["manual_deductions"] +
+                     ledger_summary["advance_installments"])
+                ),
+                
+                "ledger_entries_count": ledger_summary["entries_count"]
+            }
+            
+            enhanced_summaries.append(enhanced_summary)
+        
+        # تنسيق بيانات الدورة
+        cycle["_id"] = str(cycle["_id"])
         
         return {
             "cycle": cycle,
-            "employee_summaries": summaries,
-            "total_employees": len(summaries)
+            "employee_summaries": enhanced_summaries,
+            "total_employees": len(enhanced_summaries)
         }
 
     except Exception as e:
