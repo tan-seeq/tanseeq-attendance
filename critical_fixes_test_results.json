@@ -3,7 +3,7 @@
     "test": "Authentication",
     "success": true,
     "details": "Successfully authenticated as admin@tanseeq.com",
-    "timestamp": "2025-10-08T08:57:43.436861",
+    "timestamp": "2025-10-08T08:58:14.928621",
     "response_data": {
       "user_role": "super_admin",
       "user_name": "مدير النظام"
@@ -13,7 +13,7 @@
     "test": "Monthly Deductions Calculator",
     "success": true,
     "details": "Successfully calculated deductions for 1 employees",
-    "timestamp": "2025-10-08T08:57:43.510749",
+    "timestamp": "2025-10-08T08:58:15.020946",
     "response_data": {
       "success": true,
       "month": "2025-10",
@@ -39,9 +39,9 @@
   },
   {
     "test": "Payroll Cycle Recalculate",
-    "success": false,
-    "details": "Recalculation response unclear: {'message': 'تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger', 'cycle_id': 'e70625f9-f78e-4be3-b02e-1c51cdf5385e', 'employees_updated': 6, 'totals': {'gross': 20200.0, 'deductions': 1977.0, 'net': 18223.0}}",
-    "timestamp": "2025-10-08T08:57:43.614236",
+    "success": true,
+    "details": "Successfully recalculated payroll cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e - 6 employees updated",
+    "timestamp": "2025-10-08T08:58:15.068112",
     "response_data": {
       "message": "تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger",
       "cycle_id": "e70625f9-f78e-4be3-b02e-1c51cdf5385e",
@@ -57,14 +57,14 @@
     "test": "Salary Letter Generation",
     "success": false,
     "details": "Could not find any employee ID",
-    "timestamp": "2025-10-08T08:57:43.695294",
+    "timestamp": "2025-10-08T08:58:15.163800",
     "response_data": null
   },
   {
     "test": "Lock/Unlock Cycle - Lock",
     "success": true,
     "details": "Successfully locked cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e",
-    "timestamp": "2025-10-08T08:57:43.757862",
+    "timestamp": "2025-10-08T08:58:15.191793",
     "response_data": {
       "message": "تم قفل دورة الراتب بنجاح",
       "lock_reason": "اختبار القفل - سبب طويل جداً"
@@ -74,7 +74,7 @@
     "test": "Lock/Unlock Cycle - Unlock",
     "success": true,
     "details": "Successfully unlocked cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e",
-    "timestamp": "2025-10-08T08:57:43.821710",
+    "timestamp": "2025-10-08T08:58:15.246715",
     "response_data": {
       "message": "تم فتح دورة الراتب بنجاح",
       "unlock_reason": "اختبار الفتح - سبب طويل جداً للفتح"
