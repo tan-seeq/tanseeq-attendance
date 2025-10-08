@@ -68,20 +68,10 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
     story.append(Paragraph("TANSEEQ TAX CONSULTANCY", title_style))
     story.append(Paragraph("Salary Statement", title_style))
     story.append(Spacer(1, 0.2*cm))
-    story.append(Paragraph(f"Date: {letter_data['statement_date']}", normal_style))
-    story.append(Paragraph(f"To: Mr./Ms. {letter_data['employee_name']}", normal_style))
-    story.append(Paragraph(f"Employee ID: {letter_data['employee_code']}", normal_style))
-    story.append(Paragraph(f"Period: {letter_data['period_label']}", normal_style))
-    story.append(Spacer(1, 0.5*cm))
-    
-    # Introduction
-    story.append(Paragraph("Dear Employee,", normal_style))
-    story.append(Paragraph(
-        f"This letter outlines your salary details for the period <b>{letter_data['period_label']}</b> "
-        "as calculated according to company policies:",
-        normal_style
-    ))
-    story.append(Spacer(1, 0.5*cm))
+    # Compact header info
+    header_info = f"Date: {letter_data['statement_date']} | Employee: {letter_data['employee_name']} | ID: {letter_data['employee_code']} | Period: {letter_data['period_label']}"
+    story.append(Paragraph(header_info, normal_style))
+    story.append(Spacer(1, 0.3*cm))
     
     # Section 1: Basic Salary Information
     story.append(Paragraph("1) BASIC SALARY INFORMATION", heading_style))
