@@ -3378,6 +3378,112 @@ async def unlock_payroll_cycle(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error unlocking payroll cycle: {str(e)}")
 
+@app.post("/api/payroll/cycles/{cycle_id}/recalculate")
+async def recalculate_payroll_cycle_from_ledger(
+    cycle_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    🆕 إعادة حساب دورة الرواتب بناءً على Payroll Ledger
+    يحسب صافي الراتب تلقائياً من جميع القيود المحاسبية
+    """
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Super Admin access required")
+    
+    try:
+        from payroll_ledger_service import PayrollLedgerService
+        
+        # التحقق من وجود الدورة
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        
+        if cycle.get("is_locked", False):
+            raise HTTPException(status_code=400, detail="لا يمكن إعادة حساب دورة مقفولة")
+        
+        ledger_service = PayrollLedgerService(db)
+        
+        # جلب جميع الموظفين النشطين
+        employees = await db.users.find({"role": "user", "is_active": True}).to_list(None)
+        
+        updated_count = 0
+        total_gross = 0
+        total_deductions = 0
+        total_net = 0
+        
+        for emp in employees:
+            employee_id = emp["id"]
+            base_salary = emp.get("monthly_salary", 0)
+            allowances = 0  # يمكن جلبها من مصدر آخر
+            
+            # إعادة حساب بناءً على القيود
+            calculation = await ledger_service.recalculate_employee_payroll(
+                cycle_id=cycle_id,
+                employee_id=employee_id,
+                base_salary=base_salary,
+                allowances=allowances
+            )
+            
+            # تحديث employee_payroll_summaries
+            await db.employee_payroll_summaries.update_one(
+                {
+                    "payroll_cycle_id": cycle_id,
+                    "employee_id": employee_id
+                },
+                {
+                    "$set": {
+                        "base_salary": calculation["base_salary"],
+                        "total_allowances": calculation["allowances"],
+                        "gross_salary": calculation["gross_salary"],
+                        "attendance_deductions": calculation["attendance_deductions"],
+                        "manual_deductions": calculation["manual_deductions"],
+                        "advance_deductions": calculation["advance_installments"],
+                        "total_deductions": calculation["total_deductions"],
+                        "net_salary": calculation["net_salary"],
+                        "is_calculated": True,
+                        "calculated_at": datetime.now(timezone.utc).isoformat(),
+                        "ledger_entries_count": calculation["ledger_entries_count"]
+                    }
+                },
+                upsert=True
+            )
+            
+            total_gross += calculation["gross_salary"]
+            total_deductions += calculation["total_deductions"]
+            total_net += calculation["net_salary"]
+            updated_count += 1
+        
+        # تحديث إجماليات الدورة
+        await db.payroll_cycles.update_one(
+            {"id": cycle_id},
+            {
+                "$set": {
+                    "total_employees": updated_count,
+                    "total_gross_salary": total_gross,
+                    "total_deductions": total_deductions,
+                    "total_net_salary": total_net,
+                    "recalculated_at": datetime.now(timezone.utc).isoformat(),
+                    "recalculated_by": current_user.id
+                }
+            }
+        )
+        
+        return {
+            "message": "تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger",
+            "cycle_id": cycle_id,
+            "employees_updated": updated_count,
+            "totals": {
+                "gross": total_gross,
+                "deductions": total_deductions,
+                "net": total_net
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error recalculating payroll: {str(e)}")
+
 @app.put("/api/payroll/cycles/{cycle_id}/update-employees")
 async def update_payroll_cycle_employees(
     cycle_id: str,
