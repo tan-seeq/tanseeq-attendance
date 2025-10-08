@@ -207,15 +207,14 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
     ]))
     story.append(summary_table)
-    story.append(Spacer(1, 0.5*cm))
+    story.append(Spacer(1, 0.2*cm))
     
-    # Note
+    # Compact note
     story.append(Paragraph(
-        f"<i>Note: This statement is generated automatically from the Payroll Ledger system "
-        f"based on company policy. Payroll Cycle ID: {letter_data['cycle_code']}</i>",
+        f"<i><font size=8>Auto-generated. Cycle ID: {letter_data['cycle_code']}</font></i>",
         normal_style
     ))
-    story.append(Spacer(1, 1*cm))
+    story.append(Spacer(1, 0.3*cm))
     
     # Signatures
     signature_data = [
