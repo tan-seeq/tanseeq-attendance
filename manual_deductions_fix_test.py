@@ -117,11 +117,21 @@ class ManualDeductionsFixTester:
             # Step 3: PUT /api/payroll/cycles/{cycle_id}/update-employees with manual_deductions = 75.25
             print("3️⃣ Updating manual deductions to 75.25...")
             
+            # Get the current employee data to preserve other fields
+            current_base_salary = test_employee.get('base_salary', 0)
+            current_allowances = test_employee.get('total_allowances', 0)
+            current_attendance_ded = test_employee.get('attendance_deductions', 0)
+            current_advance_ded = test_employee.get('advance_deductions', 0)
+            
             update_data = {
                 "employees": [
                     {
                         "employee_id": employee_id,
-                        "manual_deductions": 75.25
+                        "base_salary": current_base_salary,
+                        "allowances": current_allowances,
+                        "manual_deductions": 75.25,
+                        "attendance_deductions": current_attendance_ded,
+                        "advance_deductions": current_advance_ded
                     }
                 ]
             }
