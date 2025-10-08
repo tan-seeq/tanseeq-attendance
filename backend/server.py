@@ -2665,7 +2665,7 @@ async def apply_monthly_deductions(
                 "display_name": f"رواتب {month}",
                 "start_date": date(int(year), int(month_num), 1).isoformat(),
                 "is_locked": False,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": to_iso_string_uae(),
                 "created_by": current_user.id
             }
             await db.payroll_cycles.insert_one(new_cycle)
