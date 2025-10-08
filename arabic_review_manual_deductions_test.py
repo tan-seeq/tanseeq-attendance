@@ -226,7 +226,7 @@ class ManualDeductionsTestSuite:
                                       headers=self.get_auth_headers()) as response:
                 if response.status == 200:
                     data = await response.json()
-                    ledger_entries = data.get("ledger_entries", [])
+                    ledger_entries = data.get("entries", [])
                     
                     # Look for MANUAL_DEDUCTION entries
                     manual_deduction_entries = [
