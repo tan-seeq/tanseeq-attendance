@@ -1,0 +1,124 @@
+{
+  "summary": {
+    "notification_fix": true,
+    "advances_delete_fix": true,
+    "payroll_edit_fix": true
+  },
+  "detailed_results": [
+    {
+      "test": "Login - Regular User",
+      "success": true,
+      "details": "Successfully logged in as Jihad (user)",
+      "timestamp": "2025-10-08T06:47:24.245369",
+      "response_data": {
+        "user_role": "user",
+        "user_name": "Jihad"
+      }
+    },
+    {
+      "test": "Get Unread Notifications",
+      "success": true,
+      "details": "Retrieved 17 unread notifications",
+      "timestamp": "2025-10-08T06:47:24.265761",
+      "response_data": {
+        "count": 17
+      }
+    },
+    {
+      "test": "Acknowledge Notification",
+      "success": true,
+      "details": "Acknowledgment returned success: True",
+      "timestamp": "2025-10-08T06:47:24.317788",
+      "response_data": {
+        "success": true,
+        "message": "\u062a\u0645 \u062a\u0623\u0643\u064a\u062f \u0627\u0644\u0627\u0637\u0644\u0627\u0639 \u0639\u0644\u0649 \u0627\u0644\u0625\u0634\u0639\u0627\u0631"
+      }
+    },
+    {
+      "test": "Login - Super Admin",
+      "success": true,
+      "details": "Successfully logged in as \u062d\u0627\u062a\u0645 \u0645\u062d\u0645\u062f (super_admin)",
+      "timestamp": "2025-10-08T06:47:24.563170",
+      "response_data": {
+        "user_role": "super_admin",
+        "user_name": "\u062d\u0627\u062a\u0645 \u0645\u062d\u0645\u062f"
+      }
+    },
+    {
+      "test": "Get All Transactions",
+      "success": true,
+      "details": "Retrieved 47 transactions",
+      "timestamp": "2025-10-08T06:47:24.586504",
+      "response_data": {
+        "count": 47
+      }
+    },
+    {
+      "test": "Delete Pending/Rejected Transaction",
+      "success": true,
+      "details": "Successfully deleted transaction c2f2b72c-ed51-40a4-ad92-1f01441cc6d5",
+      "timestamp": "2025-10-08T06:47:24.646940",
+      "response_data": {
+        "success": true,
+        "message": "\u062a\u0645 \u062d\u0630\u0641 \u0627\u0644\u0645\u0639\u0627\u0645\u0644\u0629 \u0628\u0646\u062c\u0627\u062d",
+        "transaction_id": "c2f2b72c-ed51-40a4-ad92-1f01441cc6d5"
+      }
+    },
+    {
+      "test": "Delete Approved Transaction (Should Fail)",
+      "success": true,
+      "details": "Correctly rejected deletion of approved transaction with 400 error",
+      "timestamp": "2025-10-08T06:47:24.660238",
+      "response_data": {
+        "detail": "\u0644\u0627 \u064a\u0645\u0643\u0646 \u062d\u0630\u0641 \u0645\u0639\u0627\u0645\u0644\u0629 \u062a\u0645\u062a \u0627\u0644\u0645\u0648\u0627\u0641\u0642\u0629 \u0639\u0644\u064a\u0647\u0627. \u064a\u0631\u062c\u0649 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u062e\u0627\u0635\u064a\u0629 '\u0627\u0644\u062a\u0633\u0648\u064a\u0629' \u0628\u062f\u0644\u0627\u064b \u0645\u0646 \u0630\u0644\u0643"
+      }
+    },
+    {
+      "test": "Login - Super Admin",
+      "success": true,
+      "details": "Successfully logged in as \u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645 (super_admin)",
+      "timestamp": "2025-10-08T06:47:24.902915",
+      "response_data": {
+        "user_role": "super_admin",
+        "user_name": "\u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645"
+      }
+    },
+    {
+      "test": "Get Payroll Cycles",
+      "success": true,
+      "details": "Retrieved 6 payroll cycles",
+      "timestamp": "2025-10-08T06:47:24.917984",
+      "response_data": {
+        "count": 6
+      }
+    },
+    {
+      "test": "Get Cycle Summary",
+      "success": true,
+      "details": "Retrieved summary for cycle 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "timestamp": "2025-10-08T06:47:24.933980",
+      "response_data": {
+        "cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f"
+      }
+    },
+    {
+      "test": "Update Employee Data",
+      "success": true,
+      "details": "Successfully updated employee data for cycle 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "timestamp": "2025-10-08T06:47:24.987992",
+      "response_data": {
+        "message": "\u062a\u0645 \u062a\u062d\u062f\u064a\u062b 0 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d",
+        "updated_count": 0,
+        "cycle_totals": {
+          "total_employees": 6,
+          "total_gross_salary": 20200.0,
+          "total_deductions": 900.0,
+          "total_net_salary": 19300.0,
+          "updated_at": "2025-10-08T06:47:24.942126+00:00"
+        }
+      }
+    }
+  ],
+  "test_time": "2025-10-08T06:47:24.988255",
+  "backend_url": "https://payroll-ledger-1.preview.emergentagent.com/api"
+}
