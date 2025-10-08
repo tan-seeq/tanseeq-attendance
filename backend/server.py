@@ -6380,6 +6380,47 @@ async def approve_leave(leave_id: str, approval_data: dict = None, current_user:
     
     await db.notifications.insert_one(notification.dict())
     
+    # 🆕 CREATE AUTOMATIC LEDGER ENTRY FOR UNPAID LEAVE
+    leave_type = leave.get("type", "").lower()
+    if "unpaid" in leave_type or "غير مدفوعة" in leave_type:
+        # Calculate leave duration and deduction
+        try:
+            start_date = datetime.fromisoformat(leave.get("start_date", ""))
+            end_date = datetime.fromisoformat(leave.get("end_date", ""))
+            leave_days = (end_date - start_date).days + 1
+            
+            # Get employee salary
+            employee = await db.users.find_one({"id": leave.get("user_id")})
+            if employee and employee.get("monthly_salary", 0) > 0:
+                daily_rate = employee.get("monthly_salary", 0) / 30
+                deduction_amount = daily_rate * leave_days
+                
+                # Find open payroll cycle for this month
+                leave_month = start_date.strftime("%Y-%m")
+                cycle = await db.payroll_cycles.find_one({
+                    "month": leave_month,
+                    "is_locked": False
+                })
+                
+                if cycle:
+                    ledger_entry = {
+                        "id": str(uuid.uuid4()),
+                        "employee_id": leave.get("user_id"),
+                        "employee_name": leave.get("user_name"),
+                        "payroll_cycle_id": cycle["id"],
+                        "entry_type": "LEAVE_ADJUSTMENT",
+                        "amount": deduction_amount,
+                        "description": f"خصم إجازة غير مدفوعة - {leave_days} يوم من {leave.get('start_date')[:10]} إلى {leave.get('end_date')[:10]}",
+                        "reference_id": leave_id,
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "created_by": current_user.id,
+                        "is_system_generated": True
+                    }
+                    await db.payroll_ledger.insert_one(ledger_entry)
+        except Exception as e:
+            # Log error but don't fail the approval
+            print(f"Error creating ledger entry for unpaid leave: {str(e)}")
+    
     # Log activity
     await log_activity(
         current_user.id, 
