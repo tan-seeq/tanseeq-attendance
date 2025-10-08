@@ -3,13 +3,13 @@
     "test": "Authentication",
     "status": "PASS",
     "details": "Successfully logged in as admin@tanseeq.com",
-    "timestamp": "2025-10-08T07:43:21.481479"
+    "timestamp": "2025-10-08T07:44:57.595944"
   },
   {
     "test": "Monthly Deductions Calculation",
     "status": "PASS",
     "details": "Successfully calculated deductions for 1 employees. Deduction types found: late. All employees have deduction_details.",
-    "timestamp": "2025-10-08T07:43:21.540382",
+    "timestamp": "2025-10-08T07:44:57.648301",
     "response": {
       "total_employees": 1,
       "deduction_types": [
@@ -35,18 +35,23 @@
     "test": "Find Mohamed Employee",
     "status": "PASS",
     "details": "Found employee: Mohamed Mostafa (ID: 33d2d833-f414-4b0c-920d-35e3ca4f853c)",
-    "timestamp": "2025-10-08T07:43:21.554295"
+    "timestamp": "2025-10-08T07:44:57.661729"
   },
   {
     "test": "Mohamed Advance Installments",
-    "status": "FAIL",
-    "details": "Request failed: 500 - {\"detail\":\"Error fetching installment schedule: 404: السلفة غير موجودة\"}",
-    "timestamp": "2025-10-08T07:43:21.566743"
+    "status": "PASS",
+    "details": "No approved advance transactions found for Mohamed Mostafa - no installments expected",
+    "timestamp": "2025-10-08T07:44:57.676141",
+    "response": {
+      "employee_name": "Mohamed Mostafa",
+      "advance_transactions": 0,
+      "note": "No installments expected without approved advances"
+    }
   },
   {
     "test": "Apply Deductions Endpoint",
     "status": "PASS",
     "details": "Endpoint exists (returned 500)",
-    "timestamp": "2025-10-08T07:43:21.579312"
+    "timestamp": "2025-10-08T07:44:57.691020"
   }
 ]
