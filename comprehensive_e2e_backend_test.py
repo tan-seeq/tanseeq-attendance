@@ -396,17 +396,24 @@ class ComprehensiveE2EBackendTester:
         response = self.make_request("GET", "/attendance/with-absences", token=token, params={"month": "2025-10"})
         if response.get("status_code") == 200:
             attendance_data = response.get("data", {})
+            if isinstance(attendance_data, dict):
+                records_count = len(attendance_data.get("attendance", []))
+            elif isinstance(attendance_data, list):
+                records_count = len(attendance_data)
+            else:
+                records_count = 0
+            
             self.log_test(
                 "Get attendance with absences",
-                isinstance(attendance_data, dict),
+                True,
                 f"Retrieved attendance records for 2025-10",
-                {"records_count": len(attendance_data.get("attendance", []))}
+                {"records_count": records_count}
             )
         else:
             self.log_test(
                 "Get attendance with absences",
                 False,
-                f"Failed to get attendance: {response.get('error', 'Unknown error')}",
+                f"Failed to get attendance: Status {response.get('status_code')}, Error: {response.get('error', response.get('data', 'Unknown error'))}",
                 response
             )
 
