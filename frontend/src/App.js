@@ -73,6 +73,9 @@ import PayrollCycleManagement from './components/IntegratedPayroll/PayrollCycleM
 import InstallmentScheduleManager from './components/IntegratedPayroll/InstallmentScheduleManager';
 import PayrollSummary from './components/IntegratedPayroll/PayrollSummary';
 
+// Import Payroll Ledger Components
+import EmployeeLedger from './components/PayrollLedger/EmployeeLedger';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
