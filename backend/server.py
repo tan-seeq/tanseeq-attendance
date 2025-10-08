@@ -6527,7 +6527,7 @@ async def approve_leave(leave_id: str, approval_data: dict = None, current_user:
                         "amount": deduction_amount,
                         "description": f"خصم إجازة غير مدفوعة - {leave_days} يوم من {leave.get('start_date')[:10]} إلى {leave.get('end_date')[:10]}",
                         "reference_id": leave_id,
-                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "created_at": to_iso_string_uae(),
                         "created_by": current_user.id,
                         "is_system_generated": True
                     }
