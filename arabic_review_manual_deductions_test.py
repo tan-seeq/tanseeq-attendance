@@ -144,7 +144,7 @@ class ManualDeductionsTestSuite:
                                       headers=self.get_auth_headers()) as response:
                 if response.status == 200:
                     data = await response.json()
-                    employees = data.get("employees", [])
+                    employees = data.get("employee_summaries", [])
                     
                     if employees:
                         # Select first employee for testing
@@ -282,7 +282,7 @@ class ManualDeductionsTestSuite:
                                       headers=self.get_auth_headers()) as response:
                 if response.status == 200:
                     data = await response.json()
-                    employees = data.get("employees", [])
+                    employees = data.get("employee_summaries", [])
                     
                     # Find our test employee
                     test_employee = None
