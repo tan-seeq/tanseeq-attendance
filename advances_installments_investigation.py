@@ -65,36 +65,77 @@ class AdvancesInstallmentsInvestigator:
         try:
             print("🔍 Searching for Mohamed Mostafa...")
             
-            # Get all employees
-            response = self.session.get(f"{BACKEND_URL}/employees/list", timeout=30)
+            # Try different employee endpoints
+            endpoints_to_try = [
+                "/employees/list",
+                "/employees",
+                "/users",
+                "/advances/admin/all-balances"  # This might have employee data
+            ]
             
-            if response.status_code == 200:
-                employees = response.json()
-                
-                # Search for Mohamed Mostafa (various name variations)
-                mohamed_variations = [
-                    "mohamed mostafa", "محمد مصطفى", "mohamed", "mostafa",
-                    "Mohamed Mostafa", "MOHAMED MOSTAFA"
-                ]
-                
-                for employee in employees:
-                    employee_name = employee.get("name", "").lower()
+            employees = []
+            
+            for endpoint in endpoints_to_try:
+                try:
+                    response = self.session.get(f"{BACKEND_URL}{endpoint}", timeout=30)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        print(f"✅ Successfully got data from {endpoint}")
+                        
+                        # Handle different response formats
+                        if isinstance(data, list):
+                            employees = data
+                        elif isinstance(data, dict):
+                            if "employees" in data:
+                                employees = data["employees"]
+                            elif "employee_balances" in data:
+                                employees = data["employee_balances"]
+                            elif "users" in data:
+                                employees = data["users"]
+                            else:
+                                employees = [data]  # Single employee object
+                        
+                        if employees:
+                            break
+                            
+                except Exception as e:
+                    print(f"⚠️ Endpoint {endpoint} failed: {e}")
+                    continue
+            
+            if not employees:
+                print("❌ Could not retrieve employee data from any endpoint")
+                return False
+            
+            print(f"✅ Retrieved {len(employees)} employee records")
+            
+            # Search for Mohamed Mostafa (various name variations)
+            mohamed_variations = [
+                "mohamed mostafa", "محمد مصطفى", "mohamed", "mostafa",
+                "Mohamed Mostafa", "MOHAMED MOSTAFA", "محمد", "مصطفى"
+            ]
+            
+            for employee in employees:
+                if isinstance(employee, dict):
+                    employee_name = employee.get("name", employee.get("employee_name", "")).lower()
+                    employee_id = employee.get("id", employee.get("employee_id", ""))
+                    
                     for variation in mohamed_variations:
                         if variation.lower() in employee_name:
-                            self.mohamed_id = employee["id"]
+                            self.mohamed_id = employee_id
                             self.results["mohamed_found"] = True
-                            print(f"✅ Found Mohamed Mostafa: ID = {self.mohamed_id}, Name = {employee['name']}")
+                            print(f"✅ Found Mohamed Mostafa: ID = {self.mohamed_id}, Name = {employee.get('name', employee.get('employee_name'))}")
                             return True
-                
-                print("❌ Mohamed Mostafa not found in employee list")
-                print("Available employees:")
-                for emp in employees[:10]:  # Show first 10
-                    print(f"  - {emp.get('name', 'Unknown')} (ID: {emp.get('id', 'Unknown')})")
-                return False
-                
-            else:
-                print(f"❌ Failed to get employees: {response.status_code} - {response.text}")
-                return False
+            
+            print("❌ Mohamed Mostafa not found in employee list")
+            print("Available employees (first 10):")
+            for i, emp in enumerate(employees[:10]):
+                if isinstance(emp, dict):
+                    name = emp.get("name", emp.get("employee_name", "Unknown"))
+                    emp_id = emp.get("id", emp.get("employee_id", "Unknown"))
+                    print(f"  {i+1}. {name} (ID: {emp_id})")
+            
+            return False
                 
         except Exception as e:
             print(f"❌ Error finding Mohamed Mostafa: {e}")
