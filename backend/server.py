@@ -4828,8 +4828,14 @@ async def generate_salary_letter(
                     
                     <div class="section">
                         <div class="section-title">2) بنود الإضافات/الخصومات</div>
-                        
-                        """ + (("<p><strong>• الغياب والتأخير:</strong></p><ul>" + "".join([f"<li>{d['description']}: {d['amount']:.2f} درهم</li>" for d in letter_data["absence_summary"]]) + "</ul>") if letter_data["absence_summary"] and len(letter_data["absence_summary"]) > 0 else "") + """
+                        <table>
+                            <tr class="highlight">
+                                <td><strong>نوع البند</strong></td>
+                                <td><strong>التفاصيل</strong></td>
+                                <td><strong>المبلغ (درهم)</strong></td>
+                            </tr>
+                            """ + ("".join([f"<tr><td>خصم حضور/تأخير</td><td>{d['description']}</td><td>{d['amount']:.2f}</td></tr>" for d in letter_data["absence_summary"]])) if letter_data["absence_summary"] and len(letter_data["absence_summary"]) > 0 else "<tr><td colspan='3' style='text-align:center;color:#666;'>لا توجد خصومات حضور</td></tr>" + """
+                            """ + ("".join([f"<tr><td>خصم يدوي</td><td>{d['description']}</td><td>{d['amount']:.2f}</td></tr>" for d in letter_data["manual_lines"]])) if letter_data["manual_lines"] and len(letter_data["manual_lines"]) > 0 else "" + """
                         
                         """ + (("<p><strong>• خصومات يدوية:</strong> إجمالي " + letter_data["manual_deductions_total"] + " درهم</p><ul>" + "".join([f"<li>{d['description']}: {d['amount']:.2f} درهم</li>" for d in letter_data["manual_lines"]]) + "</ul>") if letter_data["manual_lines"] and len(letter_data["manual_lines"]) > 0 else "") + """
                         
