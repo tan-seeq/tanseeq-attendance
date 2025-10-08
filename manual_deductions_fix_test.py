@@ -145,6 +145,10 @@ class ManualDeductionsFixTester:
             
             print("   ✅ Update request successful")
             
+            # Wait a moment for the update to be processed
+            import time
+            time.sleep(2)
+            
             # Step 4: GET /api/payroll/cycles/{cycle_id}/summary again → verify manual_deductions = 75.25
             print("4️⃣ Verifying manual deductions persistence...")
             response = self.session.get(f"{BASE_URL}/payroll/cycles/{cycle_id}/summary")
