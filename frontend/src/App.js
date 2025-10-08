@@ -477,6 +477,7 @@ const Login = () => {
 // Layout Component
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openSections, setOpenSections] = useState({});
   const { user, logout } = useAuth();
   const { t, isRTL, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
