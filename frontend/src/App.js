@@ -481,6 +481,7 @@ const Layout = ({ children }) => {
   const { t, isRTL, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
 
+  // القوائم الرئيسية والفرعية المنظمة
   const navigation = [
     { name: 'الرئيسية', href: '/dashboard', icon: ChartBarIcon },
     
@@ -497,28 +498,47 @@ const Layout = ({ children }) => {
       { name: 'إدارة الحضور', href: '/attendance-management', icon: ClockIcon },
       { name: 'إدارة الإجازات', href: '/leave-management', icon: CalendarIcon },
       { name: 'إدارة الزيارات الخارجية', href: '/field-exit-management', icon: DocumentTextIcon },
-      { name: 'التقارير', href: '/reports', icon: DocumentTextIcon },
-      { name: 'كشف الرواتب', href: '/payroll', icon: CurrencyDollarIcon },
-    ] : []),
-    
-    // قسم السوبر أدمن فقط
-    ...(user?.role === 'super_admin' ? [
-      { name: 'لوحة التحكم التحليلية', href: '/hr-dashboard', icon: ChartBarIcon },
-      { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: ExclamationTriangleIcon },
-      { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
-      { name: 'سجل قيود الرواتب', href: '/payroll-ledger', icon: DocumentTextIcon },
-      { name: 'تقارير الخصومات', href: '/reports/deductions', icon: ChartBarIcon },
-      { name: 'تقرير السلف', href: '/reports/advances', icon: BanknotesIcon },
-      { name: 'تقرير الحضور', href: '/reports/attendance', icon: ClockIcon },
-      { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
-      { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
-      { name: 'إدارة السُلف والعُهد', href: '/advances/admin', icon: BanknotesIcon },
-      { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
-    ] : []),
-    
-    // قسم نظام العملاء (منفصل)
-    ...(user?.role === 'admin' || user?.role === 'super_admin' ? [
       { name: 'إدارة العملاء', href: '/work-reports/clients', icon: UserGroupIcon },
+    ] : []),
+    
+    // قسم الرواتب والخصومات - Super Admin فقط
+    ...(user?.role === 'super_admin' ? [
+      { 
+        name: '💰 الرواتب والخصومات', 
+        isSection: true,
+        icon: CurrencyDollarIcon,
+        children: [
+          { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
+          { name: 'كشف الرواتب', href: '/payroll', icon: BanknotesIcon },
+          { name: 'سجل قيود الرواتب', href: '/payroll-ledger', icon: DocumentTextIcon },
+          { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: ExclamationTriangleIcon },
+          { name: 'إدارة السُلف والعُهد', href: '/advances/admin', icon: BanknotesIcon },
+          { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
+        ]
+      },
+    ] : []),
+    
+    // قسم التقارير - Super Admin فقط
+    ...(user?.role === 'super_admin' ? [
+      { 
+        name: '📊 التقارير', 
+        isSection: true,
+        icon: ChartBarIcon,
+        children: [
+          { name: 'لوحة التحكم التحليلية', href: '/hr-dashboard', icon: ChartBarIcon },
+          { name: 'تقرير الحضور والإنصراف', href: '/reports/attendance', icon: ClockIcon },
+          { name: 'تقارير الخصومات الشهرية', href: '/reports/deductions', icon: ExclamationTriangleIcon },
+          { name: 'تقارير السُلف والأقساط', href: '/reports/advances', icon: BanknotesIcon },
+          { name: 'تقارير الرواتب', href: '/reports', icon: DocumentTextIcon },
+          { name: 'تقارير الإجازات', href: '/leave-management', icon: CalendarIcon },
+        ]
+      },
+    ] : []),
+    
+    // قسم النظام - Super Admin فقط
+    ...(user?.role === 'super_admin' ? [
+      { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
+      { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
     ] : []),
   ];
 
