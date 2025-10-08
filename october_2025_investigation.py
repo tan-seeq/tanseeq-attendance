@@ -229,7 +229,7 @@ class October2025Investigator:
                 "transaction_type": "advance",
                 "amount": 1000.0,
                 "description": "Test advance for October 2025 installment investigation",
-                "category": "personal",
+                "category": "other",
                 "expense_date": "2025-01-15",
                 "notes": "Created for testing October 2025 installment deduction flow"
             }
