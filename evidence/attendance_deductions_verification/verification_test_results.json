@@ -1,0 +1,26 @@
+[
+  {
+    "test": "Authentication - super_admin",
+    "status": "PASS",
+    "details": "Successfully authenticated admin@tanseeq.com",
+    "timestamp": "2025-10-08T10:33:21.083208"
+  },
+  {
+    "test": "Step 1 - Calculate Monthly Deductions",
+    "status": "PASS",
+    "details": "Successfully calculated monthly deductions",
+    "timestamp": "2025-10-08T10:33:21.141823"
+  },
+  {
+    "test": "Step 2 - Verify Payroll Ledger",
+    "status": "PASS",
+    "details": "Found 1 ATTENDANCE_DEDUCTION entries, total: 17.5",
+    "timestamp": "2025-10-08T10:33:21.157465"
+  },
+  {
+    "test": "Step 3 - Verify Payroll Summary",
+    "status": "PASS",
+    "details": "Attendance deductions = 102.0 and net salary calculated correctly",
+    "timestamp": "2025-10-08T10:33:21.180168"
+  }
+]
