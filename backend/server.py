@@ -4461,8 +4461,9 @@ async def generate_salary_letter(
                             }
         
         # إعداد البيانات للقالب
+        from uae_datetime_utils import get_uae_date_str
         letter_data = {
-            "statement_date": datetime.now().strftime("%Y-%m-%d"),
+            "statement_date": get_uae_date_str(),  # التاريخ الميلادي بتوقيت الإمارات
             "employee_name": employee.get("name", ""),
             "employee_code": employee.get("id", "")[:8],
             "period_label": f"{cycle.get('month', '')}",
