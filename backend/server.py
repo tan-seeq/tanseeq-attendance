@@ -3386,6 +3386,8 @@ async def update_payroll_cycle_employees(
                 "base_salary": emp_data.get("base_salary", 0),
                 "total_allowances": emp_data.get("allowances", 0),
                 "manual_deductions": emp_data.get("manual_deductions", 0),
+                "attendance_deductions": emp_data.get("attendance_deductions", 0),
+                "advance_deductions": emp_data.get("advance_deductions", 0),
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }
             
@@ -3393,15 +3395,8 @@ async def update_payroll_cycle_employees(
             base_salary = update_fields["base_salary"]
             allowances = update_fields["total_allowances"]
             manual_ded = update_fields["manual_deductions"]
-            
-            # Get existing deductions from DB
-            existing_summary = await db.employee_payroll_summaries.find_one({
-                "payroll_cycle_id": cycle_id,
-                "employee_id": employee_id
-            })
-            
-            attendance_ded = existing_summary.get("attendance_deductions", 0) if existing_summary else 0
-            advance_ded = existing_summary.get("advance_deductions", 0) if existing_summary else 0
+            attendance_ded = update_fields["attendance_deductions"]
+            advance_ded = update_fields["advance_deductions"]
             
             update_fields["gross_salary"] = base_salary + allowances
             update_fields["total_deductions"] = manual_ded + attendance_ded + advance_ded
