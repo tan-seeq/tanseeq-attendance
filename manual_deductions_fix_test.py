@@ -144,7 +144,7 @@ class ManualDeductionsFixTester:
                 return False
             
             updated_summary = response.json()
-            updated_employees = updated_summary.get('employees', [])
+            updated_employees = updated_summary.get('employee_summaries', [])
             
             # Find the same employee
             updated_employee = None
