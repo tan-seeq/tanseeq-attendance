@@ -1,8 +1,8 @@
 {
-  "test_run_time": "2025-10-08T12:22:29.383416",
+  "test_run_time": "2025-10-08T12:23:02.098027",
   "backend_url": "https://tanseeq-payroll.preview.emergentagent.com/api",
-  "total_tests": 3,
-  "passed_tests": 2,
+  "total_tests": 5,
+  "passed_tests": 4,
   "failed_tests": 1,
   "results": [
     {
@@ -10,21 +10,35 @@
       "success": true,
       "details": "Successfully authenticated as admin@tanseeq.com",
       "status_code": 200,
-      "timestamp": "2025-10-08T12:22:29.343645"
+      "timestamp": "2025-10-08T12:23:02.030117"
     },
     {
       "test": "Get Payroll Cycles",
       "success": true,
       "details": "Found 6 cycles. Using cycle: Unknown (ID: 026ce2ba-4471-482c-ac03-dbb8353ac13f)",
       "status_code": 200,
-      "timestamp": "2025-10-08T12:22:29.360222"
+      "timestamp": "2025-10-08T12:23:02.046082"
     },
     {
       "test": "Get Cycle Summary",
-      "success": false,
-      "details": "No employees found in cycle summary",
+      "success": true,
+      "details": "Found 6 employees. Using: Jihad (ID: eed6d28b-7639-4d31-9386-4e99b9179d8f, Base Salary: 2700.0, Current Manual Deductions: 0)",
       "status_code": 200,
-      "timestamp": "2025-10-08T12:22:29.383081"
+      "timestamp": "2025-10-08T12:23:02.064538"
+    },
+    {
+      "test": "Update Employee Deductions",
+      "success": true,
+      "details": "Update request successful. Response: {'message': 'تم تحديث 1 موظف بنجاح', 'updated_count': 1, 'cycle_totals': {'total_employees': 6, 'total_gross_salary': 20200.0, 'total_deductions': 300.5, 'total_net_salary': 19899.5, 'updated_at': '2025-10-08T12:23:02.075643+00:00'}}. Set manual_deductions to 100.5",
+      "status_code": 200,
+      "timestamp": "2025-10-08T12:23:02.079743"
+    },
+    {
+      "test": "Verify Update Saved",
+      "success": false,
+      "details": "❌ BUG CONFIRMED: Expected manual_deductions = 100.5, but got 0 for Jihad. Changes are NOT being saved!",
+      "status_code": 200,
+      "timestamp": "2025-10-08T12:23:02.097834"
     }
   ]
 }
