@@ -485,9 +485,15 @@ class ComprehensiveE2EBackendTester:
         # Get employee_id for ledger testing
         emp_response = self.make_request("GET", "/employees/list", token=token)
         if emp_response.get("status_code") == 200:
-            employees = emp_response.get("data", {}).get("employees", [])
-            if employees:
-                employee_id = employees[0].get("id")
+            employees_data = emp_response.get("data", {})
+            if isinstance(employees_data, list):
+                employees = employees_data
+            else:
+                employees = employees_data.get("employees", [])
+            
+            if employees and len(employees) > 0:
+                employee_data = employees[0]
+                employee_id = employee_data.get("id") if isinstance(employee_data, dict) else None
                 
                 # 5.1 Employee Ledger
                 response = self.make_request("GET", f"/payroll/ledger/employee/{employee_id}", token=token)
