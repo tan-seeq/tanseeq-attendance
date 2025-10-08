@@ -116,12 +116,12 @@ class ManualDeductionsTestSuite:
                         if unlocked_cycle:
                             self.cycle_id = unlocked_cycle["id"]
                             self.log_test("Get Payroll Cycles", "PASS", 
-                                        f"Found unlocked cycle: {unlocked_cycle['cycle_name']} (ID: {self.cycle_id})")
+                                        f"Found unlocked cycle: {unlocked_cycle['display_name']} (ID: {self.cycle_id})")
                         else:
                             # Use first cycle even if locked for testing
                             self.cycle_id = cycles[0]["id"]
                             self.log_test("Get Payroll Cycles", "WARN", 
-                                        f"No unlocked cycles found, using: {cycles[0]['cycle_name']} (ID: {self.cycle_id})")
+                                        f"No unlocked cycles found, using: {cycles[0]['display_name']} (ID: {self.cycle_id})")
                         
                         return True
                     else:
