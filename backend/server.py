@@ -4164,6 +4164,516 @@ async def get_payroll_cycle_summary(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
 
+@app.get("/api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
+async def generate_salary_letter(
+    cycle_id: str,
+    employee_id: str,
+    format: str = "html",
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    إنشاء رسالة راتب شهرية للموظف
+    format: html or pdf
+    """
+    try:
+        # جلب دورة الراتب
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
+        
+        # جلب ملخص راتب الموظف
+        employee_summary = await db.employee_payroll_summaries.find_one({
+            "payroll_cycle_id": cycle_id,
+            "employee_id": employee_id
+        })
+        
+        if not employee_summary:
+            raise HTTPException(status_code=404, detail="لم يتم العثور على بيانات راتب الموظف")
+        
+        # جلب بيانات الموظف
+        employee = await db.users.find_one({"id": employee_id})
+        if not employee:
+            raise HTTPException(status_code=404, detail="الموظف غير موجود")
+        
+        # حساب المعدلات
+        base_salary = employee_summary.get("base_salary", 0)
+        daily_rate = base_salary / 30
+        hourly_rate = daily_rate / 8
+        minute_rate = hourly_rate / 60
+        
+        # جلب تفاصيل الخصومات من Payroll Ledger
+        ledger_entries = await db.payroll_ledger.find({
+            "employee_id": employee_id,
+            "payroll_cycle_id": cycle_id
+        }).to_list(None)
+        
+        # تصنيف البنود
+        attendance_deductions = []
+        leave_adjustments = []
+        manual_deductions = []
+        advance_installments = []
+        custody_adjustments = []
+        
+        for entry in ledger_entries:
+            entry_type = entry.get("entry_type", "")
+            amount = entry.get("amount", 0)
+            description = entry.get("description", "")
+            
+            if entry_type == "ATTENDANCE_DEDUCTION":
+                attendance_deductions.append({
+                    "description": description,
+                    "amount": amount
+                })
+            elif entry_type == "LEAVE_ADJUSTMENT":
+                leave_adjustments.append({
+                    "description": description,
+                    "amount": amount
+                })
+            elif entry_type == "MANUAL_DEDUCTION":
+                manual_deductions.append({
+                    "description": description,
+                    "amount": amount
+                })
+            elif entry_type == "ADVANCE_INSTALLMENT":
+                advance_installments.append({
+                    "description": description,
+                    "amount": amount,
+                    "reference_id": entry.get("reference_id", "")
+                })
+            elif entry_type == "CUSTODY_ADJUSTMENT":
+                custody_adjustments.append({
+                    "description": description,
+                    "amount": amount
+                })
+        
+        # حساب الإجماليات
+        total_attendance_deductions = sum(d["amount"] for d in attendance_deductions)
+        total_leave_adjustments = sum(d["amount"] for d in leave_adjustments)
+        total_manual_deductions = sum(d["amount"] for d in manual_deductions)
+        total_advance_deductions = sum(d["amount"] for d in advance_installments)
+        total_custody_adjustments = sum(d["amount"] for d in custody_adjustments)
+        
+        # جلب تفاصيل السلف (إذا وجدت)
+        advance_details = None
+        if advance_installments:
+            # Get first installment reference
+            first_installment_ref = advance_installments[0].get("reference_id", "")
+            if first_installment_ref:
+                # Get installment details
+                installment = await db.individual_installments.find_one({"id": first_installment_ref})
+                if installment:
+                    schedule_id = installment.get("schedule_id", "")
+                    schedule = await db.installment_schedules.find_one({"id": schedule_id})
+                    if schedule:
+                        advance_id = schedule.get("advance_id", "")
+                        advance = await db.advance_transactions.find_one({"id": advance_id})
+                        if advance:
+                            advance_details = {
+                                "total_amount": advance.get("amount", 0),
+                                "installments_count": schedule.get("number_of_installments", 0),
+                                "current_installment_number": installment.get("installment_number", 0),
+                                "current_installment_amount": installment.get("installment_amount", 0),
+                                "current_installment_date": installment.get("due_date", ""),
+                                "remaining_installments": schedule.get("number_of_installments", 0) - installment.get("installment_number", 0)
+                            }
+        
+        # إعداد البيانات للقالب
+        letter_data = {
+            "statement_date": datetime.now().strftime("%Y-%m-%d"),
+            "employee_name": employee.get("name", ""),
+            "employee_code": employee.get("id", "")[:8],
+            "period_label": f"{cycle.get('month', '')}",
+            "base_salary": f"{base_salary:,.2f}",
+            "daily_rate": f"{daily_rate:,.4f}",
+            "hourly_rate": f"{hourly_rate:,.4f}",
+            "minute_rate": f"{minute_rate:,.6f}",
+            
+            # الإجازات
+            "leave_summary": "لا توجد" if not leave_adjustments else f"{len(leave_adjustments)} تعديل(ات)",
+            "leave_lines": leave_adjustments,
+            
+            # الغياب والتأخير
+            "absence_summary": attendance_deductions,
+            "attendance_deductions_total": f"{total_attendance_deductions:,.2f}",
+            
+            # الخصومات اليدوية
+            "manual_deductions_total": f"{total_manual_deductions:,.2f}",
+            "manual_lines": manual_deductions,
+            
+            # السلف
+            "advance_details": advance_details,
+            "advance_deductions_total": f"{total_advance_deductions:,.2f}",
+            
+            # العهد
+            "custody_adjustments_total": f"{total_custody_adjustments:,.2f}",
+            "custody_lines": custody_adjustments,
+            
+            # الصافي
+            "net_pay": f"{employee_summary.get('net_salary', 0):,.2f}",
+            "gross_salary": f"{employee_summary.get('gross_salary', 0):,.2f}",
+            "total_deductions": f"{employee_summary.get('total_deductions', 0):,.2f}",
+            "cycle_code": cycle_id[:8]
+        }
+        
+        if format == "pdf":
+            # إنشاء PDF
+            from fastapi.responses import Response
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib import colors
+            from reportlab.lib.units import cm
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            from reportlab.lib.enums import TA_RIGHT, TA_CENTER
+            import io
+            
+            # Create PDF buffer
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+            
+            # Register Arabic font (if available)
+            try:
+                pdfmetrics.registerFont(TTFont('Arabic', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+                arabic_font = 'Arabic'
+            except:
+                arabic_font = 'Helvetica'
+            
+            # Create styles
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'TitleArabic',
+                parent=styles['Heading1'],
+                fontName=arabic_font,
+                fontSize=16,
+                alignment=TA_CENTER,
+                spaceAfter=12,
+                textColor=colors.HexColor('#1e40af')
+            )
+            
+            heading_style = ParagraphStyle(
+                'HeadingArabic',
+                parent=styles['Heading2'],
+                fontName=arabic_font,
+                fontSize=14,
+                alignment=TA_RIGHT,
+                spaceAfter=6,
+                textColor=colors.HexColor('#1e40af')
+            )
+            
+            normal_style = ParagraphStyle(
+                'NormalArabic',
+                parent=styles['Normal'],
+                fontName=arabic_font,
+                fontSize=11,
+                alignment=TA_RIGHT,
+                spaceAfter=6
+            )
+            
+            # Build document
+            story = []
+            
+            # Header
+            story.append(Paragraph("شركة التنسيق للإستشارات الضريبية", title_style))
+            story.append(Spacer(1, 0.5*cm))
+            story.append(Paragraph(f"التاريخ: {letter_data['statement_date']}", normal_style))
+            story.append(Paragraph(f"إلى/ السيد: {letter_data['employee_name']} - رقم الموظف: {letter_data['employee_code']}", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Introduction
+            story.append(Paragraph("السلام عليكم ورحمة الله وبركاته،", normal_style))
+            story.append(Paragraph(f"نفيد سيادتكم بأن تفاصيل راتبكم الشهري عن فترة {letter_data['period_label']} قد تم احتسابها وفق السياسات المعتمدة بالشركة، على النحو التالي:", normal_style))
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Section 1: Basic Data
+            story.append(Paragraph("1) البيانات الأساسية", heading_style))
+            basic_data = [
+                ["الراتب الأساسي:", f"{letter_data['base_salary']} درهم"],
+                ["الأجر اليومي:", f"{letter_data['daily_rate']} درهم (= {letter_data['base_salary']} ÷ 30)"],
+                ["أجر الساعة:", f"{letter_data['hourly_rate']} درهم (= اليومي ÷ 8)"],
+                ["أجر الدقيقة:", f"{letter_data['minute_rate']} درهم (= الساعة ÷ 60)"]
+            ]
+            
+            basic_table = Table(basic_data, colWidths=[8*cm, 8*cm])
+            basic_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f0f9ff')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+                ('FONTNAME', (0, 0), (-1, -1), arabic_font),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            story.append(basic_table)
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Section 2: Deductions
+            story.append(Paragraph("2) بنود الإضافات/الخصومات", heading_style))
+            
+            # Attendance deductions
+            if attendance_deductions:
+                story.append(Paragraph("• الغياب والتأخير:", normal_style))
+                for deduction in attendance_deductions:
+                    story.append(Paragraph(f"  - {deduction['description']}: {deduction['amount']:.2f} درهم", normal_style))
+            
+            # Manual deductions
+            if manual_deductions:
+                story.append(Paragraph(f"• خصومات يدوية: إجمالي {letter_data['manual_deductions_total']} درهم", normal_style))
+                for deduction in manual_deductions:
+                    story.append(Paragraph(f"  - {deduction['description']}: {deduction['amount']:.2f} درهم", normal_style))
+            
+            # Advance installments
+            if advance_details:
+                story.append(Paragraph("• السلف/الأقساط:", normal_style))
+                story.append(Paragraph(f"  - إجمالي السلفة: {advance_details['total_amount']:.2f} درهم", normal_style))
+                story.append(Paragraph(f"  - عدد الأقساط: {advance_details['installments_count']}", normal_style))
+                story.append(Paragraph(f"  - القسط الحالي: {advance_details['current_installment_amount']:.2f} درهم (تاريخ الاستحقاق: {advance_details['current_installment_date'][:10]})", normal_style))
+                story.append(Paragraph(f"  - الأقساط المتبقية: {advance_details['remaining_installments']}", normal_style))
+            
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Section 3: Net Salary
+            story.append(Paragraph("3) صافي الراتب", heading_style))
+            net_calculation = f"""
+            صافي المستحق = الراتب الأساسي ({letter_data['base_salary']} درهم)
+            − الخصومات ({letter_data['total_deductions']} درهم)
+            = {letter_data['net_pay']} درهم
+            """
+            story.append(Paragraph(net_calculation, normal_style))
+            story.append(Spacer(1, 0.5*cm))
+            
+            # Footer
+            story.append(Paragraph(f"تم احتساب هذه القيم تلقائيًا من نظام قيود الرواتب (Payroll Ledger) وفق سياسة الشركة، مع اعتماد دورة الرواتب رقم {letter_data['cycle_code']}.", normal_style))
+            story.append(Spacer(1, cm))
+            
+            # Signature section
+            signature_data = [
+                ["توقيع الموظف: ________________", "توقيع الموارد البشرية: ________________"],
+                ["التاريخ: __/__/____", "الاسم: ________________"]
+            ]
+            signature_table = Table(signature_data, colWidths=[8*cm, 8*cm])
+            signature_table.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+                ('FONTNAME', (0, 0), (-1, -1), arabic_font),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ]))
+            story.append(signature_table)
+            story.append(Spacer(1, 0.5*cm))
+            
+            story.append(Paragraph("مع خالص التحية،", normal_style))
+            story.append(Paragraph("شركة التنسيق للإستشارات الضريبية", normal_style))
+            
+            # Build PDF
+            doc.build(story)
+            
+            # Return PDF
+            pdf_content = buffer.getvalue()
+            buffer.close()
+            
+            return Response(
+                content=pdf_content,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f"attachment; filename=salary_letter_{employee_id[:8]}_{cycle_id[:8]}.pdf"
+                }
+            )
+        else:
+            # Return HTML
+            html_template = f"""
+            <!DOCTYPE html>
+            <html dir="rtl" lang="ar">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>رسالة راتب - {letter_data['employee_name']}</title>
+                <style>
+                    body {{
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        max-width: 800px;
+                        margin: 40px auto;
+                        padding: 20px;
+                        background-color: #f5f5f5;
+                    }}
+                    .letter {{
+                        background: white;
+                        padding: 40px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    }}
+                    .header {{
+                        text-align: center;
+                        border-bottom: 3px solid #1e40af;
+                        padding-bottom: 20px;
+                        margin-bottom: 30px;
+                    }}
+                    .company-name {{
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #1e40af;
+                        margin-bottom: 10px;
+                    }}
+                    .section {{
+                        margin: 25px 0;
+                    }}
+                    .section-title {{
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #1e40af;
+                        margin-bottom: 15px;
+                        border-right: 4px solid #1e40af;
+                        padding-right: 10px;
+                    }}
+                    table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 15px 0;
+                    }}
+                    td {{
+                        padding: 10px;
+                        border: 1px solid #ddd;
+                    }}
+                    .highlight {{
+                        background-color: #f0f9ff;
+                    }}
+                    .total {{
+                        background-color: #1e40af;
+                        color: white;
+                        font-weight: bold;
+                    }}
+                    .signature-section {{
+                        margin-top: 40px;
+                        display: flex;
+                        justify-content: space-between;
+                    }}
+                    .signature-box {{
+                        width: 45%;
+                        border: 1px dashed #ccc;
+                        padding: 20px;
+                        text-align: center;
+                    }}
+                    ul {{
+                        list-style-type: none;
+                        padding-right: 20px;
+                    }}
+                    li {{
+                        margin: 8px 0;
+                        padding-right: 20px;
+                        position: relative;
+                    }}
+                    li:before {{
+                        content: "•";
+                        position: absolute;
+                        right: 0;
+                        color: #1e40af;
+                        font-weight: bold;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="letter">
+                    <div class="header">
+                        <div class="company-name">شركة التنسيق للإستشارات الضريبية</div>
+                        <div>التاريخ: {letter_data['statement_date']}</div>
+                    </div>
+                    
+                    <div>
+                        <p><strong>إلى/ السيد:</strong> {letter_data['employee_name']} - <strong>رقم الموظف:</strong> {letter_data['employee_code']}</p>
+                        <p>السلام عليكم ورحمة الله وبركاته،</p>
+                        <p>نفيد سيادتكم بأن تفاصيل راتبكم الشهري عن فترة <strong>{letter_data['period_label']}</strong> قد تم احتسابها وفق السياسات المعتمدة بالشركة، على النحو التالي:</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">1) البيانات الأساسية</div>
+                        <table>
+                            <tr class="highlight">
+                                <td><strong>الراتب الأساسي:</strong></td>
+                                <td>{letter_data['base_salary']} درهم</td>
+                            </tr>
+                            <tr>
+                                <td><strong>الأجر اليومي:</strong></td>
+                                <td>{letter_data['daily_rate']} درهم (= {letter_data['base_salary']} ÷ 30)</td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>أجر الساعة:</strong></td>
+                                <td>{letter_data['hourly_rate']} درهم (= اليومي ÷ 8)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>أجر الدقيقة:</strong></td>
+                                <td>{letter_data['minute_rate']} درهم (= الساعة ÷ 60)</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">2) بنود الإضافات/الخصومات</div>
+                        
+                        {'<p><strong>• الغياب والتأخير:</strong></p><ul>' + ''.join([f'<li>{d["description"]}: {d["amount"]:.2f} درهم</li>' for d in letter_data['absence_summary']]) + '</ul>' if letter_data['absence_summary'] else ''}
+                        
+                        {'<p><strong>• خصومات يدوية:</strong> إجمالي ' + letter_data['manual_deductions_total'] + ' درهم</p><ul>' + ''.join([f'<li>{d["description"]}: {d["amount"]:.2f} درهم</li>' for d in letter_data['manual_lines']]) + '</ul>' if letter_data['manual_lines'] else ''}
+                        
+                        {f'''<p><strong>• السُلف/الأقساط:</strong></p>
+                        <ul>
+                            <li>إجمالي السُلفة: {letter_data['advance_details']['total_amount']:.2f} درهم</li>
+                            <li>عدد الأقساط: {letter_data['advance_details']['installments_count']}</li>
+                            <li>القسط الحالي: {letter_data['advance_details']['current_installment_amount']:.2f} درهم (تاريخ الاستحقاق: {letter_data['advance_details']['current_installment_date'][:10]})</li>
+                            <li>الأقساط المتبقية: {letter_data['advance_details']['remaining_installments']}</li>
+                        </ul>''' if letter_data['advance_details'] else ''}
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">3) صافي الراتب</div>
+                        <table>
+                            <tr class="highlight">
+                                <td><strong>إجمالي الراتب:</strong></td>
+                                <td>{letter_data['gross_salary']} درهم</td>
+                            </tr>
+                            <tr>
+                                <td><strong>إجمالي الخصومات:</strong></td>
+                                <td>{letter_data['total_deductions']} درهم</td>
+                            </tr>
+                            <tr class="total">
+                                <td><strong>صافي المستحق:</strong></td>
+                                <td><strong>{letter_data['net_pay']} درهم</strong></td>
+                            </tr>
+                        </table>
+                        <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                            تم احتساب هذه القيم تلقائيًا من نظام قيود الرواتب (Payroll Ledger) وفق سياسة الشركة، 
+                            مع اعتماد دورة الرواتب رقم <strong>{letter_data['cycle_code']}</strong>.
+                        </p>
+                    </div>
+                    
+                    <div class="signature-section">
+                        <div class="signature-box">
+                            <p><strong>توقيع الموظف</strong></p>
+                            <br><br>
+                            <p>________________</p>
+                            <p>التاريخ: __/__/____</p>
+                        </div>
+                        <div class="signature-box">
+                            <p><strong>توقيع الموارد البشرية</strong></p>
+                            <br><br>
+                            <p>________________</p>
+                            <p>الاسم: ________________</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 40px; text-align: center; color: #666;">
+                        <p>مع خالص التحية،</p>
+                        <p><strong>شركة التنسيق للإستشارات الضريبية</strong></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            from fastapi.responses import HTMLResponse
+            return HTMLResponse(content=html_template)
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating salary letter: {str(e)}")
+
 @api_router.get("/payroll/cycles/{cycle_id}")
 async def get_payroll_cycle_detail(cycle_id: str, current_user: dict = Depends(get_current_user)):
     cycle = await db.payroll_cycles.find_one({"id": cycle_id})
