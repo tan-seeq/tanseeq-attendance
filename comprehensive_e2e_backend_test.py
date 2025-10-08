@@ -186,7 +186,13 @@ class ComprehensiveE2EBackendTester:
         response = self.make_request("GET", "/payroll/cycles", token=token)
         cycles = []
         if response.get("status_code") == 200:
-            cycles = response.get("data", {}).get("cycles", [])
+            data = response.get("data", {})
+            # Handle both direct list and nested structure
+            if isinstance(data, list):
+                cycles = data
+            else:
+                cycles = data.get("cycles", [])
+            
             self.log_test(
                 "Get payroll cycles",
                 len(cycles) >= 0,
@@ -202,8 +208,9 @@ class ComprehensiveE2EBackendTester:
             )
         
         # Test specific cycle operations if cycles exist
-        if cycles:
-            cycle_id = cycles[0].get("id")
+        if cycles and len(cycles) > 0:
+            cycle_data = cycles[0]
+            cycle_id = cycle_data.get("id") if isinstance(cycle_data, dict) else None
             if cycle_id:
                 # Get specific cycle
                 response = self.make_request("GET", f"/payroll/cycles/{cycle_id}", token=token)
