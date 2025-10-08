@@ -4490,6 +4490,7 @@ async def generate_salary_letter(
             
             # السلف
             "advance_details": advance_details,
+            "advance_installments_list": advance_installments,  # للعرض في الجدول
             "advance_deductions_total": f"{total_advance_deductions:,.2f}",
             
             # العهد
