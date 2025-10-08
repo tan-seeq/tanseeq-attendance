@@ -136,7 +136,7 @@ const PayrollSummary = () => {
           
           // Auto-calculate totals
           newEmp.gross_salary = newEmp.base_salary + newEmp.allowances;
-          newEmp.total_deductions = newEmp.manual_deductions + newEmp.attendance_deductions + newEmp.advance_deductions;
+          newEmp.total_deductions = (newEmp.manual_deductions || 0) + (newEmp.attendance_deductions || 0) + (newEmp.advance_deductions || 0);
           newEmp.net_salary = newEmp.gross_salary - newEmp.total_deductions;
           
           return newEmp;
