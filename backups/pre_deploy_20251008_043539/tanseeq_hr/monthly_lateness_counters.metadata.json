@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"employee_id":{"$numberInt":"1"},"month":{"$numberInt":"-1"}},"name":"employee_id_1_month_-1"}],"uuid":"5ba1ee17d753402aa485918dbe70ea3c","collectionName":"monthly_lateness_counters","type":"collection"}

@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"employee_id":{"$numberInt":"1"},"effective_from":{"$numberInt":"-1"}},"name":"employee_id_1_effective_from_-1"}],"uuid":"f283b70f38164c669f427225be84aff8","collectionName":"attendance_policies","type":"collection"}

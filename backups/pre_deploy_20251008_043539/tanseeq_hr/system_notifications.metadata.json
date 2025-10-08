@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"employee_id":{"$numberInt":"1"},"created_at":{"$numberInt":"-1"},"acknowledged_at":{"$numberInt":"1"}},"name":"employee_id_1_created_at_-1_acknowledged_at_1"}],"uuid":"41109e2587ef4976b47886097d912086","collectionName":"system_notifications","type":"collection"}
