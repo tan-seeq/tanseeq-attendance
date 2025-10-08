@@ -77,7 +77,10 @@ const MonthlyDeductionsCalculator = () => {
       }
     } catch (err) {
       console.error('Error applying deductions:', err);
-      setError(err.response?.data?.detail || 'خطأ في تطبيق الخصومات');
+      const errorMsg = typeof err.response?.data?.detail === 'string' 
+        ? err.response.data.detail 
+        : err.response?.data?.message || err.message || 'خطأ في تطبيق الخصومات';
+      setError(errorMsg);
     } finally {
       setApplying(false);
     }
