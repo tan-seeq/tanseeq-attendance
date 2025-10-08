@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رسالة راتب - {employee_name}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .letter {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #1e40af;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section-title {
+            background: linear-gradient(to right, #1e40af, #3b82f6);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        td {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        .highlight {
+            background-color: #f0f9ff;
+        }
+        .total {
+            background: #1e40af;
+            color: white;
+            font-weight: bold;
+        }
+        .signature-section {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-box {
+            width: 45%;
+            border: 1px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding-right: 20px;
+        }
+        li {
+            margin: 8px 0;
+            padding-right: 20px;
+            position: relative;
+        }
+        li:before {
+            content: "•";
+            position: absolute;
+            right: 0;
+            color: #1e40af;
+            font-weight: bold;
+        }
+        .deduction-detail {
+            background: #fef3c7;
+            padding: 10px;
+            border-right: 3px solid #f59e0b;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .advance-details-box {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border: 1px solid #bfdbfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="letter">
+        <div class="header">
+            <div class="company-name">شركة التنسيق للإستشارات الضريبية</div>
+            <div>التاريخ: {statement_date}</div>
+        </div>
+        
+        <div>
+            <p><strong>إلى/ السيد:</strong> {employee_name} - <strong>رقم الموظف:</strong> {employee_code}</p>
+            <p>السلام عليكم ورحمة الله وبركاته،</p>
+            <p>نفيد سيادتكم بأن تفاصيل راتبكم الشهري عن فترة <strong>{period_label}</strong> قد تم احتسابها وفق السياسات المعتمدة بالشركة، على النحو التالي:</p>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">1) البيانات الأساسية</div>
+            <table>
+                <tr class="highlight">
+                    <td width="40%"><strong>الراتب الأساسي:</strong></td>
+                    <td><strong>{base_salary} درهم</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>الأجر اليومي:</strong></td>
+                    <td>{daily_rate} درهم <span style="color:#666;font-size:12px;">(= {base_salary} ÷ 30)</span></td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>أجر الساعة:</strong></td>
+                    <td>{hourly_rate} درهم <span style="color:#666;font-size:12px;">(= اليومي ÷ 8)</span></td>
+                </tr>
+                <tr>
+                    <td><strong>أجر الدقيقة:</strong></td>
+                    <td>{minute_rate} درهم <span style="color:#666;font-size:12px;">(= الساعة ÷ 60)</span></td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">2) بنود الإضافات/الخصومات</div>
+            <table>
+                <tr class="highlight">
+                    <td width="25%"><strong>نوع البند</strong></td>
+                    <td width="50%"><strong>التفاصيل</strong></td>
+                    <td width="25%"><strong>المبلغ (درهم)</strong></td>
+                </tr>
+                {deductions_rows}
+                <tr class="total">
+                    <td colspan="2"><strong>إجمالي الخصومات</strong></td>
+                    <td><strong>{total_deductions} درهم</strong></td>
+                </tr>
+            </table>
+            
+            {advance_details_html}
+        </div>
+        
+        <div class="section">
+            <div class="section-title">3) صافي الراتب</div>
+            <table>
+                <tr class="highlight">
+                    <td width="40%"><strong>إجمالي الراتب:</strong></td>
+                    <td><strong style="color:#059669;">{gross_salary} درهم</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>إجمالي الخصومات:</strong></td>
+                    <td><strong style="color:#dc2626;">{total_deductions} درهم</strong></td>
+                </tr>
+                <tr class="total">
+                    <td><strong>صافي المستحق:</strong></td>
+                    <td><strong style="font-size:18px;">{net_pay} درهم</strong></td>
+                </tr>
+            </table>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                تم احتساب هذه القيم تلقائيًا من نظام قيود الرواتب (Payroll Ledger) وفق سياسة الشركة، 
+                مع اعتماد دورة الرواتب رقم <strong>{cycle_code}</strong>.
+            </p>
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-box">
+                <p><strong>توقيع الموظف</strong></p>
+                <p>التاريخ: _______________</p>
+                <p>الإسم: _______________</p>
+            </div>
+            <div class="signature-box">
+                <p><strong>توقيع الموارد البشرية</strong></p>
+                <p>التاريخ: _______________</p>
+                <p>الإسم: _______________</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; color: #666; font-size: 12px;">
+            <p>شركة التنسيق للإستشارات الضريبية</p>
+            <p>مع أطيب التحيات والتقدير</p>
+        </div>
+    </div>
+</body>
+</html>
