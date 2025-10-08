@@ -76,6 +76,9 @@ import PayrollSummary from './components/IntegratedPayroll/PayrollSummary';
 // Import Payroll Ledger Components
 import EmployeeLedger from './components/PayrollLedger/EmployeeLedger';
 
+// Import Reports Components
+import DeductionsReport from './components/Reports/DeductionsReport';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
