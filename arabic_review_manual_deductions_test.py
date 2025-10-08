@@ -154,7 +154,7 @@ class ManualDeductionsTestSuite:
                         # Record original values
                         self.original_values = {
                             "base_salary": employee.get("base_salary", 0),
-                            "allowances": employee.get("allowances", 0),
+                            "allowances": employee.get("total_allowances", 0),
                             "manual_deductions": employee.get("manual_deductions", 0),
                             "attendance_deductions": employee.get("attendance_deductions", 0),
                             "advance_deductions": employee.get("advance_deductions", 0),
