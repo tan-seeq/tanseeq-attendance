@@ -342,7 +342,7 @@ const PayrollSummary = () => {
               </>
             )}
             
-            {/* Calculate/Lock/Unlock Buttons */}
+            {/* Calculate/Export/Lock/Unlock Buttons */}
             {!editMode && !cycle.is_locked && (
               <>
                 <button 
@@ -351,6 +351,22 @@ const PayrollSummary = () => {
                 >
                   <CalculatorIcon className="w-5 h-5 ml-2" /> حساب الرواتب
                 </button>
+                
+                {/* Export Buttons */}
+                <button 
+                  onClick={() => handleExportCycle('pdf')}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center"
+                >
+                  <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> تصدير PDF
+                </button>
+                
+                <button 
+                  onClick={() => handleExportCycle('excel')}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 inline-flex items-center"
+                >
+                  <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> تصدير Excel
+                </button>
+                
                 <button 
                   onClick={handleLock} 
                   className="px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 inline-flex items-center"
