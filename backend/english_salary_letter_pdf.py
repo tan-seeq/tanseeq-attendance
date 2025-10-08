@@ -235,23 +235,6 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         ('BOX', (1, 0), (1, -1), 1, colors.grey),
     ]))
     story.append(signature_table)
-    story.append(Spacer(1, 1*cm))
-    
-    # Footer
-    story.append(Paragraph("<b>TANSEEQ TAX CONSULTANCY</b>", ParagraphStyle(
-        'Footer',
-        parent=normal_style,
-        alignment=TA_CENTER,
-        fontSize=10,
-        textColor=colors.grey
-    )))
-    story.append(Paragraph("With best regards", ParagraphStyle(
-        'Footer2',
-        parent=normal_style,
-        alignment=TA_CENTER,
-        fontSize=9,
-        textColor=colors.grey
-    )))
     
     # Build PDF
     doc.build(story)
