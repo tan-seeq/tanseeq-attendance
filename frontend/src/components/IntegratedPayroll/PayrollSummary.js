@@ -377,12 +377,29 @@ const PayrollSummary = () => {
             )}
             
             {!editMode && cycle.is_locked && (
-              <button 
-                onClick={handleUnlock} 
-                className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 inline-flex items-center"
-              >
-                <LockOpenIcon className="w-5 h-5 ml-2" /> فتح الدورة
-              </button>
+              <>
+                {/* Export Buttons for locked cycle */}
+                <button 
+                  onClick={() => handleExportCycle('pdf')}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center"
+                >
+                  <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> تصدير PDF
+                </button>
+                
+                <button 
+                  onClick={() => handleExportCycle('excel')}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 inline-flex items-center"
+                >
+                  <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> تصدير Excel
+                </button>
+                
+                <button 
+                  onClick={handleUnlock} 
+                  className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 inline-flex items-center"
+                >
+                  <LockOpenIcon className="w-5 h-5 ml-2" /> فتح الدورة
+                </button>
+              </>
             )}
           </div>
         </div>
