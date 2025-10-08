@@ -32,8 +32,11 @@ const AdminDashboard = () => {
   });
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [approving, setApproving] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Create advance/custody form
   const [createForm, setCreateForm] = useState({
