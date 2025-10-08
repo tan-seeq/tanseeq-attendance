@@ -1,0 +1,26 @@
+[
+  {
+    "test": "Authentication",
+    "status": "PASS",
+    "details": "Successfully logged in as admin@tanseeq.com",
+    "timestamp": "2025-10-08T07:42:16.891926"
+  },
+  {
+    "test": "Monthly Deductions Calculation",
+    "status": "FAIL",
+    "details": "Request failed: 422 - {\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"month\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}",
+    "timestamp": "2025-10-08T07:42:16.941662"
+  },
+  {
+    "test": "Find Mohamed Employee",
+    "status": "FAIL",
+    "details": "Could not find Mohamed AHMED MOHAMED MOSTAFA in 8 employees",
+    "timestamp": "2025-10-08T07:42:16.956553"
+  },
+  {
+    "test": "Apply Deductions Endpoint",
+    "status": "PASS",
+    "details": "Endpoint exists (returned 500)",
+    "timestamp": "2025-10-08T07:42:16.969872"
+  }
+]
