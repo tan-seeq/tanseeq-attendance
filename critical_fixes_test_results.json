@@ -3,7 +3,7 @@
     "test": "Authentication",
     "success": true,
     "details": "Successfully authenticated as admin@tanseeq.com",
-    "timestamp": "2025-10-08T08:58:14.928621",
+    "timestamp": "2025-10-08T08:58:49.761755",
     "response_data": {
       "user_role": "super_admin",
       "user_name": "مدير النظام"
@@ -13,7 +13,7 @@
     "test": "Monthly Deductions Calculator",
     "success": true,
     "details": "Successfully calculated deductions for 1 employees",
-    "timestamp": "2025-10-08T08:58:15.020946",
+    "timestamp": "2025-10-08T08:58:49.809725",
     "response_data": {
       "success": true,
       "month": "2025-10",
@@ -41,7 +41,7 @@
     "test": "Payroll Cycle Recalculate",
     "success": true,
     "details": "Successfully recalculated payroll cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e - 6 employees updated",
-    "timestamp": "2025-10-08T08:58:15.068112",
+    "timestamp": "2025-10-08T08:58:49.884683",
     "response_data": {
       "message": "تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger",
       "cycle_id": "e70625f9-f78e-4be3-b02e-1c51cdf5385e",
@@ -55,16 +55,19 @@
   },
   {
     "test": "Salary Letter Generation",
-    "success": false,
-    "details": "Could not find any employee ID",
-    "timestamp": "2025-10-08T08:58:15.163800",
-    "response_data": null
+    "success": true,
+    "details": "Successfully generated HTML salary letter with Arabic content",
+    "timestamp": "2025-10-08T08:58:49.920680",
+    "response_data": {
+      "html_length": 7751,
+      "contains_arabic": true
+    }
   },
   {
     "test": "Lock/Unlock Cycle - Lock",
     "success": true,
     "details": "Successfully locked cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e",
-    "timestamp": "2025-10-08T08:58:15.191793",
+    "timestamp": "2025-10-08T08:58:49.985620",
     "response_data": {
       "message": "تم قفل دورة الراتب بنجاح",
       "lock_reason": "اختبار القفل - سبب طويل جداً"
@@ -74,7 +77,7 @@
     "test": "Lock/Unlock Cycle - Unlock",
     "success": true,
     "details": "Successfully unlocked cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e",
-    "timestamp": "2025-10-08T08:58:15.246715",
+    "timestamp": "2025-10-08T08:58:49.995630",
     "response_data": {
       "message": "تم فتح دورة الراتب بنجاح",
       "unlock_reason": "اختبار الفتح - سبب طويل جداً للفتح"
