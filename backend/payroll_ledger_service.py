@@ -124,7 +124,7 @@ class PayrollLedgerService:
                 "reversal_reason": reason
             },
             "created_by": reversed_by,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": to_iso_string_uae(),
             "is_reversed": False,
             "reversed_by": None,
             "reversed_at": None,
