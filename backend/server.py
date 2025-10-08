@@ -4598,11 +4598,45 @@ async def generate_salary_letter(
             # Section 2: Deductions
             story.append(Paragraph("2) بنود الإضافات/الخصومات", heading_style))
             
-            # Attendance deductions
+            # Attendance deductions with details
             if attendance_deductions:
-                story.append(Paragraph("• الغياب والتأخير:", normal_style))
+                story.append(Paragraph("• خصومات الحضور والتأخير:", normal_style))
+                
+                # جلب تفاصيل الحضور من قاعدة البيانات
+                month_prefix = cycle.get('month', '')
+                attendance_records = await db.attendance.find({
+                    "user_id": employee_id,
+                    "date": {"$regex": f"^{month_prefix}"},
+                    "$or": [
+                        {"status": "late"},
+                        {"status": "absent"}
+                    ]
+                }).to_list(None)
+                
+                if attendance_records:
+                    # عرض تفاصيل كل حالة تأخير/غياب
+                    for record in attendance_records:
+                        date = record.get("date", "")
+                        status = record.get("status", "")
+                        check_in = record.get("check_in", "--")
+                        check_out = record.get("check_out", "--")
+                        working_hours = record.get("working_hours", 0)
+                        
+                        status_ar = "متأخر" if status == "late" else "غائب"
+                        detail_line = f"  {date}: {status_ar}"
+                        if check_in != "--":
+                            detail_line += f" (حضور: {check_in}"
+                            if check_out != "--":
+                                detail_line += f" - انصراف: {check_out}"
+                            detail_line += f" - ساعات العمل: {working_hours})"
+                        
+                        story.append(Paragraph(detail_line, normal_style))
+                
+                # عرض الإجمالي
                 for deduction in attendance_deductions:
-                    story.append(Paragraph(f"  - {deduction['description']}: {deduction['amount']:.2f} درهم", normal_style))
+                    story.append(Paragraph(f"  ⬅️ {deduction['description']}: {deduction['amount']:.2f} درهم", normal_style))
+            else:
+                story.append(Paragraph("• لا توجد خصومات حضور", normal_style))
             
             # Manual deductions
             if manual_deductions:
