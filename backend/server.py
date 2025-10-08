@@ -2933,7 +2933,34 @@ async def create_manual_deduction(
             created_by=current_user.id
         )
         
-        # ربط تلقائي بدورة الراتب المفتوحة
+        # 🆕 TRIGGER: إنشاء قيد محاسبي تلقائياً في Payroll Ledger
+        try:
+            from payroll_ledger_service import trigger_manual_deduction
+            
+            # البحث عن دورة راتب مفتوحة لنفس الشهر
+            month = target_date.strftime("%Y-%m")
+            open_cycle = await db.payroll_cycles.find_one({
+                "month": month,
+                "is_locked": False
+            })
+            
+            if open_cycle:
+                await trigger_manual_deduction(
+                    db=db,
+                    employee_id=deduction["employee_id"],
+                    cycle_id=open_cycle["id"],
+                    deduction_id=deduction["id"],
+                    amount=amount,
+                    reason=deduction_data["reason"],
+                    created_by=current_user.id
+                )
+                print(f"✅ تم إنشاء قيد محاسبي تلقائياً للخصم {deduction['id']}")
+            else:
+                print(f"ℹ️ لا توجد دورة مفتوحة لشهر {month} - سيتم إنشاء القيد عند فتح الدورة")
+        except Exception as ledger_error:
+            print(f"⚠️ فشل إنشاء قيد محاسبي: {ledger_error}")
+        
+        # ربط تلقائي بدورة الراتب المفتوحة (النظام القديم)
         try:
             global payroll_engine
             if payroll_engine:
