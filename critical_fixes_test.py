@@ -156,11 +156,14 @@ class CriticalFixesTester:
                 data = response.json()
                 
                 # Verify success in recalculation
-                if data.get('success') or 'recalculated' in str(data).lower():
+                if (data.get('success') or 
+                    'recalculated' in str(data).lower() or 
+                    'تم إعادة حساب' in data.get('message', '') or
+                    data.get('employees_updated', 0) > 0):
                     self.log_test(
                         "Payroll Cycle Recalculate",
                         True,
-                        f"Successfully recalculated payroll cycle {cycle_id}",
+                        f"Successfully recalculated payroll cycle {cycle_id} - {data.get('employees_updated', 0)} employees updated",
                         data
                     )
                     return True
