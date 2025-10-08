@@ -500,6 +500,7 @@ const Layout = ({ children }) => {
       { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: ExclamationTriangleIcon },
       { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
       { name: 'سجل قيود الرواتب', href: '/payroll-ledger', icon: DocumentTextIcon },
+      { name: 'تقارير الخصومات', href: '/reports/deductions', icon: ChartBarIcon },
       { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
