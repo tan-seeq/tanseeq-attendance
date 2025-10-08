@@ -2481,6 +2481,324 @@ async def get_all_deductions_admin(
     
     return {"deductions": deductions}
 
+@api_router.post("/deductions/calculate-monthly")
+async def calculate_monthly_deductions(
+    month: str,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    حساب خصومات التأخير والغياب والسلف المستحقة لشهر معين
+    Returns: قائمة الموظفين مع الخصومات المحسوبة (لم يتم تطبيقها بعد)
+    """
+    try:
+        # Parse month (format: YYYY-MM)
+        year, month_num = month.split('-')
+        start_date = date(int(year), int(month_num), 1)
+        if int(month_num) == 12:
+            end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(int(year), int(month_num) + 1, 1) - timedelta(days=1)
+        
+        # Get all active employees
+        employees = await db.users.find({"is_active": True}).to_list(None)
+        
+        results = []
+        total_deductions = 0
+        
+        for emp in employees:
+            employee_id = emp["id"]
+            employee_name = emp["name"]
+            employee_salary = emp.get("monthly_salary", 0)
+            
+            # Skip if no salary defined
+            if employee_salary <= 0:
+                continue
+            
+            deduction_details = []
+            late_deduction = 0
+            absence_deduction = 0
+            advance_deduction = 0
+            
+            # 1. Calculate Late Deductions (التأخير)
+            attendance_records = await db.attendance.find({
+                "employee_id": employee_id,
+                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
+                "status": "late"
+            }).to_list(None)
+            
+            # Count late incidents and total late minutes
+            late_count = len(attendance_records)
+            total_late_minutes = sum(r.get("late_minutes", 0) for r in attendance_records)
+            
+            # Apply late deduction rules
+            if late_count > 0:
+                # First 15 minutes x 4 times = free
+                free_minutes = 15 * 4
+                
+                if late_count <= 4:
+                    # First 4 times with less than 15 min each = free
+                    if all(r.get("late_minutes", 0) <= 15 for r in attendance_records):
+                        deduction_details.append(f"تأخير {late_count} مرات (مجاناً - أقل من 15 دقيقة)")
+                    else:
+                        # Some late > 15 minutes
+                        billable_minutes = sum(
+                            max(0, r.get("late_minutes", 0) - 15) 
+                            for r in attendance_records
+                        )
+                        if billable_minutes > 0:
+                            hourly_rate = employee_salary / 30 / 8  # Per hour
+                            late_deduction = (billable_minutes / 60) * hourly_rate
+                            deduction_details.append(
+                                f"تأخير {late_count} مرات - {billable_minutes} دقيقة قابلة للخصم"
+                            )
+                else:
+                    # More than 4 times: accumulate all minutes
+                    billable_minutes = max(0, total_late_minutes - free_minutes)
+                    if billable_minutes > 0:
+                        hourly_rate = employee_salary / 30 / 8
+                        late_deduction = (billable_minutes / 60) * hourly_rate
+                        deduction_details.append(
+                            f"تأخير {late_count} مرات - {billable_minutes} دقيقة (بعد خصم المجاني)"
+                        )
+            
+            # 2. Calculate Absence Deductions (الغياب)
+            absence_records = await db.attendance.find({
+                "employee_id": employee_id,
+                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
+                "status": "absent"
+            }).to_list(None)
+            
+            if len(absence_records) > 0:
+                daily_rate = employee_salary / 30
+                absence_deduction = len(absence_records) * daily_rate
+                deduction_details.append(f"غياب {len(absence_records)} يوم")
+            
+            # 3. Calculate Due Advance Installments (أقساط السلف المستحقة)
+            due_installments = await db.individual_installments.find({
+                "employee_id": employee_id,
+                "due_date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
+                "status": "pending"
+            }).to_list(None)
+            
+            if len(due_installments) > 0:
+                advance_deduction = sum(inst.get("installment_amount", 0) for inst in due_installments)
+                installment_details = []
+                for inst in due_installments:
+                    schedule_id = inst.get("schedule_id", "")
+                    schedule = await db.installment_schedules.find_one({"id": schedule_id})
+                    if schedule:
+                        advance_info = await db.advance_transactions.find_one({"id": schedule.get("advance_id")})
+                        if advance_info:
+                            installment_details.append(
+                                f"قسط {inst.get('installment_number', 0)}/{schedule.get('number_of_installments', 0)} "
+                                f"من سلفة {advance_info.get('amount', 0):.2f} درهم "
+                                f"(استحقاق {inst.get('due_date', '')[:10]})"
+                            )
+                
+                if installment_details:
+                    deduction_details.extend(installment_details)
+            
+            # Calculate totals
+            total_employee_deduction = late_deduction + absence_deduction + advance_deduction
+            
+            if total_employee_deduction > 0:
+                results.append({
+                    "employee_id": employee_id,
+                    "employee_name": employee_name,
+                    "late_deduction": round(late_deduction, 2),
+                    "absence_deduction": round(absence_deduction, 2),
+                    "advance_deduction": round(advance_deduction, 2),
+                    "total_deduction": round(total_employee_deduction, 2),
+                    "deduction_details": deduction_details,
+                    "late_count": late_count,
+                    "absence_count": len(absence_records),
+                    "installment_count": len(due_installments)
+                })
+                total_deductions += total_employee_deduction
+        
+        return {
+            "success": True,
+            "month": month,
+            "employees": results,
+            "total_deductions": round(total_deductions, 2),
+            "employee_count": len(results)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
+
+@api_router.post("/deductions/apply-monthly")
+async def apply_monthly_deductions(
+    apply_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    تطبيق الخصومات المحسوبة على دورة الرواتب
+    Creates/updates payroll cycle with calculated deductions
+    """
+    try:
+        month = apply_data.get("month")
+        employees_data = apply_data.get("employees", [])
+        
+        if not month or not employees_data:
+            raise HTTPException(status_code=400, detail="البيانات غير مكتملة")
+        
+        # Parse month
+        year, month_num = month.split('-')
+        
+        # Find or create payroll cycle
+        cycle = await db.payroll_cycles.find_one({
+            "month": month,
+            "is_locked": False
+        })
+        
+        if not cycle:
+            # Create new payroll cycle
+            new_cycle = {
+                "id": str(uuid.uuid4()),
+                "month": month,
+                "year": int(year),
+                "display_name": f"رواتب {month}",
+                "start_date": date(int(year), int(month_num), 1).isoformat(),
+                "is_locked": False,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_by": current_user.id
+            }
+            await db.payroll_cycles.insert_one(new_cycle)
+            cycle = new_cycle
+        
+        cycle_id = cycle["id"]
+        applied_count = 0
+        notifications_sent = 0
+        
+        # Apply deductions for each employee
+        for emp_data in employees_data:
+            employee_id = emp_data.get("employee_id")
+            employee_name = emp_data.get("employee_name")
+            late_deduction = emp_data.get("late_deduction", 0)
+            absence_deduction = emp_data.get("absence_deduction", 0)
+            advance_deduction = emp_data.get("advance_deduction", 0)
+            deduction_details = emp_data.get("deduction_details", [])
+            
+            # Find or create employee payroll summary
+            summary = await db.employee_payroll_summaries.find_one({
+                "payroll_cycle_id": cycle_id,
+                "employee_id": employee_id
+            })
+            
+            if not summary:
+                # Get employee info
+                employee = await db.users.find_one({"id": employee_id})
+                if not employee:
+                    continue
+                
+                # Create new summary
+                summary = {
+                    "id": str(uuid.uuid4()),
+                    "payroll_cycle_id": cycle_id,
+                    "employee_id": employee_id,
+                    "employee_name": employee_name,
+                    "base_salary": employee.get("monthly_salary", 0),
+                    "total_allowances": 0,
+                    "manual_deductions": 0,
+                    "attendance_deductions": 0,
+                    "advance_deductions": 0,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.employee_payroll_summaries.insert_one(summary)
+            
+            # Update deductions
+            update_fields = {
+                "attendance_deductions": late_deduction + absence_deduction,
+                "advance_deductions": advance_deduction,
+                "deduction_notes": "\n".join(deduction_details),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Recalculate totals
+            base_salary = summary.get("base_salary", 0)
+            allowances = summary.get("total_allowances", 0)
+            manual_ded = summary.get("manual_deductions", 0)
+            
+            update_fields["gross_salary"] = base_salary + allowances
+            update_fields["total_deductions"] = manual_ded + late_deduction + absence_deduction + advance_deduction
+            update_fields["net_salary"] = update_fields["gross_salary"] - update_fields["total_deductions"]
+            
+            await db.employee_payroll_summaries.update_one(
+                {"payroll_cycle_id": cycle_id, "employee_id": employee_id},
+                {"$set": update_fields}
+            )
+            
+            # Mark installments as applied
+            await db.individual_installments.update_many(
+                {
+                    "employee_id": employee_id,
+                    "due_date": {"$regex": f"^{month}"},
+                    "status": "pending"
+                },
+                {"$set": {
+                    "status": "paid",
+                    "paid_at": datetime.now(timezone.utc).isoformat(),
+                    "payroll_cycle_id": cycle_id
+                }}
+            )
+            
+            applied_count += 1
+            
+            # Send notification to employee
+            notification_message = f"تم تطبيق خصومات شهر {month} على راتبك:\n"
+            if late_deduction > 0:
+                notification_message += f"• خصم تأخير: {late_deduction:.2f} درهم\n"
+            if absence_deduction > 0:
+                notification_message += f"• خصم غياب: {absence_deduction:.2f} درهم\n"
+            if advance_deduction > 0:
+                notification_message += f"• أقساط سلف: {advance_deduction:.2f} درهم\n"
+            
+            notification_message += f"\nإجمالي الخصومات: {(late_deduction + absence_deduction + advance_deduction):.2f} درهم"
+            
+            if deduction_details:
+                notification_message += f"\n\nالتفاصيل:\n" + "\n".join(f"• {detail}" for detail in deduction_details)
+            
+            notification = SystemNotification(
+                employee_id=employee_id,
+                employee_name=employee_name,
+                title=f"خصومات شهر {month}",
+                message=notification_message,
+                severity=NotificationSeverity.IMPORTANT,
+                must_acknowledge=True,
+                category="payroll_deductions_applied",
+                reference_id=cycle_id
+            )
+            
+            await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
+            notifications_sent += 1
+        
+        # Update cycle totals
+        summaries = await db.employee_payroll_summaries.find({"payroll_cycle_id": cycle_id}).to_list(None)
+        cycle_totals = {
+            "total_employees": len(summaries),
+            "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
+            "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
+            "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.payroll_cycles.update_one(
+            {"id": cycle_id},
+            {"$set": cycle_totals}
+        )
+        
+        return {
+            "success": True,
+            "message": f"تم تطبيق الخصومات بنجاح على {applied_count} موظف",
+            "cycle_id": cycle_id,
+            "applied_count": applied_count,
+            "notifications_sent": notifications_sent
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في تطبيق الخصومات: {str(e)}")
+
 # ====================
 # NOTIFICATIONS API
 # ====================
