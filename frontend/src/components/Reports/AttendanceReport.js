@@ -24,12 +24,26 @@ const AttendanceReport = () => {
       setLoading(true);
       setError('');
       
-      // Fetch attendance data for the month
-      const response = await axios.get(`${API}/attendance/with-absences`, {
-        params: { month: selectedMonth }
+      // Fetch attendance data
+      const response = await axios.get(`${API}/attendance/with-absences`);
+      
+      // Response is array directly
+      let records = Array.isArray(response.data) ? response.data : [];
+      
+      // Filter by selected month
+      records = records.filter(r => {
+        const recordDate = r.date || '';
+        return recordDate.startsWith(selectedMonth);
       });
       
-      const records = response.data.attendance || [];
+      // Normalize status values (Present/Late/Absent to lowercase)
+      records = records.map(r => ({
+        ...r,
+        status: (r.original_status || r.status || '').toLowerCase(),
+        employee_id: r.user_id,
+        employee_name: r.user_name,
+        late_minutes: r.is_late ? 30 : 0  // Default 30 minutes if late (can be enhanced)
+      }));
       
       // Calculate statistics
       const stats = {
