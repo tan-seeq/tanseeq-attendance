@@ -313,13 +313,13 @@ const PayrollSummary = () => {
             {!editMode && (
               <>
                 <button 
-                  onClick={() => handleDownload('pdf')} 
+                  onClick={() => handleExportCycle('pdf')} 
                   className="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 inline-flex items-center"
                 >
                   <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> PDF
                 </button>
                 <button 
-                  onClick={() => handleDownload('excel')} 
+                  onClick={() => handleExportCycle('excel')} 
                   className="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 inline-flex items-center"
                 >
                   <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> Excel
