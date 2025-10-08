@@ -4703,10 +4703,90 @@ async def generate_salary_letter(
                 }
             )
         else:
-            # Return HTML with proper response type
+            # Return HTML using template
             from fastapi.responses import HTMLResponse
             
-            html_content = f"""
+            # Build deductions rows
+            deductions_rows = ""
+            
+            # Attendance deductions
+            if attendance_deductions and len(attendance_deductions) > 0:
+                for d in attendance_deductions:
+                    deductions_rows += f"""
+                    <tr>
+                        <td>خصم حضور/تأخير</td>
+                        <td>{d['description']}</td>
+                        <td style='color:#dc2626;font-weight:bold;'>{d['amount']:.2f}</td>
+                    </tr>
+                    """
+            else:
+                deductions_rows += """
+                <tr>
+                    <td colspan='3' style='text-align:center;color:#666;'>✓ لا توجد خصومات حضور</td>
+                </tr>
+                """
+            
+            # Manual deductions
+            if manual_deductions and len(manual_deductions) > 0:
+                for d in manual_deductions:
+                    deductions_rows += f"""
+                    <tr>
+                        <td>خصم يدوي</td>
+                        <td>{d['description']}</td>
+                        <td style='color:#dc2626;font-weight:bold;'>{d['amount']:.2f}</td>
+                    </tr>
+                    """
+            
+            # Advance installments
+            if advance_installments and len(advance_installments) > 0:
+                for d in advance_installments:
+                    deductions_rows += f"""
+                    <tr>
+                        <td>قسط سُلفة</td>
+                        <td>{d['description']}</td>
+                        <td style='color:#dc2626;font-weight:bold;'>{d['amount']:.2f}</td>
+                    </tr>
+                    """
+            
+            # Build advance details HTML
+            advance_details_html = ""
+            if advance_details:
+                advance_details_html = f"""
+                <div class='advance-details-box'>
+                    <p style='margin:0;'><strong>📊 تفاصيل السُلفة:</strong></p>
+                    <ul style='margin:10px 0;'>
+                        <li>إجمالي السُلفة: <strong>{advance_details['total_amount']:.2f} درهم</strong></li>
+                        <li>عدد الأقساط: <strong>{advance_details['installments_count']}</strong></li>
+                        <li>القسط الحالي: <strong>{advance_details['current_installment_amount']:.2f} درهم</strong> (استحقاق: {advance_details['current_installment_date'][:10]})</li>
+                        <li>الأقساط المتبقية: <strong>{advance_details['remaining_installments']}</strong></li>
+                    </ul>
+                </div>
+                """
+            
+            # Read template
+            template_path = "/app/backend/salary_letter_template.html"
+            with open(template_path, 'r', encoding='utf-8') as f:
+                html_template = f.read()
+            
+            # Replace placeholders
+            html_content = html_template.format(
+                employee_name=letter_data['employee_name'],
+                employee_code=letter_data['employee_code'],
+                statement_date=letter_data['statement_date'],
+                period_label=letter_data['period_label'],
+                base_salary=letter_data['base_salary'],
+                daily_rate=letter_data['daily_rate'],
+                hourly_rate=letter_data['hourly_rate'],
+                minute_rate=letter_data['minute_rate'],
+                deductions_rows=deductions_rows,
+                total_deductions=letter_data['total_deductions'],
+                advance_details_html=advance_details_html,
+                gross_salary=letter_data['gross_salary'],
+                net_pay=letter_data['net_pay'],
+                cycle_code=letter_data['cycle_code']
+            )
+            
+            return HTMLResponse(content=html_content)
             <!DOCTYPE html>
             <html dir="rtl" lang="ar">
             <head>
