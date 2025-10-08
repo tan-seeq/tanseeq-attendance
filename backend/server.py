@@ -4072,13 +4072,29 @@ async def update_payroll_cycle_employees(
             
             # CREATE/UPDATE LEDGER ENTRY for manual deductions if changed
             if new_manual_ded != old_manual_ded:
-                # Create ledger entry for the new manual deduction
+                # Check if a manual deduction ledger entry already exists for this employee/cycle
+                existing_ledger_entry = await db.payroll_ledger.find_one({
+                    "employee_id": employee_id,
+                    "cycle_id": cycle_id,
+                    "source_type": "MANUAL_DEDUCTION",
+                    "is_reversed": False
+                })
+                
+                # If exists, reverse it first to maintain audit trail
+                if existing_ledger_entry:
+                    await ledger_service.reverse_entry(
+                        entry_id=existing_ledger_entry["id"],
+                        reversed_by=current_user.id,
+                        reason=f"تحديث الخصم اليدوي من {old_manual_ded:.2f} إلى {new_manual_ded:.2f} درهم"
+                    )
+                
+                # Create new ledger entry if new amount > 0
                 if new_manual_ded > 0:
                     await ledger_service.create_entry(
                         employee_id=employee_id,
                         cycle_id=cycle_id,
                         source_type="MANUAL_DEDUCTION",
-                        source_id=f"manual_edit_{cycle_id}_{employee_id}",
+                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{datetime.now(timezone.utc).timestamp()}",
                         amount=-new_manual_ded,  # Negative for deduction
                         description=f"خصم يدوي تم تعديله بواسطة الإدارة - {new_manual_ded:.2f} درهم",
                         created_by=current_user.id
