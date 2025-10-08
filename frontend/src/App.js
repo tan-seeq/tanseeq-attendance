@@ -3368,6 +3368,13 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/reports/deductions" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <ErrorBoundary><DeductionsReport /></ErrorBoundary>
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/advances/my-transactions" element={
               <ProtectedRoute>
                 <Layout>
