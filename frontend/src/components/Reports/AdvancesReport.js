@@ -156,11 +156,11 @@ const AdvancesReport = () => {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">إجمالي المبالغ المطلوبة:</span>
-              <span className="text-xl font-bold text-blue-600">{stats.totalAmount.toFixed(2)} درهم</span>
+              <span className="text-xl font-bold text-blue-600">{(stats.totalAmount || 0).toFixed(2)} درهم</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">المبالغ الموافق عليها:</span>
-              <span className="text-xl font-bold text-green-600">{stats.approvedAmount.toFixed(2)} درهم</span>
+              <span className="text-xl font-bold text-green-600">{(stats.approvedAmount || 0).toFixed(2)} درهم</span>
             </div>
           </div>
         </div>
