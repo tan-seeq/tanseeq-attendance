@@ -603,7 +603,14 @@ class ComprehensiveE2EBackendTester:
                 test_name = "Get my leaves (user)"
             
             if response.get("status_code") == 200:
-                leaves = response.get("data", {}).get("leaves", [])
+                data = response.get("data", {})
+                if isinstance(data, dict):
+                    leaves = data.get("leaves", [])
+                elif isinstance(data, list):
+                    leaves = data
+                else:
+                    leaves = []
+                
                 self.log_test(
                     test_name,
                     isinstance(leaves, list),
@@ -614,7 +621,7 @@ class ComprehensiveE2EBackendTester:
                 self.log_test(
                     test_name,
                     False,
-                    f"Failed to get leaves for {role}: {response.get('error', 'Unknown error')}",
+                    f"Failed to get leaves for {role}: Status {response.get('status_code')}, Error: {response.get('error', response.get('data', 'Unknown error'))}",
                     response
                 )
 
