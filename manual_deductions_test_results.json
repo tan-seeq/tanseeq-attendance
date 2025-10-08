@@ -1,25 +1,32 @@
 {
   "summary": {
-    "total_tests": 2,
-    "passed": 1,
+    "total_tests": 3,
+    "passed": 2,
     "failed": 1,
     "warnings": 0,
-    "success_rate": 50.0,
-    "test_time": "2025-10-08T12:52:44.564173"
+    "success_rate": 66.66666666666666,
+    "test_time": "2025-10-08T12:53:12.194182"
   },
   "test_results": [
     {
       "test": "Authentication",
       "status": "PASS",
       "details": "Super Admin login successful: \u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645 (admin@tanseeq.com)",
-      "timestamp": "2025-10-08T12:52:44.544134",
+      "timestamp": "2025-10-08T12:53:12.153724",
       "data": null
     },
     {
       "test": "Get Payroll Cycles",
+      "status": "PASS",
+      "details": "Found unlocked cycle: \u062f\u0648\u0631\u0629 \u0631\u0627\u062a\u0628 \u062f\u064a\u0633\u0645\u0628\u0631 2025 (ID: 026ce2ba-4471-482c-ac03-dbb8353ac13f)",
+      "timestamp": "2025-10-08T12:53:12.164511",
+      "data": null
+    },
+    {
+      "test": "Get Current Summary",
       "status": "FAIL",
-      "details": "Error getting cycles: 'list' object has no attribute 'get'",
-      "timestamp": "2025-10-08T12:52:44.563338",
+      "details": "No employees found in summary",
+      "timestamp": "2025-10-08T12:53:12.193395",
       "data": null
     }
   ]
