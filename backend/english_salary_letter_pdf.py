@@ -64,10 +64,10 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
     # Build document
     story = []
     
-    # Header
+    # Header - compact
     story.append(Paragraph("TANSEEQ TAX CONSULTANCY", title_style))
     story.append(Paragraph("Salary Statement", title_style))
-    story.append(Spacer(1, 0.5*cm))
+    story.append(Spacer(1, 0.2*cm))
     story.append(Paragraph(f"Date: {letter_data['statement_date']}", normal_style))
     story.append(Paragraph(f"To: Mr./Ms. {letter_data['employee_name']}", normal_style))
     story.append(Paragraph(f"Employee ID: {letter_data['employee_code']}", normal_style))
