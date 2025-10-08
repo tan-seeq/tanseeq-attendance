@@ -223,12 +223,21 @@ class AttendanceDeductionsPayrollTester:
             
             if cycles_response.status_code == 200:
                 cycles_data = cycles_response.json()
-                cycles = cycles_data.get("cycles", [])
+                
+                # Handle different response formats
+                if isinstance(cycles_data, list):
+                    cycles = cycles_data
+                else:
+                    cycles = cycles_data.get("cycles", [])
+                
+                print(f"📋 Found {len(cycles)} payroll cycles")
                 
                 # البحث عن دورة أكتوبر 2025
                 october_cycle = None
                 for cycle in cycles:
-                    if "2025-10" in cycle.get("month", ""):
+                    cycle_month = cycle.get("month", "")
+                    print(f"   - Cycle: {cycle_month}, ID: {cycle.get('id')}")
+                    if "2025-10" in cycle_month:
                         october_cycle = cycle
                         self.cycle_id = cycle.get("id")
                         break
