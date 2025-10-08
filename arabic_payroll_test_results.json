@@ -1,0 +1,30 @@
+{
+  "test_run_time": "2025-10-08T12:22:29.383416",
+  "backend_url": "https://tanseeq-payroll.preview.emergentagent.com/api",
+  "total_tests": 3,
+  "passed_tests": 2,
+  "failed_tests": 1,
+  "results": [
+    {
+      "test": "Admin Authentication",
+      "success": true,
+      "details": "Successfully authenticated as admin@tanseeq.com",
+      "status_code": 200,
+      "timestamp": "2025-10-08T12:22:29.343645"
+    },
+    {
+      "test": "Get Payroll Cycles",
+      "success": true,
+      "details": "Found 6 cycles. Using cycle: Unknown (ID: 026ce2ba-4471-482c-ac03-dbb8353ac13f)",
+      "status_code": 200,
+      "timestamp": "2025-10-08T12:22:29.360222"
+    },
+    {
+      "test": "Get Cycle Summary",
+      "success": false,
+      "details": "No employees found in cycle summary",
+      "status_code": 200,
+      "timestamp": "2025-10-08T12:22:29.383081"
+    }
+  ]
+}
