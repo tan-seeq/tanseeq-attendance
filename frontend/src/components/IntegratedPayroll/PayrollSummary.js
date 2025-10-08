@@ -420,11 +420,31 @@ const PayrollSummary = () => {
                           <span className="text-red-600">{manualDed.toFixed(2)}</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-red-600">
-                        {attendDed.toFixed(2)}
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        {editMode ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={attendDed}
+                            onChange={(e) => handleFieldChange(emp.employee_id, 'attendance_deductions', e.target.value)}
+                            className="w-full px-2 py-1 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                          />
+                        ) : (
+                          <span className="text-red-600">{attendDed.toFixed(2)}</span>
+                        )}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-red-600">
-                        {advanceDed.toFixed(2)}
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        {editMode ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={advanceDed}
+                            onChange={(e) => handleFieldChange(emp.employee_id, 'advance_deductions', e.target.value)}
+                            className="w-full px-2 py-1 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          />
+                        ) : (
+                          <span className="text-red-600">{advanceDed.toFixed(2)}</span>
+                        )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-red-600">
                         {totalDed.toFixed(2)}
