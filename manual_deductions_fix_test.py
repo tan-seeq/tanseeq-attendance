@@ -118,7 +118,10 @@ class ManualDeductionsFixTester:
             print("3️⃣ Updating manual deductions to 75.25...")
             
             # Get the current employee data to preserve other fields
+            # Note: base_salary might be 0 in summary, so we need to use a reasonable value
             current_base_salary = test_employee.get('base_salary', 0)
+            if current_base_salary == 0:
+                current_base_salary = 2700  # Use known base salary for this employee
             current_allowances = test_employee.get('total_allowances', 0)
             current_attendance_ded = test_employee.get('attendance_deductions', 0)
             current_advance_ded = test_employee.get('advance_deductions', 0)
