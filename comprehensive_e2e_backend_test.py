@@ -343,32 +343,54 @@ class ComprehensiveE2EBackendTester:
         
         # 3.2 Manual Deductions
         response = self.make_request("GET", "/deductions", token=token)
-        self.log_test(
-            "Get all deductions",
-            response.get("status_code") == 200,
-            f"Retrieved deductions list",
-            {"deductions_count": len(response.get("data", {}).get("deductions", []))}
-        )
+        if response.get("status_code") == 200:
+            data = response.get("data", {})
+            if isinstance(data, list):
+                deductions_count = len(data)
+            else:
+                deductions_count = len(data.get("deductions", []))
+            
+            self.log_test(
+                "Get all deductions",
+                True,
+                f"Retrieved deductions list",
+                {"deductions_count": deductions_count}
+            )
+        else:
+            self.log_test(
+                "Get all deductions",
+                False,
+                f"Failed to get deductions: Status {response.get('status_code')}",
+                response
+            )
         
         # Get a valid employee_id for manual deduction
         emp_response = self.make_request("GET", "/employees/list", token=token)
         if emp_response.get("status_code") == 200:
-            employees = emp_response.get("data", {}).get("employees", [])
-            if employees:
-                employee_id = employees[0].get("id")
-                manual_deduction_data = {
-                    "employee_id": employee_id,
-                    "amount": 50.00,
-                    "description": "اختبار خصم يدوي شامل",
-                    "category": "other"
-                }
-                response = self.make_request("POST", "/deductions/manual", token=token, data=manual_deduction_data)
-                self.log_test(
-                    "Create manual deduction",
-                    response.get("status_code") in [200, 201],
-                    f"Created manual deduction for employee {employee_id}",
-                    response.get("data")
-                )
+            employees_data = emp_response.get("data", {})
+            if isinstance(employees_data, list):
+                employees = employees_data
+            else:
+                employees = employees_data.get("employees", [])
+            
+            if employees and len(employees) > 0:
+                employee_data = employees[0]
+                employee_id = employee_data.get("id") if isinstance(employee_data, dict) else None
+                
+                if employee_id:
+                    manual_deduction_data = {
+                        "employee_id": employee_id,
+                        "amount": 50.00,
+                        "description": "اختبار خصم يدوي شامل",
+                        "category": "other"
+                    }
+                    response = self.make_request("POST", "/deductions/manual", token=token, data=manual_deduction_data)
+                    self.log_test(
+                        "Create manual deduction",
+                        response.get("status_code") in [200, 201],
+                        f"Created manual deduction for employee {employee_id}",
+                        response.get("data")
+                    )
         
         # 3.3 Attendance
         response = self.make_request("GET", "/attendance/with-absences", token=token, params={"month": "2025-10"})
