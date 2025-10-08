@@ -3,30 +3,24 @@
     "test": "Authentication - super_admin",
     "status": "PASS",
     "details": "Successfully authenticated admin@tanseeq.com",
-    "timestamp": "2025-10-08T10:31:16.544541"
+    "timestamp": "2025-10-08T10:31:49.134339"
   },
   {
     "test": "Step 1 - Calculate Monthly Deductions",
     "status": "PASS",
     "details": "Found Mohamed Mostafa with deductions data",
-    "timestamp": "2025-10-08T10:31:16.597905"
+    "timestamp": "2025-10-08T10:31:49.194980"
   },
   {
     "test": "Step 2 - Get Calculated Data",
     "status": "PASS",
     "details": "Successfully extracted Mohamed's deduction data",
-    "timestamp": "2025-10-08T10:31:16.597963"
+    "timestamp": "2025-10-08T10:31:49.195020"
   },
   {
     "test": "Step 3 - Apply Monthly Deductions",
-    "status": "PASS",
-    "details": "Successfully applied monthly deductions",
-    "timestamp": "2025-10-08T10:31:16.644706"
-  },
-  {
-    "test": "Step 4 - Verify Payroll Ledger",
     "status": "FAIL",
-    "details": "Exception: 'list' object has no attribute 'get'",
-    "timestamp": "2025-10-08T10:31:16.655549"
+    "details": "Status: 500, Response: {\"detail\":\"خطأ في تطبيق الخصومات: batch op errors occurred, full error: {'writeErrors': [{'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: tanseeq_hr.payroll_ledger index: idempotency_key_1 dup key: { idempotency_key: null }', 'keyPattern': {'idempotency_key': 1}, 'keyValue': {'idempotency_key': None}, 'op': {'id': '8b522e7e-1f56-40dc-af97-9426b6c8214a', 'employee_id': '33d2d833-f414-4b0c-920d-35e3ca4f853c', 'employee_name': 'Mohamed Mostafa', 'payroll_cycle_id': 'e70625f9-f78e-4be3-b02e-1c51cdf5385e', 'entry_type': 'ATTENDANCE_DEDUCTION', 'amount': 17.5, 'description': 'خصومات الحضور والتأخير - 2025-10: تأخير 4 مرات - 72 دقيقة قابلة للخصم', 'reference_id': None, 'created_at': '2025-10-08T10:31:49.209233+00:00', 'created_by': 'admin_001', 'is_system_generated': True, '_id': ObjectId('68e63d95b584fe6315c78f60')}}], 'writeConcernErrors': [], 'nInserted': 0, 'nUpserted': 0, 'nMatched': 0, 'nModified': 0, 'nRemoved': 0, 'upserted': []}\"}",
+    "timestamp": "2025-10-08T10:31:49.214434"
   }
 ]
