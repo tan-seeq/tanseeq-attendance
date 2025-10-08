@@ -1,0 +1,248 @@
+"""
+UAE DateTime Utilities
+======================
+توفير وظائف للتعامل مع التواريخ والأوقات بتوقيت دولة الإمارات العربية المتحدة
+
+UAE Timezone: Asia/Dubai (UTC+4)
+التقويم: ميلادي فقط (Gregorian Calendar Only)
+"""
+
+from datetime import datetime, date, time, timedelta
+from zoneinfo import ZoneInfo
+from typing import Optional
+
+# UAE Timezone
+UAE_TZ = ZoneInfo("Asia/Dubai")  # UTC+4
+
+
+def get_uae_now() -> datetime:
+    """
+    الحصول على التاريخ والوقت الحالي بتوقيت الإمارات
+    Get current datetime in UAE timezone
+    
+    Returns:
+        datetime: Current datetime in UAE timezone (Asia/Dubai - UTC+4)
+    """
+    return datetime.now(UAE_TZ)
+
+
+def get_uae_today() -> date:
+    """
+    الحصول على تاريخ اليوم بتوقيت الإمارات
+    Get today's date in UAE timezone
+    
+    Returns:
+        date: Today's date in UAE
+    """
+    return get_uae_now().date()
+
+
+def get_uae_time() -> time:
+    """
+    الحصول على الوقت الحالي بتوقيت الإمارات
+    Get current time in UAE timezone
+    
+    Returns:
+        time: Current time in UAE
+    """
+    return get_uae_now().time()
+
+
+def convert_to_uae_time(dt: datetime) -> datetime:
+    """
+    تحويل datetime إلى توقيت الإمارات
+    Convert datetime to UAE timezone
+    
+    Args:
+        dt: datetime object (can be naive or aware)
+        
+    Returns:
+        datetime: datetime in UAE timezone
+    """
+    if dt.tzinfo is None:
+        # If naive, assume UTC and convert
+        dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+    return dt.astimezone(UAE_TZ)
+
+
+def format_uae_datetime(dt: Optional[datetime] = None, format_str: str = "%Y-%m-%d %H:%M:%S") -> str:
+    """
+    تنسيق datetime بتوقيت الإمارات
+    Format datetime in UAE timezone
+    
+    Args:
+        dt: datetime object (if None, uses current UAE time)
+        format_str: strftime format string
+        
+    Returns:
+        str: Formatted datetime string
+    """
+    if dt is None:
+        dt = get_uae_now()
+    elif dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(UAE_TZ)
+    else:
+        dt = dt.astimezone(UAE_TZ)
+    
+    return dt.strftime(format_str)
+
+
+def format_uae_date(d: Optional[date] = None, format_str: str = "%Y-%m-%d") -> str:
+    """
+    تنسيق التاريخ بالصيغة الميلادية
+    Format date in Gregorian format
+    
+    Args:
+        d: date object (if None, uses today's UAE date)
+        format_str: strftime format string
+        
+    Returns:
+        str: Formatted date string (Gregorian)
+    """
+    if d is None:
+        d = get_uae_today()
+    return d.strftime(format_str)
+
+
+def parse_uae_datetime(datetime_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> datetime:
+    """
+    تحويل string إلى datetime بتوقيت الإمارات
+    Parse string to datetime in UAE timezone
+    
+    Args:
+        datetime_str: datetime string
+        format_str: strptime format string
+        
+    Returns:
+        datetime: datetime object in UAE timezone
+    """
+    dt = datetime.strptime(datetime_str, format_str)
+    return dt.replace(tzinfo=UAE_TZ)
+
+
+def get_month_start_end_uae(year: int, month: int) -> tuple[datetime, datetime]:
+    """
+    الحصول على بداية ونهاية الشهر بتوقيت الإمارات
+    Get start and end of month in UAE timezone
+    
+    Args:
+        year: Year (e.g., 2025)
+        month: Month (1-12)
+        
+    Returns:
+        tuple: (start_of_month, end_of_month) in UAE timezone
+    """
+    start = datetime(year, month, 1, 0, 0, 0, tzinfo=UAE_TZ)
+    
+    # Get last day of month
+    if month == 12:
+        end = datetime(year + 1, 1, 1, 0, 0, 0, tzinfo=UAE_TZ) - timedelta(microseconds=1)
+    else:
+        end = datetime(year, month + 1, 1, 0, 0, 0, tzinfo=UAE_TZ) - timedelta(microseconds=1)
+    
+    return start, end
+
+
+def is_weekend_uae(d: date) -> bool:
+    """
+    التحقق من أن التاريخ هو عطلة نهاية أسبوع في الإمارات
+    Check if date is weekend in UAE (Saturday & Sunday)
+    
+    Args:
+        d: date object
+        
+    Returns:
+        bool: True if weekend (Saturday or Sunday)
+    """
+    # UAE weekend: Saturday (5) and Sunday (6)
+    return d.weekday() in [5, 6]
+
+
+def get_working_days_uae(start_date: date, end_date: date) -> int:
+    """
+    حساب عدد أيام العمل بين تاريخين (باستثناء عطل نهاية الأسبوع)
+    Calculate working days between two dates (excluding weekends)
+    
+    Args:
+        start_date: Start date
+        end_date: End date
+        
+    Returns:
+        int: Number of working days
+    """
+    working_days = 0
+    current_date = start_date
+    
+    while current_date <= end_date:
+        if not is_weekend_uae(current_date):
+            working_days += 1
+        current_date += timedelta(days=1)
+    
+    return working_days
+
+
+def to_iso_string_uae(dt: Optional[datetime] = None) -> str:
+    """
+    تحويل datetime إلى ISO string بتوقيت الإمارات
+    Convert datetime to ISO string in UAE timezone
+    
+    Args:
+        dt: datetime object (if None, uses current UAE time)
+        
+    Returns:
+        str: ISO format string (e.g., "2025-10-08T15:30:00+04:00")
+    """
+    if dt is None:
+        dt = get_uae_now()
+    elif dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UAE_TZ)
+    else:
+        dt = dt.astimezone(UAE_TZ)
+    
+    return dt.isoformat()
+
+
+# Convenience functions for common formats
+def get_uae_date_str() -> str:
+    """Get current date as string (YYYY-MM-DD)"""
+    return format_uae_date()
+
+
+def get_uae_datetime_str() -> str:
+    """Get current datetime as string (YYYY-MM-DD HH:MM:SS)"""
+    return format_uae_datetime()
+
+
+def get_uae_month_str() -> str:
+    """Get current month as string (YYYY-MM)"""
+    return format_uae_date(format_str="%Y-%m")
+
+
+# Example usage and tests
+if __name__ == "__main__":
+    print("🇦🇪 UAE DateTime Utilities Test")
+    print("=" * 50)
+    
+    print(f"Current UAE Time: {get_uae_now()}")
+    print(f"Current UAE Date: {get_uae_today()}")
+    print(f"Current UAE Time (time only): {get_uae_time()}")
+    print(f"Formatted DateTime: {get_uae_datetime_str()}")
+    print(f"Formatted Date: {get_uae_date_str()}")
+    print(f"Current Month: {get_uae_month_str()}")
+    print(f"ISO String: {to_iso_string_uae()}")
+    
+    # Test weekend check
+    today = get_uae_today()
+    print(f"\nIs today ({today}) a weekend? {is_weekend_uae(today)}")
+    
+    # Test month boundaries
+    start, end = get_month_start_end_uae(2025, 10)
+    print(f"\nOctober 2025:")
+    print(f"  Start: {start}")
+    print(f"  End: {end}")
+    
+    # Test working days
+    working_days = get_working_days_uae(date(2025, 10, 1), date(2025, 10, 31))
+    print(f"  Working Days: {working_days}")
+    
+    print("\n✅ All tests completed!")
