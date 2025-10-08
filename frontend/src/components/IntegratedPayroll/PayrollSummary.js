@@ -162,7 +162,9 @@ const PayrollSummary = () => {
           employee_name: emp.employee_name,
           base_salary: emp.base_salary,
           allowances: emp.allowances,
-          manual_deductions: emp.manual_deductions
+          manual_deductions: emp.manual_deductions,
+          attendance_deductions: emp.attendance_deductions,
+          advance_deductions: emp.advance_deductions
         })),
         notes: `تم التعديل بواسطة Super Admin في ${new Date().toLocaleString('ar-AE')}`
       };
