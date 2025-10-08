@@ -100,7 +100,7 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
     ]))
     story.append(basic_table)
-    story.append(Spacer(1, 0.5*cm))
+    story.append(Spacer(1, 0.2*cm))
     
     # Section 2: Deductions
     story.append(Paragraph("2) DEDUCTIONS BREAKDOWN", heading_style))
