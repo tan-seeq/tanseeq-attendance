@@ -116,7 +116,7 @@ The script uses the following configuration (can be modified in the script):
 
 ```python
 # Base URL
-base_url = "https://tanseeq-payroll.preview.emergentagent.com"
+base_url = "https://salary-processor-1.preview.emergentagent.com"
 
 # Screenshot settings
 viewport = {"width": 1920, "height": 800}
