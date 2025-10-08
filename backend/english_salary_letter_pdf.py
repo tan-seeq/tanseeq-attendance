@@ -174,7 +174,7 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
     ]))
     story.append(deductions_table)
-    story.append(Spacer(1, 0.5*cm))
+    story.append(Spacer(1, 0.2*cm))
     
     # Section 3: Net Salary
     story.append(Paragraph("3) NET SALARY SUMMARY", heading_style))
