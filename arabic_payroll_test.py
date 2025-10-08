@@ -209,7 +209,7 @@ class PayrollEditTester:
             
             if response.status_code == 200:
                 summary = response.json()
-                employees = summary.get("employees", [])
+                employees = summary.get("employee_summaries", [])
                 
                 # Find the specific employee
                 target_employee = None
