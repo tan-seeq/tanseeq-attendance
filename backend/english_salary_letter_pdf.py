@@ -30,9 +30,9 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         'Title',
         parent=styles['Heading1'],
         fontName='Helvetica-Bold',
-        fontSize=18,
+        fontSize=14,  # Reduced from 18
         alignment=TA_CENTER,
-        spaceAfter=12,
+        spaceAfter=4,  # Reduced from 12
         textColor=colors.HexColor('#1e40af')
     )
     
@@ -40,9 +40,9 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         'Heading',
         parent=styles['Heading2'],
         fontName='Helvetica-Bold',
-        fontSize=14,
+        fontSize=11,  # Reduced from 14
         alignment=TA_LEFT,
-        spaceAfter=8,
+        spaceAfter=4,  # Reduced from 8
         textColor=colors.HexColor('#1e40af')
     )
     
@@ -50,9 +50,9 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         'Normal',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=11,
+        fontSize=9,  # Reduced from 11
         alignment=TA_LEFT,
-        spaceAfter=6
+        spaceAfter=2  # Reduced from 6
     )
     
     bold_style = ParagraphStyle(
