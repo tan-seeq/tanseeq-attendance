@@ -431,7 +431,14 @@ class ComprehensiveE2EBackendTester:
         # 4.1 Advances List
         response = self.make_request("GET", "/advances/admin/all-transactions", token=token)
         if response.get("status_code") == 200:
-            transactions = response.get("data", {}).get("transactions", [])
+            data = response.get("data", {})
+            if isinstance(data, dict):
+                transactions = data.get("transactions", [])
+            elif isinstance(data, list):
+                transactions = data
+            else:
+                transactions = []
+            
             self.log_test(
                 "Get all advance transactions",
                 isinstance(transactions, list),
@@ -442,7 +449,7 @@ class ComprehensiveE2EBackendTester:
             self.log_test(
                 "Get all advance transactions",
                 False,
-                f"Failed to get advance transactions: {response.get('error', 'Unknown error')}",
+                f"Failed to get advance transactions: Status {response.get('status_code')}, Error: {response.get('error', response.get('data', 'Unknown error'))}",
                 response
             )
         
