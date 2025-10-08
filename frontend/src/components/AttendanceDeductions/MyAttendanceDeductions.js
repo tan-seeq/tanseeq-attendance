@@ -18,9 +18,7 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const MyAttendanceDeductions = () => {
-  // Mock user data for now - this should be replaced with proper auth context
-  const currentUser = { id: 1, name: 'Current User' };
+const MyAttendanceDeductions = ({ currentUser }) => {
   const [deductions, setDeductions] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -28,7 +26,7 @@ const MyAttendanceDeductions = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && currentUser.id) {
       fetchMyDeductions();
       fetchMyAttendanceStats();
       fetchMyNotifications();
