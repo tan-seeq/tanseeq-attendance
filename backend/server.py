@@ -2512,8 +2512,8 @@ async def acknowledge_notification(
     result = await db.system_notifications.update_one(
         {"id": notification_id},
         {"$set": {
-            "acknowledged_at": datetime.now().isoformat(),
-            "read_at": datetime.now().isoformat()
+            "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+            "read_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
