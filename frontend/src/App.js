@@ -512,8 +512,7 @@ const Layout = ({ children }) => {
       { name: 'تقرير الحضور', href: '/reports/attendance', icon: ClockIcon },
       { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
-      { name: 'السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
-      { name: 'إدارة السُلف والعُهد', href: '/advances/admin', icon: UserIcon },
+      { name: 'إدارة السُلف والعُهد', href: '/advances/admin', icon: BanknotesIcon },
       { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
     ] : []),
     
