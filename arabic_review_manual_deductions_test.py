@@ -103,10 +103,9 @@ class ManualDeductionsTestSuite:
             async with self.session.get(f"{API_BASE}/payroll/cycles", 
                                       headers=self.get_auth_headers()) as response:
                 if response.status == 200:
-                    data = await response.json()
-                    cycles = data.get("cycles", [])
+                    cycles = await response.json()
                     
-                    if cycles:
+                    if cycles and isinstance(cycles, list):
                         # Find an unlocked cycle or use the first one
                         unlocked_cycle = None
                         for cycle in cycles:
