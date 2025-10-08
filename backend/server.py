@@ -3668,10 +3668,19 @@ async def export_payroll_pdf(
     cycle_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """تصدير كشف الراتب كـ PDF"""
+    """تصدير كشف الراتب كـ PDF باستخدام ReportLab"""
     try:
-        from fastapi.responses import StreamingResponse
+        from fastapi.responses import Response
+        from reportlab.lib.pagesizes import A4, landscape
+        from reportlab.lib import colors
+        from reportlab.lib.units import cm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.lib.enums import TA_RIGHT, TA_CENTER
         import io
+        from datetime import datetime
         
         # جلب بيانات دورة الراتب
         cycle = await db.payroll_cycles.find_one({"id": cycle_id})
@@ -3682,33 +3691,126 @@ async def export_payroll_pdf(
             "payroll_cycle_id": cycle_id
         }).to_list(1000)
         
-        # إنشاء محتوى PDF بسيط (يمكن تحسينه لاحقاً)
-        pdf_content = f"""
-        كشف الراتب - {cycle.get('display_name', 'غير محدد')}
+        if not summaries:
+            raise HTTPException(status_code=404, detail="No employee summaries found")
         
-        تاريخ الإنشاء: {cycle.get('created_at', '')}
+        # إنشاء PDF في الذاكرة
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=1*cm, leftMargin=1*cm, topMargin=2*cm, bottomMargin=2*cm)
         
-        تفاصيل الموظفين:
-        """
+        elements = []
+        
+        # العنوان
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            textColor=colors.HexColor('#1e40af'),
+            alignment=TA_CENTER,
+            spaceAfter=20
+        )
+        
+        title = Paragraph(f"كشف الرواتب - {cycle.get('display_name', 'غير محدد')}", title_style)
+        elements.append(title)
+        elements.append(Spacer(1, 0.5*cm))
+        
+        # معلومات الدورة
+        info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=10, alignment=TA_RIGHT)
+        info_text = f"تاريخ الإصدار: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        elements.append(Paragraph(info_text, info_style))
+        elements.append(Spacer(1, 0.5*cm))
+        
+        # إنشاء جدول البيانات
+        data = [
+            ['صافي الراتب', 'إجمالي الخصومات', 'خصم سلف', 'خصم حضور', 'خصم يدوي', 'إجمالي الراتب', 'البدلات', 'الراتب الأساسي', 'اسم الموظف']
+        ]
+        
+        total_gross = 0
+        total_deductions = 0
+        total_net = 0
         
         for summary in summaries:
-            pdf_content += f"""
-        الموظف: {summary.get('employee_name', 'غير محدد')}
-        الراتب الأساسي: {summary.get('basic_salary', 0)} درهم
-        البدلات: {summary.get('allowances', 0)} درهم
-        الخصومات: {summary.get('total_deductions', 0)} درهم
-        الصافي: {summary.get('net_salary', 0)} درهم
-        _______________________________________________
-        """
+            gross = summary.get('gross_salary', 0)
+            deductions = summary.get('total_deductions', 0)
+            net = summary.get('net_salary', 0)
+            
+            total_gross += gross
+            total_deductions += deductions
+            total_net += net
+            
+            data.append([
+                f"{net:.2f}",
+                f"{deductions:.2f}",
+                f"{summary.get('advance_deductions', 0):.2f}",
+                f"{summary.get('attendance_deductions', 0):.2f}",
+                f"{summary.get('manual_deductions', 0):.2f}",
+                f"{gross:.2f}",
+                f"{summary.get('total_allowances', 0):.2f}",
+                f"{summary.get('base_salary', 0):.2f}",
+                summary.get('employee_name', 'غير محدد')
+            ])
         
-        # تحويل النص إلى bytes
-        pdf_bytes = pdf_content.encode('utf-8')
-        pdf_buffer = io.BytesIO(pdf_bytes)
+        # إضافة صف الإجماليات
+        data.append([
+            f"{total_net:.2f}",
+            f"{total_deductions:.2f}",
+            '',
+            '',
+            '',
+            f"{total_gross:.2f}",
+            '',
+            '',
+            'الإجمالي'
+        ])
         
-        return StreamingResponse(
-            io.BytesIO(pdf_bytes),
+        # تنسيق الجدول
+        table = Table(data, repeatRows=1)
+        table.setStyle(TableStyle([
+            # تنسيق الهيدر
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            
+            # تنسيق البيانات
+            ('BACKGROUND', (0, 1), (-1, -2), colors.beige),
+            ('TEXTCOLOR', (0, 1), (-1, -2), colors.black),
+            ('ALIGN', (0, 1), (-2, -1), 'CENTER'),
+            ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 1), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            
+            # تنسيق صف الإجماليات
+            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#10b981')),
+            ('TEXTCOLOR', (0, -1), (-1, -1), colors.whitesmoke),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, -1), (-1, -1), 11),
+            
+            # حدود الجدول
+            ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+            ('LINEBELOW', (0, 0), (-1, 0), 2, colors.HexColor('#1e40af')),
+            ('LINEABOVE', (0, -1), (-1, -1), 2, colors.HexColor('#10b981')),
+        ]))
+        
+        elements.append(table)
+        
+        # بناء PDF
+        doc.build(elements)
+        
+        # إرجاع الملف
+        buffer.seek(0)
+        
+        return Response(
+            content=buffer.getvalue(),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=payroll_{cycle_id}.pdf"}
+            headers={
+                "Content-Disposition": f"attachment; filename=payroll_{cycle.get('month', 'unknown')}_{cycle_id[:8]}.pdf"
+            }
         )
         
     except Exception as e:
