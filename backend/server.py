@@ -3695,28 +3695,36 @@ async def unlock_payroll_cycle(
     unlock_data: dict,
     current_user: dict = Depends(get_current_user)
 ):
-    """فتح دورة راتب مقفولة (سوبر أدمن فقط)"""
+    """فتح دورة راتب مقفولة (سوبر أدمن فقط) - السبب إلزامي"""
     if current_user.role != "super_admin":
         raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
         global payroll_engine
         
-        unlock_reason = unlock_data.get("reason")
-        if not unlock_reason:
-            raise HTTPException(status_code=400, detail="Unlock reason is required")
+        unlock_reason = unlock_data.get("reason") or unlock_data.get("unlock_reason")
+        if not unlock_reason or unlock_reason.strip() == "":
+            raise HTTPException(status_code=400, detail="سبب الفتح إلزامي. يجب توضيح سبب فتح دورة الراتب المقفولة.")
+        
+        if len(unlock_reason.strip()) < 15:
+            raise HTTPException(status_code=400, detail="سبب الفتح يجب أن يكون 15 حرف على الأقل (فتح دورة مقفولة يتطلب تبرير قوي)")
         
         success = await payroll_engine.unlock_payroll_cycle(
             cycle_id=cycle_id,
             unlocked_by=current_user.id,
-            unlock_reason=unlock_reason
+            unlock_reason=unlock_reason.strip()
         )
         
         if success:
-            return {"message": "تم فتح دورة الراتب بنجاح"}
+            return {
+                "message": "تم فتح دورة الراتب بنجاح",
+                "unlock_reason": unlock_reason.strip()
+            }
         else:
             raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error unlocking payroll cycle: {str(e)}")
 
