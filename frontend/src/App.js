@@ -78,6 +78,8 @@ import EmployeeLedger from './components/PayrollLedger/EmployeeLedger';
 
 // Import Reports Components
 import DeductionsReport from './components/Reports/DeductionsReport';
+import AdvancesReport from './components/Reports/AdvancesReport';
+import AttendanceReport from './components/Reports/AttendanceReport';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
