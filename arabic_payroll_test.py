@@ -120,7 +120,7 @@ class PayrollEditTester:
             
             if response.status_code == 200:
                 summary = response.json()
-                employees = summary.get("employees", [])
+                employees = summary.get("employee_summaries", [])
                 
                 if employees and len(employees) > 0:
                     employee = employees[0]
