@@ -231,7 +231,7 @@ class ManualDeductionsTestSuite:
                     # Look for MANUAL_DEDUCTION entries
                     manual_deduction_entries = [
                         entry for entry in ledger_entries 
-                        if entry.get("entry_type") == "MANUAL_DEDUCTION"
+                        if entry.get("source_type") == "MANUAL_DEDUCTION"
                     ]
                     
                     if manual_deduction_entries:
