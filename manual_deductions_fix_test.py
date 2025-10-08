@@ -118,7 +118,7 @@ class ManualDeductionsFixTester:
             print("3️⃣ Updating manual deductions to 75.25...")
             
             update_data = {
-                "employee_updates": [
+                "employees": [
                     {
                         "employee_id": employee_id,
                         "manual_deductions": 75.25
