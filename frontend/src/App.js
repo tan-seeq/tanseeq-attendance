@@ -3397,6 +3397,13 @@ const AppWithNotifications = () => {
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/hr-dashboard" element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <ErrorBoundary><HRDashboard /></ErrorBoundary>
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/advances/my-transactions" element={
               <ProtectedRoute>
                 <Layout>
