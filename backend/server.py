@@ -13,6 +13,10 @@ import qrcode
 from io import BytesIO
 import base64
 from datetime import datetime, timezone, timedelta, time, date
+from uae_datetime_utils import (
+    get_uae_now, get_uae_today, get_uae_date_str, 
+    get_uae_datetime_str, to_iso_string_uae, UAE_TZ
+)
 from jose import JWTError, jwt
 import os
 import logging
