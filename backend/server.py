@@ -4898,7 +4898,7 @@ async def generate_salary_letter(
             """
             
             from fastapi.responses import HTMLResponse
-            return HTMLResponse(content=html_template)
+            return HTMLResponse(content=html_content)
             
     except HTTPException:
         raise
