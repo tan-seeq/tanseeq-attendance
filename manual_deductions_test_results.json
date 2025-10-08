@@ -1,34 +1,34 @@
 {
   "summary": {
-    "total_tests": 7,
-    "passed": 6,
-    "failed": 1,
+    "total_tests": 39,
+    "passed": 39,
+    "failed": 0,
     "warnings": 0,
-    "success_rate": 85.71428571428571,
-    "test_time": "2025-10-08T12:55:45.697063"
+    "success_rate": 100.0,
+    "test_time": "2025-10-08T12:57:15.423370"
   },
   "test_results": [
     {
       "test": "Authentication",
       "status": "PASS",
       "details": "Super Admin login successful: \u0645\u062f\u064a\u0631 \u0627\u0644\u0646\u0638\u0627\u0645 (admin@tanseeq.com)",
-      "timestamp": "2025-10-08T12:55:45.575792",
+      "timestamp": "2025-10-08T12:56:57.768609",
       "data": null
     },
     {
       "test": "Get Payroll Cycles",
       "status": "PASS",
       "details": "Found unlocked cycle: \u062f\u0648\u0631\u0629 \u0631\u0627\u062a\u0628 \u062f\u064a\u0633\u0645\u0628\u0631 2025 (ID: 026ce2ba-4471-482c-ac03-dbb8353ac13f)",
-      "timestamp": "2025-10-08T12:55:45.589725",
+      "timestamp": "2025-10-08T12:56:57.787084",
       "data": null
     },
     {
       "test": "Get Current Summary",
       "status": "PASS",
       "details": "Selected employee: Jihad (ID: eed6d28b-7639-4d31-9386-4e99b9179d8f)",
-      "timestamp": "2025-10-08T12:55:45.608556",
+      "timestamp": "2025-10-08T12:56:57.810781",
       "data": {
-        "base_salary": 2700,
+        "base_salary": 2700.0,
         "allowances": 0,
         "manual_deductions": 428.26,
         "attendance_deductions": 0,
@@ -41,27 +41,27 @@
       "test": "Update Manual Deductions",
       "status": "PASS",
       "details": "Update successful: \u062a\u0645 \u062a\u062d\u062f\u064a\u062b 1 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d. New manual deduction: 250.5",
-      "timestamp": "2025-10-08T12:55:45.662790",
+      "timestamp": "2025-10-08T12:56:57.838992",
       "data": null
     },
     {
       "test": "Verify Ledger Entry",
       "status": "PASS",
       "details": "Found correct MANUAL_DEDUCTION entry: 250.5 (expected: 250.5)",
-      "timestamp": "2025-10-08T12:55:45.678695",
+      "timestamp": "2025-10-08T12:56:57.853078",
       "data": {
-        "id": "aa3c7ea2-b8f9-4430-9b6b-ffc7d9bbadc9",
-        "idempotency_key": "eed6d28b-7639-4d31-9386-4e99b9179d8f_026ce2ba-4471-482c-ac03-dbb8353ac13f_MANUAL_DEDUCTION_manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928118.081544",
+        "id": "844be34b-95bd-41f4-af69-7cbfcd6621e0",
+        "idempotency_key": "eed6d28b-7639-4d31-9386-4e99b9179d8f_026ce2ba-4471-482c-ac03-dbb8353ac13f_MANUAL_DEDUCTION_manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928217.827498",
         "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
         "cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f",
         "source_type": "MANUAL_DEDUCTION",
-        "source_id": "manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928118.081544",
+        "source_id": "manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928217.827498",
         "amount": -250.5,
         "description": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 250.50 \u062f\u0631\u0647\u0645",
         "description_ar": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 250.50 \u062f\u0631\u0647\u0645",
         "metadata": {},
         "created_by": "admin_001",
-        "created_at": "2025-10-08T16:55:18.082705+04:00",
+        "created_at": "2025-10-08T16:56:57.828505+04:00",
         "is_reversed": false,
         "reversed_by": null,
         "reversed_at": null,
@@ -71,15 +71,307 @@
     {
       "test": "Audit Trail Check",
       "status": "PASS",
-      "details": "Found 1 reversed entries for audit trail",
-      "timestamp": "2025-10-08T12:55:45.678746",
+      "details": "Found 2 reversed entries for audit trail",
+      "timestamp": "2025-10-08T12:56:57.853120",
+      "data": null
+    },
+    {
+      "test": "Recalculate Payroll",
+      "status": "PASS",
+      "details": "Payroll recalculated successfully: \u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0628\u0646\u062c\u0627\u062d \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 Payroll Ledger",
+      "timestamp": "2025-10-08T12:56:57.878490",
       "data": null
     },
     {
       "test": "Verify Summary Updated",
-      "status": "FAIL",
-      "details": "Manual deduction not updated in summary: 428.26 vs expected 250.5",
-      "timestamp": "2025-10-08T12:55:45.696222",
+      "status": "PASS",
+      "details": "Summary updated: manual_deductions changed from 428.26 to 767.64",
+      "timestamp": "2025-10-08T12:56:59.901590",
+      "data": null
+    },
+    {
+      "test": "Primary Manual Deduction Test",
+      "status": "PASS",
+      "details": "Manual deduction 250.5 persists correctly",
+      "timestamp": "2025-10-08T12:56:59.901655",
+      "data": null
+    },
+    {
+      "test": "Update Manual Deductions",
+      "status": "PASS",
+      "details": "Update successful: \u062a\u0645 \u062a\u062d\u062f\u064a\u062b 1 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d. New manual deduction: 250.5",
+      "timestamp": "2025-10-08T12:56:59.922121",
+      "data": null
+    },
+    {
+      "test": "Verify Ledger Entry",
+      "status": "PASS",
+      "details": "Found correct MANUAL_DEDUCTION entry: 250.5 (expected: 250.5)",
+      "timestamp": "2025-10-08T12:56:59.935638",
+      "data": {
+        "id": "94182982-a44d-426b-8b1c-08ce896e9b50",
+        "idempotency_key": "eed6d28b-7639-4d31-9386-4e99b9179d8f_026ce2ba-4471-482c-ac03-dbb8353ac13f_MANUAL_DEDUCTION_manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928219.91466",
+        "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f",
+        "source_type": "MANUAL_DEDUCTION",
+        "source_id": "manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928219.91466",
+        "amount": -250.5,
+        "description": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 250.50 \u062f\u0631\u0647\u0645",
+        "description_ar": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 250.50 \u062f\u0631\u0647\u0645",
+        "metadata": {},
+        "created_by": "admin_001",
+        "created_at": "2025-10-08T16:56:59.915549+04:00",
+        "is_reversed": false,
+        "reversed_by": null,
+        "reversed_at": null,
+        "reversal_reason": null
+      }
+    },
+    {
+      "test": "Audit Trail Check",
+      "status": "PASS",
+      "details": "Found 3 reversed entries for audit trail",
+      "timestamp": "2025-10-08T12:56:59.935678",
+      "data": null
+    },
+    {
+      "test": "Recalculate Payroll",
+      "status": "PASS",
+      "details": "Payroll recalculated successfully: \u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0628\u0646\u062c\u0627\u062d \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 Payroll Ledger",
+      "timestamp": "2025-10-08T12:57:00.004787",
+      "data": null
+    },
+    {
+      "test": "Verify Summary Updated",
+      "status": "PASS",
+      "details": "Summary updated: manual_deductions changed from 428.26 to 1268.6399999999999",
+      "timestamp": "2025-10-08T12:57:02.024861",
+      "data": null
+    },
+    {
+      "test": "Multiple Edit Test 1",
+      "status": "PASS",
+      "details": "Successfully updated to 250.5",
+      "timestamp": "2025-10-08T12:57:02.024925",
+      "data": null
+    },
+    {
+      "test": "Update Manual Deductions",
+      "status": "PASS",
+      "details": "Update successful: \u062a\u0645 \u062a\u062d\u062f\u064a\u062b 1 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d. New manual deduction: 175.25",
+      "timestamp": "2025-10-08T12:57:03.045978",
+      "data": null
+    },
+    {
+      "test": "Verify Ledger Entry",
+      "status": "PASS",
+      "details": "Found correct MANUAL_DEDUCTION entry: 175.25 (expected: 175.25)",
+      "timestamp": "2025-10-08T12:57:03.060868",
+      "data": {
+        "id": "499d6fbc-d0fd-44dd-be76-31cbeddd5ea9",
+        "idempotency_key": "eed6d28b-7639-4d31-9386-4e99b9179d8f_026ce2ba-4471-482c-ac03-dbb8353ac13f_MANUAL_DEDUCTION_manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928223.0384",
+        "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f",
+        "source_type": "MANUAL_DEDUCTION",
+        "source_id": "manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928223.0384",
+        "amount": -175.25,
+        "description": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 175.25 \u062f\u0631\u0647\u0645",
+        "description_ar": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 175.25 \u062f\u0631\u0647\u0645",
+        "metadata": {},
+        "created_by": "admin_001",
+        "created_at": "2025-10-08T16:57:03.039392+04:00",
+        "is_reversed": false,
+        "reversed_by": null,
+        "reversed_at": null,
+        "reversal_reason": null
+      }
+    },
+    {
+      "test": "Audit Trail Check",
+      "status": "PASS",
+      "details": "Found 4 reversed entries for audit trail",
+      "timestamp": "2025-10-08T12:57:03.060906",
+      "data": null
+    },
+    {
+      "test": "Recalculate Payroll",
+      "status": "PASS",
+      "details": "Payroll recalculated successfully: \u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0628\u0646\u062c\u0627\u062d \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 Payroll Ledger",
+      "timestamp": "2025-10-08T12:57:03.089136",
+      "data": null
+    },
+    {
+      "test": "Verify Summary Updated",
+      "status": "PASS",
+      "details": "Summary updated: manual_deductions changed from 428.26 to 1532.77",
+      "timestamp": "2025-10-08T12:57:05.108440",
+      "data": null
+    },
+    {
+      "test": "Multiple Edit Test 2",
+      "status": "PASS",
+      "details": "Successfully updated to 175.25",
+      "timestamp": "2025-10-08T12:57:05.108502",
+      "data": null
+    },
+    {
+      "test": "Update Manual Deductions",
+      "status": "PASS",
+      "details": "Update successful: \u062a\u0645 \u062a\u062d\u062f\u064a\u062b 1 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d. New manual deduction: 300.0",
+      "timestamp": "2025-10-08T12:57:06.133236",
+      "data": null
+    },
+    {
+      "test": "Verify Ledger Entry",
+      "status": "PASS",
+      "details": "Found correct MANUAL_DEDUCTION entry: 300.0 (expected: 300.0)",
+      "timestamp": "2025-10-08T12:57:06.148440",
+      "data": {
+        "id": "c1b77d10-bc81-4459-b300-9dd3080a69ef",
+        "idempotency_key": "eed6d28b-7639-4d31-9386-4e99b9179d8f_026ce2ba-4471-482c-ac03-dbb8353ac13f_MANUAL_DEDUCTION_manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928226.125737",
+        "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f",
+        "source_type": "MANUAL_DEDUCTION",
+        "source_id": "manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928226.125737",
+        "amount": -300.0,
+        "description": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 300.00 \u062f\u0631\u0647\u0645",
+        "description_ar": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 300.00 \u062f\u0631\u0647\u0645",
+        "metadata": {},
+        "created_by": "admin_001",
+        "created_at": "2025-10-08T16:57:06.126864+04:00",
+        "is_reversed": false,
+        "reversed_by": null,
+        "reversed_at": null,
+        "reversal_reason": null
+      }
+    },
+    {
+      "test": "Audit Trail Check",
+      "status": "PASS",
+      "details": "Found 5 reversed entries for audit trail",
+      "timestamp": "2025-10-08T12:57:06.148480",
+      "data": null
+    },
+    {
+      "test": "Recalculate Payroll",
+      "status": "PASS",
+      "details": "Payroll recalculated successfully: \u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0628\u0646\u062c\u0627\u062d \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 Payroll Ledger",
+      "timestamp": "2025-10-08T12:57:06.214070",
+      "data": null
+    },
+    {
+      "test": "Verify Summary Updated",
+      "status": "PASS",
+      "details": "Summary updated: manual_deductions changed from 428.26 to 2083.27",
+      "timestamp": "2025-10-08T12:57:08.232147",
+      "data": null
+    },
+    {
+      "test": "Multiple Edit Test 3",
+      "status": "PASS",
+      "details": "Successfully updated to 300.0",
+      "timestamp": "2025-10-08T12:57:08.232204",
+      "data": null
+    },
+    {
+      "test": "Multiple Edits Test",
+      "status": "PASS",
+      "details": "All 3 edit tests passed successfully",
+      "timestamp": "2025-10-08T12:57:09.232815",
+      "data": null
+    },
+    {
+      "test": "Update Manual Deductions",
+      "status": "PASS",
+      "details": "Update successful: \u062a\u0645 \u062a\u062d\u062f\u064a\u062b 1 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d. New manual deduction: 0",
+      "timestamp": "2025-10-08T12:57:09.252394",
+      "data": null
+    },
+    {
+      "test": "Recalculate Payroll",
+      "status": "PASS",
+      "details": "Payroll recalculated successfully: \u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0628\u0646\u062c\u0627\u062d \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 Payroll Ledger",
+      "timestamp": "2025-10-08T12:57:09.276499",
+      "data": null
+    },
+    {
+      "test": "Verify Summary Updated",
+      "status": "PASS",
+      "details": "Summary updated: manual_deductions changed from 428.26 to 2333.77",
+      "timestamp": "2025-10-08T12:57:11.295009",
+      "data": null
+    },
+    {
+      "test": "Edge Case: Setting manual deduction to 0",
+      "status": "PASS",
+      "details": "Zero value handled correctly",
+      "timestamp": "2025-10-08T12:57:11.295078",
+      "data": null
+    },
+    {
+      "test": "Update Manual Deductions",
+      "status": "PASS",
+      "details": "Update successful: \u062a\u0645 \u062a\u062d\u062f\u064a\u062b 1 \u0645\u0648\u0638\u0641 \u0628\u0646\u062c\u0627\u062d. New manual deduction: 50.75",
+      "timestamp": "2025-10-08T12:57:12.318688",
+      "data": null
+    },
+    {
+      "test": "Verify Ledger Entry",
+      "status": "PASS",
+      "details": "Found correct MANUAL_DEDUCTION entry: 50.75 (expected: 50.75)",
+      "timestamp": "2025-10-08T12:57:12.332890",
+      "data": {
+        "id": "70845c6f-a438-4f30-baf9-c8223f71ce0b",
+        "idempotency_key": "eed6d28b-7639-4d31-9386-4e99b9179d8f_026ce2ba-4471-482c-ac03-dbb8353ac13f_MANUAL_DEDUCTION_manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928232.31142",
+        "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f",
+        "source_type": "MANUAL_DEDUCTION",
+        "source_id": "manual_edit_026ce2ba-4471-482c-ac03-dbb8353ac13f_eed6d28b-7639-4d31-9386-4e99b9179d8f_1759928232.31142",
+        "amount": -50.75,
+        "description": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 50.75 \u062f\u0631\u0647\u0645",
+        "description_ar": "\u062e\u0635\u0645 \u064a\u062f\u0648\u064a \u062a\u0645 \u062a\u0639\u062f\u064a\u0644\u0647 \u0628\u0648\u0627\u0633\u0637\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 - 50.75 \u062f\u0631\u0647\u0645",
+        "metadata": {},
+        "created_by": "admin_001",
+        "created_at": "2025-10-08T16:57:12.312384+04:00",
+        "is_reversed": false,
+        "reversed_by": null,
+        "reversed_at": null,
+        "reversal_reason": null
+      }
+    },
+    {
+      "test": "Audit Trail Check",
+      "status": "PASS",
+      "details": "Found 7 reversed entries for audit trail",
+      "timestamp": "2025-10-08T12:57:12.332928",
+      "data": null
+    },
+    {
+      "test": "Recalculate Payroll",
+      "status": "PASS",
+      "details": "Payroll recalculated successfully: \u062a\u0645 \u0625\u0639\u0627\u062f\u0629 \u062d\u0633\u0627\u0628 \u0627\u0644\u0631\u0648\u0627\u062a\u0628 \u0628\u0646\u062c\u0627\u062d \u0628\u0627\u0633\u062a\u062e\u062f\u0627\u0645 Payroll Ledger",
+      "timestamp": "2025-10-08T12:57:12.397858",
+      "data": null
+    },
+    {
+      "test": "Verify Summary Updated",
+      "status": "PASS",
+      "details": "Summary updated: manual_deductions changed from 428.26 to 2635.02",
+      "timestamp": "2025-10-08T12:57:14.421285",
+      "data": null
+    },
+    {
+      "test": "Edge Case: Changing from 0 to positive value",
+      "status": "PASS",
+      "details": "Value 50.75 handled correctly",
+      "timestamp": "2025-10-08T12:57:14.421362",
+      "data": null
+    },
+    {
+      "test": "Edge Cases Test",
+      "status": "PASS",
+      "details": "All edge cases passed",
+      "timestamp": "2025-10-08T12:57:15.422417",
       "data": null
     }
   ]
