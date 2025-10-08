@@ -190,37 +190,27 @@ class CriticalFixesTester:
     def get_employee_id_from_cycle(self, cycle_id):
         """Get any employee ID from the cycle"""
         try:
-            # Try to get cycle details or employee list
-            response = self.session.get(f"{BACKEND_URL}/payroll/cycles/{cycle_id}")
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Look for employees in the cycle data
-                if 'employees' in data and data['employees']:
-                    return data['employees'][0].get('employee_id')
-                elif 'line_items' in data and data['line_items']:
-                    return data['line_items'][0].get('employee_id')
-            
-            # Try payroll summary endpoint
+            # Try payroll summary endpoint first (most reliable)
             response = self.session.get(f"{BACKEND_URL}/payroll/cycles/{cycle_id}/summary")
             if response.status_code == 200:
                 data = response.json()
-                if 'employees' in data and data['employees']:
-                    return data['employees'][0].get('employee_id')
+                if 'employee_summaries' in data and data['employee_summaries']:
+                    return data['employee_summaries'][0].get('employee_id')
             
-            # Fallback: get any active employee
+            # Try employees list endpoint
             response = self.session.get(f"{BACKEND_URL}/employees/list")
             if response.status_code == 200:
-                employees = response.json()
-                if employees:
-                    return employees[0].get('id')
+                data = response.json()
+                if 'employees' in data and data['employees']:
+                    return data['employees'][0].get('id')
+                elif isinstance(data, list) and data:
+                    return data[0].get('id')
             
-            # Try users endpoint as final fallback
+            # Try users endpoint as fallback
             response = self.session.get(f"{BACKEND_URL}/users")
             if response.status_code == 200:
                 users = response.json()
-                if users:
+                if isinstance(users, list) and users:
                     return users[0].get('id')
                     
             return None
