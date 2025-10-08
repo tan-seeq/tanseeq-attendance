@@ -496,6 +496,7 @@ const Layout = ({ children }) => {
     ...(user?.role === 'super_admin' ? [
       { name: 'نظام الخصومات المتقدم', href: '/attendance-deductions', icon: ExclamationTriangleIcon },
       { name: 'إدارة دورات الرواتب', href: '/payroll-cycles', icon: CurrencyDollarIcon },
+      { name: 'سجل قيود الرواتب', href: '/payroll-ledger', icon: DocumentTextIcon },
       { name: 'جدولة الأقساط', href: '/installment-schedules', icon: CalendarIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'السُلف والعُهد', href: '/advances', icon: CurrencyDollarIcon },
