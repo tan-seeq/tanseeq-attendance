@@ -3,24 +3,50 @@
     "test": "Authentication",
     "status": "PASS",
     "details": "Successfully logged in as admin@tanseeq.com",
-    "timestamp": "2025-10-08T07:42:16.891926"
+    "timestamp": "2025-10-08T07:43:21.481479"
   },
   {
     "test": "Monthly Deductions Calculation",
-    "status": "FAIL",
-    "details": "Request failed: 422 - {\"detail\":[{\"type\":\"missing\",\"loc\":[\"query\",\"month\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}",
-    "timestamp": "2025-10-08T07:42:16.941662"
+    "status": "PASS",
+    "details": "Successfully calculated deductions for 1 employees. Deduction types found: late. All employees have deduction_details.",
+    "timestamp": "2025-10-08T07:43:21.540382",
+    "response": {
+      "total_employees": 1,
+      "deduction_types": [
+        "late"
+      ],
+      "sample_employee": {
+        "employee_id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+        "employee_name": "Mohamed Mostafa",
+        "late_deduction": 17.5,
+        "absence_deduction": 0,
+        "advance_deduction": 0,
+        "total_deduction": 17.5,
+        "deduction_details": [
+          "تأخير 4 مرات - 72 دقيقة قابلة للخصم"
+        ],
+        "late_count": 4,
+        "absence_count": 0,
+        "installment_count": 0
+      }
+    }
   },
   {
     "test": "Find Mohamed Employee",
+    "status": "PASS",
+    "details": "Found employee: Mohamed Mostafa (ID: 33d2d833-f414-4b0c-920d-35e3ca4f853c)",
+    "timestamp": "2025-10-08T07:43:21.554295"
+  },
+  {
+    "test": "Mohamed Advance Installments",
     "status": "FAIL",
-    "details": "Could not find Mohamed AHMED MOHAMED MOSTAFA in 8 employees",
-    "timestamp": "2025-10-08T07:42:16.956553"
+    "details": "Request failed: 500 - {\"detail\":\"Error fetching installment schedule: 404: السلفة غير موجودة\"}",
+    "timestamp": "2025-10-08T07:43:21.566743"
   },
   {
     "test": "Apply Deductions Endpoint",
     "status": "PASS",
     "details": "Endpoint exists (returned 500)",
-    "timestamp": "2025-10-08T07:42:16.969872"
+    "timestamp": "2025-10-08T07:43:21.579312"
   }
 ]
