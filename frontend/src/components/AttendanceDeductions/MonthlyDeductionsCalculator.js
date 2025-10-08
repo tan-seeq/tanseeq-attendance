@@ -33,7 +33,10 @@ const MonthlyDeductionsCalculator = () => {
       }
     } catch (err) {
       console.error('Error calculating deductions:', err);
-      setError(err.response?.data?.detail || 'خطأ في حساب الخصومات');
+      const errorMsg = typeof err.response?.data?.detail === 'string' 
+        ? err.response.data.detail 
+        : err.response?.data?.message || err.message || 'خطأ في حساب الخصومات';
+      setError(errorMsg);
     } finally {
       setCalculating(false);
     }
