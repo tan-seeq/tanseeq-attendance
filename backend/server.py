@@ -4516,12 +4516,19 @@ async def generate_salary_letter(
             buffer = io.BytesIO()
             doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
             
-            # Register Arabic font (if available)
+            # Register Arabic font with proper RTL support
             try:
-                pdfmetrics.registerFont(TTFont('Arabic', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
-                arabic_font = 'Arabic'
+                # Try KacstOne first (better Arabic support)
+                pdfmetrics.registerFont(TTFont('ArabicFont', '/usr/share/fonts/truetype/kacst-one/KacstOne.ttf'))
+                arabic_font = 'ArabicFont'
             except:
-                arabic_font = 'Helvetica'
+                try:
+                    # Fallback to KacstFarsi
+                    pdfmetrics.registerFont(TTFont('ArabicFont', '/usr/share/fonts/truetype/kacst/KacstFarsi.ttf'))
+                    arabic_font = 'ArabicFont'
+                except:
+                    # Last fallback
+                    arabic_font = 'Helvetica'
             
             # Create styles
             styles = getSampleStyleSheet()
