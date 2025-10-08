@@ -360,6 +360,7 @@ const PayrollSummary = () => {
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">خصم سلف</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجمالي الخصومات</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase font-bold">صافي الراتب</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">رسالة الراتب</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
