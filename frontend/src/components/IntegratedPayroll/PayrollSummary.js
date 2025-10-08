@@ -469,10 +469,18 @@ const PayrollSummary = () => {
           </div>
           
           {editMode && (
-            <div className="px-6 py-4 bg-yellow-50 border-t border-yellow-200">
-              <p className="text-sm text-yellow-800">
-                ℹ️ <strong>ملاحظة:</strong> يمكنك تعديل الراتب الأساسي، البدلات، والخصومات اليدوية. 
-                سيتم حساب الإجماليات تلقائياً. خصومات الحضور والسلف يتم تحديثها عبر أنظمتها الخاصة.
+            <div className="px-6 py-4 bg-blue-50 border-t border-blue-200">
+              <p className="text-sm text-blue-800">
+                ℹ️ <strong>ملاحظة:</strong> يمكنك الآن تعديل:
+              </p>
+              <ul className="text-sm text-blue-700 mt-2 mr-6 list-disc">
+                <li><strong>الراتب الأساسي والبدلات</strong> - يؤثر على إجمالي الراتب</li>
+                <li><strong>الخصم اليدوي</strong> - خصومات يدوية إضافية</li>
+                <li><strong>خصم الحضور</strong> - خصومات التأخير والغياب <span className="text-orange-600 font-bold">✨ جديد!</span></li>
+                <li><strong>خصم السلف</strong> - أقساط السلف الشهرية <span className="text-purple-600 font-bold">✨ جديد!</span></li>
+              </ul>
+              <p className="text-sm text-blue-700 mt-2">
+                سيتم حساب الإجماليات وصافي الراتب تلقائياً عند أي تغيير.
               </p>
             </div>
           )}
