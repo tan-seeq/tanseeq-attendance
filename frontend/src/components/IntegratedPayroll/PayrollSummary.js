@@ -453,6 +453,27 @@ const PayrollSummary = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
                         {netSalary.toFixed(2)}
                       </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        <div className="flex flex-col gap-2">
+                          <a
+                            href={`${API}/payroll/cycles/${id}/employees/${emp.employee_id}/letter?format=html`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-xs"
+                          >
+                            <DocumentArrowDownIcon className="h-4 w-4 ml-1" />
+                            عرض الرسالة
+                          </a>
+                          <a
+                            href={`${API}/payroll/cycles/${id}/employees/${emp.employee_id}/letter?format=pdf`}
+                            download
+                            className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-xs"
+                          >
+                            <DocumentArrowDownIcon className="h-4 w-4 ml-1" />
+                            تحميل PDF
+                          </a>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
