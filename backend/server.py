@@ -4577,10 +4577,42 @@ async def generate_salary_letter(
                 </div>
                 """
             
-            # Read template
+            # Read template with error handling
+            import os
             template_path = "/app/backend/salary_letter_template.html"
-            with open(template_path, 'r', encoding='utf-8') as f:
-                html_template = f.read()
+            
+            if not os.path.exists(template_path):
+                # Fallback: create inline template
+                html_template = """<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>رسالة راتب</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; padding: 20px; direction: rtl; }}
+        .letter {{ background: white; padding: 30px; }}
+        .header {{ text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 15px; }}
+        table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+        td {{ padding: 10px; border: 1px solid #ddd; }}
+    </style>
+</head>
+<body>
+    <div class="letter">
+        <div class="header"><h2>شركة التنسيق</h2></div>
+        <p>الموظف: {employee_name}</p>
+        <p>التاريخ: {statement_date}</p>
+        <table>
+            <tr><td>الراتب الأساسي</td><td>{base_salary}</td></tr>
+            <tr><td>الخصومات</td><td>{total_deductions}</td></tr>
+            <tr><td>الصافي</td><td>{net_pay}</td></tr>
+        </table>
+        {deductions_rows}
+    </div>
+</body>
+</html>"""
+            else:
+                with open(template_path, 'r', encoding='utf-8') as f:
+                    html_template = f.read()
             
             # Replace placeholders
             html_content = html_template.format(
