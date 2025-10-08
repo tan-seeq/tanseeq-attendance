@@ -3378,6 +3378,51 @@ async def unlock_payroll_cycle(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error unlocking payroll cycle: {str(e)}")
 
+@app.get("/api/payroll/cycles/{cycle_id}/ledger")
+async def get_payroll_ledger_entries(
+    cycle_id: str,
+    employee_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    🆕 جلب القيود المحاسبية لدورة الرواتب
+    يعرض جميع القيود (attendance, leave, manual, advance, custody)
+    """
+    try:
+        from payroll_ledger_service import PayrollLedgerService
+        
+        ledger_service = PayrollLedgerService(db)
+        
+        entries = await ledger_service.get_entries_for_cycle(
+            cycle_id=cycle_id,
+            employee_id=employee_id
+        )
+        
+        # تجميع حسب نوع القيد
+        summary_by_type = {}
+        for entry in entries:
+            source_type = entry["source_type"]
+            if source_type not in summary_by_type:
+                summary_by_type[source_type] = {
+                    "count": 0,
+                    "total_amount": 0,
+                    "entries": []
+                }
+            summary_by_type[source_type]["count"] += 1
+            summary_by_type[source_type]["total_amount"] += entry["amount"]
+            summary_by_type[source_type]["entries"].append(entry)
+        
+        return {
+            "cycle_id": cycle_id,
+            "employee_id": employee_id,
+            "total_entries": len(entries),
+            "summary_by_type": summary_by_type,
+            "entries": entries
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching ledger entries: {str(e)}")
+
 @app.post("/api/payroll/cycles/{cycle_id}/recalculate")
 async def recalculate_payroll_cycle_from_ledger(
     cycle_id: str,
