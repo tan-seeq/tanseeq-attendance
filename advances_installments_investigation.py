@@ -146,21 +146,50 @@ class AdvancesInstallmentsInvestigator:
         try:
             print(f"📊 Getting advances data for Mohamed Mostafa (ID: {self.mohamed_id})...")
             
-            response = self.session.get(
-                f"{BACKEND_URL}/advances",
-                params={"employee_id": self.mohamed_id},
-                timeout=30
-            )
+            # Try different endpoints to get advances data
+            endpoints_to_try = [
+                f"/advances?employee_id={self.mohamed_id}",
+                f"/advances/my-transactions",  # If we can impersonate
+                f"/advances/admin/all-transactions?employee_id={self.mohamed_id}",
+                f"/advances/admin/all-transactions"
+            ]
             
-            if response.status_code == 200:
-                data = response.json()
-                advances = data.get("transactions", []) if isinstance(data, dict) else data
-                
-                self.results["advances_count"] = len(advances)
-                self.results["advances_data"] = advances
-                
-                print(f"✅ Found {len(advances)} advances for Mohamed Mostafa")
-                
+            advances = []
+            
+            for endpoint in endpoints_to_try:
+                try:
+                    response = self.session.get(f"{BACKEND_URL}{endpoint}", timeout=30)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        print(f"✅ Successfully got data from {endpoint}")
+                        
+                        # Handle different response formats
+                        if isinstance(data, list):
+                            advances = data
+                        elif isinstance(data, dict):
+                            if "transactions" in data:
+                                advances = data["transactions"]
+                            elif "advances" in data:
+                                advances = data["advances"]
+                        
+                        # Filter for Mohamed Mostafa if we got all transactions
+                        if endpoint.endswith("all-transactions") and not endpoint.endswith(f"employee_id={self.mohamed_id}"):
+                            advances = [adv for adv in advances if adv.get("employee_id") == self.mohamed_id]
+                        
+                        if advances:
+                            break
+                            
+                except Exception as e:
+                    print(f"⚠️ Endpoint {endpoint} failed: {e}")
+                    continue
+            
+            self.results["advances_count"] = len(advances)
+            self.results["advances_data"] = advances
+            
+            print(f"✅ Found {len(advances)} advances for Mohamed Mostafa")
+            
+            if advances:
                 for i, advance in enumerate(advances, 1):
                     print(f"  Advance {i}:")
                     print(f"    - ID: {advance.get('id')}")
@@ -168,12 +197,10 @@ class AdvancesInstallmentsInvestigator:
                     print(f"    - Amount: {advance.get('amount')} AED")
                     print(f"    - Status: {advance.get('status')} ({advance.get('status_ar', '')})")
                     print(f"    - Created: {advance.get('created_at_display', advance.get('created_at'))}")
-                
-                return True
-                
             else:
-                print(f"❌ Failed to get advances: {response.status_code} - {response.text}")
-                return False
+                print("⚠️ No advances found for Mohamed Mostafa")
+            
+            return True
                 
         except Exception as e:
             print(f"❌ Error getting advances data: {e}")
