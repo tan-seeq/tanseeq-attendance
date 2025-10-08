@@ -1837,6 +1837,48 @@ async def edit_advance_transaction(
         "transaction_id": transaction_id
     }
 
+@api_router.delete("/advances/{transaction_id}")
+async def delete_advance_transaction(
+    transaction_id: str,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """حذف معاملة سلفة/عهدة (خاص بالسوبر أدمن فقط)"""
+    
+    # البحث عن المعاملة
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    # التأكد أن المعاملة لم تتم الموافقة عليها
+    if transaction.get("status") == "approved":
+        raise HTTPException(
+            status_code=400, 
+            detail="لا يمكن حذف معاملة تمت الموافقة عليها. يرجى استخدام خاصية 'التسوية' بدلاً من ذلك"
+        )
+    
+    # حذف المعاملة من قاعدة البيانات
+    result = await db.advance_transactions.delete_one({"id": transaction_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم الحذف")
+    
+    # إذا تم حذف معاملة معلقة، قد نحتاج لتحديث الرصيد
+    if transaction.get("status") != "pending":
+        await update_employee_balance(transaction['employee_id'])
+    
+    # إضافة سجل في النشاطات
+    await log_activity(
+        current_user.id,
+        "advance_deleted",
+        f"حذف معاملة {transaction.get('transaction_type_ar', 'غير محدد')} - {transaction.get('employee_name', 'غير محدد')} بمبلغ {transaction.get('amount', 0):.2f} درهم"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم حذف المعاملة بنجاح",
+        "transaction_id": transaction_id
+    }
+
 @api_router.post("/advances/settle-advance")
 async def settle_advance_with_salary(
     settlement_request: dict,
