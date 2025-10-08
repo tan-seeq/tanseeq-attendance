@@ -1,0 +1,87 @@
+[
+  {
+    "test": "Super Admin Login",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Authentication successful",
+    "timestamp": "2025-10-08T10:12:19.862602"
+  },
+  {
+    "test": "Regular User Login",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Authentication successful",
+    "timestamp": "2025-10-08T10:12:20.118691"
+  },
+  {
+    "test": "POST /api/payroll/cycles/{cycle_id}/recalculate (حساب الرواتب)",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Payroll recalculation endpoint",
+    "timestamp": "2025-10-08T10:12:20.192895",
+    "response_body_preview": "{'message': 'تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger', 'cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'employees_updated': 6, 'totals': {'gross': 20200.0, 'deductions': 900.0, 'net': 19300.0}}"
+  },
+  {
+    "test": "POST /api/payroll/cycles/{cycle_id}/lock (قفل الدورة)",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Cycle lock endpoint",
+    "timestamp": "2025-10-08T10:12:20.215289",
+    "response_body_preview": "{'message': 'تم قفل دورة الراتب بنجاح', 'lock_reason': 'اختبار قفل الدورة للمراجعة العربية'}"
+  },
+  {
+    "test": "POST /api/payroll/cycles/{cycle_id}/unlock (فتح الدورة)",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Cycle unlock endpoint",
+    "timestamp": "2025-10-08T10:12:20.239946",
+    "response_body_preview": "{'message': 'تم فتح دورة الراتب بنجاح', 'unlock_reason': 'اختبار فتح الدورة للمراجعة العربية'}"
+  },
+  {
+    "test": "GET /api/payroll/cycles/{cycle_id}/summary",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Required fields: True, Employee data: True",
+    "timestamp": "2025-10-08T10:12:20.269256",
+    "response_body_preview": "{'cycle': {'_id': '68e4bc1e9fc6f50b317e06ae', 'id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'month': '2025-12', 'year': 2025, 'display_name': 'دورة راتب ديسمبر 2025', 'start_date': '2025-12-01', 'end_date': '2025-12-31', 'cutoff_date': '2026-01-05', 'status': 'open', 'is_locked': False, 'total_employees': 6, 'total_gross_salary': 20200.0, 'total_allowances': 0.0, 'total_deductions': 900.0, 'total_net_salary': 19300.0, 'default_deduction_ceiling_type': 'percentage', 'default_deduction_ceiling_value': 0.33, 'created_by': 'admin_001', 'created_by_name': 'مدير النظام', 'created_at': '2025-10-07T07:07:10.540589', 'locked_by': None, 'locked_by_name': None, 'locked_at': None, 'lock_reason': None, 'finalized_by': None, 'finalized_by_name': None, 'finalized_at': None, 'notes': None, 'updated_at': '2025-10-08T08:23:52.673538+00:00', 'recalculated_at': '2025-10-08T10:12:20.148146+00:00', 'recalculated_by': 'admin_001'}, 'employee_summaries': [{'_id': '68e4bc1e3971a8eefe43a6a8', 'employee_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'employee_name': 'Jihad', 'payroll_cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'base_salary': 2700.0, 'total_allowances': 0, 'gross_salary': 2700.0, 'attendance_deductions': 0, 'manual_deductions': 0, 'advance_deductions': 700.0, 'leave_adjustments': 0, 'custody_adjustments': 0, 'total_deductions': 700.0, 'net_salary': 2000.0, 'ledger_entries_count': 2}, {'_id': '68e4bc1e3971a8eefe43a6ac', 'employee_id': '83da4c33-c9c2-42cd-9b82-dea36ff1f05d', 'employee_name': 'Tarek Wazzan', 'payroll_cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'base_salary': 4000.0, 'total_allowances': 0, 'gross_salary': 4000.0, 'attendance_deductions': 0, 'manual_deductions': 0, 'advance_deductions': 200.0, 'leave_adjustments': 0, 'custody_adjustments': 0, 'total_deductions': 200.0, 'net_salary': 3800.0, 'ledger_entries_count': 1}, {'_id': '68e4bc1e3971a8eefe43a6b0', 'employee_id': 'a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8', 'employee_name': 'Tarek Hegazy', 'payroll_cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'base_salary': 5000.0, 'total_allowances': 0, 'gross_salary': 5000.0, 'attendance_deductions': 0, 'manual_deductions': 0, 'advance_deductions': 0, 'leave_adjustments': 0, 'custody_adjustments': 0, 'total_deductions': 0, 'net_salary': 5000.0, 'ledger_entries_count': 0}, {'_id': '68e4bc1e3971a8eefe43a6b4', 'employee_id': '41a2f63a-a584-4a65-ae84-d7f0a98f5981', 'employee_name': 'Kareem', 'payroll_cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'base_salary': 2500.0, 'total_allowances': 0, 'gross_salary': 2500.0, 'attendance_deductions': 0, 'manual_deductions': 0, 'advance_deductions': 0, 'leave_adjustments': 0, 'custody_adjustments': 0, 'total_deductions': 0, 'net_salary': 2500.0, 'ledger_entries_count': 0}, {'_id': '68e4bc1e3971a8eefe43a6b8', 'employee_id': '16d4a924-ff1f-401c-b95e-9b57db963d42', 'employee_name': 'Hesham', 'payroll_cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'base_salary': 2500.0, 'total_allowances': 0, 'gross_salary': 2500.0, 'attendance_deductions': 0, 'manual_deductions': 0, 'advance_deductions': 0, 'leave_adjustments': 0, 'custody_adjustments': 0, 'total_deductions': 0, 'net_salary': 2500.0, 'ledger_entries_count': 0}, {'_id': '68e4bc1e3971a8eefe43a6bc', 'employee_id': '33d2d833-f414-4b0c-920d-35e3ca4f853c', 'employee_name': 'Mohamed Mostafa', 'payroll_cycle_id': '026ce2ba-4471-482c-ac03-dbb8353ac13f', 'base_salary': 3500.0, 'total_allowances': 0, 'gross_salary': 3500.0, 'attendance_deductions': 0, 'manual_deductions': 0, 'advance_deductions': 0, 'leave_adjustments': 0, 'custody_adjustments': 0, 'total_deductions': 0, 'net_salary': 3500.0, 'ledger_entries_count': 0}], 'total_employees': 6}"
+  },
+  {
+    "test": "POST /api/deductions/calculate-monthly?month=2025-01",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Monthly deductions calculation",
+    "timestamp": "2025-10-08T10:12:20.324587",
+    "response_body_preview": "{'success': True, 'month': '2025-01', 'employees': [], 'total_deductions': 0, 'employee_count': 0}"
+  },
+  {
+    "test": "GET /api/leaves/my (Regular User)",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "User's leave requests",
+    "timestamp": "2025-10-08T10:12:20.349493",
+    "response_body_preview": "[{'id': 'b32b2c10-b2e8-4e2c-8ba4-717d8df1ebf5', 'user_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'user_name': 'Jihad', 'start_date': '2025-03-10', 'end_date': '2025-03-12', 'reason': 'إجازة شخصية للاختبار', 'type': '', 'status': 'approved', 'days_count': 3, 'approved_by': 'Hatem Mohamed Ahmed', 'attachment_url': None, 'created_at': '2025-08-20T11:06:26.300000'}, {'id': '75df6e12-92c4-4cf5-bef5-6049b1a5ca36', 'user_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'user_name': 'Jihad', 'start_date': '2025-03-15', 'end_date': '2025-03-17', 'reason': 'إجازة مرضية للاختبار', 'type': '', 'status': 'approved', 'days_count': 3, 'approved_by': 'Hatem Mohamed', 'attachment_url': None, 'created_at': '2025-08-20T11:06:26.368000'}, {'id': '9d62ac6b-6b6a-4269-b690-ed875b622a69', 'user_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'user_name': 'Jihad', 'start_date': '2025-10-14', 'end_date': '2025-10-16', 'reason': 'إجازة اختبار من نظام QA', 'type': '', 'status': 'pending', 'days_count': 3, 'approved_by': None, 'attachment_url': None, 'created_at': '2025-10-07T06:01:13.593000'}, {'id': '2ae7e30c-89ff-47ac-a79d-2ed6c25f1552', 'user_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'user_name': 'Jihad', 'start_date': '2025-10-21', 'end_date': '2025-10-23', 'reason': 'إجازة اختبار فورم من نظام QA', 'type': '', 'status': 'pending', 'days_count': 3, 'approved_by': None, 'attachment_url': None, 'created_at': '2025-10-07T06:01:13.615000'}]"
+  },
+  {
+    "test": "GET /api/payroll/installment-schedules",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "Installment schedules retrieval",
+    "timestamp": "2025-10-08T10:12:20.371004",
+    "response_body_preview": "{'schedules': [{'id': '8f8022fb-957d-4dfd-8512-7575fd11750c', 'advance_transaction_id': '6c66b70c-faea-4200-80ec-efca94d496fb', 'employee_id': '83da4c33-c9c2-42cd-9b82-dea36ff1f05d', 'employee_name': 'Tarek Wazzan', 'total_amount': 1000.0, 'installment_amount': 200.0, 'number_of_installments': 5, 'current_installment': 1, 'completed_installments': 0, 'remaining_balance': 1000.0, 'start_date': '2025-10-07', 'scheduled_end_date': '2026-03-07', 'actual_end_date': None, 'is_active': True, 'is_completed': False, 'respect_deduction_ceiling': True, 'max_deduction_percentage': 0.33, 'created_by': 'admin_001', 'created_by_name': 'مدير النظام', 'created_at': '2025-10-07T09:32:56.378592', 'updated_by': None, 'updated_by_name': None, 'updated_at': None, 'is_cancelled': False, 'cancelled_by': None, 'cancelled_by_name': None, 'cancelled_at': None, 'cancellation_reason': None}, {'id': '6542e14c-cbe0-4c53-88d6-ab49bb9e276d', 'advance_transaction_id': 'edaa7cc6-ec5c-4005-b320-764913cd30a7', 'employee_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'employee_name': 'Jihad', 'total_amount': 2000.0, 'installment_amount': 200.0, 'number_of_installments': 10, 'current_installment': 1, 'completed_installments': 0, 'remaining_balance': 2000.0, 'start_date': '2025-11-06', 'scheduled_end_date': '2026-09-06', 'actual_end_date': None, 'is_active': True, 'is_completed': False, 'respect_deduction_ceiling': True, 'max_deduction_percentage': 0.33, 'created_by': 'hatem_tan_seeq_001', 'created_by_name': 'حاتم محمد', 'created_at': '2025-10-07T06:01:14.098862', 'updated_by': None, 'updated_by_name': None, 'updated_at': None, 'is_cancelled': False, 'cancelled_by': None, 'cancelled_by_name': None, 'cancelled_at': None, 'cancellation_reason': None}, {'id': '8f915f5c-da1e-49e9-88ed-87dd1e9a0396', 'advance_transaction_id': '350d234d-a854-49be-87a3-e6e95873a45b', 'employee_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'employee_name': 'Jihad', 'total_amount': 5000.0, 'installment_amount': 500.0, 'number_of_installments': 10, 'current_installment': 1, 'completed_installments': 0, 'remaining_balance': 5000.0, 'start_date': '2025-11-06', 'scheduled_end_date': '2026-09-06', 'actual_end_date': None, 'is_active': True, 'is_completed': False, 'respect_deduction_ceiling': True, 'max_deduction_percentage': 0.33, 'created_by': 'hatem_tan_seeq_001', 'created_by_name': 'حاتم محمد', 'created_at': '2025-10-07T03:36:10.923180', 'updated_by': None, 'updated_by_name': None, 'updated_at': None, 'is_cancelled': False, 'cancelled_by': None, 'cancelled_by_name': None, 'cancelled_at': None, 'cancellation_reason': None}]}"
+  },
+  {
+    "test": "GET Salary Letter (format=html)",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "HTML salary letter, Content-Type: text/html; charset=utf-8",
+    "timestamp": "2025-10-08T10:12:20.391199",
+    "response_body_preview": "\n            <!DOCTYPE html>\n            <html dir=\"rtl\" lang=\"ar\">\n            <head>\n                <meta charset=\"UTF-8\">\n                <meta name=\"viewport\" content=\"width=device-width, initial"
+  },
+  {
+    "test": "GET Salary Letter (format=pdf)",
+    "status_code": 200,
+    "result": "✅ Pass",
+    "details": "PDF salary letter, Content-Type: application/pdf, Size: 26690 bytes",
+    "timestamp": "2025-10-08T10:12:20.433021"
+  }
+]
