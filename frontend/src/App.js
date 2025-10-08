@@ -66,6 +66,7 @@ import NotificationModal from './components/NotificationModal';
 // Import Attendance Deductions Components
 import AttendanceDeductionsAdmin from './components/AttendanceDeductions/AttendanceDeductionsAdmin';
 import MyAttendanceDeductions from './components/AttendanceDeductions/MyAttendanceDeductions';
+import MonthlyDeductionsCalculator from './components/AttendanceDeductions/MonthlyDeductionsCalculator';
 
 // Import Integrated Payroll Components
 import PayrollCycleManagement from './components/IntegratedPayroll/PayrollCycleManagement';
