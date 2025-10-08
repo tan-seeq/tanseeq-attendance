@@ -3297,7 +3297,7 @@ const AppWithNotifications = () => {
             <Route path="/attendance-deductions" element={
               <ProtectedRoute>
                 <Layout>
-                  <AttendanceDeductionsAdmin />
+                  <MonthlyDeductionsCalculator />
                 </Layout>
               </ProtectedRoute>
             } />
