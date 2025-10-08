@@ -187,6 +187,77 @@ const AdminDashboard = () => {
     setShowTransactionModal(true);
   };
 
+  const openEditModal = (transaction) => {
+    setSelectedTransaction(transaction);
+    setEditForm({
+      amount: transaction.amount,
+      description: transaction.description,
+      notes: transaction.notes || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditTransaction = async (e) => {
+    e.preventDefault();
+    
+    if (!editForm.amount || parseFloat(editForm.amount) <= 0) {
+      alert('يرجى إدخال مبلغ صحيح');
+      return;
+    }
+    
+    if (!editForm.description || editForm.description.trim().length < 5) {
+      alert('يرجى إدخال وصف لا يقل عن 5 أحرف');
+      return;
+    }
+
+    try {
+      setEditing(true);
+      
+      await axios.put(`${API}/advances/${selectedTransaction.id}/edit`, {
+        amount: parseFloat(editForm.amount),
+        description: editForm.description,
+        notes: editForm.notes
+      });
+
+      alert('تم تعديل المعاملة بنجاح!');
+      setShowEditModal(false);
+      setSelectedTransaction(null);
+      setEditForm({ amount: '', description: '', notes: '' });
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Error editing transaction:', error);
+      const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || 'خطأ غير معروف';
+      alert(`حدث خطأ في تعديل المعاملة: ${errorMessage}`);
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  const handleDeleteTransaction = async (transactionId, transactionName) => {
+    const confirmDelete = window.confirm(
+      `هل أنت متأكد من حذف هذه المعاملة؟\n${transactionName}\n\nلا يمكن التراجع عن هذا الإجراء.`
+    );
+    
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      
+      await axios.delete(`${API}/advances/${transactionId}`);
+
+      alert('تم حذف المعاملة بنجاح!');
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.message || 'خطأ غير معروف';
+      alert(`حدث خطأ في حذف المعاملة: ${errorMessage}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const formatCurrency = (amount) => {
     return `${amount?.toFixed(2) || '0.00'} درهم`;
   };
