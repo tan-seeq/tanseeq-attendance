@@ -1,0 +1,50 @@
+[
+  {
+    "test": "Authentication",
+    "status": "PASS",
+    "details": "Successfully authenticated admin@tanseeq.com",
+    "timestamp": "2025-10-08T08:02:42.386340"
+  },
+  {
+    "test": "Verify October 2025 Cycle",
+    "status": "PASS",
+    "details": "Found cycle: 2025-10 (ID: e70625f9-f78e-4be3-b02e-1c51cdf5385e)",
+    "timestamp": "2025-10-08T08:02:42.401488"
+  },
+  {
+    "test": "Find Employee - Mohamed Mostafa",
+    "status": "PASS",
+    "details": "Found employee: Mohamed Mostafa (ID: 33d2d833-f414-4b0c-920d-35e3ca4f853c)",
+    "timestamp": "2025-10-08T08:02:42.415336"
+  },
+  {
+    "test": "HTML Salary Letter - Mohamed Mostafa",
+    "status": "PASS",
+    "details": "Generated successfully (4/5 checks passed). Content length: 7689 chars. Saved to: evidence/salary_letters/Mohamed_Mostafa_salary_letter.html",
+    "timestamp": "2025-10-08T08:02:42.433272"
+  },
+  {
+    "test": "PDF Salary Letter - Mohamed Mostafa",
+    "status": "PASS",
+    "details": "Generated successfully (4/4 checks passed). Content-Type: application/pdf, Size: 26707 bytes. Saved to: evidence/salary_letters/Mohamed_Mostafa_salary_letter.pdf",
+    "timestamp": "2025-10-08T08:02:42.473172"
+  },
+  {
+    "test": "Find Employee - Jihad",
+    "status": "PASS",
+    "details": "Found employee: Jihad (ID: eed6d28b-7639-4d31-9386-4e99b9179d8f)",
+    "timestamp": "2025-10-08T08:02:42.538023"
+  },
+  {
+    "test": "HTML Salary Letter - Jihad",
+    "status": "PASS",
+    "details": "Generated successfully (4/5 checks passed). Content length: 7670 chars. Saved to: evidence/salary_letters/Jihad_salary_letter.html",
+    "timestamp": "2025-10-08T08:02:42.554622"
+  },
+  {
+    "test": "Employee Data Differences",
+    "status": "PASS",
+    "details": "Confirmed that different employees have different salary letter content",
+    "timestamp": "2025-10-08T08:02:42.567578"
+  }
+]
