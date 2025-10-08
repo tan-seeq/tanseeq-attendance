@@ -54,6 +54,13 @@ const AdminDashboard = () => {
     notes: ''
   });
 
+  // Edit form
+  const [editForm, setEditForm] = useState({
+    amount: '',
+    description: '',
+    notes: ''
+  });
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
