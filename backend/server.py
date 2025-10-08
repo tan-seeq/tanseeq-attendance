@@ -4501,35 +4501,21 @@ async def generate_salary_letter(
         }
         
         if format == "pdf":
-            # إنشاء PDF
-            from fastapi.responses import Response
-            from reportlab.lib.pagesizes import A4
-            from reportlab.lib import colors
-            from reportlab.lib.units import cm
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.pdfbase import pdfmetrics
-            from reportlab.pdfbase.ttfonts import TTFont
-            from reportlab.lib.enums import TA_RIGHT, TA_CENTER
-            import io
+            # Generate PDF using English-only template (cleaner, no RTL issues)
+            from english_salary_letter_pdf import generate_english_salary_letter_pdf
             
-            # Create PDF buffer
-            buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+            pdf_content = generate_english_salary_letter_pdf(
+                letter_data,
+                attendance_deductions,
+                manual_deductions,
+                advance_installments
+            )
             
-            # Register Arabic font with proper RTL support
-            try:
-                # Try KacstOne first (better Arabic support)
-                pdfmetrics.registerFont(TTFont('ArabicFont', '/usr/share/fonts/truetype/kacst-one/KacstOne.ttf'))
-                arabic_font = 'ArabicFont'
-            except:
-                try:
-                    # Fallback to KacstFarsi
-                    pdfmetrics.registerFont(TTFont('ArabicFont', '/usr/share/fonts/truetype/kacst/KacstFarsi.ttf'))
-                    arabic_font = 'ArabicFont'
-                except:
-                    # Last fallback
-                    arabic_font = 'Helvetica'
+            return Response(
+                content=pdf_content,
+                media_type="application/pdf",
+                headers={"Content-Disposition": f"attachment; filename=salary_letter_{cycle_id}_{employee_id}.pdf"}
+            )
             
             # Create styles
             styles = getSampleStyleSheet()
