@@ -316,7 +316,7 @@ class ComprehensiveE2EBackendTester:
         token = self.tokens["super_admin"]
         
         # 3.1 Monthly Deductions
-        response = self.make_request("POST", "/deductions/calculate-monthly", token=token, params={"month": "2025-10"})
+        response = self.make_request("GET", "/deductions/calculate-monthly", token=token, params={"month": "2025-10"})
         if response.get("status_code") == 200:
             calc_data = response.get("data", {})
             if isinstance(calc_data, dict):
