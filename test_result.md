@@ -300,6 +300,21 @@ frontend:
         comment: "🎉 COMPREHENSIVE E2E FRONTEND TESTING COMPLETED - 95.2% SUCCESS RATE: Successfully conducted complete end-to-end testing of the TANSEEQ HR system with 20/21 tests passed. CRITICAL FINDINGS: 1) ✅ AUTHENTICATION SYSTEM: Both Super Admin (admin@tanseeq.com/ADMIN) and Regular User (jihad@tanseeq.com/jihad123) authentication working perfectly with proper Arabic RTL support and role-based access control 2) ✅ ALL MAJOR PAGES WORKING: Payroll Cycles Management (6 cycles with working 'عرض' buttons), Attendance Deductions System (month selector and calculate button present), Advances & Loans Admin (dashboard with statistics), Payroll Ledger, All Reports pages (Deductions, Advances, Attendance), Notifications System (169 notifications), Leave Management (table with data), Employee Management (employee records), Attendance Management (139 interactive buttons), Field Exit Management (187 buttons), Marketing Visits, Installment Schedules (2 tables), HR Analytics Dashboard 3) ✅ PAYROLL SUMMARY FUNCTIONALITY: Successfully accessed payroll summary pages via 'عرض' buttons, all required buttons working correctly (حساب الرواتب, قفل الدورة, تصدير PDF, تصدير Excel, عرض الرسالة, تحميل PDF), employee-specific buttons (12 found), proper Arabic content and RTL layout 4) ✅ ROLE-BASED ACCESS CONTROL: Super Admin has access to all 15 tested admin pages, Regular User properly restricted to 5 accessible pages (Dashboard, Attendance, Leaves, Field Exits, Marketing Visits) 5) ✅ ARABIC RTL SUPPORT: Excellent Arabic text rendering throughout all interfaces with proper right-to-left layout, Arabic navigation menu, Arabic button labels, Arabic content 6) ✅ NO CRITICAL ISSUES: No red error screens, no white blank pages, no broken links, all navigation working, sidebar scrolling functional 7) ⚠️ MINOR ISSUES: One JavaScript error in Advances Report component (toFixed undefined), some 403 API errors for regular user (expected behavior), one timeout on My Deductions page for regular user. CONCLUSION: The TANSEEQ HR system is fully operational with excellent functionality across all major features, perfect Arabic RTL support, and robust role-based access control. System is production-ready with 95.2% success rate."
 
 backend:
+  - task: "Phase 1: Ledger Idempotency + Source Type Unification + RBAC"
+    implemented: true
+    working: true
+    file: "server.py, payroll_ledger_service.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "المتطلب الأول: توحيد source_type (إزالة entry_type)، تعزيز idempotency في PayrollLedgerService مع race condition handling، تطبيق RBAC صارم على 5 endpoints حساسة (lock/unlock cycles، update employees، create installment schedules). هذه Phase 1 من الإصلاحات الشاملة."
+      - working: true
+        agent: "main"
+        comment: "✅ PHASE 1 COMPLETE: 1) Source Type Unification: تم توحيد جميع استخدامات entry_type → source_type في الكود (16 تعديل في server.py) + backfill migration لقاعدة البيانات (1 قيد متبقي). النتيجة: 56/56 قيد يستخدم source_type (100%). 2) Enhanced Idempotency: تم تعزيز PayrollLedgerService.create_entry() مع: atomic insert، race condition handling (duplicate key E11000)، enhanced logging، composite idempotency key (cycle_id + employee_id + source_type + source_id). 3) RBAC Implementation: تم استبدال manual role checks بـ get_super_admin_user dependency في 5 endpoints حساسة: /api/payroll/cycles/{cycle_id}/update-employees، /api/payroll/cycles/{cycle_id}/lock، /api/payroll/cycles/{cycle_id}/unlock، /api/advances/{advance_id}/installments، /api/payroll/installment-schedules. 4) Backend Status: ✅ Startup successful، zero errors، MongoDB connections established، Payroll engine initialized. التفاصيل الكاملة في: /app/PHASE_1_IMPLEMENTATION_REPORT.md. جاهز لـ Phase 2: Timezone Unification."
+
   - task: "Payroll Salary Edits Bug Investigation - Arabic Review"
     implemented: true
     working: true
