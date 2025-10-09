@@ -3740,11 +3740,14 @@ async def lock_payroll_cycle(
 async def unlock_payroll_cycle(
     cycle_id: str,
     unlock_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
-    """فتح دورة راتب مقفولة (سوبر أدمن فقط) - السبب إلزامي"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """
+    فتح دورة راتب مقفولة - Super Admin Only
+    Unlock locked payroll cycle - Reason is mandatory (15+ chars)
+    
+    🔒 RBAC: Restricted to Super Admin only - unlocking is a critical audit event
+    """
     
     try:
         global payroll_engine
