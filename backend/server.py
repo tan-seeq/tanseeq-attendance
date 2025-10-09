@@ -2696,8 +2696,9 @@ async def calculate_monthly_deductions(
                         )
             
             # 2. Calculate Absence Deductions (الغياب)
+            # ✅ Fixed: attendance table uses 'user_id' not 'employee_id'
             absence_records = await db.attendance.find({
-                "employee_id": employee_id,
+                "user_id": employee_id,
                 "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
                 "status": "absent"
             }).to_list(None)
