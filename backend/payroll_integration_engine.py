@@ -119,7 +119,7 @@ class PayrollIntegrationEngine:
                     "status": PayrollStatus.CLOSED,
                     "locked_by": locked_by,
                     "locked_by_name": locked_by_name,
-                    "locked_at": get_uae_now()  # UAE timezone.isoformat(),
+                    "locked_at": get_uae_now(),  # UAE timezone
                     "lock_reason": lock_reason
                 }
             }
