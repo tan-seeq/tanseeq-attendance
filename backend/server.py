@@ -3829,14 +3829,15 @@ async def get_payroll_ledger_entries(
 @app.post("/api/payroll/cycles/{cycle_id}/recalculate")
 async def recalculate_payroll_cycle_from_ledger(
     cycle_id: str,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
     """
-    🆕 إعادة حساب دورة الرواتب بناءً على Payroll Ledger
+    إعادة حساب دورة الرواتب بناءً على Payroll Ledger - Super Admin Only
+    Recalculate payroll cycle from ledger - Financial operation
+    
+    🔒 RBAC: Restricted to Super Admin only - recalculation affects salaries
     يحسب صافي الراتب تلقائياً من جميع القيود المحاسبية
     """
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
     
     try:
         from payroll_ledger_service import PayrollLedgerService
