@@ -108,8 +108,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 # Security
 security = HTTPBearer()
 
-# Create the main app
-app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
+# Create the main app (already created above)
+# app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 
 # Initialize Work Reports MongoDB collections on startup - DISABLED for performance
 # @app.on_event("startup")
