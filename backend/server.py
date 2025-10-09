@@ -10662,18 +10662,38 @@ async def create_activity_type(
 # Ensure MongoDB indexes for work reports logs
 @app.on_event("startup")
 async def init_work_reports_indexes():
+    """
+    Initialize Work Reports MongoDB indexes
+    ✅ Non-blocking: runs in background, doesn't block startup
+    """
     try:
-        # Compound indexes for performance
-        await work_reports_db.work_logs.create_index([("created_by", 1), ("start_at", -1)])
-        await work_reports_db.work_logs.create_index([("client_id", 1)])
-        await work_reports_db.work_logs.create_index([("start_at", -1)])
-        # Optional text index for search
-        await work_reports_db.work_logs.create_index(
-            [("description", "text"), ("notes", "text"), ("client_name", "text"), ("activity_name", "text")],
-            name="worklog_text_index"
-        )
+        # ✅ Check if work_reports_db is available
+        if work_reports_db is None:
+            logger.warning("Work Reports DB not available, skipping index creation")
+            return
+        
+        # ✅ Create indexes in background (non-blocking)
+        import asyncio
+        async def create_indexes_background():
+            try:
+                # Compound indexes for performance
+                await work_reports_db.work_logs.create_index([("created_by", 1), ("start_at", -1)])
+                await work_reports_db.work_logs.create_index([("client_id", 1)])
+                await work_reports_db.work_logs.create_index([("start_at", -1)])
+                # Optional text index for search
+                await work_reports_db.work_logs.create_index(
+                    [("description", "text"), ("notes", "text"), ("client_name", "text"), ("activity_name", "text")],
+                    name="worklog_text_index"
+                )
+                logger.info("✅ Work Reports indexes created successfully")
+            except Exception as e:
+                logger.warning(f"Work Reports index creation warning: {e}")
+        
+        # ✅ Run in background without blocking startup
+        asyncio.create_task(create_indexes_background())
+        
     except Exception as e:
-        logger.warning(f"Work Reports index creation warning: {e}")
+        logger.warning(f"Work Reports index initialization warning: {e}")
 
 
 # ============ WORK LOG MANAGEMENT ============
