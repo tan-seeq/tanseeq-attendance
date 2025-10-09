@@ -1284,8 +1284,7 @@ async def approve_transaction(
         "status": approval.status,
         "approved_by": current_user.id,
         "approved_at": to_iso_string_uae()  # UAE timezone,
-        "updated_at": to_iso_string_uae()  # UAE timezone
-    }
+        "updated_at": to_iso_string_uae()}  # UAE timezone
     
     if approval.status == TransactionStatus.REJECTED:
         update_data["rejection_reason"] = approval.notes or "لم يتم تحديد سبب"
@@ -1631,8 +1630,7 @@ async def complete_marketing_visit(
         "status": VisitStatus.COMPLETED,
         "report": report.dict(),
         "end_location": completion_request.gps_location.dict() if completion_request.gps_location else None,
-        "updated_at": to_iso_string_uae()  # UAE timezone
-    }
+        "updated_at": to_iso_string_uae()}  # UAE timezone
     
     await db.marketing_visits.update_one(
         {"id": visit_id},
@@ -2363,8 +2361,7 @@ async def void_deduction(
         "voided_by": current_user.id,
         "voided_by_name": current_user.name,
         "void_reason": void_data.get("void_reason", ""),
-        "voided_at": to_iso_string_uae()  # UAE timezone
-    }
+        "voided_at": to_iso_string_uae()}  # UAE timezone
     
     result = await db.payroll_deductions.update_one(
         {"id": deduction_id},
@@ -2412,8 +2409,7 @@ async def void_deduction_post(
         "voided_by": current_user.id,
         "voided_by_name": current_user.name,
         "void_reason": void_data.get("void_reason", ""),
-        "voided_at": to_iso_string_uae()  # UAE timezone
-    }
+        "voided_at": to_iso_string_uae()}  # UAE timezone
     
     result = await db.payroll_deductions.update_one(
         {"id": deduction_id},
@@ -2707,8 +2703,7 @@ async def apply_monthly_deductions(
                     "manual_deductions": 0,
                     "attendance_deductions": 0,
                     "advance_deductions": 0,
-                    "created_at": to_iso_string_uae()  # UAE timezone
-                }
+                    "created_at": to_iso_string_uae()}  # UAE timezone
                 await db.employee_payroll_summaries.insert_one(summary)
             
             # Update deductions
@@ -2716,8 +2711,7 @@ async def apply_monthly_deductions(
                 "attendance_deductions": late_deduction + absence_deduction,
                 "advance_deductions": advance_deduction,
                 "deduction_notes": "\n".join(deduction_details),
-                "updated_at": to_iso_string_uae()  # UAE timezone
-            }
+                "updated_at": to_iso_string_uae()}  # UAE timezone
             
             # Recalculate totals
             base_salary = summary.get("base_salary", 0)
@@ -2824,8 +2818,7 @@ async def apply_monthly_deductions(
             "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
             "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
             "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
-            "updated_at": to_iso_string_uae()  # UAE timezone
-        }
+            "updated_at": to_iso_string_uae()}  # UAE timezone
         
         await db.payroll_cycles.update_one(
             {"id": cycle_id},
@@ -2917,8 +2910,7 @@ async def acknowledge_notification(
         {"id": notification_id},
         {"$set": {
             "acknowledged_at": to_iso_string_uae()  # UAE timezone,
-            "read_at": to_iso_string_uae()  # UAE timezone
-        }}
+            "read_at": to_iso_string_uae()}}  # UAE timezone
     )
     
     return {
@@ -3143,8 +3135,7 @@ async def get_scheduler_status(
             "missing_checkout_deadline": "23:59 daily",
             "monthly_reset": "00:01 on 1st of each month"
         },
-        "last_check": to_iso_string_uae()  # UAE timezone
-    }
+        "last_check": to_iso_string_uae()}  # UAE timezone
 
 async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
     """إرسال إشعار للسوبر أدمن عند إكمال الزيارة"""
@@ -3417,8 +3408,7 @@ async def update_deduction(
             "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": f"Updated deduction {deduction_id}",
             "details": f"Updated fields: {', '.join(update_fields.keys())}",
-            "timestamp": to_iso_string_uae()  # UAE timezone
-        })
+            "timestamp": to_iso_string_uae()}  # UAE timezone)
         
         # Send notification if amount changed
         if "amount" in update_fields:
@@ -3432,8 +3422,7 @@ async def update_deduction(
                 "sender": current_user.name,
                 "is_read": False,
                 "sent_at": to_iso_string_uae()  # UAE timezone,
-                "created_at": to_iso_string_uae()  # UAE timezone
-            }
+                "created_at": to_iso_string_uae()}  # UAE timezone
             await db.notifications.insert_one(notification)
         
         return {"message": "Deduction updated successfully"}
@@ -3487,8 +3476,7 @@ async def void_deduction(
             "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": f"Voided deduction {deduction_id}",
             "details": f"Reason: {void_reason}",
-            "timestamp": to_iso_string_uae()  # UAE timezone
-        })
+            "timestamp": to_iso_string_uae()}  # UAE timezone)
         
         # Send notification
         notification = {
@@ -3501,8 +3489,7 @@ async def void_deduction(
             "sender": current_user.name,
             "is_read": False,
             "sent_at": to_iso_string_uae()  # UAE timezone,
-            "created_at": to_iso_string_uae()  # UAE timezone
-        }
+            "created_at": to_iso_string_uae()}  # UAE timezone
         await db.notifications.insert_one(notification)
         
         return {"message": "Deduction voided successfully"}
@@ -3612,8 +3599,7 @@ async def recompute_attendance(
             "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": "Recomputed attendance",
             "details": message,
-            "timestamp": to_iso_string_uae()  # UAE timezone
-        })
+            "timestamp": to_iso_string_uae()}  # UAE timezone)
         
         return {"message": message}
         
@@ -4057,8 +4043,7 @@ async def update_payroll_cycle_employees(
                 "manual_deductions": new_manual_ded,
                 "attendance_deductions": emp_data.get("attendance_deductions", 0),
                 "advance_deductions": emp_data.get("advance_deductions", 0),
-                "updated_at": to_iso_string_uae()  # UAE timezone
-            }
+                "updated_at": to_iso_string_uae()}  # UAE timezone
             
             # Recalculate totals
             base_salary = update_fields["base_salary"]
@@ -4120,8 +4105,7 @@ async def update_payroll_cycle_employees(
             "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
             "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
             "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
-            "updated_at": to_iso_string_uae()  # UAE timezone
-        }
+            "updated_at": to_iso_string_uae()}  # UAE timezone
         
         await db.payroll_cycles.update_one(
             {"id": cycle_id},
@@ -5067,8 +5051,7 @@ async def create_notification(
             "sender": current_user.name,
             "is_read": False,
             "sent_at": to_iso_string_uae()  # UAE timezone,
-            "created_at": to_iso_string_uae()  # UAE timezone
-        }
+            "created_at": to_iso_string_uae()}  # UAE timezone
         
         await db.notifications.insert_one(notification)
         
@@ -5169,7 +5152,7 @@ async def mark_all_notifications_read(current_user: User = Depends(get_current_u
                 ],
                 "is_read": False
             },
-            {"$set": {"is_read": True, "read_at": to_iso_string_uae()  # UAE timezone}}
+            {"$set": {"is_read": True, "read_at": to_iso_string_uae()}}  # UAE timezone
         )
         
         return {
@@ -5857,8 +5840,7 @@ async def delete_absence_record(attendance_id: str, current_user: User = Depends
             "user_id": current_user.id,
             "user_name": current_user.name,
             "action": f"Deleted absence record for {attendance.get('user_name')} on {attendance.get('date')}",
-            "timestamp": to_iso_string_uae()  # UAE timezone
-        })
+            "timestamp": to_iso_string_uae()}  # UAE timezone)
         
         return {"message": "Absence record deleted successfully"}
         
@@ -5894,8 +5876,7 @@ async def delete_attendance_record(attendance_id: str, current_user: User = Depe
             "user_name": current_user.name,
             "action": f"Deleted attendance record",
             "details": f"Employee: {employee_name}, Date: {date}, Status: {status}",
-            "timestamp": to_iso_string_uae()  # UAE timezone
-        })
+            "timestamp": to_iso_string_uae()}  # UAE timezone)
         
         return {
             "message": "Attendance record deleted successfully",
