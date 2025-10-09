@@ -114,7 +114,7 @@ async def ensure_test_super_admin():
         admin_email = "admin@tanseeq.com"
         existing = await db.users.find_one({"email": admin_email})
         if not existing:
-            now = datetime.utcnow()
+            now = get_uae_now()  # UAE timezone
             test_user = {
                 "id": str(uuid.uuid4()),
                 "name": "Admin QA",
