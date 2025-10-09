@@ -4107,11 +4107,12 @@ async def update_payroll_cycle_employees(
                 
                 # Create new ledger entry if new amount > 0
                 if new_manual_ded > 0:
+                    from uae_datetime_utils import get_uae_now
                     await ledger_service.create_entry(
                         employee_id=employee_id,
                         cycle_id=cycle_id,
                         source_type="MANUAL_DEDUCTION",
-                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{datetime.now(timezone.utc).timestamp()}",
+                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{get_uae_now().timestamp()}",  # ✅ UAE timezone
                         amount=-new_manual_ded,  # Negative for deduction
                         description=f"خصم يدوي تم تعديله بواسطة الإدارة - {new_manual_ded:.2f} درهم",
                         created_by=current_user.id
