@@ -37,27 +37,33 @@ class PayrollLedgerService:
         amount: float,
         description: str,
         created_by: str,
+        description_ar: str = "",
         metadata: Optional[Dict] = None
     ) -> Dict:
         """
-        إنشاء قيد محاسبي جديد
+        إنشاء قيد جديد في دفتر الأستاذ مع ضمان Strict Idempotency
+        Create new ledger entry with strict idempotency guarantee
         
-        Idempotency: يستخدم مفتاح مركب لمنع التكرار
+        Idempotency Strategy:
+        - Uses composite key: cycle_id + employee_id + source_type + source_id
+        - Returns existing entry if duplicate detected (no exception)
+        - Atomic upsert operation to prevent race conditions
         """
+        # إنشاء مفتاح فريد للتأكد من عدم التكرار
+        idempotency_key = f"{cycle_id}_{employee_id}_{source_type}_{source_id}"
         
-        # Idempotency key
-        idempotency_key = f"{employee_id}_{cycle_id}_{source_type}_{source_id}"
-        
-        # التحقق من عدم وجود قيد مكرر
-        existing = await self.ledger_collection.find_one({
-            "idempotency_key": idempotency_key,
-            "is_reversed": False
-        })
+        # التحقق من وجود القيد مسبقاً (idempotency check)
+        existing = await self.ledger_collection.find_one(
+            {"idempotency_key": idempotency_key},
+            {"_id": 0}  # Exclude MongoDB _id
+        )
         
         if existing:
-            return existing  # Idempotent - إرجاع القيد الموجود
+            # القيد موجود مسبقاً - إرجاعه مباشرة (idempotent)
+            logger.info(f"Idempotency: Entry already exists for key {idempotency_key[:50]}...")
+            return existing
         
-        # إنشاء القيد
+        # إنشاء القيد الجديد
         entry = {
             "id": str(uuid.uuid4()),
             "idempotency_key": idempotency_key,
@@ -65,9 +71,9 @@ class PayrollLedgerService:
             "cycle_id": cycle_id,
             "source_type": source_type,
             "source_id": source_id,
-            "amount": amount,  # موجب = إضافة، سالب = خصم
+            "amount": amount,
             "description": description,
-            "description_ar": description,
+            "description_ar": description_ar or description,
             "metadata": metadata or {},
             "created_by": created_by,
             "created_at": to_iso_string_uae(),
@@ -77,7 +83,26 @@ class PayrollLedgerService:
             "reversal_reason": None
         }
         
-        await self.ledger_collection.insert_one(entry)
+        try:
+            # Atomic insert with duplicate key handling
+            await self.ledger_collection.insert_one(entry)
+            logger.info(f"Created ledger entry: {entry['id']} for {source_type}")
+        except Exception as e:
+            # Handle potential race condition (duplicate key error)
+            if "duplicate" in str(e).lower() or "E11000" in str(e):
+                logger.warning(f"Race condition detected for {idempotency_key[:50]}... - fetching existing")
+                existing = await self.ledger_collection.find_one(
+                    {"idempotency_key": idempotency_key},
+                    {"_id": 0}
+                )
+                if existing:
+                    return existing
+            raise  # Re-raise if not a duplicate key error
+        
+        # إزالة _id من MongoDB للتسهيل
+        if "_id" in entry:
+            del entry["_id"]
+        
         return entry
     
     async def reverse_entry(
