@@ -4523,12 +4523,16 @@ async def generate_salary_letter(
                             }
         
         # إعداد البيانات للقالب
-        from uae_datetime_utils import get_uae_date_str
+        from uae_datetime_utils import format_uae_date_dmy, get_uae_today
+        
+        # ✅ تنسيق التواريخ بصيغة dd/MM/yyyy (Gregorian)
+        statement_date_dmy = format_uae_date_dmy()  # Today in dd/MM/yyyy
+        
         letter_data = {
-            "statement_date": get_uae_date_str(),  # التاريخ الميلادي بتوقيت الإمارات
+            "statement_date": statement_date_dmy,  # ✅ dd/MM/yyyy Asia/Dubai
             "employee_name": employee.get("name", ""),
             "employee_code": employee.get("id", "")[:8],
-            "period_label": f"{cycle.get('month', '')}",
+            "period_label": f"{cycle.get('month', '')} {cycle.get('year', '')}",
             "base_salary": f"{base_salary:,.2f}",
             "daily_rate": f"{daily_rate:,.4f}",
             "hourly_rate": f"{hourly_rate:,.4f}",
