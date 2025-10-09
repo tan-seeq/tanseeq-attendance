@@ -8669,8 +8669,10 @@ async def get_backup_stats(current_user: User = Depends(get_super_admin_user)):
         from pathlib import Path
         import os
         
-        BACKUP_DIR = "/app/backups"
-        Path(BACKUP_DIR).mkdir(exist_ok=True)
+        # ✅ Use ROOT_DIR for deployment compatibility
+        ROOT_DIR = Path(__file__).parent.parent
+        BACKUP_DIR = ROOT_DIR / "backups"
+        BACKUP_DIR.mkdir(exist_ok=True)
         
         # Count backup files
         backup_files = list(Path(BACKUP_DIR).glob("backup_*.zip"))
