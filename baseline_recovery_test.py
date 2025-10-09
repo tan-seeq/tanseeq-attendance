@@ -176,7 +176,12 @@ class BaselineRecoveryTester:
             self.log_test("Get Payroll Cycles for Update", "FAIL", f"Status {status}: {cycles_data}")
             return
         
-        cycles = cycles_data.get("cycles", [])
+        # Handle both list and dict responses
+        if isinstance(cycles_data, list):
+            cycles = cycles_data
+        else:
+            cycles = cycles_data.get("cycles", [])
+            
         if not cycles:
             self.log_test("Get Payroll Cycles for Update", "FAIL", "No payroll cycles found")
             return
