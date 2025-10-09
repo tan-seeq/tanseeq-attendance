@@ -1964,7 +1964,7 @@ async def set_expense_deduction_source(
         {"$set": {
             "deduction_source": deduction_source,
             "deduction_source_ar": "سلفة" if deduction_source == "advance" else "عهدة",
-            "updated_at": to_iso_string_uae()  # ✅ UAE timezone,
+            "updated_at": to_iso_string_uae(),  # ✅ UAE timezone
             "updated_by": current_user.id
         }}
     )
