@@ -72,10 +72,33 @@ from report_generator import report_generator
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# MongoDB connection - lazy initialization for deployment safety
+app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
+
+@app.on_event("startup")
+async def _init_db_if_needed():
+    import os
+    from motor.motor_asyncio import AsyncIOMotorClient
+    mongo_url = os.environ.get('MONGO_URL')
+    db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
+    if not mongo_url:
+        raise RuntimeError("MONGO_URL is required")
+    if not hasattr(app.state, 'db') or app.state.db is None:
+        # Non-blocking client creation; connection tested on first query
+        client = AsyncIOMotorClient(
+            mongo_url,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
+            socketTimeoutMS=5000,
+            maxPoolSize=10,
+            minPoolSize=1,
+        )
+        app.state.db = client[db_name]
+
+# Backwards compatibility: accessor
+@property
+def db():
+    return app.state.db
 
 # JWT Configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here')
