@@ -960,7 +960,7 @@ async def create_advance_or_custody(
         expense_date=request.expense_date,
         status=TransactionStatus.APPROVED,  # تلقائياً معتمد من السوبر أدمن
         approved_by=current_user.id,
-        approved_at=get_uae_now()  # UAE timezone,
+        approved_at=get_uae_now(),  # UAE timezone
         notes=request.notes
     )
     
