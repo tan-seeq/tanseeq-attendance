@@ -9,7 +9,7 @@ from datetime import datetime
 import sys
 
 # Configuration
-BACKEND_URL = "https://tanseeq-payroll-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://tanseeq-hr-fix.preview.emergentagent.com/api"
 SUPER_ADMIN_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

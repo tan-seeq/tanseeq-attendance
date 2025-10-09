@@ -37,7 +37,7 @@ def test_login(email, password, base_url):
         return False, None
 
 if __name__ == "__main__":
-    backend_url = "https://tanseeq-payroll-1.preview.emergentagent.com"
+    backend_url = "https://tanseeq-hr-fix.preview.emergentagent.com"
     
     print("🔍 Testing different login credentials...")
     print("=" * 50)

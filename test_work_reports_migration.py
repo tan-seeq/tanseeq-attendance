@@ -227,9 +227,9 @@ if __name__ == "__main__":
                     backend_url = line.split('=', 1)[1].strip()
                     break
         else:
-            backend_url = "https://tanseeq-payroll-1.preview.emergentagent.com"
+            backend_url = "https://tanseeq-hr-fix.preview.emergentagent.com"
     except:
-        backend_url = "https://tanseeq-payroll-1.preview.emergentagent.com"
+        backend_url = "https://tanseeq-hr-fix.preview.emergentagent.com"
     
     tester = WorkReportsMigrationTester(backend_url)
     success = tester.run_migration_tests()
