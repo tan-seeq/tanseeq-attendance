@@ -15,6 +15,7 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, validator
 from enum import Enum
 import uuid
+from uae_datetime_utils import get_uae_now
 
 # Transaction Types
 class TransactionType(str, Enum):
