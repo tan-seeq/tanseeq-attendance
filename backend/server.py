@@ -4046,7 +4046,7 @@ async def update_payroll_cycle_employees(
             
             # Get current values to compare
             current_summary = await db.employee_payroll_summaries.find_one({
-                "payroll_cycle_id": cycle_id,
+                "cycle_id": cycle_id,  # ✅ استخدام cycle_id بدلاً من payroll_cycle_id
                 "employee_id": employee_id
             })
             
