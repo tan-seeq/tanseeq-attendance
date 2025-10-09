@@ -11851,28 +11851,6 @@ from salary_letter_router import build_salary_letter_router
 salary_router = build_salary_letter_router(get_current_user)
 app.include_router(salary_router)
 
-                ]
-            }
-            pd.DataFrame(summary_data).to_excel(writer, sheet_name='Summary', index=False)
-        
-        excel_buffer.seek(0)
-        
-        log_work_reports_activity(
-            db, current_user.id, current_user.name, "export_excel",
-            after_value={"records_count": len(work_logs)}
-        )
-        
-        filename = f"work_logs_export_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
-        
-        return Response(
-            content=excel_buffer.getvalue(),
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
-        )
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Excel export failed: {str(e)}")
-
 # Include the router in the main app
 app.include_router(api_router)
 
