@@ -18,14 +18,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # MongoDB connection - Use same connection as main system
+# ✅ Get MONGO_URL from environment (required in production)
 mongo_url = os.environ.get('MONGO_URL')
+
+# ✅ Raise error if MONGO_URL is missing (fail fast, not silent timeout)
 if not mongo_url:
-    print("Warning: MONGO_URL environment variable not set for Work Reports")
-    # Use a dummy connection that won't fail startup
-    mongo_url = "mongodb://localhost:27017"
+    raise ValueError(
+        "MONGO_URL environment variable is required for Work Reports. "
+        "Please set MONGO_URL in your environment configuration."
+    )
 
 try:
     # Create MongoDB client with connection pooling and timeout settings
+    # ✅ Non-blocking client creation (actual connection happens on first query)
     client = AsyncIOMotorClient(
         mongo_url,
         serverSelectionTimeoutMS=5000,  # 5 second timeout
@@ -34,12 +39,18 @@ try:
         maxPoolSize=10,
         minPoolSize=1
     )
-    work_reports_db = client[f"{os.environ.get('DB_NAME', 'tanseeq_hr')}_work_reports"]
-    print("Work Reports MongoDB client initialized successfully")
+    
+    # ✅ Get database name from environment
+    db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
+    work_reports_db = client[f"{db_name}_work_reports"]
+    
+    # ✅ Success message (connection will be tested on first actual query)
+    print(f"✅ Work Reports MongoDB client initialized successfully (database: {db_name}_work_reports)")
+    
 except Exception as e:
-    print(f"Warning: Work Reports MongoDB initialization failed: {e}")
-    # Create a mock database that won't break the app
-    work_reports_db = None
+    # ✅ Log error and re-raise (fail fast, not silent)
+    print(f"❌ CRITICAL: Work Reports MongoDB initialization failed: {e}")
+    raise
 
 # Encryption key for client credentials 
 ENCRYPTION_KEY = os.environ.get('WORK_REPORTS_ENCRYPTION_KEY', 
