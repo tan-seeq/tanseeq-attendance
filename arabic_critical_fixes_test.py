@@ -298,7 +298,12 @@ class ArabicReviewTester:
                 
                 if response.status == 200:
                     data = await response.json()
-                    cycles = data.get("cycles", [])
+                    # Handle both list and dict responses
+                    if isinstance(data, list):
+                        cycles = data
+                    else:
+                        cycles = data.get("cycles", [])
+                    
                     self.log_test(
                         "Payroll Cycles Retrieval", 
                         "PASS", 
@@ -307,8 +312,8 @@ class ArabicReviewTester:
                     )
                     
                     # Test getting details of first cycle if available
-                    if cycles:
-                        cycle_id = cycles[0].get("id")
+                    if cycles and len(cycles) > 0:
+                        cycle_id = cycles[0].get("id") if isinstance(cycles[0], dict) else None
                         if cycle_id:
                             await self.test_payroll_cycle_details(cycle_id)
                     
