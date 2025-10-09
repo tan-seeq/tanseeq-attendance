@@ -1,11 +1,53 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form, Response, Query, Request
+# ========================================
+# CRITICAL: FastAPI app + health endpoints FIRST
+# ========================================
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+
+# Load environment variables EARLY
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+# Define app EARLY (before any DB-related imports)
+app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
+
+# ========================================
+# HEALTH ENDPOINTS (No DB dependency)
+# ========================================
+
+@app.get("/api/healthz")
+async def healthz():
+    """Fast health check - no DB required"""
+    return {"status": "ok"}
+
+@app.get("/api/readyz")
+async def readyz():
+    """Readiness check - tests DB connectivity"""
+    try:
+        from backend.db_client import get_db
+        db = get_db()
+        await db.command("ping")  # يفشل بسرعة لو Atlas مش جاهز
+        return {"status": "ready"}
+    except Exception as e:
+        return JSONResponse({"status": "not_ready", "error": str(e)}, status_code=503)
+
+@app.get("/")
+async def root():
+    """Root endpoint for LB checks"""
+    return {"ok": True}
+
+# ========================================
+# NOW safe to import heavy modules
+# ========================================
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, Form, Response, Query, Request
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 import pyotp
@@ -18,19 +60,17 @@ from uae_datetime_utils import (
     get_uae_datetime_str, to_iso_string_uae, UAE_TZ
 )
 from jose import JWTError, jwt
-import os
 import logging
 import uuid
 import bcrypt
 import pytz
 import shutil
-from pathlib import Path
 import requests
 import openpyxl
 import json
 import calendar
 
-# Import Work Reports Database Module - MongoDB version
+# Import Work Reports Database Module - MongoDB version (now lazy)
 from work_reports_mongo import (
     get_work_reports_db, init_work_reports_collections, init_default_activity_types,
     Client, ClientCredential, ActivityType, WorkLog, WorkReportsAuditLog,
@@ -40,7 +80,7 @@ from work_reports_mongo import (
     ActivityTypeCreate, ActivityTypeResponse,
     WorkLogCreate, WorkLogUpdate, WorkLogResponse,
     UserPermissionResponse, PermissionUpdateRequest,
-    credential_encryption, log_work_reports_activity, work_reports_db
+    credential_encryption, log_work_reports_activity
 )
 
 # Notification Model
@@ -67,40 +107,22 @@ class SendNotificationRequest(BaseModel):
 from sqlalchemy.orm import Session
 from report_generator import report_generator
 
-# Load environment variables
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# ========================================
+# Lazy DB initialization (using db_client.py)
+# ========================================
+from backend.db_client import get_db, get_client
 
-# MongoDB connection - lazy initialization for deployment safety
-app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
-
-@app.on_event("startup")
-async def _init_db_if_needed():
-    import os
-    mongo_url = os.environ.get('MONGO_URL')
-    db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
-    if not mongo_url:
-        raise RuntimeError("MONGO_URL is required")
-    if not hasattr(app.state, 'db') or app.state.db is None:
-        # Non-blocking client creation; connection tested on first query
-        client = AsyncIOMotorClient(
-            mongo_url,
-            serverSelectionTimeoutMS=5000,
-            connectTimeoutMS=5000,
-            socketTimeoutMS=5000,
-            maxPoolSize=10,
-            minPoolSize=1,
-        )
-        app.state.db = client[db_name]
-        app.state.mongo_client = client
-        # set module-level globals for backward compatibility
-        global db, mongo_client
-        db = app.state.db
-        mongo_client = client
-
-# Global DB handles (set on startup)
+# Global DB handles (lazy - set on first access)
 db = None
 mongo_client = None
+
+def _ensure_db():
+    """Ensure DB is initialized (lazy)"""
+    global db, mongo_client
+    if db is None:
+        db = get_db()
+        mongo_client = get_client()
+    return db
 
 # JWT Configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here')
@@ -109,9 +131,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Security
 security = HTTPBearer()
-
-# Create the main app (already created above)
-# app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 
 # Initialize Work Reports MongoDB collections on startup - DISABLED for performance
 # @app.on_event("startup")
