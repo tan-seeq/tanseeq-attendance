@@ -11861,25 +11861,7 @@ async def export_work_logs_excel(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Excel export failed: {str(e)}")
 
-# ---- Health router ----
-health_router = APIRouter(prefix="/api")
-
-@health_router.get("/healthz")
-async def healthz(request: Request):
-    try:
-        _db = getattr(request.app.state, "db", None)
-        if _db is None:
-            return {"status": "starting", "db": "not_initialized"}
-        import asyncio
-        try:
-            await asyncio.wait_for(_db.command("ping"), timeout=1.0)
-            return {"status": "ok"}
-        except Exception:
-            return {"status": "degraded", "db": "unreachable"}
-    except Exception:
-        return {"status": "error"}
-
-app.include_router(health_router)
+# ---- Health endpoints already defined at top of file ----
 
 # ---- Salary letter router inclusion (order-safe) ----
 from salary_letter_router import build_salary_letter_router
