@@ -383,6 +383,9 @@ async def log_work_reports_activity(user_id: str, action_type: str, details: str
                                   target_id: Optional[str] = None, before_value: Optional[str] = None, 
                                   after_value: Optional[str] = None):
     """Log work reports audit activity"""
+    # ✅ Use lazy initialization
+    db = _ensure_work_reports_db()
+    
     audit_log = {
         "id": str(uuid.uuid4()),
         "user_id": user_id,
@@ -395,7 +398,7 @@ async def log_work_reports_activity(user_id: str, action_type: str, details: str
         "ip_address": None  # Can be enhanced later
     }
     
-    await work_reports_db.audit_logs.insert_one(audit_log)
+    await db.audit_logs.insert_one(audit_log)
     return audit_log["id"]
 
 # Backward compatibility - keep old function names
