@@ -1964,7 +1964,7 @@ async def set_expense_deduction_source(
         {"$set": {
             "deduction_source": deduction_source,
             "deduction_source_ar": "سلفة" if deduction_source == "advance" else "عهدة",
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": to_iso_string_uae()  # ✅ UAE timezone,
             "updated_by": current_user.id
         }}
     )
@@ -2716,7 +2716,7 @@ async def apply_monthly_deductions(
                 "attendance_deductions": late_deduction + absence_deduction,
                 "advance_deductions": advance_deduction,
                 "deduction_notes": "\n".join(deduction_details),
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": to_iso_string_uae()  # ✅ UAE timezone
             }
             
             # Recalculate totals
@@ -2824,7 +2824,7 @@ async def apply_monthly_deductions(
             "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
             "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
             "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
-            "updated_at": datetime.now(timezone.utc).isoformat()
+            "updated_at": to_iso_string_uae()  # ✅ UAE timezone
         }
         
         await db.payroll_cycles.update_one(
@@ -4129,7 +4129,7 @@ async def update_payroll_cycle_employees(
             "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
             "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
             "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
-            "updated_at": datetime.now(timezone.utc).isoformat()
+            "updated_at": to_iso_string_uae()  # ✅ UAE timezone
         }
         
         await db.payroll_cycles.update_one(
