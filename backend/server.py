@@ -112,17 +112,34 @@ from report_generator import report_generator
 # ========================================
 from backend.db_client import get_db, get_client
 
-# Global DB handles (lazy - set on first access)
-db = None
-mongo_client = None
+# Create a proxy class that initializes DB on first access
+class LazyDB:
+    """Lazy DB proxy that initializes MongoDB connection on first attribute access"""
+    def __init__(self):
+        self._db = None
+        self._client = None
+    
+    def __getattr__(self, name):
+        if self._db is None:
+            self._db = get_db()
+            self._client = get_client()
+        return getattr(self._db, name)
+    
+    def __bool__(self):
+        # Make sure truthiness works
+        return True
+
+# Use lazy proxy for global db
+db = LazyDB()
+mongo_client = None  # Will be set on first DB access
 
 def _ensure_db():
-    """Ensure DB is initialized (lazy)"""
-    global db, mongo_client
-    if db is None:
-        db = get_db()
+    """Ensure DB is initialized (lazy) - returns the underlying DB"""
+    if not hasattr(db, '_db') or db._db is None:
+        db._db = get_db()
+        global mongo_client
         mongo_client = get_client()
-    return db
+    return db._db
 
 # JWT Configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here')
