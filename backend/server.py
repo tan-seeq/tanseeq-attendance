@@ -3272,11 +3272,14 @@ async def get_employees_list(current_user: User = Depends(get_current_user)):
 @app.post("/api/deductions/manual")
 async def create_manual_deduction(
     deduction_data: dict,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
-    """Create manual deduction (Super Admin only)"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """
+    إنشاء خصم يدوي - Super Admin Only
+    Create manual deduction - Financial operation
+    
+    🔒 RBAC: Restricted to Super Admin only - manual deductions affect salaries
+    """
     
     try:
         global attendance_engine
