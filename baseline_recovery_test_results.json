@@ -11,79 +11,79 @@
       "test_name": "Authentication (super_admin)",
       "status": "PASS",
       "details": "Successfully authenticated as hatem@tan-seeq.co",
-      "timestamp": "2025-10-09T05:39:21.644440",
+      "timestamp": "2025-10-09T05:39:45.529191",
       "response_data": null
     },
     {
       "test_name": "Get Payroll Cycles",
       "status": "PASS",
       "details": "Found 6 cycles, testing with cycle 026ce2ba-4471-482c-ac03-dbb8353ac13f",
-      "timestamp": "2025-10-09T05:39:21.660596",
+      "timestamp": "2025-10-09T05:39:45.543384",
       "response_data": null
     },
     {
       "test_name": "Payroll Ledger Endpoint",
       "status": "PASS",
       "details": "Status 200, 17 entries, summary types: ['ADVANCE_INSTALLMENT', 'MANUAL_DEDUCTION']",
-      "timestamp": "2025-10-09T05:39:21.676551",
+      "timestamp": "2025-10-09T05:39:45.561241",
       "response_data": null
     },
     {
       "test_name": "Payroll Update Employees",
       "status": "FAIL",
       "details": "Status 500: {'detail': 'Error updating employees: can only concatenate list (not \"int\") to list'}",
-      "timestamp": "2025-10-09T05:39:21.757919",
+      "timestamp": "2025-10-09T05:39:45.632177",
       "response_data": null
     },
     {
       "test_name": "Authentication (user)",
       "status": "PASS",
       "details": "Successfully authenticated as jihad@tanseeq.com",
-      "timestamp": "2025-10-09T05:39:22.003539",
+      "timestamp": "2025-10-09T05:39:45.879075",
       "response_data": null
     },
     {
       "test_name": "Installments RBAC (User)",
       "status": "PASS",
       "details": "Regular user correctly denied access (403)",
-      "timestamp": "2025-10-09T05:39:22.055544",
+      "timestamp": "2025-10-09T05:39:45.887385",
       "response_data": null
     },
     {
       "test_name": "Installments Validation",
       "status": "FAIL",
       "details": "Expected 400/422, got 500: {'detail': 'Error creating installment schedule: 400: \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0645\u0637\u0644\u0648\u0628\u0629'}",
-      "timestamp": "2025-10-09T05:39:22.126542",
+      "timestamp": "2025-10-09T05:39:45.912455",
       "response_data": null
     },
     {
       "test_name": "Installments Creation",
-      "status": "PASS",
-      "details": "Valid installment schedule created (200)",
-      "timestamp": "2025-10-09T05:39:22.159873",
+      "status": "FAIL",
+      "details": "Status 400: {'detail': '\u064a\u0648\u062c\u062f \u062c\u062f\u0648\u0644\u0629 \u0623\u0642\u0633\u0627\u0637 \u0646\u0634\u0637\u0629 \u0644\u0647\u0630\u0647 \u0627\u0644\u0633\u0644\u0641\u0629'}",
+      "timestamp": "2025-10-09T05:39:45.926059",
       "response_data": null
     },
     {
       "test_name": "Salary Letter HTML",
       "status": "FAIL",
       "details": "Status 500: {'detail': \"Error generating salary letter: '\\\\n            font-family'\"}",
-      "timestamp": "2025-10-09T05:39:22.242547",
+      "timestamp": "2025-10-09T05:39:45.966186",
       "response_data": null
     },
     {
       "test_name": "Salary Letter PDF",
       "status": "FAIL",
       "details": "Status 0: 'utf-8' codec can't decode byte 0x93 in position 10: invalid start byte",
-      "timestamp": "2025-10-09T05:39:22.264124",
+      "timestamp": "2025-10-09T05:39:45.987528",
       "response_data": null
     },
     {
-      "test_name": "Timezone Verification",
-      "status": "FAIL",
-      "details": "No +04:00 timezone found in any timestamp fields",
-      "timestamp": "2025-10-09T05:39:22.328923",
+      "test_name": "Timezone Check (/advances/admin/all-transactions)",
+      "status": "PASS",
+      "details": "Found timezone info in created_at: 2025-10-08T11:10:07.646721+00:00",
+      "timestamp": "2025-10-09T05:39:46.014647",
       "response_data": null
     }
   ],
-  "timestamp": "2025-10-09T05:39:22.329240"
+  "timestamp": "2025-10-09T05:39:46.014874"
 }
