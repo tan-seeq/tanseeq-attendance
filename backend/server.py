@@ -4143,11 +4143,14 @@ async def update_payroll_cycle_employees(
 async def create_installment_schedule(
     advance_id: str,
     schedule_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
-    """إنشاء جدولة أقساط للسلفة (سوبر أدمن فقط)"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """
+    إنشاء جدولة أقساط للسلفة - Super Admin Only
+    Create installment schedule for advance - Financial operation
+    
+    🔒 RBAC: Restricted to Super Admin only - installment scheduling affects payroll deductions
+    """
     
     try:
         global payroll_engine
