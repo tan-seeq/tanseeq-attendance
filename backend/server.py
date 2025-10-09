@@ -27,9 +27,9 @@ async def healthz():
 async def readyz():
     """Readiness check - tests DB connectivity"""
     try:
-        from backend.db_client import get_db
-        db = get_db()
-        await db.command("ping")  # يفشل بسرعة لو Atlas مش جاهز
+        from db_client import get_db
+        _db = get_db()
+        await _db.command("ping")  # يفشل بسرعة لو Atlas مش جاهز
         return {"status": "ready"}
     except Exception as e:
         return JSONResponse({"status": "not_ready", "error": str(e)}, status_code=503)
