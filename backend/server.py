@@ -4656,8 +4656,11 @@ async def generate_salary_letter(
                 """
             
             # Read template with error handling
+            # ✅ Use ROOT_DIR for deployment compatibility
             import os
-            template_path = "/app/backend/salary_letter_template.html"
+            from pathlib import Path
+            ROOT_DIR = Path(__file__).parent
+            template_path = ROOT_DIR / "salary_letter_template.html"
             
             if not os.path.exists(template_path):
                 # Fallback: create inline template
