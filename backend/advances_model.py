@@ -81,7 +81,7 @@ class AdvanceTransaction(BaseModel):
     rejection_reason: Optional[str] = None
     
     # Metadata
-    created_at: datetime = Field(default_factory=lambda: get_uae_now()  # UAE timezone)
+    created_at: datetime = Field(default_factory=lambda: get_uae_now())  # UAE timezone
     updated_at: datetime = Field(default_factory=lambda: get_uae_now()  # UAE timezone)
     notes: Optional[str] = None
 
@@ -109,7 +109,7 @@ class EmployeeBalance(BaseModel):
     
     # Metadata
     last_transaction_date: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=lambda: get_uae_now()  # UAE timezone)
+    created_at: datetime = Field(default_factory=lambda: get_uae_now())  # UAE timezone
     updated_at: datetime = Field(default_factory=lambda: get_uae_now()  # UAE timezone)
 
 # Request Models
