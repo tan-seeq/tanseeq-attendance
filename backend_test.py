@@ -258,7 +258,7 @@ class BackendTester:
         response, data = await self.make_request("GET", "/payroll/cycles", "super_admin")
         
         if response and response.status == 200:
-            cycles = data.get("cycles", [])
+            cycles = data.get("cycles", []) if isinstance(data, dict) else data
             if cycles:
                 cycle_id = cycles[0]["id"]
                 self.test_data["test_cycle_id"] = cycle_id
