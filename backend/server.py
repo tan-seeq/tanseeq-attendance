@@ -132,7 +132,7 @@ from report_generator import report_generator
 # ========================================
 # Lazy DB initialization (using db_client.py)
 # ========================================
-from backend.db_client import get_db, get_client
+from db_client import get_db, get_client
 
 # Create a proxy class that initializes DB on first access
 class LazyDB:
