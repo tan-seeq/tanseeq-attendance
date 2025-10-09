@@ -4444,32 +4444,32 @@ async def generate_salary_letter(
         custody_adjustments = []
         
         for entry in ledger_entries:
-            entry_type = entry.get("entry_type", "")
+            source_type = entry.get("source_type", "")
             amount = entry.get("amount", 0)
             description = entry.get("description", "")
             
-            if entry_type == "ATTENDANCE_DEDUCTION":
+            if source_type == "ATTENDANCE_DEDUCTION":
                 attendance_deductions.append({
                     "description": description,
                     "amount": amount
                 })
-            elif entry_type == "LEAVE_ADJUSTMENT":
+            elif source_type == "LEAVE_ADJUSTMENT":
                 leave_adjustments.append({
                     "description": description,
                     "amount": amount
                 })
-            elif entry_type == "MANUAL_DEDUCTION":
+            elif source_type == "MANUAL_DEDUCTION":
                 manual_deductions.append({
                     "description": description,
                     "amount": amount
                 })
-            elif entry_type == "ADVANCE_INSTALLMENT":
+            elif source_type == "ADVANCE_INSTALLMENT":
                 advance_installments.append({
                     "description": description,
                     "amount": amount,
                     "reference_id": entry.get("reference_id", "")
                 })
-            elif entry_type == "CUSTODY_ADJUSTMENT":
+            elif source_type == "CUSTODY_ADJUSTMENT":
                 custody_adjustments.append({
                     "description": description,
                     "amount": amount
