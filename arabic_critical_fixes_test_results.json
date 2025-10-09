@@ -4,37 +4,32 @@
       "test_name": "Admin Authentication",
       "status": "PASS",
       "details": "Logged in as مدير النظام",
-      "timestamp": "2025-10-09T10:22:04.219646",
+      "timestamp": "2025-10-09T10:22:48.951959",
       "response_data": null
     },
     {
       "test_name": "Attendance Check-In",
       "status": "PASS",
-      "details": "Check-in successful at 14:22:04, Status: متأخر",
-      "timestamp": "2025-10-09T10:22:04.240048",
+      "details": "Already checked in today (expected behavior)",
+      "timestamp": "2025-10-09T10:22:48.963839",
       "response_data": {
-        "message": "تم تسجيل الحضور بنجاح ✅",
-        "check_in_time": "14:22:04",
-        "status": "متأخر",
-        "is_late": true
+        "detail": "تم تسجيل الحضور مسبقاً اليوم"
       }
     },
     {
       "test_name": "Attendance Check-Out",
       "status": "PASS",
-      "details": "Check-out successful at 14:22:04, Working hours: 0",
-      "timestamp": "2025-10-09T10:22:04.257846",
+      "details": "Expected validation: تم تسجيل الانصراف مسبقاً اليوم",
+      "timestamp": "2025-10-09T10:22:49.015305",
       "response_data": {
-        "message": "تم تسجيل الانصراف بنجاح ✅",
-        "check_out_time": "14:22:04",
-        "working_hours": 0
+        "detail": "تم تسجيل الانصراف مسبقاً اليوم"
       }
     },
     {
       "test_name": "Monthly Deductions Calculation",
       "status": "PASS",
       "details": "Calculation successful for 2025-10. Found attendance records with user_id",
-      "timestamp": "2025-10-09T10:22:04.312482",
+      "timestamp": "2025-10-09T10:22:49.067594",
       "response_data": {
         "success": true,
         "month": "2025-10",
@@ -132,23 +127,32 @@
       "test_name": "Apply Monthly Deductions",
       "status": "FAIL",
       "details": "Status 500: خطأ في تطبيق الخصومات: 400: البيانات غير مكتملة",
-      "timestamp": "2025-10-09T10:22:04.325828",
+      "timestamp": "2025-10-09T10:22:49.119397",
       "response_data": {
         "detail": "خطأ في تطبيق الخصومات: 400: البيانات غير مكتملة"
       }
     },
     {
       "test_name": "Advances Balance Check",
-      "status": "FAIL",
-      "details": "Exception: 500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://hr-system-fix.preview.emergentagent.com/api/advances/my-balance'",
-      "timestamp": "2025-10-09T10:22:04.339959",
-      "response_data": null
+      "status": "PASS",
+      "details": "Balance retrieved successfully. Total available: 0.0 AED",
+      "timestamp": "2025-10-09T10:22:49.136987",
+      "response_data": {
+        "employee_name": "مدير النظام",
+        "total_advances": 0.0,
+        "total_custody": 0.0,
+        "total_expenses": 0.0,
+        "remaining_advance": 0.0,
+        "remaining_custody": 0.0,
+        "total_available": 0.0,
+        "last_transaction_date": null
+      }
     },
     {
       "test_name": "Payroll Cycles Retrieval",
       "status": "FAIL",
       "details": "Exception: 'list' object has no attribute 'get'",
-      "timestamp": "2025-10-09T10:22:04.351362",
+      "timestamp": "2025-10-09T10:22:49.151376",
       "response_data": null
     }
   ],
@@ -174,9 +178,6 @@
       "flexible_core_hours": "10:00-15:00",
       "flexible_days_per_week": 5
     },
-    "check_in_time": "14:22:04",
-    "check_out_time": "14:22:04",
-    "working_hours": 0,
     "monthly_deductions": {
       "success": true,
       "month": "2025-10",
@@ -268,16 +269,26 @@
       ],
       "total_deductions": 903.12,
       "employee_count": 6
+    },
+    "advances_balance": {
+      "employee_name": "مدير النظام",
+      "total_advances": 0.0,
+      "total_custody": 0.0,
+      "total_expenses": 0.0,
+      "remaining_advance": 0.0,
+      "remaining_custody": 0.0,
+      "total_available": 0.0,
+      "last_transaction_date": null
     }
   },
   "summary": {
     "total_tests": 7,
-    "passed": 4,
-    "failed": 3,
-    "success_rate": 57.14285714285714,
+    "passed": 5,
+    "failed": 2,
+    "success_rate": 71.42857142857143,
     "attendance_working": true,
     "deductions_working": false,
-    "advances_working": false,
+    "advances_working": true,
     "payroll_working": false
   }
 }
