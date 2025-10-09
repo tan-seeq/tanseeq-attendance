@@ -6305,7 +6305,7 @@ async def approve_leave(leave_id: str, approval_data: dict = None, current_user:
                         "employee_id": leave.get("user_id"),
                         "employee_name": leave.get("user_name"),
                         "payroll_cycle_id": cycle["id"],
-                        "entry_type": "LEAVE_ADJUSTMENT",
+                        "source_type": "LEAVE_ADJUSTMENT",
                         "amount": deduction_amount,
                         "description": f"خصم إجازة غير مدفوعة - {leave_days} يوم من {leave.get('start_date')[:10]} إلى {leave.get('end_date')[:10]}",
                         "reference_id": leave_id,
