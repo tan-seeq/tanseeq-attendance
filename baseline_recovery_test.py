@@ -286,10 +286,10 @@ class BaselineRecoveryTester:
         
         advance_id = advance_transactions[0]["id"]
         
-        # Test validation - invalid data
+        # Test validation - invalid data (missing required fields)
         invalid_payload = {
-            "installments": 0,  # Invalid: should be > 0
-            "amount": -100      # Invalid: should be > 0
+            "installment_amount": 100.0
+            # Missing number_of_installments and start_date
         }
         
         status, response = await self.make_request(
@@ -306,8 +306,9 @@ class BaselineRecoveryTester:
         
         # Test valid data
         valid_payload = {
-            "installments": 5,
-            "amount": 1000.0
+            "installment_amount": 200.0,
+            "number_of_installments": 5,
+            "start_date": "2025-01-01"
         }
         
         status, response = await self.make_request(
