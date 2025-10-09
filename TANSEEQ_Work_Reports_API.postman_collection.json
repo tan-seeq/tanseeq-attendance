@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://tanseeq-hr-fix.preview.emergentagent.com",
+			"value": "https://hr-system-upgrade.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

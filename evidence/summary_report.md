@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://tanseeq-hr-fix.preview.emergentagent.com
-    - **Backend URL**: https://tanseeq-hr-fix.preview.emergentagent.com/api
+    - **Frontend URL**: https://hr-system-upgrade.preview.emergentagent.com
+    - **Backend URL**: https://hr-system-upgrade.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 

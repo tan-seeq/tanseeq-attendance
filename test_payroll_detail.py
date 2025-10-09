@@ -83,7 +83,7 @@ def login_and_test(email, password, base_url):
         return False
 
 if __name__ == "__main__":
-    backend_url = "https://tanseeq-hr-fix.preview.emergentagent.com"
+    backend_url = "https://hr-system-upgrade.preview.emergentagent.com"
     
     print("🔍 Testing payroll calculation in detail...")
     print("=" * 50)

@@ -14,7 +14,7 @@ from pathlib import Path
 import time
 
 # Configuration
-BASE_URL = "https://tanseeq-hr-fix.preview.emergentagent.com/api"
+BASE_URL = "https://hr-system-upgrade.preview.emergentagent.com/api"
 
 # Test accounts
 TEST_ACCOUNTS = {
