@@ -4481,7 +4481,8 @@ async def get_payroll_cycle_summary(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
 
-@app.get("/api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
+# Disabled legacy salary letter endpoint in favor of router-based implementation
+@app.get("/__disabled__/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
 async def generate_salary_letter(
     cycle_id: str,
     employee_id: str,
