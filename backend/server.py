@@ -80,8 +80,30 @@ from work_reports_mongo import (
     ActivityTypeCreate, ActivityTypeResponse,
     WorkLogCreate, WorkLogUpdate, WorkLogResponse,
     UserPermissionResponse, PermissionUpdateRequest,
-    credential_encryption, log_work_reports_activity
+    credential_encryption, log_work_reports_activity,
+    _ensure_work_reports_db as get_work_reports_db_lazy
 )
+
+# Helper to get work reports DB (lazy)
+def _get_wr_db():
+    """Get Work Reports DB (lazy initialization)"""
+    return get_work_reports_db_lazy()
+
+# Proxy for work_reports_db for backward compatibility
+class LazyWorkReportsDB:
+    """Lazy Work Reports DB proxy"""
+    def __init__(self):
+        self._db = None
+    
+    def __getattr__(self, name):
+        if self._db is None:
+            self._db = get_work_reports_db_lazy()
+        return getattr(self._db, name)
+    
+    def __bool__(self):
+        return True
+
+work_reports_db = LazyWorkReportsDB()
 
 # Notification Model
 class Notification(BaseModel):
