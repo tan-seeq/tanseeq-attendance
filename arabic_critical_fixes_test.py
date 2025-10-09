@@ -248,10 +248,25 @@ class ArabicReviewTester:
             headers = await self.get_headers()
             current_month = datetime.now().strftime("%Y-%m")
             
+            # First, get calculated deductions if available
+            calculated_deductions = self.test_data.get("monthly_deductions", {})
+            employees_data = calculated_deductions.get("employees", [])
+            
+            if not employees_data:
+                # If no calculated deductions, create minimal test data
+                employees_data = [{
+                    "employee_id": self.test_data.get("admin_user", {}).get("id", "test"),
+                    "employee_name": self.test_data.get("admin_user", {}).get("name", "Test User"),
+                    "late_deduction": 0,
+                    "absence_deduction": 0,
+                    "advance_deduction": 0,
+                    "deduction_details": []
+                }]
+            
             async with self.session.post(
                 f"{BACKEND_URL}/deductions/apply-monthly",
                 headers=headers,
-                json={"month": current_month}
+                json={"month": current_month, "employees": employees_data}
             ) as response:
                 
                 if response.status == 200:
