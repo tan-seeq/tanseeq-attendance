@@ -8728,8 +8728,10 @@ async def create_manual_backup(current_user: User = Depends(get_super_admin_user
         import zipfile
         import shutil
         
-        BACKUP_DIR = "/app/backups"
-        Path(BACKUP_DIR).mkdir(exist_ok=True)
+        # ✅ Use ROOT_DIR for deployment compatibility
+        ROOT_DIR = Path(__file__).parent.parent
+        BACKUP_DIR = ROOT_DIR / "backups"
+        BACKUP_DIR.mkdir(exist_ok=True)
         
         # Create timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
