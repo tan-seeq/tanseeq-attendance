@@ -268,16 +268,19 @@ if __name__ == "__main__":
     print("🇦🇪 UAE DateTime Utilities Test")
     print("=" * 50)
     
-    print(f"Current UAE Time: {get_uae_now()}")
-    print(f"Current UAE Date: {get_uae_today()}")
-    print(f"Current UAE Time (time only): {get_uae_time()}")
-    print(f"Formatted DateTime: {get_uae_datetime_str()}")
-    print(f"Formatted Date: {get_uae_date_str()}")
-    print(f"Current Month: {get_uae_month_str()}")
-    print(f"ISO String: {to_iso_string_uae()}")
+    # Test all functions
+    now = get_uae_now()
+    today = get_uae_today()
+    iso_str = to_iso_string_uae()
+    date_str = get_uae_date_str()
+    month_str = get_uae_month_str()
+    
+    print(f"Current UAE time: {now}")
+    print(f"Current UAE date: {today}")
+    print(f"ISO string: {iso_str}")
+    print(f"Date string: {date_str}")
     
     # Test weekend check
-    today = get_uae_today()
     print(f"\nIs today ({today}) a weekend? {is_weekend_uae(today)}")
     
     # Test month boundaries
@@ -288,6 +291,19 @@ if __name__ == "__main__":
     
     # Test working days
     working_days = get_working_days_uae(date(2025, 10, 1), date(2025, 10, 31))
-    print(f"  Working Days: {working_days}")
+    print(f"Working days in {month_str}: {working_days}")
+    
+    # Test new formatting functions
+    print("\n📅 Testing new dd/MM/yyyy formatters:")
+    test_date = date(2025, 10, 9)
+    test_datetime = datetime(2025, 10, 9, 14, 30, 0, tzinfo=UAE_TZ)
+    
+    formatted_date = format_uae_date_dmy(test_date)
+    formatted_datetime = format_uae_datetime_dmy(test_datetime)
+    
+    print(f"  format_uae_date_dmy({test_date}) = '{formatted_date}'")
+    print(f"  format_uae_datetime_dmy({test_datetime}) = '{formatted_datetime}'")
+    print(f"  format_uae_date_dmy() (today) = '{format_uae_date_dmy()}'")
+    print(f"  format_uae_datetime_dmy() (now) = '{format_uae_datetime_dmy()}'")
     
     print("\n✅ All tests completed!")
