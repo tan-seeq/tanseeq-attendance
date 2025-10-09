@@ -312,9 +312,9 @@ async def init_work_reports_collections():
         
         # Use background: True for non-blocking index creation
         index_tasks = [
-            work_reports_db.clients.create_index("is_active", background=True),
-            work_reports_db.work_logs.create_index("date", background=True),
-            work_reports_db.user_permissions.create_index("user_id", background=True),
+            db.clients.create_index("is_active", background=True),
+            db.work_logs.create_index("date", background=True),
+            db.user_permissions.create_index("user_id", background=True),
         ]
         
         # Wait only for essential indexes with short timeout
