@@ -1735,3 +1735,75 @@ agent_communication:
   - agent: "main"
     message: "MANUAL DEDUCTIONS PERSISTENCE FIX IMPLEMENTED: Modified PUT /api/payroll/cycles/{cycle_id}/update-employees endpoint (server.py lines 4073-4100) to properly handle manual deduction ledger entries. KEY CHANGES: 1) When manual deduction amount changes, the endpoint now: a) Checks for existing non-reversed manual deduction ledger entries, b) Reverses the old entry if it exists (maintaining audit trail), c) Creates a new ledger entry with the updated amount and unique source_id, d) Uses timestamp in source_id to ensure uniqueness across multiple edits 2) This ensures the PayrollLedgerService.get_employee_summary() method correctly aggregates only the current (non-reversed) manual deduction amount 3) Maintains complete audit trail by using reversal mechanism instead of updating or deleting entries. TECHNICAL DETAILS: Added logic to query payroll_ledger collection for existing entries, call reverse_entry() with Arabic reason, create new entry with timestamped source_id. This fix resolves the data inconsistency where update-employees modified employee_payroll_summaries but didn't create corresponding ledger entries, causing summary endpoint to show 0 for manual deductions. Ready for backend testing."
 
+
+
+---
+user_problem_statement: "🚨 BASELINE BACKEND AUDIT: Validate Installment Schedules, Payroll Ledger idempotency/linking, Salary Letters parity, Timezone (Gregorian + Asia/Dubai). Capture defects before fixes."
+backend:
+  - task: "Installment schedules endpoints (create/get/list)"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Request baseline test for POST /api/advances/{advance_id}/installments, GET /api/advances/{advance_id}/installments, GET /api/payroll/installment-schedules with RBAC (super_admin only) and error handling."
+  - task: "Payroll Ledger idempotency & cycle linking"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/payroll_ledger_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Verify idempotency key (employee_id+cycle_id+source_type+source_id), reversal flow, and entries visibility in /api/payroll/cycles/{cycle_id}/summary."
+  - task: "Salary letters parity with Ledger"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Validate /api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter (html/pdf) shows ledger-driven deductions equal to summary/export."
+  - task: "Timezone & Gregorian enforcement"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/uae_datetime_utils.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Check created_at/updated_at/ISO strings include +04:00 and dates use YYYY-MM-DD (Gregorian)."
+
+frontend: []
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 4
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Installment schedules endpoints"
+    - "Payroll Ledger idempotency & summary parity"
+    - "Salary letters parity (HTML/PDF)"
+    - "Timezone & Gregorian enforcement"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "TESTING REQUEST: Please run a comprehensive BACKEND baseline test focusing on: 1) Installment schedules: POST /api/advances/{advance_id}/installments (Super Admin only), GET /api/advances/{advance_id}/installments, GET /api/payroll/installment-schedules; validate RBAC, required fields, error messages. 2) Payroll Ledger: verify idempotency (employee_id+cycle_id+source_type+source_id), reversal flow (if endpoint available), and that /api/payroll/cycles/{cycle_id}/summary aggregates ledger entries correctly. 3) Salary letters: /api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter?format=html and pdf produce deductions equal to summary and ledger totals. 4) Timezone: created_at/updated_at and ISO strings include +04:00 (Asia/Dubai), dates Gregorian. 5) Regression spot-check: /api/payroll/cycles/{cycle_id}/update-employees persists manual deductions in ledger. Use credentials: super_admin hatem@tan-seeq.co/hatem123 and admin admin@tanseeq.com/ADMIN and user jihad@tanseeq.com/jihad123. Ensure all routes use /api prefix. Save evidence and return summarized defects."
+
