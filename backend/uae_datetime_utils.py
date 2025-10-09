@@ -218,6 +218,51 @@ def get_uae_month_str() -> str:
     return format_uae_date(format_str="%Y-%m")
 
 
+def format_uae_date_dmy(d: Optional[date] = None) -> str:
+    """
+    تنسيق التاريخ بصيغة dd/MM/yyyy (Gregorian)
+    Format date as dd/MM/yyyy (Gregorian calendar only)
+    
+    Args:
+        d: date object (if None, uses today's UAE date)
+        
+    Returns:
+        str: Date formatted as dd/MM/yyyy (e.g., "09/10/2025")
+    
+    Example:
+        >>> format_uae_date_dmy(date(2025, 10, 9))
+        '09/10/2025'
+    """
+    if d is None:
+        d = get_uae_today()
+    return d.strftime("%d/%m/%Y")
+
+
+def format_uae_datetime_dmy(dt: Optional[datetime] = None) -> str:
+    """
+    تنسيق التاريخ والوقت بصيغة dd/MM/yyyy HH:mm (Asia/Dubai)
+    Format datetime as dd/MM/yyyy HH:mm (UAE timezone)
+    
+    Args:
+        dt: datetime object (if None, uses current UAE time)
+        
+    Returns:
+        str: Datetime formatted as dd/MM/yyyy HH:mm (e.g., "09/10/2025 14:30")
+    
+    Example:
+        >>> format_uae_datetime_dmy(datetime(2025, 10, 9, 14, 30, 0, tzinfo=UAE_TZ))
+        '09/10/2025 14:30'
+    """
+    if dt is None:
+        dt = get_uae_now()
+    elif dt.tzinfo is None:
+        dt = dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(UAE_TZ)
+    else:
+        dt = dt.astimezone(UAE_TZ)
+    
+    return dt.strftime("%d/%m/%Y %H:%M")
+
+
 # Example usage and tests
 if __name__ == "__main__":
     print("🇦🇪 UAE DateTime Utilities Test")
