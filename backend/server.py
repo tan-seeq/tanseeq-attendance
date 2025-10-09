@@ -2741,15 +2741,15 @@ async def apply_monthly_deductions(
             if late_deduction + absence_deduction > 0:
                 attendance_desc = f"خصومات الحضور والتأخير - {month}: " + ", ".join([d for d in deduction_details if "تأخير" in d or "غياب" in d])
                 
-                await ledger_service.create_ledger_entry(
+                await ledger_service.create_entry(
                     employee_id=employee_id,
                     cycle_id=cycle_id,
-                    entry_type="ATTENDANCE_DEDUCTION",
+                    source_type="ATTENDANCE_DEDUCTION",
+                    source_id=f"attendance_{month}_{employee_id}",
                     amount=-(late_deduction + absence_deduction),  # سالب للخصم
                     description=attendance_desc,
-                    source_type="attendance",
-                    source_id=f"attendance_{month}_{employee_id}",
-                    created_by=current_user.id
+                    created_by=current_user.id,
+                    metadata={"month": month}
                 )
             
             # 2. Advance Installment Ledger Entries
