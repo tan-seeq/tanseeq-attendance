@@ -4120,7 +4120,7 @@ async def update_payroll_cycle_employees(
                 updated_count += 1
         
         # Recalculate cycle totals
-        summaries = await db.employee_payroll_summaries.find({"payroll_cycle_id": cycle_id}).to_list(None)
+        summaries = await db.employee_payroll_summaries.find({"cycle_id": cycle_id}).to_list(None)  # ✅ استخدام cycle_id
         
         cycle_totals = {
             "total_employees": len(summaries),
