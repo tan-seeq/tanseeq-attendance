@@ -3964,14 +3964,14 @@ async def get_employee_ledger_entries(
         # Calculate totals by type
         totals_by_type = {}
         for entry in entries:
-            entry_type_name = entry.get("entry_type", "UNKNOWN")
+            source_type_name = entry.get("source_type", "UNKNOWN")
             amount = entry.get("amount", 0)
             
-            if entry_type_name not in totals_by_type:
-                totals_by_type[entry_type_name] = {"count": 0, "total_amount": 0}
+            if source_type_name not in totals_by_type:
+                totals_by_type[source_type_name] = {"count": 0, "total_amount": 0}
             
-            totals_by_type[entry_type_name]["count"] += 1
-            totals_by_type[entry_type_name]["total_amount"] += amount
+            totals_by_type[source_type_name]["count"] += 1
+            totals_by_type[source_type_name]["total_amount"] += amount
         
         # Remove _id for JSON serialization
         for entry in entries:
