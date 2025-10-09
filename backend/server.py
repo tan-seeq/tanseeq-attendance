@@ -3928,7 +3928,7 @@ async def get_employee_ledger_entries(
     employee_id: str,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    entry_type: Optional[str] = None,
+    source_type: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -3943,8 +3943,8 @@ async def get_employee_ledger_entries(
         # Build query
         query = {"employee_id": employee_id}
         
-        if entry_type:
-            query["entry_type"] = entry_type
+        if source_type:
+            query["source_type"] = source_type
         
         if start_date or end_date:
             date_query = {}
