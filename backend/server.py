@@ -803,7 +803,7 @@ async def check_in(current_user: User = Depends(get_current_user)):
             is_late=is_late
         )
         attendance_data["id"] = attendance_record.id
-        attendance_data["created_at"] = datetime.utcnow()
+        attendance_data["created_at"] = to_iso_string_uae()  # UAE timezone as ISO string
         await db.attendance.insert_one(attendance_data)
         attendance_id = attendance_record.id
     
