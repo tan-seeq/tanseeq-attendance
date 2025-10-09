@@ -11917,7 +11917,12 @@ app.add_middleware(
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    # Close Mongo client if present
+    try:
+        if hasattr(app.state, 'mongo_client') and app.state.mongo_client:
+            app.state.mongo_client.close()
+    except Exception:
+        pass
 
 # Root endpoint
 @app.get("/")
