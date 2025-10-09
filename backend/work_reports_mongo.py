@@ -365,7 +365,7 @@ async def init_default_activity_types():
         
         # Fast insert with timeout
         await asyncio.wait_for(
-            work_reports_db.activity_types.insert_many(default_activities),
+            db.activity_types.insert_many(default_activities),
             timeout=2.0
         )
         
