@@ -2653,8 +2653,9 @@ async def calculate_monthly_deductions(
             advance_deduction = 0
             
             # 1. Calculate Late Deductions (التأخير)
+            # ✅ Fixed: attendance table uses 'user_id' not 'employee_id'
             attendance_records = await db.attendance.find({
-                "employee_id": employee_id,
+                "user_id": employee_id,
                 "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
                 "status": "late"
             }).to_list(None)
