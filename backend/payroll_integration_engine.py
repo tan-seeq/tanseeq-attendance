@@ -223,7 +223,7 @@ class PayrollIntegrationEngine:
             "employee_id": deduction.employee_id,
             "deduction_id": deduction.id,
             "message": f"خصم بمبلغ {deduction.amount} درهم للموظف {deduction.employee_name} لا يوجد له دورة راتب مفتوحة",
-            "created_at": get_uae_now()  # UAE timezone.isoformat(),
+            "created_at": get_uae_now(),  # UAE timezone
             "is_resolved": False
         }
         
