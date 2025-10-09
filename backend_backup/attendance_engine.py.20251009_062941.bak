@@ -354,9 +354,9 @@ class AttendanceEngine:
             attendance.working_hours = work_delta.total_seconds() / 3600
         
         # تسجيل وقت المعالجة
-        attendance.computed_at = get_uae_now()  # UAE timezone
+        attendance.computed_at = datetime.now()
         if existing_doc:
-            attendance.recomputed_at = get_uae_now()  # UAE timezone
+            attendance.recomputed_at = datetime.now()
         
         # حفظ السجل
         attendance_dict = prepare_for_mongo(attendance.dict())
@@ -591,7 +591,7 @@ class AttendanceScheduler:
         
     async def check_missing_checkouts_warning(self):
         """فحص عدم تسجيل الانصراف - تحذير 18:10"""
-        current_time = get_uae_now()  # UAE timezone
+        current_time = datetime.now()
         today = current_time.date()
         
         if current_time.time() < time(18, 10):
@@ -628,7 +628,7 @@ class AttendanceScheduler:
     
     async def process_missing_checkouts_final(self):
         """معالجة عدم تسجيل الانصراف النهائية - 23:59"""
-        current_time = get_uae_now()  # UAE timezone
+        current_time = datetime.now()
         today = current_time.date()
         
         if current_time.time() < time(23, 59):
@@ -671,7 +671,7 @@ class AttendanceScheduler:
                     {"$set": {
                         "status": AttendanceStatus.MISSING_CHECKOUT.value,
                         "early_leave_minutes": missing_minutes,
-                        "computed_at": get_uae_now()  # UAE timezone.isoformat()
+                        "computed_at": datetime.now().isoformat()
                     }}
                 )
 
@@ -706,6 +706,6 @@ class AttendanceScheduler:
             {"month": current_month},
             {"$set": {
                 "free_occurrences_used": 0,
-                "reset_at": get_uae_now()  # UAE timezone.isoformat()
+                "reset_at": datetime.now().isoformat()
             }}
         )

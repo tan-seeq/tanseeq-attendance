@@ -119,7 +119,7 @@ class PayrollIntegrationEngine:
                     "status": PayrollStatus.CLOSED,
                     "locked_by": locked_by,
                     "locked_by_name": locked_by_name,
-                    "locked_at": get_uae_now()  # UAE timezone.isoformat(),
+                    "locked_at": datetime.now().isoformat(),
                     "lock_reason": lock_reason
                 }
             }
@@ -223,7 +223,7 @@ class PayrollIntegrationEngine:
             "employee_id": deduction.employee_id,
             "deduction_id": deduction.id,
             "message": f"خصم بمبلغ {deduction.amount} درهم للموظف {deduction.employee_name} لا يوجد له دورة راتب مفتوحة",
-            "created_at": get_uae_now()  # UAE timezone.isoformat(),
+            "created_at": datetime.now().isoformat(),
             "is_resolved": False
         }
         
@@ -357,7 +357,7 @@ class PayrollIntegrationEngine:
                         "$set": {
                             "status": InstallmentStatus.SKIPPED,
                             "skip_reason": warning,
-                            "processed_at": get_uae_now()  # UAE timezone.isoformat()
+                            "processed_at": datetime.now().isoformat()
                         }
                     }
                 )
@@ -416,7 +416,7 @@ class PayrollIntegrationEngine:
                         "status": InstallmentStatus.DEDUCTED,
                         "actual_amount": installment["scheduled_amount"],
                         "payroll_cycle_id": payroll_cycle_id,
-                        "processed_at": get_uae_now()  # UAE timezone.isoformat()
+                        "processed_at": datetime.now().isoformat()
                     }
                 }
             )
@@ -456,11 +456,11 @@ class PayrollIntegrationEngine:
             "completed_installments": completed_installments,
             "remaining_balance": remaining_balance,
             "is_completed": is_completed,
-            "updated_at": get_uae_now()  # UAE timezone.isoformat()
+            "updated_at": datetime.now().isoformat()
         }
         
         if is_completed:
-            updates["actual_end_date"] = get_uae_now()  # UAE timezone.date().isoformat()
+            updates["actual_end_date"] = datetime.now().date().isoformat()
         
         await self.db.installment_schedules.update_one(
             {"id": schedule_id},
@@ -595,7 +595,7 @@ class PayrollIntegrationEngine:
             total_deductions=total_deductions,
             net_salary=net_salary,
             is_calculated=True,
-            calculated_at=get_uae_now()  # UAE timezone
+            calculated_at=datetime.now()
         )
         
         # حفظ الملخص
@@ -631,7 +631,7 @@ class PayrollIntegrationEngine:
                     "total_gross_salary": total_gross_salary,
                     "total_deductions": total_deductions,
                     "total_net_salary": total_net_salary,
-                    "updated_at": get_uae_now()  # UAE timezone.isoformat()
+                    "updated_at": datetime.now().isoformat()
                 }
             }
         )
@@ -651,7 +651,7 @@ class PayrollIntegrationEngine:
             "performed_by": performed_by,
             "details": details,
             "metadata": metadata or {},
-            "timestamp": get_uae_now()  # UAE timezone.isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "ip_address": None,  # يمكن إضافته لاحقاً
             "user_agent": None   # يمكن إضافته لاحقاً
         }

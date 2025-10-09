@@ -960,7 +960,7 @@ async def create_advance_or_custody(
         expense_date=request.expense_date,
         status=TransactionStatus.APPROVED,  # تلقائياً معتمد من السوبر أدمن
         approved_by=current_user.id,
-        approved_at=get_uae_now()  # UAE timezone,
+        approved_at=datetime.now(timezone.utc),
         notes=request.notes
     )
     
@@ -1283,8 +1283,8 @@ async def approve_transaction(
     update_data = {
         "status": approval.status,
         "approved_by": current_user.id,
-        "approved_at": get_uae_now()  # UAE timezone.isoformat(),
-        "updated_at": get_uae_now()  # UAE timezone.isoformat()
+        "approved_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
     if approval.status == TransactionStatus.REJECTED:
@@ -1398,7 +1398,7 @@ async def send_advance_notification(employee, transaction, admin, action):
 💵 المبلغ: {transaction.amount} درهم
 📝 الوصف: {transaction.description}
 👤 تم الإنشاء من: {admin.name}
-📅 التاريخ: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}
+📅 التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M')}
 
 {f"📋 ملاحظات: {transaction.notes}" if transaction.notes else ""}
 
@@ -1413,7 +1413,7 @@ async def send_advance_notification(employee, transaction, admin, action):
         message=message,
         type="success",
         priority="normal",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -1444,7 +1444,7 @@ async def send_expense_approval_notification(employee, transaction, attachments)
             message=message,
             type="info",
             priority="high",
-            sent_at=get_uae_now()  # UAE timezone
+            sent_at=datetime.utcnow()
         )
         
         await db.notifications.insert_one(notification.dict())
@@ -1489,7 +1489,7 @@ async def send_expense_decision_notification(employee, transaction, approval, ad
         message=message,
         type=msg_type,
         priority="normal",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -1532,7 +1532,7 @@ async def start_marketing_visit(
         purpose=visit_request.purpose,
         purpose_details=visit_request.purpose_details,
         start_location=visit_request.gps_location,
-        start_time=get_uae_now()  # UAE timezone  # Server timestamp
+        start_time=datetime.now(timezone.utc)  # Server timestamp
     )
     
     # حفظ في قاعدة البيانات
@@ -1569,7 +1569,7 @@ async def get_active_visit(current_user: User = Depends(get_current_user)):
     
     # حساب الوقت المنقضي
     start_time = datetime.fromisoformat(active_visit["start_time"].replace("Z", "+00:00"))
-    elapsed_minutes = int((get_uae_now()  # UAE timezone - start_time).total_seconds() / 60)
+    elapsed_minutes = int((datetime.now(timezone.utc) - start_time).total_seconds() / 60)
     
     return {
         "active_visit": {
@@ -1621,7 +1621,7 @@ async def complete_marketing_visit(
     
     # حساب مدة الزيارة
     start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
-    end_time = get_uae_now()  # UAE timezone
+    end_time = datetime.now(timezone.utc)
     duration_minutes = int((end_time - start_time).total_seconds() / 60)
     
     # تحديث الزيارة
@@ -1631,7 +1631,7 @@ async def complete_marketing_visit(
         "status": VisitStatus.COMPLETED,
         "report": report.dict(),
         "end_location": completion_request.gps_location.dict() if completion_request.gps_location else None,
-        "updated_at": get_uae_now()  # UAE timezone.isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.marketing_visits.update_one(
@@ -1757,7 +1757,7 @@ async def edit_marketing_visit(
             update_data[field] = edit_data[field]
     
     # تحديث وقت التعديل
-    update_data['updated_at'] = get_uae_now()  # UAE timezone.isoformat()
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
     update_data['edited_by'] = current_user.id
     update_data['edited_by_name'] = current_user.name
     
@@ -1811,7 +1811,7 @@ async def edit_advance_transaction(
             update_data[field] = edit_data[field]
     
     # تحديث وقت التعديل
-    update_data['updated_at'] = get_uae_now()  # UAE timezone.isoformat()
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
     update_data['edited_by'] = current_user.id
     update_data['edited_by_name'] = current_user.name
     
@@ -1912,7 +1912,7 @@ async def settle_advance_with_salary(
         description=f"تسوية سلفة مع راتب شهر {salary_month}",
         status=TransactionStatus.APPROVED,
         approved_by=current_user.id,
-        approved_at=get_uae_now()  # UAE timezone,
+        approved_at=datetime.now(timezone.utc),
         notes=notes,
         created_by=current_user.id
     )
@@ -1964,7 +1964,7 @@ async def set_expense_deduction_source(
         {"$set": {
             "deduction_source": deduction_source,
             "deduction_source_ar": "سلفة" if deduction_source == "advance" else "عهدة",
-            "updated_at": get_uae_now()  # UAE timezone.isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
             "updated_by": current_user.id
         }}
     )
@@ -2066,7 +2066,7 @@ async def get_daily_attendance(
         raise HTTPException(status_code=403, detail="غير مسموح")
     
     if not date:
-        date = get_uae_now()  # UAE timezone.date().isoformat()
+        date = datetime.now().date().isoformat()
     
     # البحث عن السجل
     attendance_doc = await db.daily_attendance.find_one({
@@ -2086,7 +2086,7 @@ async def check_in_attendance(
 ):
     """تسجيل الحضور"""
     
-    check_in_time = get_uae_now()  # UAE timezone
+    check_in_time = datetime.now()
     today = check_in_time.date()
     
     # التحقق من عدم وجود تسجيل حضور مسبق اليوم
@@ -2119,7 +2119,7 @@ async def check_out_attendance(
 ):
     """تسجيل الانصراف"""
     
-    check_out_time = get_uae_now()  # UAE timezone
+    check_out_time = datetime.now()
     today = check_out_time.date()
     
     # البحث عن سجل الحضور
@@ -2160,7 +2160,7 @@ async def recompute_attendance(
     """إعادة احتساب الحضور (سوبر أدمن فقط)"""
     
     if not month:
-        month = get_uae_now()  # UAE timezone.strftime('%Y-%m')
+        month = datetime.now().strftime('%Y-%m')
     
     # تحديد النطاق
     if employee_id:
@@ -2311,7 +2311,7 @@ async def update_deduction(
         update_fields["notes"] = update_data["notes"]
     
     update_fields["updated_by"] = current_user.id
-    update_fields["updated_at"] = get_uae_now()  # UAE timezone.isoformat()
+    update_fields["updated_at"] = datetime.now().isoformat()
     
     # تحديث الخصم
     result = await db.payroll_deductions.update_one(
@@ -2363,7 +2363,7 @@ async def void_deduction(
         "voided_by": current_user.id,
         "voided_by_name": current_user.name,
         "void_reason": void_data.get("void_reason", ""),
-        "voided_at": get_uae_now()  # UAE timezone.isoformat()
+        "voided_at": datetime.now().isoformat()
     }
     
     result = await db.payroll_deductions.update_one(
@@ -2412,7 +2412,7 @@ async def void_deduction_post(
         "voided_by": current_user.id,
         "voided_by_name": current_user.name,
         "void_reason": void_data.get("void_reason", ""),
-        "voided_at": get_uae_now()  # UAE timezone.isoformat()
+        "voided_at": datetime.now().isoformat()
     }
     
     result = await db.payroll_deductions.update_one(
@@ -2707,7 +2707,7 @@ async def apply_monthly_deductions(
                     "manual_deductions": 0,
                     "attendance_deductions": 0,
                     "advance_deductions": 0,
-                    "created_at": get_uae_now()  # UAE timezone.isoformat()
+                    "created_at": datetime.now(timezone.utc).isoformat()
                 }
                 await db.employee_payroll_summaries.insert_one(summary)
             
@@ -2716,7 +2716,7 @@ async def apply_monthly_deductions(
                 "attendance_deductions": late_deduction + absence_deduction,
                 "advance_deductions": advance_deduction,
                 "deduction_notes": "\n".join(deduction_details),
-                "updated_at": get_uae_now()  # UAE timezone.isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
             
             # Recalculate totals
@@ -2782,7 +2782,7 @@ async def apply_monthly_deductions(
                 },
                 {"$set": {
                     "status": "paid",
-                    "paid_at": get_uae_now()  # UAE timezone.isoformat(),
+                    "paid_at": datetime.now(timezone.utc).isoformat(),
                     "payroll_cycle_id": cycle_id
                 }}
             )
@@ -2824,7 +2824,7 @@ async def apply_monthly_deductions(
             "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
             "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
             "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
-            "updated_at": get_uae_now()  # UAE timezone.isoformat()
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         
         await db.payroll_cycles.update_one(
@@ -2916,8 +2916,8 @@ async def acknowledge_notification(
     result = await db.system_notifications.update_one(
         {"id": notification_id},
         {"$set": {
-            "acknowledged_at": get_uae_now()  # UAE timezone.isoformat(),
-            "read_at": get_uae_now()  # UAE timezone.isoformat()
+            "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+            "read_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
@@ -2939,7 +2939,7 @@ async def get_attendance_stats(
         raise HTTPException(status_code=403, detail="غير مسموح")
     
     if not month:
-        month = get_uae_now()  # UAE timezone.strftime('%Y-%m')
+        month = datetime.now().strftime('%Y-%m')
     
     stats = await attendance_engine.get_attendance_stats(employee_id, month)
     return {"stats": stats.dict()}
@@ -3058,7 +3058,7 @@ async def update_attendance_config(
         config = AttendanceSystemConfig(**config_data)
     
     config.updated_by = current_user.id
-    config.updated_at = get_uae_now()  # UAE timezone
+    config.updated_at = datetime.now(timezone.utc)
     
     # حفظ الإعدادات
     config_dict = prepare_for_mongo(config.dict())
@@ -3143,7 +3143,7 @@ async def get_scheduler_status(
             "missing_checkout_deadline": "23:59 daily",
             "monthly_reset": "00:01 on 1st of each month"
         },
-        "last_check": get_uae_now()  # UAE timezone.isoformat()
+        "last_check": datetime.now(timezone.utc).isoformat()
     }
 
 async def send_visit_completion_notification(visit_data, report, employee, duration_minutes):
@@ -3187,7 +3187,7 @@ async def send_visit_completion_notification(visit_data, report, employee, durat
             message=notification_message,
             type="info",
             priority="normal",
-            sent_at=get_uae_now()  # UAE timezone
+            sent_at=datetime.utcnow()
         )
         
         await db.notifications.insert_one(notification.dict())
@@ -3399,7 +3399,7 @@ async def update_deduction(
         
         # Add audit information
         update_fields["updated_by"] = current_user.id
-        update_fields["updated_at"] = get_uae_now()  # UAE timezone.isoformat()
+        update_fields["updated_at"] = datetime.now().isoformat()
         
         # Update deduction
         result = await db.payroll_deductions.update_one(
@@ -3417,7 +3417,7 @@ async def update_deduction(
             "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": f"Updated deduction {deduction_id}",
             "details": f"Updated fields: {', '.join(update_fields.keys())}",
-            "timestamp": get_uae_now()  # UAE timezone.isoformat()
+            "timestamp": datetime.now().isoformat()
         })
         
         # Send notification if amount changed
@@ -3431,8 +3431,8 @@ async def update_deduction(
                 "user_id": existing["employee_id"],
                 "sender": current_user.name,
                 "is_read": False,
-                "sent_at": get_uae_now()  # UAE timezone.isoformat(),
-                "created_at": get_uae_now()  # UAE timezone.isoformat()
+                "sent_at": datetime.now().isoformat(),
+                "created_at": datetime.now().isoformat()
             }
             await db.notifications.insert_one(notification)
         
@@ -3468,7 +3468,7 @@ async def void_deduction(
         void_fields = {
             "is_voided": True,
             "voided_by": current_user.id,
-            "voided_at": get_uae_now()  # UAE timezone.isoformat(),
+            "voided_at": datetime.now().isoformat(),
             "void_reason": void_reason
         }
         
@@ -3487,7 +3487,7 @@ async def void_deduction(
             "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": f"Voided deduction {deduction_id}",
             "details": f"Reason: {void_reason}",
-            "timestamp": get_uae_now()  # UAE timezone.isoformat()
+            "timestamp": datetime.now().isoformat()
         })
         
         # Send notification
@@ -3500,8 +3500,8 @@ async def void_deduction(
             "user_id": existing["employee_id"],
             "sender": current_user.name,
             "is_read": False,
-            "sent_at": get_uae_now()  # UAE timezone.isoformat(),
-            "created_at": get_uae_now()  # UAE timezone.isoformat()
+            "sent_at": datetime.now().isoformat(),
+            "created_at": datetime.now().isoformat()
         }
         await db.notifications.insert_one(notification)
         
@@ -3525,7 +3525,7 @@ async def get_attendance_stats(
             raise HTTPException(status_code=403, detail="Access denied")
         
         if not month:
-            month = get_uae_now()  # UAE timezone.strftime("%Y-%m")
+            month = datetime.now().strftime("%Y-%m")
         
         global attendance_engine
         
@@ -3612,7 +3612,7 @@ async def recompute_attendance(
             "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
             "action": "Recomputed attendance",
             "details": message,
-            "timestamp": get_uae_now()  # UAE timezone.isoformat()
+            "timestamp": datetime.now().isoformat()
         })
         
         return {"message": message}
@@ -3886,7 +3886,7 @@ async def recalculate_payroll_cycle_from_ledger(
                         "total_deductions": calculation["total_deductions"],
                         "net_salary": calculation["net_salary"],
                         "is_calculated": True,
-                        "calculated_at": get_uae_now()  # UAE timezone.isoformat(),
+                        "calculated_at": datetime.now(timezone.utc).isoformat(),
                         "ledger_entries_count": calculation["ledger_entries_count"]
                     }
                 },
@@ -3907,7 +3907,7 @@ async def recalculate_payroll_cycle_from_ledger(
                     "total_gross_salary": total_gross,
                     "total_deductions": total_deductions,
                     "total_net_salary": total_net,
-                    "recalculated_at": get_uae_now()  # UAE timezone.isoformat(),
+                    "recalculated_at": datetime.now(timezone.utc).isoformat(),
                     "recalculated_by": current_user.id
                 }
             }
@@ -4057,7 +4057,7 @@ async def update_payroll_cycle_employees(
                 "manual_deductions": new_manual_ded,
                 "attendance_deductions": emp_data.get("attendance_deductions", 0),
                 "advance_deductions": emp_data.get("advance_deductions", 0),
-                "updated_at": get_uae_now()  # UAE timezone.isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
             
             # Recalculate totals
@@ -4103,7 +4103,7 @@ async def update_payroll_cycle_employees(
                         employee_id=employee_id,
                         cycle_id=cycle_id,
                         source_type="MANUAL_DEDUCTION",
-                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{get_uae_now()  # UAE timezone.timestamp()}",
+                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{datetime.now(timezone.utc).timestamp()}",
                         amount=-new_manual_ded,  # Negative for deduction
                         description=f"خصم يدوي تم تعديله بواسطة الإدارة - {new_manual_ded:.2f} درهم",
                         created_by=current_user.id
@@ -4120,7 +4120,7 @@ async def update_payroll_cycle_employees(
             "total_gross_salary": sum(s.get("gross_salary", 0) for s in summaries),
             "total_deductions": sum(s.get("total_deductions", 0) for s in summaries),
             "total_net_salary": sum(s.get("net_salary", 0) for s in summaries),
-            "updated_at": get_uae_now()  # UAE timezone.isoformat()
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         
         await db.payroll_cycles.update_one(
@@ -4762,7 +4762,7 @@ async def export_payroll_pdf(
         
         # معلومات الدورة
         info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=10, alignment=TA_RIGHT)
-        info_text = f"تاريخ الإصدار: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}"
+        info_text = f"تاريخ الإصدار: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         elements.append(Paragraph(info_text, info_style))
         elements.append(Spacer(1, 0.5*cm))
         
@@ -4913,7 +4913,7 @@ async def export_payroll_excel(
         # معلومات الدورة
         ws.merge_cells('A2:I2')
         info_cell = ws['A2']
-        info_cell.value = f"تاريخ الإصدار: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}"
+        info_cell.value = f"تاريخ الإصدار: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         info_cell.alignment = Alignment(horizontal='center')
         
         # Headers
@@ -5066,8 +5066,8 @@ async def create_notification(
             "user_id": notification_data.get("user_id"),
             "sender": current_user.name,
             "is_read": False,
-            "sent_at": get_uae_now()  # UAE timezone.isoformat(),
-            "created_at": get_uae_now()  # UAE timezone.isoformat()
+            "sent_at": datetime.now().isoformat(),
+            "created_at": datetime.now().isoformat()
         }
         
         await db.notifications.insert_one(notification)
@@ -5133,7 +5133,7 @@ async def mark_notification_read(
     try:
         result = await db.notifications.update_one(
             {"id": notification_id},
-            {"$set": {"is_read": True, "read_at": get_uae_now()  # UAE timezone.isoformat()}}
+            {"$set": {"is_read": True, "read_at": datetime.now().isoformat()}}
         )
         
         if result.matched_count == 0:
@@ -5141,7 +5141,7 @@ async def mark_notification_read(
             try:
                 result = await db.notifications.update_one(
                     {"_id": ObjectId(notification_id)},
-                    {"$set": {"is_read": True, "read_at": get_uae_now()  # UAE timezone.isoformat()}}
+                    {"$set": {"is_read": True, "read_at": datetime.now().isoformat()}}
                 )
             except:
                 raise HTTPException(status_code=404, detail="Notification not found")
@@ -5169,7 +5169,7 @@ async def mark_all_notifications_read(current_user: User = Depends(get_current_u
                 ],
                 "is_read": False
             },
-            {"$set": {"is_read": True, "read_at": get_uae_now()  # UAE timezone.isoformat()}}
+            {"$set": {"is_read": True, "read_at": datetime.now().isoformat()}}
         )
         
         return {
@@ -5230,7 +5230,7 @@ async def send_notification(notification_data: dict, current_user: User = Depend
         message=notification_data["message"],
         type=notification_data.get("type", "info"),
         priority=notification_data.get("priority", "normal"),
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -5265,7 +5265,7 @@ async def send_warning_notification(notification_data: dict, current_user: User 
 📝 {notification_data['message']}
 
 👤 من: {current_user.name} (الإدارة العليا)
-📅 التاريخ: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}
+📅 التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M')}
 
 {f"⚠️ إجراء مطلوب: {notification_data['required_action']}" if notification_data.get('required_action') else ""}
 {f"📋 ملاحظات إضافية: {notification_data['additional_notes']}" if notification_data.get('additional_notes') else ""}
@@ -5281,7 +5281,7 @@ async def send_warning_notification(notification_data: dict, current_user: User 
         message=warning_message.strip(),
         type="warning" if notification_type == "warning" else "info",
         priority="high" if notification_type == "warning" else "normal",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -5319,7 +5319,7 @@ async def create_user(user: UserCreate, current_user: User = Depends(get_admin_u
     user_dict = user.dict()
     user_dict["id"] = str(uuid.uuid4())
     user_dict["password"] = hash_password(user.password)
-    user_dict["created_at"] = get_uae_now()  # UAE timezone
+    user_dict["created_at"] = datetime.utcnow()
     user_dict["has_custom_schedule"] = False
     
     # Calculate daily rate
@@ -5560,7 +5560,7 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
         update_fields["is_manually_edited"] = True
         update_fields["modified_by"] = current_user.id
         update_fields["modified_by_name"] = current_user.name
-        update_fields["modified_at"] = get_uae_now()  # UAE timezone
+        update_fields["modified_at"] = datetime.utcnow()
     
     # Apply updates
     if update_fields:
@@ -5647,7 +5647,7 @@ async def check_in(current_user: User = Depends(get_current_user)):
         "is_weekend": is_weekend,
         "schedule_type": "flexible" if has_flexible_schedule else "fixed",
         "flexible_schedule": has_flexible_schedule,
-        "created_at": get_uae_now()  # UAE timezone
+        "created_at": datetime.utcnow()
     }
     
     if existing_attendance:
@@ -5757,7 +5757,7 @@ async def create_absence_record(attendance_data: dict, current_user: User = Depe
         "created_by": current_user.id,
         "created_by_name": current_user.name,
         "is_manual_entry": True,
-        "created_at": get_uae_now()  # UAE timezone
+        "created_at": datetime.utcnow()
     }
     
     await db.attendance.insert_one(absence_record)
@@ -5790,7 +5790,7 @@ async def edit_absence_record(attendance_id: str, attendance_data: dict, current
         "status": new_status,
         "modified_by": current_user.id,
         "modified_by_name": current_user.name,
-        "modified_at": get_uae_now()  # UAE timezone,
+        "modified_at": datetime.utcnow(),
         "is_manually_edited": True
     }
     
@@ -5857,7 +5857,7 @@ async def delete_absence_record(attendance_id: str, current_user: User = Depends
             "user_id": current_user.id,
             "user_name": current_user.name,
             "action": f"Deleted absence record for {attendance.get('user_name')} on {attendance.get('date')}",
-            "timestamp": get_uae_now()  # UAE timezone.isoformat()
+            "timestamp": datetime.now().isoformat()
         })
         
         return {"message": "Absence record deleted successfully"}
@@ -5894,7 +5894,7 @@ async def delete_attendance_record(attendance_id: str, current_user: User = Depe
             "user_name": current_user.name,
             "action": f"Deleted attendance record",
             "details": f"Employee: {employee_name}, Date: {date}, Status: {status}",
-            "timestamp": get_uae_now()  # UAE timezone.isoformat()
+            "timestamp": datetime.now().isoformat()
         })
         
         return {
@@ -5971,7 +5971,7 @@ async def process_daily_absences(date_data: dict, current_user: User = Depends(g
     """Process daily absences - create absence records for employees who didn't check in (Super Admin only)"""
     target_date = date_data.get("date")
     if not target_date:
-        target_date = get_uae_now()  # UAE timezone.strftime("%Y-%m-%d")
+        target_date = datetime.now().strftime("%Y-%m-%d")
     
     # Get all active employees
     all_employees = await db.users.find({"role": "user", "is_active": True}).to_list(1000)
@@ -6000,7 +6000,7 @@ async def process_daily_absences(date_data: dict, current_user: User = Depends(g
             "created_by_name": current_user.name,
             "is_manual_entry": True,
             "is_auto_absence": True,  # Flag to identify auto-generated absences
-            "created_at": get_uae_now()  # UAE timezone
+            "created_at": datetime.utcnow()
         }
         
         await db.attendance.insert_one(absence_record)
@@ -6024,7 +6024,7 @@ async def process_daily_absences(date_data: dict, current_user: User = Depends(g
 @api_router.get("/attendance/missing-today")
 async def get_missing_employees_today(current_user: User = Depends(get_admin_user)):
     """Get employees who haven't checked in today"""
-    today = get_uae_now()  # UAE timezone.strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")
     
     # Get all active employees
     all_employees = await db.users.find({"role": "user", "is_active": True}).to_list(1000)
@@ -6181,7 +6181,7 @@ async def create_leave_request(
         "days_count": int(days_count),
         "status": "pending",
         "attachment_url": attachment_url,
-        "created_at": get_uae_now()  # UAE timezone,
+        "created_at": datetime.utcnow(),
         "approved_by": None,
         "approved_by_id": None,
         "admin_notes": ""
@@ -6227,7 +6227,7 @@ async def create_leave_request_json(
         "days_count": int(days_count),
         "status": "pending",
         "attachment_url": leave_data.get("attachment_url"),
-        "created_at": get_uae_now()  # UAE timezone,
+        "created_at": datetime.utcnow(),
         "approved_by": None,
         "approved_by_id": None,
         "admin_notes": ""
@@ -6264,7 +6264,7 @@ async def approve_leave(leave_id: str, approval_data: dict = None, current_user:
         "status": "approved",
         "approved_by": current_user.name,
         "approved_by_id": current_user.id,
-        "approved_at": get_uae_now()  # UAE timezone,
+        "approved_at": datetime.utcnow(),
         "admin_notes": notes
     }
     
@@ -6287,7 +6287,7 @@ async def approve_leave(leave_id: str, approval_data: dict = None, current_user:
 يمكنك الاستمتاع بإجازتك!""",
         type="success",
         priority="normal",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -6362,7 +6362,7 @@ async def reject_leave(leave_id: str, rejection_data: dict = None, current_user:
         "status": "rejected",
         "rejected_by": current_user.name,
         "rejected_by_id": current_user.id,
-        "rejected_at": get_uae_now()  # UAE timezone,
+        "rejected_at": datetime.utcnow(),
         "admin_notes": notes
     }
     
@@ -6385,7 +6385,7 @@ async def reject_leave(leave_id: str, rejection_data: dict = None, current_user:
 يمكنك التواصل مع الإدارة لمزيد من التوضيح.""",
         type="warning",
         priority="high",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -6505,7 +6505,7 @@ async def create_field_exit_request(
         "rejected_by_id": None,
         "rejected_at": None,
         "admin_notes": "",
-        "created_at": get_uae_now()  # UAE timezone,
+        "created_at": datetime.utcnow(),
         "exit_status": "requested"  # requested, departed, returned, completed
     }
     
@@ -6678,7 +6678,7 @@ async def approve_field_exit(field_exit_id: str, approval_data: dict = None, cur
         "status": "approved",
         "approved_by": current_user.name,
         "approved_by_id": current_user.id,
-        "approved_at": get_uae_now()  # UAE timezone,
+        "approved_at": datetime.utcnow(),
         "admin_notes": notes,
         "exit_status": "approved"
     }
@@ -6703,7 +6703,7 @@ async def approve_field_exit(field_exit_id: str, approval_data: dict = None, cur
 يمكنك الآن تسجيل وقت المغادرة عند بدء الزيارة.""",
         type="success",
         priority="normal",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -6737,7 +6737,7 @@ async def reject_field_exit(field_exit_id: str, rejection_data: dict = None, cur
         "status": "rejected",
         "rejected_by": current_user.name,
         "rejected_by_id": current_user.id,
-        "rejected_at": get_uae_now()  # UAE timezone,
+        "rejected_at": datetime.utcnow(),
         "admin_notes": notes,
         "exit_status": "rejected"
     }
@@ -6762,7 +6762,7 @@ async def reject_field_exit(field_exit_id: str, rejection_data: dict = None, cur
 يمكنك التواصل مع الإدارة لمزيد من التوضيح أو إعادة التقديم.""",
         type="warning",
         priority="high",
-        sent_at=get_uae_now()  # UAE timezone
+        sent_at=datetime.utcnow()
     )
     
     await db.notifications.insert_one(notification.dict())
@@ -7082,7 +7082,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Enhanced period info
         ws.merge_cells('A4:G4')
         period_cell = ws['A4']
-        period_cell.value = f"الفترة: {start_date} إلى {end_date} | عدد السجلات: {len(report_data)} | تاريخ الإنشاء: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}"
+        period_cell.value = f"الفترة: {start_date} إلى {end_date} | عدد السجلات: {len(report_data)} | تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         period_cell.font = Font(name="Arial", size=10, color="555555")
         period_cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
         period_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -7253,7 +7253,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         story.append(report_title_text)
         
         # Period info with icons
-        period_info = Paragraph(f"الفترة: {start_date} إلى {end_date}<br/>عدد السجلات: {len(report_data)}<br/>تاريخ الإنشاء: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}", info_style)
+        period_info = Paragraph(f"الفترة: {start_date} إلى {end_date}<br/>عدد السجلات: {len(report_data)}<br/>تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
         story.append(period_info)
         story.append(Spacer(1, 30))
         
@@ -7525,7 +7525,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         # Period info
         ws.merge_cells('A3:G3')
         period_cell = ws['A3']
-        period_cell.value = f"Period: {start_date} to {end_date.split('-')[0]}-{end_date.split('-')[1]}-{int(end_date.split('-')[2])-1:02d} | Generated on: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}"
+        period_cell.value = f"Period: {start_date} to {end_date.split('-')[0]}-{end_date.split('-')[1]}-{int(end_date.split('-')[2])-1:02d} | Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         period_cell.font = Font(name="Arial", size=10, color="666666")
         period_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[3].height = 20
@@ -7673,7 +7673,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         story.append(report_subtitle)
         
         # Period info
-        period_info = Paragraph(f"Period: {start_date} to {end_date.split('-')[0]}-{end_date.split('-')[1]}-{int(end_date.split('-')[2])-1:02d}<br/>Generated on: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}", info_style)
+        period_info = Paragraph(f"Period: {start_date} to {end_date.split('-')[0]}-{end_date.split('-')[1]}-{int(end_date.split('-')[2])-1:02d}<br/>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
         story.append(period_info)
         story.append(Spacer(1, 20))
         
@@ -8017,7 +8017,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         # Date and generation info
         ws.merge_cells('A4:J4')
         date_cell = ws['A4']
-        date_cell.value = f"Generated on: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M:%S')} UAE Time - تم الإنشاء في الوقت الإماراتي"
+        date_cell.value = f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UAE Time - تم الإنشاء في الوقت الإماراتي"
         date_cell.font = Font(name="Arial", size=10, color="666666")
         date_cell.alignment = Alignment(horizontal="center")
         ws.row_dimensions[4].height = 20
@@ -8117,7 +8117,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         # Enhanced period info
         ws.merge_cells('A4:G4')
         period_cell = ws['A4']
-        period_cell.value = f"الشهر: {month} | عدد الموظفين: {len(payroll_data)} | تاريخ الإنشاء: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}"
+        period_cell.value = f"الشهر: {month} | عدد الموظفين: {len(payroll_data)} | تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         period_cell.font = Font(name="Arial", size=10, color="555555")
         period_cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
         period_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -8285,7 +8285,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         story.append(report_title_text)
         
         # Period info
-        period_info = Paragraph(f"الشهر: {month}<br/>عدد الموظفين: {len(payroll_data)}<br/>تاريخ الإنشاء: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d %H:%M')}", info_style)
+        period_info = Paragraph(f"الشهر: {month}<br/>عدد الموظفين: {len(payroll_data)}<br/>تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
         story.append(period_info)
         story.append(Spacer(1, 30))
         
@@ -8402,7 +8402,7 @@ async def update_payroll(user_id: str, month: str, payroll_data: dict, current_u
         "override_salary": payroll_data.get("override_salary"),
         "reason": payroll_data.get("reason", "Manual override"),
         "created_by": current_user.id,
-        "created_at": get_uae_now()  # UAE timezone
+        "created_at": datetime.utcnow()
     }
     
     await db.payroll_overrides.insert_one(override_data)
@@ -8592,7 +8592,7 @@ async def apply_late_penalties(month: str, current_user: User = Depends(get_supe
                 "penalty_days": penalty.penalty_days,
                 "penalty_type": penalty.penalty_type,
                 "applied_by": current_user.id,
-                "applied_at": get_uae_now()  # UAE timezone,
+                "applied_at": datetime.utcnow(),
                 "status": "applied"
             }
             
@@ -8678,7 +8678,7 @@ async def get_backup_stats(current_user: User = Depends(get_super_admin_user)):
                 "status": log.get("status", "unknown"),
                 "file_size_mb": log.get("file_size_mb", 0),
                 "error": log.get("error", ""),
-                "time_ago": get_time_ago(log.get("timestamp", get_uae_now()  # UAE timezone))
+                "time_ago": get_time_ago(log.get("timestamp", datetime.utcnow()))
             })
         
         stats = {
@@ -8710,7 +8710,7 @@ async def create_manual_backup(current_user: User = Depends(get_super_admin_user
         Path(BACKUP_DIR).mkdir(exist_ok=True)
         
         # Create timestamp
-        timestamp = get_uae_now()  # UAE timezone.strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_folder = f"{BACKUP_DIR}/manual_backup_{timestamp}"
         
         # Create backup folder
@@ -8747,14 +8747,14 @@ async def create_manual_backup(current_user: User = Depends(get_super_admin_user
             # Log backup to database
             log_entry = {
                 "id": f"manual_backup_{timestamp}",
-                "timestamp": get_uae_now()  # UAE timezone,
+                "timestamp": datetime.utcnow(),
                 "file_path": zip_path,
                 "file_size_mb": file_size,
                 "status": "success",
                 "error": "",
                 "created_by": current_user.id,
                 "backup_type": "manual",
-                "created_at": get_uae_now()  # UAE timezone
+                "created_at": datetime.utcnow()
             }
             
             await db.backup_logs.insert_one(log_entry)
@@ -8765,7 +8765,7 @@ async def create_manual_backup(current_user: User = Depends(get_super_admin_user
                 "message": "Manual backup created successfully",
                 "backup_file": f"manual_backup_{timestamp}.zip",
                 "file_size_mb": round(file_size, 2),
-                "created_at": get_uae_now()  # UAE timezone.strftime("%Y-%m-%d %H:%M:%S")
+                "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             
         else:
@@ -8774,14 +8774,14 @@ async def create_manual_backup(current_user: User = Depends(get_super_admin_user
             # Log failed backup
             log_entry = {
                 "id": f"manual_backup_failed_{timestamp}",
-                "timestamp": get_uae_now()  # UAE timezone,
+                "timestamp": datetime.utcnow(),
                 "file_path": "",
                 "file_size_mb": 0,
                 "status": "failed",
                 "error": error_msg,
                 "created_by": current_user.id,
                 "backup_type": "manual",
-                "created_at": get_uae_now()  # UAE timezone
+                "created_at": datetime.utcnow()
             }
             
             await db.backup_logs.insert_one(log_entry)
@@ -8795,7 +8795,7 @@ async def create_manual_backup(current_user: User = Depends(get_super_admin_user
 
 def get_time_ago(created_at: datetime) -> str:
     """Calculate human readable time ago"""
-    now = get_uae_now()  # UAE timezone
+    now = datetime.utcnow()
     diff = now - created_at
     
     if diff.days > 0:
@@ -8888,7 +8888,7 @@ async def send_late_warning_notifications():
             existing_notification = await db.messages.find_one({
                 "message_type": "late_warning",
                 "to_user_ids": {"$in": [user_id]},
-                "created_at": {"$gte": get_uae_now()  # UAE timezone.replace(hour=0, minute=0, second=0, microsecond=0)}
+                "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)}
             })
             
             if existing_notification:
@@ -8985,7 +8985,7 @@ async def send_absence_warning_notifications():
             existing_notification = await db.messages.find_one({
                 "message_type": "absence_warning",
                 "to_user_ids": {"$in": [user_id]},
-                "created_at": {"$gte": get_uae_now()  # UAE timezone.replace(hour=0, minute=0, second=0, microsecond=0)}
+                "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)}
             })
             
             if existing_notification:
@@ -9049,7 +9049,7 @@ async def send_penalty_notification(user_id: str, penalty_amount: float, penalty
 
 💸 مبلغ الخصم: {penalty_amount:.2f} درهم
 📋 السبب: {penalty_reason}
-📅 تاريخ التطبيق: {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d')}
+📅 تاريخ التطبيق: {datetime.now().strftime('%Y-%m-%d')}
 
 هذا الخصم مطبق وفقاً لسياسة الشركة ونظام الحضور والانصراف.
 
@@ -9134,7 +9134,7 @@ async def get_messages(current_user: User = Depends(get_current_user)):
             {
                 "$or": [
                     {"expires_at": None},
-                    {"expires_at": {"$gt": get_uae_now()  # UAE timezone}}
+                    {"expires_at": {"$gt": datetime.utcnow()}}
                 ]
             }
         ]
@@ -9200,7 +9200,7 @@ async def get_unread_count(current_user: User = Depends(get_current_user)):
             {
                 "$or": [
                     {"expires_at": None},
-                    {"expires_at": {"$gt": get_uae_now()  # UAE timezone}}
+                    {"expires_at": {"$gt": datetime.utcnow()}}
                 ]
             }
         ]
@@ -9314,7 +9314,7 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
         from pathlib import Path
         
         # Create timestamp
-        timestamp = get_uae_now()  # UAE timezone.strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_name = f"tanseeq_backup_{timestamp}.json"
         
         # Create backup directory if it doesn't exist
@@ -9328,7 +9328,7 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
         backup_data = {
             "backup_info": {
                 "filename": backup_name,
-                "created_at": get_uae_now()  # UAE timezone.isoformat(),
+                "created_at": datetime.now().isoformat(),
                 "version": "1.0",
                 "database": "tanseeq_hr",
                 "total_collections": 0,
@@ -9387,18 +9387,18 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
             "file_size": file_size,
             "total_records": total_records,
             "total_collections": len(collections_to_backup),
-            "created_at": get_uae_now()  # UAE timezone.isoformat(),
+            "created_at": datetime.now().isoformat(),
             "download_url": f"/api/backup/download/{backup_name}",
             "saved_on_server": True
         }
         
     except Exception as e:
         # Return error but still provide something workable
-        timestamp = get_uae_now()  # UAE timezone.strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         emergency_backup = {
             "backup_info": {
                 "filename": f"emergency_backup_{timestamp}.json",
-                "created_at": get_uae_now()  # UAE timezone.isoformat(),
+                "created_at": datetime.now().isoformat(),
                 "version": "1.0",
                 "status": "emergency",
                 "error": str(e)
@@ -9431,7 +9431,7 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
             "file_size": file_size,
             "total_records": 0,
             "total_collections": 5,
-            "created_at": get_uae_now()  # UAE timezone.isoformat(),
+            "created_at": datetime.now().isoformat(),
             "download_url": f"/api/backup/download/emergency_backup_{timestamp}.json",
             "saved_on_server": True,
             "status": "emergency",
@@ -9659,7 +9659,7 @@ async def restore_backup(
             "file_size": len(backup_content),
             "collections_restored": collections_restored,
             "records_restored": records_restored,
-            "restored_at": get_uae_now()  # UAE timezone.isoformat(),
+            "restored_at": datetime.now().isoformat(),
             "status": "simulated",
             "warning": "هذه محاكاة - لم يتم تغيير قاعدة البيانات الفعلية لضمان الأمان"
         }
@@ -9719,7 +9719,7 @@ async def create_leave_request_for_employee(
         leave_dict = leave_request.dict()
         leave_dict.update({
             "approved_by_id": current_user.id,
-            "approved_at": get_uae_now()  # UAE timezone,
+            "approved_at": datetime.utcnow(),
             "admin_notes": f"Request created by Super Admin ({current_user.name}) on behalf of employee. Notes: {notes}",
             "created_by_admin": True,
             "created_by_admin_id": current_user.id,
@@ -9814,7 +9814,7 @@ async def create_field_exit_request_for_employee(
             "actual_start_time": None,
             "actual_end_time": None,
             "approved_by_id": current_user.id,
-            "approved_at": get_uae_now()  # UAE timezone,
+            "approved_at": datetime.utcnow(),
             "admin_notes": f"Request created by Super Admin ({current_user.name}) on behalf of employee. Notes: {notes}",
             "created_by_admin": True,
             "created_by_admin_id": current_user.id,
@@ -10310,14 +10310,14 @@ async def get_automation_status(current_user: User = Depends(get_super_admin_use
         # Get recent automation logs/activity
         recent_messages = await db.messages.find({
             "message_type": {"$in": ["late_warning", "absence_warning", "penalty_notification"]},
-            "created_at": {"$gte": get_uae_now()  # UAE timezone - timedelta(days=7)}
+            "created_at": {"$gte": datetime.utcnow() - timedelta(days=7)}
         }).sort("created_at", -1).limit(10).to_list(10)
         
         # Get recent penalty applications (if late_penalties collection exists)
         recent_penalties = []
         try:
             recent_penalties = await db.late_penalties.find({
-                "applied_at": {"$gte": get_uae_now()  # UAE timezone - timedelta(days=30)}
+                "applied_at": {"$gte": datetime.utcnow() - timedelta(days=30)}
             }).sort("applied_at", -1).limit(5).to_list(5)
         except:
             pass  # Collection might not exist yet
@@ -10393,7 +10393,7 @@ async def create_client(
     # Generate client code if not provided
     if not client_data.client_code:
         company_initials = ''.join([word[0].upper() for word in client_data.company_name.split()[:3]])
-        timestamp = get_uae_now()  # UAE timezone.strftime("%y%m")
+        timestamp = datetime.now().strftime("%y%m")
         client_data.client_code = f"{company_initials}{timestamp}"
     # Check for duplicate client code
     dup = await work_reports_db.clients.find_one({"client_code": client_data.client_code})
@@ -10412,8 +10412,8 @@ async def create_client(
         "tax_number": client_data.tax_number,
         "commercial_registration": client_data.commercial_registration,
         "is_active": True,
-        "created_at": get_uae_now()  # UAE timezone.isoformat(),
-        "updated_at": get_uae_now()  # UAE timezone.isoformat(),
+        "created_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat(),
         "created_by": current_user.id,
         "created_by_name": current_user.name
     }
@@ -10446,7 +10446,7 @@ async def update_client(
     
     # Prepare update data
     update_data = client_update.dict(exclude_unset=True)
-    update_data["updated_at"] = get_uae_now()  # UAE timezone.isoformat()
+    update_data["updated_at"] = datetime.utcnow().isoformat()
     
     # Update client in MongoDB
     await work_reports_db.clients.update_one(
@@ -10483,7 +10483,7 @@ async def delete_client(
     
     # Soft delete
     client.is_active = False
-    client.updated_at = get_uae_now()  # UAE timezone
+    client.updated_at = datetime.utcnow()
     db.commit()
     
     log_work_reports_activity(
@@ -10580,7 +10580,7 @@ async def get_credential_password(
         raise HTTPException(status_code=404, detail="لا توجد كلمة مرور محفوظة لهذا الاعتماد")
     
     # Update last used timestamp
-    credential.last_used = get_uae_now()  # UAE timezone
+    credential.last_used = datetime.utcnow()
     db.commit()
     
     log_work_reports_activity(
@@ -10756,8 +10756,8 @@ async def create_work_log(
         "hourly_rate": hourly_rate,
         "total_amount": total_amount,
         "status": "open",
-        "created_at": get_uae_now()  # UAE timezone,
-        "updated_at": get_uae_now()  # UAE timezone
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow()
     }
     await work_reports_db.work_logs.insert_one(work_log)
     await log_work_reports_activity(
@@ -10819,7 +10819,7 @@ async def update_work_log(
             update_data["total_amount"] = round((duration_minutes / 60) * hourly_rate, 2) if hourly_rate else doc.get("total_amount", 0)
     except Exception as e:
         logger.warning(f"Work log recompute failed for {log_id}: {e}")
-    update_data["updated_at"] = get_uae_now()  # UAE timezone
+    update_data["updated_at"] = datetime.utcnow()
     await work_reports_db.work_logs.update_one({"id": log_id}, {"$set": update_data})
     # Convert datetime objects to strings for JSON serialization
     def serialize_for_json(data):
@@ -10935,7 +10935,7 @@ async def import_clients_from_excel(
                 company_initials = ''.join([word[0].upper() for word in company_name.split()[:2] if word.strip()])
                 if not company_initials:
                     company_initials = "CL"
-                timestamp = get_uae_now()  # UAE timezone.strftime("%y%m")
+                timestamp = datetime.now().strftime("%y%m")
                 client_code = f"{company_initials}{timestamp}{row_num:03d}"
                 
                 # Check for duplicate
@@ -10959,7 +10959,7 @@ async def import_clients_from_excel(
                     address=row_data.get("Address") or row_data.get("العنوان", ""),
                     tax_number=row_data.get("Tax Number") or row_data.get("TRN") or row_data.get("الرقم الضريبي", ""),
                     commercial_registration=row_data.get("CR Number") or row_data.get("الرخصة التجارية", ""),
-                    notes=f"تم الاستيراد من Excel في {get_uae_now()  # UAE timezone.strftime('%Y-%m-%d')}",
+                    notes=f"تم الاستيراد من Excel في {datetime.now().strftime('%Y-%m-%d')}",
                     created_by=current_user.name
                 )
                 
@@ -11059,21 +11059,21 @@ async def get_work_reports_dashboard(
     total_clients = await work_reports_db.clients.count_documents({"is_active": True})
     
     # Get today's work logs
-    today = get_uae_now()  # UAE timezone.date().isoformat()
+    today = datetime.now().date().isoformat()
     today_logs_filter = {"date": today}
     if current_user.role == "user":
         today_logs_filter["created_by"] = current_user.id
     today_logs = await work_reports_db.work_logs.count_documents(today_logs_filter)
     
     # Get this week's work logs
-    week_start = (get_uae_now()  # UAE timezone.date() - timedelta(days=get_uae_now()  # UAE timezone.weekday())).isoformat()
+    week_start = (datetime.now().date() - timedelta(days=datetime.now().weekday())).isoformat()
     week_logs_filter = {"date": {"$gte": week_start}}
     if current_user.role == "user":
         week_logs_filter["created_by"] = current_user.id
     week_logs = await work_reports_db.work_logs.count_documents(week_logs_filter)
     
     # Get this month's work logs
-    month_start = get_uae_now()  # UAE timezone.date().replace(day=1).isoformat()
+    month_start = datetime.now().date().replace(day=1).isoformat()
     month_logs_filter = {"date": {"$gte": month_start}}
     if current_user.role == "user":
         month_logs_filter["created_by"] = current_user.id
@@ -11139,7 +11139,7 @@ async def get_credential_password(
         raise HTTPException(status_code=404, detail="لا توجد كلمة مرور محفوظة لهذا الاعتماد")
     
     # Update last used timestamp
-    credential.last_used = get_uae_now()  # UAE timezone
+    credential.last_used = datetime.utcnow()
     db.commit()
     
     log_work_reports_activity(
@@ -11239,7 +11239,7 @@ async def setup_sample_data(
         created_logs = []
         for log_data in sample_logs_data:
             # تحقق من وجود سجل مماثل
-            log_date = get_uae_now()  # UAE timezone - timedelta(days=log_data["date_offset"])
+            log_date = datetime.now() - timedelta(days=log_data["date_offset"])
             existing_log = db.query(WorkLog).filter(
                 WorkLog.client_id == sample_client.id,
                 WorkLog.date >= log_date.replace(hour=0, minute=0, second=0),
@@ -11400,7 +11400,7 @@ async def create_or_update_user_permissions(
             if hasattr(permissions, key):
                 setattr(permissions, key, value)
         
-        permissions.last_updated = get_uae_now()  # UAE timezone
+        permissions.last_updated = datetime.utcnow()
         
     else:
         # Create new permissions
@@ -11469,8 +11469,8 @@ async def get_my_permissions(
         user_name=current_user.name,
         user_email=getattr(current_user, 'email', ''),
         permission_level="admin",
-        granted_at=get_uae_now()  # UAE timezone,
-        last_updated=get_uae_now()  # UAE timezone,
+        granted_at=datetime.utcnow(),
+        last_updated=datetime.utcnow(),
         is_active=True,
         # FULL PERMISSIONS FOR EVERYONE
         can_view_credentials=True,
@@ -11501,7 +11501,7 @@ async def revoke_user_permissions(
     
     if permissions:
         permissions.is_active = False
-        permissions.last_updated = get_uae_now()  # UAE timezone
+        permissions.last_updated = datetime.utcnow()
         db.commit()
         
         log_work_reports_activity(
@@ -11700,7 +11700,7 @@ async def export_work_logs_excel(
             after_value={"records_count": len(work_logs)}
         )
         
-        filename = f"work_logs_export_{get_uae_now()  # UAE timezone.strftime('%Y%m%d_%H%M')}.xlsx"
+        filename = f"work_logs_export_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
         
         return Response(
             content=excel_buffer.getvalue(),
