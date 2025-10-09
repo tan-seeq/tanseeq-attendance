@@ -147,6 +147,12 @@ class PayrollLedgerService:
             query["employee_id"] = employee_id
         
         entries = await self.ledger_collection.find(query).to_list(None)
+        
+        # Clean up MongoDB ObjectId for JSON serialization
+        for entry in entries:
+            if "_id" in entry:
+                del entry["_id"]
+        
         return entries
     
     async def get_employee_summary(
