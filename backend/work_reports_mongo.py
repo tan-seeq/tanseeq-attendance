@@ -17,40 +17,56 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# MongoDB connection - Use same connection as main system
-# ✅ Get MONGO_URL from environment (required in production)
-mongo_url = os.environ.get('MONGO_URL')
+# ❌ REMOVED import-time MongoDB connection
+# ✅ Lazy initialization - only connect when actually needed
+_work_reports_client = None
+_work_reports_db = None
 
-# ✅ Raise error if MONGO_URL is missing (fail fast, not silent timeout)
-if not mongo_url:
-    raise ValueError(
-        "MONGO_URL environment variable is required for Work Reports. "
-        "Please set MONGO_URL in your environment configuration."
-    )
+def get_work_reports_client():
+    """Get or create Work Reports MongoDB client (lazy initialization)"""
+    global _work_reports_client
+    if _work_reports_client is None:
+        mongo_url = os.environ.get('MONGO_URL')
+        if not mongo_url:
+            raise ValueError(
+                "MONGO_URL environment variable is required for Work Reports. "
+                "Please set MONGO_URL in your environment configuration."
+            )
+        
+        # Create client with short timeouts to prevent blocking
+        _work_reports_client = AsyncIOMotorClient(
+            mongo_url,
+            serverSelectionTimeoutMS=2000,  # 2 second timeout
+            connectTimeoutMS=2000,
+            socketTimeoutMS=2000,
+            maxPoolSize=10,
+            minPoolSize=1,
+            retryWrites=True
+        )
+        print(f"✅ Work Reports MongoDB client initialized (lazy)")
+    
+    return _work_reports_client
 
-try:
-    # Create MongoDB client with connection pooling and timeout settings
-    # ✅ Non-blocking client creation (actual connection happens on first query)
-    client = AsyncIOMotorClient(
-        mongo_url,
-        serverSelectionTimeoutMS=5000,  # 5 second timeout
-        connectTimeoutMS=5000,
-        socketTimeoutMS=5000,
-        maxPoolSize=10,
-        minPoolSize=1
-    )
+def get_work_reports_db_connection():
+    """Get Work Reports database (lazy initialization)"""
+    global _work_reports_db
+    if _work_reports_db is None:
+        client = get_work_reports_client()
+        db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
+        _work_reports_db = client[f"{db_name}_work_reports"]
+        print(f"✅ Work Reports database ready: {db_name}_work_reports")
     
-    # ✅ Get database name from environment
-    db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
-    work_reports_db = client[f"{db_name}_work_reports"]
-    
-    # ✅ Success message (connection will be tested on first actual query)
-    print(f"✅ Work Reports MongoDB client initialized successfully (database: {db_name}_work_reports)")
-    
-except Exception as e:
-    # ✅ Log error and re-raise (fail fast, not silent)
-    print(f"❌ CRITICAL: Work Reports MongoDB initialization failed: {e}")
-    raise
+    return _work_reports_db
+
+# Backward compatibility - return None initially, will be set on first access
+work_reports_db = None
+
+def _ensure_work_reports_db():
+    """Internal helper to ensure work_reports_db is initialized"""
+    global work_reports_db
+    if work_reports_db is None:
+        work_reports_db = get_work_reports_db_connection()
+    return work_reports_db
 
 # Encryption key for client credentials 
 ENCRYPTION_KEY = os.environ.get('WORK_REPORTS_ENCRYPTION_KEY', 
