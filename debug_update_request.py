@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-BASE_URL = "https://hr-system-upgrade.preview.emergentagent.com/api"
+BASE_URL = "https://hr-system-fix.preview.emergentagent.com/api"
 TEST_ACCOUNT = {"email": "admin@tanseeq.com", "password": "ADMIN"}
 
 def debug_update_request():

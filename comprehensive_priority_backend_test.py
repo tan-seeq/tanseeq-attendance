@@ -13,7 +13,7 @@ import time
 import uuid
 
 # Configuration - Use environment variable
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://hr-system-upgrade.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://hr-system-fix.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 # Test accounts from review request
