@@ -204,17 +204,17 @@ async def ensure_test_super_admin():
                 "password": hash_password("ADMIN"),
                 "created_at": now,
             }
-            await db.users.insert_one(test_user)
-            logger.info("Created test Super Admin user admin@tanseeq.com / ADMIN")
+            await _db.users.insert_one(test_user)
+            print("✅ Created test Super Admin user admin@tanseeq.com / ADMIN")
         else:
             # Ensure role and active status are correct
             updates = {"role": "super_admin", "is_active": True}
             if existing.get("password") is None:
                 updates["password"] = hash_password("ADMIN")
-            await db.users.update_one({"email": admin_email}, {"$set": updates})
-            logger.info("Verified test Super Admin user exists")
+            await _db.users.update_one({"email": admin_email}, {"$set": updates})
+            print("✅ Verified test Super Admin user exists")
     except Exception as e:
-        logger.error(f"Failed to ensure test Super Admin user: {e}")
+        print(f"⚠️ Failed to ensure test Super Admin user: {e}")
 
 # Create uploads directory
 uploads_dir = ROOT_DIR / "uploads"
