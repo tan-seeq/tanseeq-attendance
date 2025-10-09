@@ -4246,11 +4246,14 @@ async def get_installment_schedule(
 
 @app.get("/api/payroll/installment-schedules")
 async def get_all_installment_schedules(
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
-    """جلب جميع جدولات الأقساط (سوبر أدمن فقط)"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """
+    جلب جميع جدولات الأقساط - Super Admin Only
+    Get all installment schedules - Financial overview
+    
+    🔒 RBAC: Restricted to Super Admin only - financial data overview
+    """
     
     try:
         # جلب جميع جدولات الأقساط
