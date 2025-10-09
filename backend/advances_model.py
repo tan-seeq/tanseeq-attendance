@@ -53,7 +53,7 @@ class Attachment(BaseModel):
     file_path: str
     file_size: int
     file_type: str  # MIME type
-    uploaded_at: datetime = Field(default_factory=lambda: get_uae_now()  # UAE timezone)
+    uploaded_at: datetime = Field(default_factory=lambda: get_uae_now())  # UAE timezone
 
 # Base Transaction Model
 class AdvanceTransaction(BaseModel):
