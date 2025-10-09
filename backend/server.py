@@ -95,10 +95,9 @@ async def _init_db_if_needed():
         )
         app.state.db = client[db_name]
 
-# Backwards compatibility: accessor
-@property
-def db():
-    return app.state.db
+# Global DB handles (set on startup)
+db = None
+mongo_client = None
 
 # JWT Configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-here')
