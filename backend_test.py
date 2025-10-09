@@ -590,7 +590,7 @@ class BackendTester:
                 },
                 "test_results": self.test_results,
                 "test_data": self.test_data
-            }, indent=2)
+            }, f, indent=2)
         
         print(f"\n📄 Detailed results saved to: /app/backend_test_results.json")
 
