@@ -94,6 +94,11 @@ async def _init_db_if_needed():
             minPoolSize=1,
         )
         app.state.db = client[db_name]
+        app.state.mongo_client = client
+        # set module-level globals for backward compatibility
+        global db, mongo_client
+        db = app.state.db
+        mongo_client = client
 
 # Global DB handles (set on startup)
 db = None
