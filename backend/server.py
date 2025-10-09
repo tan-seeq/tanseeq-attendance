@@ -11822,58 +11822,6 @@ async def export_work_logs_excel(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Excel export failed: {str(e)}")
 
-# Include the router in the main app
-app.include_router(api_router)
-
-# ---- Health router ----
-health_router = APIRouter(prefix="/api")
-
-@health_router.get("/healthz")
-async def healthz(request: Request):
-    try:
-        db = getattr(request.app.state, "db", None)
-        if db is None:
-            return {"status": "starting", "db": "not_initialized"}
-        # quick ping with timeout using Motor command
-        import asyncio
-        try:
-            await asyncio.wait_for(db.command("ping"), timeout=1.0)
-            return {"status": "ok"}
-        except Exception:
-            return {"status": "degraded", "db": "unreachable"}
-    except Exception:
-        return {"status": "error"}
-
-app.include_router(health_router)
-
-# ---- Salary letter router inclusion (order-safe) ----
-from salary_letter_router import build_salary_letter_router
-salary_router = build_salary_letter_router(get_current_user)
-app.include_router(salary_router)
-
-# Include the router in the main app
-app.include_router(api_router)
-
-# ---- Health router ----
-health_router = APIRouter(prefix="/api")
-
-@health_router.get("/healthz")
-async def healthz(request: Request):
-    try:
-        _db = getattr(request.app.state, "db", None)
-        if _db is None:
-            return {"status": "starting", "db": "not_initialized"}
-        import asyncio
-        try:
-            await asyncio.wait_for(_db.command("ping"), timeout=1.0)
-            return {"status": "ok"}
-        except Exception:
-            return {"status": "degraded", "db": "unreachable"}
-    except Exception:
-        return {"status": "error"}
-
-app.include_router(health_router)
-
 # ---- Health router ----
 health_router = APIRouter(prefix="/api")
 
@@ -11899,11 +11847,8 @@ from salary_letter_router import build_salary_letter_router
 salary_router = build_salary_letter_router(get_current_user)
 app.include_router(salary_router)
 
-
-# ---- Salary letter router inclusion (order-safe) ----
-from salary_letter_router import build_salary_letter_router
-salary_router = build_salary_letter_router(get_current_user)
-app.include_router(salary_router)
+# Include the router in the main app
+app.include_router(api_router)
 
 
 # CORS middleware
