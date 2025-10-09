@@ -3986,7 +3986,7 @@ async def get_employee_ledger_entries(
             "filters": {
                 "start_date": start_date,
                 "end_date": end_date,
-                "entry_type": entry_type
+                "source_type": source_type
             }
         }
         
