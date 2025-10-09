@@ -289,7 +289,7 @@ class AdvancesCreateTester:
 def main():
     # Get backend URL from environment or use default
     import os
-    backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://salary-processor-1.preview.emergentagent.com')
+    backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://tanseeq-payroll-1.preview.emergentagent.com')
     
     print(f"🔧 Using Backend URL: {backend_url}")
     

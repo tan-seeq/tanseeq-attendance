@@ -142,6 +142,6 @@ class PermissionsAPITester:
         print(f"Success Rate: {(self.tests_passed / self.tests_run * 100):.1f}%")
 
 if __name__ == "__main__":
-    base_url = "https://salary-processor-1.preview.emergentagent.com"
+    base_url = "https://tanseeq-payroll-1.preview.emergentagent.com"
     tester = PermissionsAPITester(base_url)
     tester.test_permissions_endpoints()

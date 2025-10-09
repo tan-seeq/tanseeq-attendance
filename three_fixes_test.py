@@ -14,7 +14,7 @@ from datetime import datetime
 import os
 
 # Get backend URL from environment
-BACKEND_URL = "https://salary-processor-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://tanseeq-payroll-1.preview.emergentagent.com/api"
 
 class ThreeFixesTester:
     def __init__(self):

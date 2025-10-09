@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://salary-processor-1.preview.emergentagent.com
-    - **Backend URL**: https://salary-processor-1.preview.emergentagent.com/api
+    - **Frontend URL**: https://tanseeq-payroll-1.preview.emergentagent.com
+    - **Backend URL**: https://tanseeq-payroll-1.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 
