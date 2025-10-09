@@ -2762,15 +2762,15 @@ async def apply_monthly_deductions(
                 }).to_list(None)
                 
                 for installment in installments:
-                    await ledger_service.create_ledger_entry(
+                    await ledger_service.create_entry(
                         employee_id=employee_id,
                         cycle_id=cycle_id,
-                        entry_type="ADVANCE_INSTALLMENT",
+                        source_type="ADVANCE_INSTALLMENT",
+                        source_id=installment.get("id"),
                         amount=-installment.get("installment_amount", 0),  # سالب للخصم
                         description=f"قسط سلفة رقم {installment.get('installment_number', 0)} - استحقاق {installment.get('due_date', '')[:10]}",
-                        source_type="advance_installment",
-                        source_id=installment.get("id"),
-                        created_by=current_user.id
+                        created_by=current_user.id,
+                        metadata={"installment_number": installment.get('installment_number')}
                     )
             
             # Mark installments as applied
