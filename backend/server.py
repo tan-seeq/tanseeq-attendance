@@ -11800,6 +11800,31 @@ async def export_work_logs_excel(
                     sum([log.total_amount or 0 for log in work_logs if log.is_billable]) / 
                     max(sum([(log.duration_minutes or 0) / 60 for log in work_logs if log.is_billable]), 1)
 
+                ]
+            }
+            pd.DataFrame(summary_data).to_excel(writer, sheet_name='Summary', index=False)
+        
+        excel_buffer.seek(0)
+        
+        log_work_reports_activity(
+            db, current_user.id, current_user.name, "export_excel",
+            after_value={"records_count": len(work_logs)}
+        )
+        
+        filename = f"work_logs_export_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+        
+        return Response(
+            content=excel_buffer.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Excel export failed: {str(e)}")
+
+# Include the router in the main app
+app.include_router(api_router)
+
 # ---- Health router ----
 health_router = APIRouter(prefix="/api")
 
