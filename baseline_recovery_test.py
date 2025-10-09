@@ -368,7 +368,7 @@ class BaselineRecoveryTester:
         # Test HTML salary letter
         status, html_response = await self.make_request(
             "GET", 
-            f"/payroll/cycles/{cycle_id}/salary-letter/{employee_id}?format=html", 
+            f"/payroll/cycles/{cycle_id}/employees/{employee_id}/letter?format=html", 
             token
         )
         
@@ -389,7 +389,7 @@ class BaselineRecoveryTester:
         # Test PDF salary letter
         status, pdf_response = await self.make_request(
             "GET", 
-            f"/payroll/cycles/{cycle_id}/salary-letter/{employee_id}?format=pdf", 
+            f"/payroll/cycles/{cycle_id}/employees/{employee_id}/letter?format=pdf", 
             token
         )
         
