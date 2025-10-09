@@ -298,16 +298,15 @@ async def get_work_reports_db():
 async def init_work_reports_collections():
     """Initialize MongoDB collections and indexes for work reports - Fast & Non-blocking"""
     try:
-        if work_reports_db is None:
-            print("Work Reports database not available, skipping initialization")
-            return True
+        # ✅ Use lazy initialization
+        db = _ensure_work_reports_db()
             
         # Create essential indexes only, avoid blocking operations
         import asyncio
         
         # Test connection first with quick timeout
         await asyncio.wait_for(
-            work_reports_db.command("ping"),
+            db.command("ping"),
             timeout=2.0
         )
         
