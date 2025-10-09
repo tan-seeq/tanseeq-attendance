@@ -3,96 +3,96 @@
     "test": "Authentication - super_admin",
     "status": "PASS",
     "details": "Successfully authenticated admin@tanseeq.com (Role: super_admin)",
-    "timestamp": "2025-10-07T09:56:30.513250"
+    "timestamp": "2025-10-09T05:13:48.673886"
   },
   {
     "test": "Authentication - user",
     "status": "PASS",
     "details": "Successfully authenticated jihad@tanseeq.com (Role: user)",
-    "timestamp": "2025-10-07T09:56:30.756816"
+    "timestamp": "2025-10-09T05:13:48.961342"
   },
   {
     "test": "Payroll Cycles - List All",
     "status": "PASS",
     "details": "Retrieved 6 cycles with proper JSON structure",
-    "timestamp": "2025-10-07T09:56:30.768074"
+    "timestamp": "2025-10-09T05:13:48.976498"
   },
   {
     "test": "Payroll Cycles - Calculate (Corrected)",
     "status": "FAIL",
     "details": "Exception: 'list' object has no attribute 'get'",
-    "timestamp": "2025-10-07T09:56:30.822061"
+    "timestamp": "2025-10-09T05:13:49.030444"
   },
   {
     "test": "Employees List - Get ID",
     "status": "PASS",
     "details": "Retrieved employee ID: eed6d28b-7639-4d31-9386-4e99b9179d8f",
-    "timestamp": "2025-10-07T09:56:30.829937"
+    "timestamp": "2025-10-09T05:13:49.082019"
   },
   {
     "test": "Manual Deductions - Create (Corrected)",
     "status": "PASS",
     "details": "Created manual deduction using POST /deductions/manual: None",
-    "timestamp": "2025-10-07T09:56:30.892143"
+    "timestamp": "2025-10-09T05:13:49.118383"
   },
   {
     "test": "Attendance Policies - Get Employee Policy",
     "status": "PASS",
     "details": "Retrieved attendance policy using GET /attendance/policies/eed6d28b-7639-4d31-9386-4e99b9179d8f",
-    "timestamp": "2025-10-07T09:56:30.908702"
+    "timestamp": "2025-10-09T05:13:49.139076"
   },
   {
     "test": "Work Reports - Create Client",
     "status": "PASS",
-    "details": "Created client for work logs: f5d7aacf-828c-4495-87f2-1a5ff8e8ab37",
-    "timestamp": "2025-10-07T09:56:30.921424"
+    "details": "Created client for work logs: b71aaeec-5158-4ca3-8720-8c0a424d8a9f",
+    "timestamp": "2025-10-09T05:13:49.191524"
   },
   {
     "test": "Work Reports - Get Activity Types",
     "status": "PASS",
     "details": "Retrieved 4 activity types",
-    "timestamp": "2025-10-07T09:56:30.971961"
+    "timestamp": "2025-10-09T05:13:49.205301"
   },
   {
     "test": "Work Reports - Create Log (Corrected)",
     "status": "PASS",
-    "details": "Created work log with valid client/activity: ddf427a1-8bb1-4705-95ae-b942787757f3",
-    "timestamp": "2025-10-07T09:56:31.049996"
+    "details": "Created work log with valid client/activity: 72366103-3fa3-4dd0-9015-ce02c4baadc3",
+    "timestamp": "2025-10-09T05:13:49.236645"
   },
   {
     "test": "Work Reports - Update Log (Corrected)",
     "status": "PASS",
     "details": "Log updated with duration/amount recompute",
-    "timestamp": "2025-10-07T09:56:31.063908"
+    "timestamp": "2025-10-09T05:13:49.291164"
   },
   {
     "test": "Work Reports - Delete Log (Corrected)",
     "status": "PASS",
     "details": "Log deleted successfully",
-    "timestamp": "2025-10-07T09:56:31.075935"
+    "timestamp": "2025-10-09T05:13:49.303747"
   },
   {
     "test": "Marketing Visits - Start",
     "status": "PASS",
-    "details": "Visit started: a546354c-3b7f-44ce-8330-20d8388696f7",
-    "timestamp": "2025-10-07T09:56:31.085085"
+    "details": "Visit started: 8fdd63a8-0774-48cd-ab7c-5121704f49fd",
+    "timestamp": "2025-10-09T05:13:49.321032"
   },
   {
     "test": "Marketing Visits - Complete",
     "status": "PASS",
     "details": "Visit completed with mandatory report",
-    "timestamp": "2025-10-07T09:56:34.101131"
+    "timestamp": "2025-10-09T05:13:52.355728"
   },
   {
     "test": "Marketing Visits - Super Admin Notification (/notifications/my)",
     "status": "INFO",
     "details": "No recent visit notifications found in 0 total notifications",
-    "timestamp": "2025-10-07T09:56:36.110482"
+    "timestamp": "2025-10-09T05:13:54.368173"
   },
   {
     "test": "Marketing Visits - Super Admin Notification (/notifications)",
     "status": "PASS",
-    "details": "Found 10 recent visit-related notifications",
-    "timestamp": "2025-10-07T09:56:36.131965"
+    "details": "Found 5 recent visit-related notifications",
+    "timestamp": "2025-10-09T05:13:54.395270"
   }
 ]
