@@ -11795,6 +11795,33 @@ async def export_work_logs_excel(
                     sum([log.total_amount or 0 for log in work_logs if log.is_billable]),
                     sum([log.total_amount or 0 for log in work_logs if log.is_billable]) / 
                     max(sum([(log.duration_minutes or 0) / 60 for log in work_logs if log.is_billable]), 1)
+
+# ---- Health router ----
+health_router = APIRouter(prefix="/api")
+
+@health_router.get("/healthz")
+async def healthz(request: Request):
+    try:
+        db = getattr(request.app.state, "db", None)
+        if db is None:
+            return {"status": "starting", "db": "not_initialized"}
+        # quick ping with timeout using Motor command
+        import asyncio
+        try:
+            await asyncio.wait_for(db.command("ping"), timeout=1.0)
+            return {"status": "ok"}
+        except Exception:
+            return {"status": "degraded", "db": "unreachable"}
+    except Exception:
+        return {"status": "error"}
+
+app.include_router(health_router)
+
+# ---- Salary letter router inclusion (order-safe) ----
+from salary_letter_router import build_salary_letter_router
+salary_router = build_salary_letter_router(get_current_user)
+app.include_router(salary_router)
+
                 ]
             }
             pd.DataFrame(summary_data).to_excel(writer, sheet_name='Summary', index=False)
