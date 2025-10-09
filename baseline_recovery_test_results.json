@@ -1,26 +1,89 @@
 {
   "summary": {
-    "total_tests": 2,
-    "passed": 1,
-    "failed": 1,
+    "total_tests": 11,
+    "passed": 5,
+    "failed": 6,
     "partial": 0,
-    "success_rate": "50.0%"
+    "success_rate": "45.5%"
   },
   "test_results": [
     {
       "test_name": "Authentication (super_admin)",
       "status": "PASS",
       "details": "Successfully authenticated as hatem@tan-seeq.co",
-      "timestamp": "2025-10-09T05:37:40.491508",
+      "timestamp": "2025-10-09T05:38:03.901148",
       "response_data": null
     },
     {
-      "test_name": "Test Suite",
+      "test_name": "Get Payroll Cycles",
+      "status": "PASS",
+      "details": "Found 6 cycles, testing with cycle 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "timestamp": "2025-10-09T05:38:03.913657",
+      "response_data": null
+    },
+    {
+      "test_name": "Payroll Ledger Endpoint",
+      "status": "PASS",
+      "details": "Status 200, 17 entries, summary types: ['ADVANCE_INSTALLMENT', 'MANUAL_DEDUCTION']",
+      "timestamp": "2025-10-09T05:38:03.926658",
+      "response_data": null
+    },
+    {
+      "test_name": "Payroll Update Employees",
       "status": "FAIL",
-      "details": "Unexpected error: 'list' object has no attribute 'get'",
-      "timestamp": "2025-10-09T05:37:40.507005",
+      "details": "Status 500: {'detail': 'Error updating employees: can only concatenate list (not \"int\") to list'}",
+      "timestamp": "2025-10-09T05:38:04.007407",
+      "response_data": null
+    },
+    {
+      "test_name": "Authentication (user)",
+      "status": "PASS",
+      "details": "Successfully authenticated as jihad@tanseeq.com",
+      "timestamp": "2025-10-09T05:38:04.291088",
+      "response_data": null
+    },
+    {
+      "test_name": "Installments RBAC (User)",
+      "status": "PASS",
+      "details": "Regular user correctly denied access (403)",
+      "timestamp": "2025-10-09T05:38:04.300994",
+      "response_data": null
+    },
+    {
+      "test_name": "Installments Validation",
+      "status": "FAIL",
+      "details": "Expected 400/422, got 500: {'detail': 'Error creating installment schedule: 400: \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0645\u0637\u0644\u0648\u0628\u0629'}",
+      "timestamp": "2025-10-09T05:38:04.366257",
+      "response_data": null
+    },
+    {
+      "test_name": "Installments Creation",
+      "status": "FAIL",
+      "details": "Status 500: {'detail': 'Error creating installment schedule: 400: \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0645\u0637\u0644\u0648\u0628\u0629'}",
+      "timestamp": "2025-10-09T05:38:04.375760",
+      "response_data": null
+    },
+    {
+      "test_name": "Salary Letter HTML",
+      "status": "FAIL",
+      "details": "Status 404: {'detail': 'Not Found'}",
+      "timestamp": "2025-10-09T05:38:04.410940",
+      "response_data": null
+    },
+    {
+      "test_name": "Salary Letter PDF",
+      "status": "FAIL",
+      "details": "Status 404: {'detail': 'Not Found'}",
+      "timestamp": "2025-10-09T05:38:04.458568",
+      "response_data": null
+    },
+    {
+      "test_name": "Timezone Verification",
+      "status": "FAIL",
+      "details": "No +04:00 timezone found in any timestamp fields",
+      "timestamp": "2025-10-09T05:38:04.523015",
       "response_data": null
     }
   ],
-  "timestamp": "2025-10-09T05:37:40.507228"
+  "timestamp": "2025-10-09T05:38:04.523314"
 }
