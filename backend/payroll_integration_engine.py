@@ -651,7 +651,7 @@ class PayrollIntegrationEngine:
             "performed_by": performed_by,
             "details": details,
             "metadata": metadata or {},
-            "timestamp": get_uae_now()  # UAE timezone.isoformat(),
+            "timestamp": get_uae_now(),  # UAE timezone
             "ip_address": None,  # يمكن إضافته لاحقاً
             "user_agent": None   # يمكن إضافته لاحقاً
         }
