@@ -3629,11 +3629,14 @@ async def recompute_attendance(
 @app.post("/api/payroll/cycles")
 async def create_payroll_cycle(
     cycle_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
-    """إنشاء دورة راتب جديدة (سوبر أدمن فقط)"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """
+    إنشاء دورة راتب جديدة - Super Admin Only
+    Create new payroll cycle - Financial operation
+    
+    🔒 RBAC: Restricted to Super Admin only - cycle creation is critical
+    """
     
     try:
         global payroll_engine
