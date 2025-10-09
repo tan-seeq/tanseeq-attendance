@@ -68,7 +68,12 @@ class PayrollLedgerTester:
             async with self.session.get(f"{BACKEND_URL}/api/payroll/cycles", headers=self.get_headers()) as response:
                 if response.status == 200:
                     data = await response.json()
-                    cycles = data.get("cycles", [])
+                    # Handle both list and dict responses
+                    if isinstance(data, list):
+                        cycles = data
+                    else:
+                        cycles = data.get("cycles", [])
+                    
                     if cycles:
                         cycle_id = cycles[0]["id"]
                         print(f"✅ Found test cycle ID: {cycle_id}")
