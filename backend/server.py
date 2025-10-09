@@ -3999,11 +3999,14 @@ async def get_employee_ledger_entries(
 async def update_payroll_cycle_employees(
     cycle_id: str,
     update_data: dict,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
 ):
-    """تعديل بيانات رواتب الموظفين في دورة معينة"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
+    """
+    تعديل بيانات رواتب الموظفين في دورة معينة - Super Admin Only
+    Update payroll cycle employee data (recalculate with new values)
+    
+    🔒 RBAC: Restricted to Super Admin only - financial modifications require highest privilege
+    """
     
     try:
         # Check if cycle exists and is not locked
