@@ -1996,16 +1996,38 @@ attendance_engine = AttendanceEngine(db)
 
 @app.on_event("startup")
 async def initialize_attendance_engine():
-    """Initialize attendance engine on startup"""
+    """
+    Initialize attendance engine on startup
+    ✅ Non-blocking: runs in background if initialization is slow
+    """
     global attendance_engine, payroll_engine
     from attendance_engine import AttendanceEngine
     from payroll_integration_engine import PayrollIntegrationEngine
     
-    attendance_engine = AttendanceEngine(db)
-    await attendance_engine.initialize()
-    
-    payroll_engine = PayrollIntegrationEngine(db)
-    print("✅ Payroll integration engine initialized successfully")
+    try:
+        # ✅ Initialize engines (fast operations)
+        attendance_engine = AttendanceEngine(db)
+        payroll_engine = PayrollIntegrationEngine(db)
+        
+        # ✅ Run slow initialization in background (non-blocking)
+        import asyncio
+        async def init_attendance_background():
+            try:
+                await attendance_engine.initialize()
+                print("✅ Attendance engine initialized successfully")
+            except Exception as e:
+                print(f"⚠️  Attendance engine initialization warning: {e}")
+        
+        # ✅ Don't block startup - run in background
+        asyncio.create_task(init_attendance_background())
+        
+        print("✅ Payroll integration engine initialized successfully")
+        
+    except Exception as e:
+        print(f"❌ Engine initialization error: {e}")
+        # Don't crash the entire server
+        attendance_engine = None
+        payroll_engine = None
 
 @api_router.get("/attendance/policies/{employee_id}")
 async def get_employee_attendance_policy(
