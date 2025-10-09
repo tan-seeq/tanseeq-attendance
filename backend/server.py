@@ -943,21 +943,40 @@ async def check_out(current_user: User = Depends(get_current_user)):
     current_time = get_uae_time()
     check_out_time = current_time.strftime('%H:%M:%S')
     
-    # Calculate working hours
+    # Calculate working hours AND deductions
     check_in_str = existing_attendance.get("check_in")
     if check_in_str:
-        check_in_time = datetime.strptime(f"{today} {check_in_str}", "%Y-%m-%d %H:%M:%S")
-        check_out_time_dt = datetime.strptime(f"{today} {check_out_time}", "%Y-%m-%d %H:%M:%S")
-        working_hours = (check_out_time_dt - check_in_time).total_seconds() / 3600
+        # Use full datetime string format (YYYY-MM-DD HH:MM:SS)
+        check_in_full = f"{today} {check_in_str}"
+        check_out_full = f"{today} {check_out_time}"
+        
+        # ✅ Calculate working hours and deductions using the utility function
+        work_calc = calculate_working_hours_and_deductions(
+            check_in=check_in_full,
+            check_out=check_out_full,
+            break_time_minutes=0,
+            is_admin_edited=False
+        )
+        
+        working_hours = work_calc.get("total_hours", 0)
+        late_minutes = work_calc.get("late_minutes", 0)
+        early_departure_minutes = work_calc.get("early_departure_minutes", 0)
+        deducted_hours = work_calc.get("deducted_hours", 0)
     else:
         working_hours = 0
+        late_minutes = 0
+        early_departure_minutes = 0
+        deducted_hours = 0
     
-    # Update attendance record
+    # ✅ Update attendance record with all calculated fields
     await db.attendance.update_one(
         {"user_id": current_user.id, "date": today},
         {"$set": {
             "check_out": check_out_time,
-            "working_hours": round(working_hours, 2)
+            "working_hours": round(working_hours, 2),
+            "late_minutes": late_minutes,
+            "early_departure_minutes": early_departure_minutes,
+            "deducted_hours": round(deducted_hours, 2)
         }}
     )
     
