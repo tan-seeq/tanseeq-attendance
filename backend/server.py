@@ -5133,7 +5133,7 @@ async def mark_notification_read(
     try:
         result = await db.notifications.update_one(
             {"id": notification_id},
-            {"$set": {"is_read": True, "read_at": get_uae_now()  # UAE timezone.isoformat()}}
+            {"$set": {"is_read": True, "read_at": to_iso_string_uae()}}  # UAE timezone
         )
         
         if result.matched_count == 0:
