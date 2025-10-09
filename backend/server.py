@@ -1024,8 +1024,11 @@ async def create_expense_with_invoice(
                     )
                 
                 # إنشاء مجلد الحفظ
-                upload_dir = f"/app/uploads/expenses/{current_user.id}"
-                os.makedirs(upload_dir, exist_ok=True)
+                # ✅ Use ROOT_DIR for deployment compatibility
+                from pathlib import Path
+                ROOT_DIR = Path(__file__).parent
+                upload_dir = ROOT_DIR / "uploads" / "expenses" / current_user.id
+                upload_dir.mkdir(parents=True, exist_ok=True)
                 
                 # إنشاء اسم ملف فريد
                 file_extension = os.path.splitext(file.filename)[1]
