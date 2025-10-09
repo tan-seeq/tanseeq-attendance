@@ -152,25 +152,32 @@ async def ensure_test_super_admin():
     """
     Ensure default Super Admin user exists
     ✅ With timeout protection - doesn't block startup indefinitely
+    ✅ Uses lazy DB initialization
     """
     try:
+        # ✅ Initialize DB lazily
+        _db = _ensure_db()
+        
         # ✅ Create index with timeout
         import asyncio
         await asyncio.wait_for(
-            db.users.create_index("email", unique=True),
+            _db.users.create_index("email", unique=True),
             timeout=5.0  # 5 second timeout
         )
     except asyncio.TimeoutError:
-        logger.warning("Index creation timed out, continuing...")
+        print("⚠️ Index creation timed out, continuing...")
+        return  # Exit early if timeout
     except Exception as e:
-        logger.warning(f"Index creation warning: {e}")
+        print(f"⚠️ Index creation warning: {e}")
+        return  # Exit early if error
     
     try:
         # ✅ Check and create admin user with timeout
         admin_email = "admin@tanseeq.com"
+        _db = _ensure_db()  # Ensure DB is ready
         import asyncio
         existing = await asyncio.wait_for(
-            db.users.find_one({"email": admin_email}),
+            _db.users.find_one({"email": admin_email}),
             timeout=5.0  # 5 second timeout
         )
         if not existing:
