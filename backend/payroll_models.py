@@ -559,7 +559,9 @@ class PayrollDB:
         """تحضير البيانات للحفظ في MongoDB"""
         prepared = {}
         for key, value in data.items():
-            if isinstance(value, (date, datetime)):
+            if isinstance(value, datetime):
+                prepared[key] = to_iso_string_uae(value)
+            elif isinstance(value, date):
                 prepared[key] = value.isoformat()
             elif isinstance(value, Enum):
                 prepared[key] = value.value
