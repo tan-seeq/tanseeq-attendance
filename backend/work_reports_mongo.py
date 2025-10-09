@@ -335,14 +335,13 @@ async def init_work_reports_collections():
 async def init_default_activity_types():
     """Initialize default activity types - Fast & Non-blocking"""
     try:
-        if work_reports_db is None:
-            print("Work Reports database not available, skipping activity types initialization")
-            return 0
+        # ✅ Use lazy initialization
+        db = _ensure_work_reports_db()
             
         # Quick check with timeout
         import asyncio
         existing_count = await asyncio.wait_for(
-            work_reports_db.activity_types.count_documents({}, limit=1),
+            db.activity_types.count_documents({}, limit=1),
             timeout=2.0
         )
         
