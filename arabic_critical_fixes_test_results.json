@@ -1,0 +1,283 @@
+{
+  "test_results": [
+    {
+      "test_name": "Admin Authentication",
+      "status": "PASS",
+      "details": "Logged in as مدير النظام",
+      "timestamp": "2025-10-09T10:22:04.219646",
+      "response_data": null
+    },
+    {
+      "test_name": "Attendance Check-In",
+      "status": "PASS",
+      "details": "Check-in successful at 14:22:04, Status: متأخر",
+      "timestamp": "2025-10-09T10:22:04.240048",
+      "response_data": {
+        "message": "تم تسجيل الحضور بنجاح ✅",
+        "check_in_time": "14:22:04",
+        "status": "متأخر",
+        "is_late": true
+      }
+    },
+    {
+      "test_name": "Attendance Check-Out",
+      "status": "PASS",
+      "details": "Check-out successful at 14:22:04, Working hours: 0",
+      "timestamp": "2025-10-09T10:22:04.257846",
+      "response_data": {
+        "message": "تم تسجيل الانصراف بنجاح ✅",
+        "check_out_time": "14:22:04",
+        "working_hours": 0
+      }
+    },
+    {
+      "test_name": "Monthly Deductions Calculation",
+      "status": "PASS",
+      "details": "Calculation successful for 2025-10. Found attendance records with user_id",
+      "timestamp": "2025-10-09T10:22:04.312482",
+      "response_data": {
+        "success": true,
+        "month": "2025-10",
+        "employees": [
+          {
+            "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+            "employee_name": "Tarek Wazzan",
+            "late_deduction": 0,
+            "absence_deduction": 133.33,
+            "advance_deduction": 0,
+            "total_deduction": 133.33,
+            "deduction_details": [
+              "غياب 1 يوم"
+            ],
+            "late_count": 0,
+            "absence_count": 1,
+            "installment_count": 0
+          },
+          {
+            "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+            "employee_name": "Tarek Hegazy",
+            "late_deduction": 0,
+            "absence_deduction": 166.67,
+            "advance_deduction": 0,
+            "total_deduction": 166.67,
+            "deduction_details": [
+              "غياب 1 يوم"
+            ],
+            "late_count": 0,
+            "absence_count": 1,
+            "installment_count": 0
+          },
+          {
+            "employee_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+            "employee_name": "Kareem",
+            "late_deduction": 0,
+            "absence_deduction": 83.33,
+            "advance_deduction": 0,
+            "total_deduction": 83.33,
+            "deduction_details": [
+              "غياب 1 يوم"
+            ],
+            "late_count": 0,
+            "absence_count": 1,
+            "installment_count": 0
+          },
+          {
+            "employee_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+            "employee_name": "Hesham",
+            "late_deduction": 0,
+            "absence_deduction": 83.33,
+            "advance_deduction": 0,
+            "total_deduction": 83.33,
+            "deduction_details": [
+              "غياب 1 يوم"
+            ],
+            "late_count": 0,
+            "absence_count": 1,
+            "installment_count": 0
+          },
+          {
+            "employee_id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+            "employee_name": "Mohamed Mostafa",
+            "late_deduction": 0,
+            "absence_deduction": 116.67,
+            "advance_deduction": 0,
+            "total_deduction": 116.67,
+            "deduction_details": [
+              "غياب 1 يوم"
+            ],
+            "late_count": 0,
+            "absence_count": 1,
+            "installment_count": 0
+          },
+          {
+            "employee_id": "admin_001",
+            "employee_name": "مدير النظام",
+            "late_deduction": 319.79,
+            "absence_deduction": 0,
+            "advance_deduction": 0,
+            "total_deduction": 319.79,
+            "deduction_details": [
+              "تأخير 1 مرات - 307 دقيقة قابلة للخصم"
+            ],
+            "late_count": 1,
+            "absence_count": 0,
+            "installment_count": 0
+          }
+        ],
+        "total_deductions": 903.12,
+        "employee_count": 6
+      }
+    },
+    {
+      "test_name": "Apply Monthly Deductions",
+      "status": "FAIL",
+      "details": "Status 500: خطأ في تطبيق الخصومات: 400: البيانات غير مكتملة",
+      "timestamp": "2025-10-09T10:22:04.325828",
+      "response_data": {
+        "detail": "خطأ في تطبيق الخصومات: 400: البيانات غير مكتملة"
+      }
+    },
+    {
+      "test_name": "Advances Balance Check",
+      "status": "FAIL",
+      "details": "Exception: 500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://hr-system-fix.preview.emergentagent.com/api/advances/my-balance'",
+      "timestamp": "2025-10-09T10:22:04.339959",
+      "response_data": null
+    },
+    {
+      "test_name": "Payroll Cycles Retrieval",
+      "status": "FAIL",
+      "details": "Exception: 'list' object has no attribute 'get'",
+      "timestamp": "2025-10-09T10:22:04.351362",
+      "response_data": null
+    }
+  ],
+  "test_data": {
+    "admin_user": {
+      "id": "admin_001",
+      "name": "مدير النظام",
+      "email": "admin@tanseeq.com",
+      "role": "super_admin",
+      "position": "مدير",
+      "monthly_salary": 15000.0,
+      "daily_rate": 500.0,
+      "working_hours_start": "08:00",
+      "working_hours_end": "18:00",
+      "phone": "+971501234567",
+      "hire_date": null,
+      "is_active": true,
+      "has_custom_schedule": false,
+      "has_flexible_schedule": true,
+      "flexible_hours_per_day": 8.0,
+      "flexible_start_range": "07:00-11:00",
+      "flexible_end_range": "16:00-20:00",
+      "flexible_core_hours": "10:00-15:00",
+      "flexible_days_per_week": 5
+    },
+    "check_in_time": "14:22:04",
+    "check_out_time": "14:22:04",
+    "working_hours": 0,
+    "monthly_deductions": {
+      "success": true,
+      "month": "2025-10",
+      "employees": [
+        {
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "employee_name": "Tarek Wazzan",
+          "late_deduction": 0,
+          "absence_deduction": 133.33,
+          "advance_deduction": 0,
+          "total_deduction": 133.33,
+          "deduction_details": [
+            "غياب 1 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 1,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "employee_name": "Tarek Hegazy",
+          "late_deduction": 0,
+          "absence_deduction": 166.67,
+          "advance_deduction": 0,
+          "total_deduction": 166.67,
+          "deduction_details": [
+            "غياب 1 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 1,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+          "employee_name": "Kareem",
+          "late_deduction": 0,
+          "absence_deduction": 83.33,
+          "advance_deduction": 0,
+          "total_deduction": 83.33,
+          "deduction_details": [
+            "غياب 1 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 1,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+          "employee_name": "Hesham",
+          "late_deduction": 0,
+          "absence_deduction": 83.33,
+          "advance_deduction": 0,
+          "total_deduction": 83.33,
+          "deduction_details": [
+            "غياب 1 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 1,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+          "employee_name": "Mohamed Mostafa",
+          "late_deduction": 0,
+          "absence_deduction": 116.67,
+          "advance_deduction": 0,
+          "total_deduction": 116.67,
+          "deduction_details": [
+            "غياب 1 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 1,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "admin_001",
+          "employee_name": "مدير النظام",
+          "late_deduction": 319.79,
+          "absence_deduction": 0,
+          "advance_deduction": 0,
+          "total_deduction": 319.79,
+          "deduction_details": [
+            "تأخير 1 مرات - 307 دقيقة قابلة للخصم"
+          ],
+          "late_count": 1,
+          "absence_count": 0,
+          "installment_count": 0
+        }
+      ],
+      "total_deductions": 903.12,
+      "employee_count": 6
+    }
+  },
+  "summary": {
+    "total_tests": 7,
+    "passed": 4,
+    "failed": 3,
+    "success_rate": 57.14285714285714,
+    "attendance_working": true,
+    "deductions_working": false,
+    "advances_working": false,
+    "payroll_working": false
+  }
+}
