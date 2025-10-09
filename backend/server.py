@@ -29,7 +29,6 @@ import requests
 import openpyxl
 import json
 import calendar
-from io import BytesIO
 
 # Import Work Reports Database Module - MongoDB version
 from work_reports_mongo import (
@@ -78,7 +77,6 @@ app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 @app.on_event("startup")
 async def _init_db_if_needed():
     import os
-    from motor.motor_asyncio import AsyncIOMotorClient
     mongo_url = os.environ.get('MONGO_URL')
     db_name = os.environ.get('DB_NAME', 'tanseeq_hr')
     if not mongo_url:
@@ -977,8 +975,6 @@ from advances_model import (
     TransactionType, TransactionStatus, ExpenseCategory, Attachment,
     TRANSACTION_TYPE_AR, TRANSACTION_STATUS_AR, EXPENSE_CATEGORY_AR
 )
-import shutil
-from fastapi import UploadFile, File
 
 @api_router.post("/advances/create")
 async def create_advance_or_custody(
@@ -2869,7 +2865,7 @@ async def apply_monthly_deductions(
             notification_message += f"\nإجمالي الخصومات: {(late_deduction + absence_deduction + advance_deduction):.2f} درهم"
             
             if deduction_details:
-                notification_message += f"\n\nالتفاصيل:\n" + "\n".join(f"• {detail}" for detail in deduction_details)
+                notification_message += "\n\nالتفاصيل:\n" + "\n".join(f"• {detail}" for detail in deduction_details)
             
             notification = SystemNotification(
                 employee_id=employee_id,
@@ -3139,7 +3135,7 @@ async def update_attendance_config(
     await log_activity(
         current_user.id,
         "attendance_config_updated",
-        f"تحديث إعدادات نظام الحضور"
+        "تحديث إعدادات نظام الحضور"
     )
     
     return {
@@ -5375,7 +5371,7 @@ async def send_warning_notification(notification_data: dict, current_user: User 
     # Log activity with detailed information
     await log_activity(
         current_user.id, 
-        f"warning_notification_sent", 
+        "warning_notification_sent", 
         f"Sent {notification_type} notification to {recipient['name']}: {notification_data.get('title', 'Administrative Notice')}"
     )
     
@@ -5978,7 +5974,7 @@ async def delete_attendance_record(attendance_id: str, current_user: User = Depe
             "id": str(uuid.uuid4()),
             "user_id": current_user.id,
             "user_name": current_user.name,
-            "action": f"Deleted attendance record",
+            "action": "Deleted attendance record",
             "details": f"Employee: {employee_name}, Date: {date}, Status: {status}",
             "timestamp": datetime.now().isoformat()
         })
@@ -9567,7 +9563,7 @@ async def list_backup_files(current_user: User = Depends(get_super_admin_user)):
                         "records": records_count,
                         "collections": collections_count
                     })
-                except Exception as e:
+                except Exception:
                     # Skip files that can't be processed
                     continue
         
@@ -11135,7 +11131,7 @@ async def import_clients_from_excel(
         )
         
         return {
-            "message": f"استيراد مكتمل - Import Status",
+            "message": "استيراد مكتمل - Import Status",
             "success": len(imported_clients) > 0,
             "imported_count": len(imported_clients),
             "skipped_empty_rows": skipped_empty_rows,
