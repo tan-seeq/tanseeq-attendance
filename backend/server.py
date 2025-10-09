@@ -4058,13 +4058,14 @@ async def update_payroll_cycle_employees(
             old_manual_ded = current_summary.get("manual_deductions", 0)
             
             # Update employee summary
+            from uae_datetime_utils import to_iso_string_uae
             update_fields = {
                 "base_salary": emp_data.get("base_salary", 0),
                 "total_allowances": emp_data.get("allowances", 0),
                 "manual_deductions": new_manual_ded,
                 "attendance_deductions": emp_data.get("attendance_deductions", 0),
                 "advance_deductions": emp_data.get("advance_deductions", 0),
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": to_iso_string_uae()  # ✅ UAE timezone
             }
             
             # Recalculate totals
