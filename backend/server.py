@@ -105,14 +105,30 @@ app = FastAPI(title="TANSEEQ HR System", version="1.0.0")
 # Ensure test Super Admin user exists on startup
 @app.on_event("startup")
 async def ensure_test_super_admin():
+    """
+    Ensure default Super Admin user exists
+    ✅ With timeout protection - doesn't block startup indefinitely
+    """
     try:
-        # Create default indexes lazily if needed
-        await db.users.create_index("email", unique=True)
-    except Exception:
-        pass
+        # ✅ Create index with timeout
+        import asyncio
+        await asyncio.wait_for(
+            db.users.create_index("email", unique=True),
+            timeout=5.0  # 5 second timeout
+        )
+    except asyncio.TimeoutError:
+        logger.warning("Index creation timed out, continuing...")
+    except Exception as e:
+        logger.warning(f"Index creation warning: {e}")
+    
     try:
+        # ✅ Check and create admin user with timeout
         admin_email = "admin@tanseeq.com"
-        existing = await db.users.find_one({"email": admin_email})
+        import asyncio
+        existing = await asyncio.wait_for(
+            db.users.find_one({"email": admin_email}),
+            timeout=5.0  # 5 second timeout
+        )
         if not existing:
             now = get_uae_now()  # UAE timezone
             test_user = {
