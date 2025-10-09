@@ -5141,7 +5141,7 @@ async def mark_notification_read(
             try:
                 result = await db.notifications.update_one(
                     {"_id": ObjectId(notification_id)},
-                    {"$set": {"is_read": True, "read_at": get_uae_now()  # UAE timezone.isoformat()}}
+                    {"$set": {"is_read": True, "read_at": to_iso_string_uae()}}  # UAE timezone
                 )
             except:
                 raise HTTPException(status_code=404, detail="Notification not found")
