@@ -7,7 +7,10 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import datetime, timezone
 from typing import List, Dict, Optional
 import uuid
+import logging
 from uae_datetime_utils import to_iso_string_uae, get_uae_now
+
+logger = logging.getLogger(__name__)
 
 # أنواع القيود
 class LedgerSourceType:
