@@ -4275,6 +4275,11 @@ async def update_payroll_cycle_employees(
             
             if result.modified_count > 0:
                 updated_count += 1
+                print(f"✅ Updated employee: {employee_id}")
+            else:
+                print(f"⚠️ No changes for employee: {employee_id}")
+        
+        print(f"📊 Total updated: {updated_count} employees")
         
         # Recalculate cycle totals
         summaries = await db.employee_payroll_summaries.find({"cycle_id": cycle_id}).to_list(None)  # ✅ استخدام cycle_id
