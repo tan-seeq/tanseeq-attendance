@@ -5993,6 +5993,9 @@ async def create_absence_record(attendance_data: dict, current_user: User = Depe
     if existing_attendance:
         raise HTTPException(status_code=400, detail="Attendance record already exists for this date")
     
+    # ✅ Get leave type if provided
+    leave_type = attendance_data.get("leave_type")
+    
     # Create absence record
     absence_record = {
         "id": str(uuid.uuid4()),
@@ -6005,6 +6008,7 @@ async def create_absence_record(attendance_data: dict, current_user: User = Depe
         "status": "absent",
         "is_late": False,
         "absence_reason": reason,
+        "leave_type": leave_type,  # ✅ Add leave type
         "created_by": current_user.id,
         "created_by_name": current_user.name,
         "is_manual_entry": True,
