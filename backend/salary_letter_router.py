@@ -48,7 +48,7 @@ def build_salary_letter_router(get_current_user_dep):
 
             # جلب ملخص راتب الموظف
             employee_summary = await db.employee_payroll_summaries.find_one({
-                "cycle_id": cycle_id,  # ✅ cycle_id (not payroll_cycle_id)
+                "payroll_cycle_id": cycle_id,  # ✅ FIXED: Use payroll_cycle_id (database field name)
                 "employee_id": employee_id
             })
             
