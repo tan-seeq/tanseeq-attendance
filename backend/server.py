@@ -751,7 +751,7 @@ def calculate_working_hours_and_deductions(check_in, check_out, break_time_minut
         # Subtract break time
         net_worked_hours = max(0, total_worked_time - BREAK_TIME)
         
-        # NO PENALTY FOR EARLY ARRIVAL (before 9:00 AM) - REMOVED!
+        # ✅ LATE PENALTY: Any minute after 9:15 AM is considered late
         late_minutes = 0
         if check_in_time.time() > STANDARD_START_TIME:
             late_delta = datetime.combine(check_in_time.date(), check_in_time.time()) - datetime.combine(check_in_time.date(), STANDARD_START_TIME)
