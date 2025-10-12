@@ -18,6 +18,8 @@ const AttendanceReport = () => {
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [applyingDeductions, setApplyingDeductions] = useState(false);
+  const [deductionsResult, setDeductionsResult] = useState(null);
 
   const generateReport = async () => {
     try {
