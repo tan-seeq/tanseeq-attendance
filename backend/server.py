@@ -4172,16 +4172,22 @@ async def update_payroll_cycle_employees(
     """
     
     try:
+        print(f"📝 UPDATE PAYROLL: cycle_id={cycle_id}, user={current_user.id}")
+        print(f"📊 Received {len(update_data.get('employees', []))} employees to update")
+        
         # Check if cycle exists and is not locked
         cycle = await db.payroll_cycles.find_one({"id": cycle_id})
         if not cycle:
+            print(f"❌ Cycle not found: {cycle_id}")
             raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
         
         if cycle.get("is_locked", False):
+            print(f"🔒 Cycle is locked: {cycle_id}")
             raise HTTPException(status_code=400, detail="لا يمكن التعديل على دورة مقفولة")
         
         employees = update_data.get("employees", [])
         if not employees:
+            print(f"⚠️ No employees data in request")
             raise HTTPException(status_code=400, detail="لا توجد بيانات موظفين للتحديث")
         
         # Update each employee's summary AND create ledger entries
