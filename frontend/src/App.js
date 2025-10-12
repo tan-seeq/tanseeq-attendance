@@ -3754,7 +3754,8 @@ const AttendanceManagement = () => {
         check_in: editData.check_in || null,
         check_out: editData.check_out || null,
         status: editData.status,
-        reason: editData.reason || null
+        reason: editData.reason || null,
+        leave_type: editData.leave_type || null
       };
 
       await axios.put(`${API}/attendance/${id}`, updateData);
