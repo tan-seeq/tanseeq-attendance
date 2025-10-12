@@ -37,10 +37,9 @@ def build_salary_letter_router(get_current_user_dep):
             HTML or PDF salary letter with ledger data
         """
         try:
-            # ✅ Safe DB access for Atlas/sandbox (no global db)
-            db = getattr(request.app.state, "db", None)
-            if db is None:
-                raise HTTPException(status_code=500, detail="Database not initialized")
+            # ✅ Use lazy DB initialization from db_client
+            from db_client import get_db
+            db = get_db()
 
             # جلب دورة الراتب
             cycle = await db.payroll_cycles.find_one({"id": cycle_id})
