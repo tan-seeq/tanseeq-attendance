@@ -3980,6 +3980,44 @@ const AttendanceManagement = () => {
                       record.absence_reason || '--'
                     )}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {editingRecord === record.id && editData.status === 'absent' ? (
+                      <select
+                        value={editData.leave_type || ''}
+                        onChange={(e) => setEditData({...editData, leave_type: e.target.value})}
+                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      >
+                        <option value="">-- اختر نوع الإجازة --</option>
+                        <option value="annual">إجازة سنوية</option>
+                        <option value="sick">إجازة مرضية</option>
+                        <option value="personal">إجازة شخصية</option>
+                        <option value="emergency">إجازة طارئة</option>
+                        <option value="unpaid">إجازة بدون راتب</option>
+                        <option value="maternity">إجازة أمومة</option>
+                        <option value="study">إجازة دراسية</option>
+                        <option value="other">أخرى</option>
+                      </select>
+                    ) : (
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        record.leave_type === 'annual' ? 'bg-blue-100 text-blue-800' :
+                        record.leave_type === 'sick' ? 'bg-red-100 text-red-800' :
+                        record.leave_type === 'personal' ? 'bg-purple-100 text-purple-800' :
+                        record.leave_type === 'emergency' ? 'bg-orange-100 text-orange-800' :
+                        record.leave_type === 'unpaid' ? 'bg-gray-100 text-gray-800' :
+                        record.leave_type ? 'bg-indigo-100 text-indigo-800' : ''
+                      }`}>
+                        {record.leave_type === 'annual' ? '🏖️ إجازة سنوية' :
+                         record.leave_type === 'sick' ? '🤒 إجازة مرضية' :
+                         record.leave_type === 'personal' ? '👤 إجازة شخصية' :
+                         record.leave_type === 'emergency' ? '🚨 إجازة طارئة' :
+                         record.leave_type === 'unpaid' ? '💰 بدون راتب' :
+                         record.leave_type === 'maternity' ? '👶 إجازة أمومة' :
+                         record.leave_type === 'study' ? '📚 إجازة دراسية' :
+                         record.leave_type === 'other' ? '📋 أخرى' :
+                         record.status === 'Absent' || record.status === 'absent' ? '--' : ''}
+                      </span>
+                    )}
+                  </td>
                   {(user?.role === 'super_admin' || user?.name === "Hatem Mohamed Ahmed") && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {editingRecord === record.id ? (
