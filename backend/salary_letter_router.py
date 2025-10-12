@@ -69,7 +69,7 @@ def build_salary_letter_router(get_current_user_dep):
             # ✅ Ledger parity: source_type + cycle_id
             ledger_entries = await db.payroll_ledger.find({
                 "employee_id": employee_id,
-                "cycle_id": cycle_id  # ✅ cycle_id (not payroll_cycle_id)
+                "payroll_cycle_id": cycle_id  # ✅ FIXED: Use payroll_cycle_id (database field name)
             }).to_list(None)
             
             # Remove MongoDB _id
