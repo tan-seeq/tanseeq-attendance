@@ -4616,10 +4616,10 @@ async def generate_salary_letter(
         minute_rate = hourly_rate / 60
         
         # جلب تفاصيل الخصومات من Payroll Ledger
-        # ✅ استخدام cycle_id (ليس payroll_cycle_id) - Ledger Parity
+        # ✅ FIXED: Use payroll_cycle_id (database field name)
         ledger_entries = await db.payroll_ledger.find({
             "employee_id": employee_id,
-            "cycle_id": cycle_id
+            "payroll_cycle_id": cycle_id
         }).to_list(None)
         
         # تصنيف البنود
