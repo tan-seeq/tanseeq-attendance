@@ -4103,6 +4103,24 @@ const AttendanceManagement = () => {
                   placeholder="مثال: مرض، ظروف شخصية"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">نوع الإجازة</label>
+                <select
+                  value={absenceData.leave_type || ''}
+                  onChange={(e) => setAbsenceData({...absenceData, leave_type: e.target.value})}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">-- اختر نوع الإجازة --</option>
+                  <option value="annual">🏖️ إجازة سنوية</option>
+                  <option value="sick">🤒 إجازة مرضية</option>
+                  <option value="personal">👤 إجازة شخصية</option>
+                  <option value="emergency">🚨 إجازة طارئة</option>
+                  <option value="unpaid">💰 إجازة بدون راتب</option>
+                  <option value="maternity">👶 إجازة أمومة</option>
+                  <option value="study">📚 إجازة دراسية</option>
+                  <option value="other">📋 أخرى</option>
+                </select>
+              </div>
             </div>
             <div className="flex justify-end space-x-2 mt-6">
               <button
