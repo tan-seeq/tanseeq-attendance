@@ -21,10 +21,40 @@ const AttendanceReport = () => {
   const [applyingDeductions, setApplyingDeductions] = useState(false);
   const [deductionsResult, setDeductionsResult] = useState(null);
 
+  const applyDeductions = async () => {
+    if (!window.confirm(`هل أنت متأكد من تطبيق خصومات التأخير والغياب للشهر ${selectedMonth}؟\n\nسيتم حساب:\n- خصومات التأخير\n- خصومات الغياب\n- أقساط السلف المستحقة`)) {
+      return;
+    }
+
+    try {
+      setApplyingDeductions(true);
+      setError('');
+      
+      // Calculate deductions
+      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${selectedMonth}`);
+      
+      if (response.data.success) {
+        setDeductionsResult(response.data);
+        alert(`✅ تم حساب الخصومات بنجاح!\n\n` +
+              `عدد الموظفين المتأثرين: ${response.data.employee_count}\n` +
+              `إجمالي الخصومات: ${response.data.total_deductions.toFixed(2)} درهم\n\n` +
+              `يمكنك الآن مراجعة الخصومات في صفحة "نظام خصومات التأخير المتقدم"`);
+      }
+    } catch (err) {
+      console.error('Error applying deductions:', err);
+      const errorMsg = err.response?.data?.detail || 'خطأ في تطبيق الخصومات';
+      setError(errorMsg);
+      alert('❌ خطأ: ' + errorMsg);
+    } finally {
+      setApplyingDeductions(false);
+    }
+  };
+
   const generateReport = async () => {
     try {
       setLoading(true);
       setError('');
+      setDeductionsResult(null);
       
       // Fetch attendance data
       const response = await axios.get(`${API}/attendance/with-absences`);
