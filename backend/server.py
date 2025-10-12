@@ -686,10 +686,10 @@ async def log_activity(user_id: str, action: str, details: str, before_value: st
     )
     await db.activity_logs.insert_one(activity_log.dict())
 def calculate_working_hours_and_deductions(check_in, check_out, break_time_minutes=0, is_admin_edited=False):
-    """Calculate working hours and deductions - NEW RULES: No penalty before 9AM, penalty only for early checkout before 6PM"""
+    """Calculate working hours and deductions - NEW RULES: Late after 9:15 AM, penalty only for early checkout before 6PM"""
     
-    # Standard work hours - UPDATED RULES
-    STANDARD_START_TIME = datetime.strptime("09:00", "%H:%M").time()
+    # Standard work hours - UPDATED RULES (9:15 AM tolerance)
+    STANDARD_START_TIME = datetime.strptime("09:15", "%H:%M").time()  # ✅ Changed to 9:15 AM
     STANDARD_END_TIME = datetime.strptime("18:00", "%H:%M").time() 
     STANDARD_HOURS = 9.0  # 9 hours standard
     BREAK_TIME = break_time_minutes / 60.0  # Convert to hours
