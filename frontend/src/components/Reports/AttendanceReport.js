@@ -156,11 +156,11 @@ const AttendanceReport = () => {
             />
           </div>
           
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <button
               onClick={generateReport}
               disabled={loading}
-              className="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -171,6 +171,24 @@ const AttendanceReport = () => {
                 <>
                   <ChartBarIcon className="h-5 w-5" />
                   إنشاء التقرير
+                </>
+              )}
+            </button>
+            
+            <button
+              onClick={applyDeductions}
+              disabled={applyingDeductions || !selectedMonth}
+              className="flex-1 px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {applyingDeductions ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  جاري التطبيق...
+                </>
+              ) : (
+                <>
+                  <ExclamationTriangleIcon className="h-5 w-5" />
+                  تطبيق خصومات التأخير
                 </>
               )}
             </button>
