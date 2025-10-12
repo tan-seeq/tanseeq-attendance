@@ -218,15 +218,21 @@ const PayrollSummary = () => {
         notes: `تم التعديل بواسطة Super Admin في ${new Date().toLocaleString('ar-AE')}`
       };
 
-      await axios.put(`${API}/payroll/cycles/${id}/update-employees`, payload);
+      console.log('💾 Saving payload:', payload);
+      console.log('📊 Number of employees:', payload.employees.length);
       
-      alert('تم حفظ التعديلات بنجاح');
+      const response = await axios.put(`${API}/payroll/cycles/${id}/update-employees`, payload);
+      
+      console.log('✅ Save response:', response.data);
+      alert('تم حفظ التعديلات بنجاح ✅\n' + (response.data.message || ''));
       setEditMode(false);
       setEditedData([]);
       fetchCycleData();
     } catch (err) {
-      console.error('Save error:', err);
-      alert(err.response?.data?.detail || 'فشل حفظ التعديلات');
+      console.error('❌ Save error:', err);
+      console.error('Error details:', err.response?.data);
+      const errorMsg = err.response?.data?.detail || 'فشل حفظ التعديلات';
+      alert('خطأ في الحفظ: ' + errorMsg);
     } finally {
       setSaving(false);
     }
