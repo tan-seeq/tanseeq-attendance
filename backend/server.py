@@ -4247,7 +4247,7 @@ async def update_payroll_cycle_employees(
                 # Check if a manual deduction ledger entry already exists for this employee/cycle
                 existing_ledger_entry = await db.payroll_ledger.find_one({
                     "employee_id": employee_id,
-                    "cycle_id": cycle_id,
+                    "payroll_cycle_id": cycle_id,  # ✅ FIXED: Use payroll_cycle_id
                     "source_type": "MANUAL_DEDUCTION",
                     "is_reversed": False
                 })
