@@ -3741,7 +3741,8 @@ const AttendanceManagement = () => {
       check_in: record.check_in || '',
       check_out: record.check_out || '',
       status: backendStatus,
-      reason: record.absence_reason || ''
+      reason: record.absence_reason || '',
+      leave_type: record.leave_type || ''
     });
   };
 
