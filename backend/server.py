@@ -4242,34 +4242,101 @@ async def update_payroll_cycle_employees(
                 {"$set": update_fields}
             )
             
-            # CREATE/UPDATE LEDGER ENTRY for manual deductions if changed
+            # ✅ UPDATE LEDGER ENTRIES for all deduction types
+            from uae_datetime_utils import get_uae_now
+            
+            # 1. Manual Deduction
+            old_manual_ded = current_summary.get("manual_deductions", 0)
             if new_manual_ded != old_manual_ded:
-                # Check if a manual deduction ledger entry already exists for this employee/cycle
-                existing_ledger_entry = await db.payroll_ledger.find_one({
+                # Check if entry exists
+                existing_entry = await db.payroll_ledger.find_one({
                     "employee_id": employee_id,
-                    "payroll_cycle_id": cycle_id,  # ✅ FIXED: Use payroll_cycle_id
+                    "payroll_cycle_id": cycle_id,
                     "source_type": "MANUAL_DEDUCTION",
                     "is_reversed": False
                 })
                 
-                # If exists, reverse it first to maintain audit trail
-                if existing_ledger_entry:
+                # Reverse old entry
+                if existing_entry:
                     await ledger_service.reverse_entry(
-                        entry_id=existing_ledger_entry["id"],
+                        entry_id=existing_entry["id"],
                         reversed_by=current_user.id,
                         reason=f"تحديث الخصم اليدوي من {old_manual_ded:.2f} إلى {new_manual_ded:.2f} درهم"
                     )
                 
-                # Create new ledger entry if new amount > 0
+                # Create new entry if amount > 0
                 if new_manual_ded > 0:
-                    from uae_datetime_utils import get_uae_now
                     await ledger_service.create_entry(
                         employee_id=employee_id,
                         cycle_id=cycle_id,
                         source_type="MANUAL_DEDUCTION",
-                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{get_uae_now().timestamp()}",  # ✅ UAE timezone
-                        amount=-new_manual_ded,  # Negative for deduction
+                        source_id=f"manual_edit_{cycle_id}_{employee_id}_{get_uae_now().timestamp()}",
+                        amount=-new_manual_ded,
                         description=f"خصم يدوي تم تعديله بواسطة الإدارة - {new_manual_ded:.2f} درهم",
+                        created_by=current_user.id
+                    )
+            
+            # 2. Attendance Deduction
+            new_attendance_ded = emp_data.get("attendance_deductions", 0)
+            old_attendance_ded = current_summary.get("attendance_deductions", 0)
+            if new_attendance_ded != old_attendance_ded:
+                # Check if entry exists
+                existing_entry = await db.payroll_ledger.find_one({
+                    "employee_id": employee_id,
+                    "payroll_cycle_id": cycle_id,
+                    "source_type": "ATTENDANCE_DEDUCTION",
+                    "is_reversed": False
+                })
+                
+                # Reverse old entry
+                if existing_entry:
+                    await ledger_service.reverse_entry(
+                        entry_id=existing_entry["id"],
+                        reversed_by=current_user.id,
+                        reason=f"تحديث خصم الحضور من {old_attendance_ded:.2f} إلى {new_attendance_ded:.2f} درهم"
+                    )
+                
+                # Create new entry if amount > 0
+                if new_attendance_ded > 0:
+                    await ledger_service.create_entry(
+                        employee_id=employee_id,
+                        cycle_id=cycle_id,
+                        source_type="ATTENDANCE_DEDUCTION",
+                        source_id=f"attendance_edit_{cycle_id}_{employee_id}_{get_uae_now().timestamp()}",
+                        amount=-new_attendance_ded,
+                        description=f"خصم حضور/تأخير تم تعديله بواسطة الإدارة - {new_attendance_ded:.2f} درهم",
+                        created_by=current_user.id
+                    )
+            
+            # 3. Advance Deduction (Installments)
+            new_advance_ded = emp_data.get("advance_deductions", 0)
+            old_advance_ded = current_summary.get("advance_deductions", 0)
+            if new_advance_ded != old_advance_ded:
+                # Check if entry exists
+                existing_entry = await db.payroll_ledger.find_one({
+                    "employee_id": employee_id,
+                    "payroll_cycle_id": cycle_id,
+                    "source_type": "ADVANCE_INSTALLMENT",
+                    "is_reversed": False
+                })
+                
+                # Reverse old entry
+                if existing_entry:
+                    await ledger_service.reverse_entry(
+                        entry_id=existing_entry["id"],
+                        reversed_by=current_user.id,
+                        reason=f"تحديث خصم السلف من {old_advance_ded:.2f} إلى {new_advance_ded:.2f} درهم"
+                    )
+                
+                # Create new entry if amount > 0
+                if new_advance_ded > 0:
+                    await ledger_service.create_entry(
+                        employee_id=employee_id,
+                        cycle_id=cycle_id,
+                        source_type="ADVANCE_INSTALLMENT",
+                        source_id=f"advance_edit_{cycle_id}_{employee_id}_{get_uae_now().timestamp()}",
+                        amount=-new_advance_ded,
+                        description=f"خصم سلفة تم تعديله بواسطة الإدارة - {new_advance_ded:.2f} درهم",
                         created_by=current_user.id
                     )
             
