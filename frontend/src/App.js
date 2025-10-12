@@ -3899,6 +3899,9 @@ const AttendanceManagement = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   سبب الغياب
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  نوع الإجازة
+                </th>
                 {(user?.role === 'super_admin' || user?.name === "Hatem Mohamed Ahmed") && (
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     الإجراءات
