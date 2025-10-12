@@ -5745,6 +5745,12 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
             update_fields["check_out"] = None
             update_fields["working_hours"] = 0
             changes.append(f"set absence reason: {reason}")
+            
+            # ✅ Set leave type if provided
+            leave_type = update_data.get("leave_type")
+            if leave_type:
+                update_fields["leave_type"] = leave_type
+                changes.append(f"set leave type: {leave_type}")
     
     # Handle time updates
     check_in_updated = "check_in" in update_data
