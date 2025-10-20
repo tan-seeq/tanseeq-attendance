@@ -12105,6 +12105,8 @@ async def shutdown_db_client():
 # Root endpoint
 @app.get("/")
 async def root():
+    """Root endpoint for health checks"""
+    return {"status": "ok", "app": "TANSEEQ HR System"}
 
 
 # ============================================
