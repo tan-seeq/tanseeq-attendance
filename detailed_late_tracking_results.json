@@ -1,0 +1,90 @@
+{
+  "test_summary": {
+    "total_tests": 6,
+    "passed_tests": 4,
+    "success_rate": 66.66666666666666,
+    "critical_issues": [
+      "3 historical records with incorrect late tracking"
+    ]
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication (regular)",
+      "success": true,
+      "details": "Successfully authenticated as jihad@tanseeq.com",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:47:49.921763"
+    },
+    {
+      "test": "User Schedule Analysis",
+      "success": true,
+      "details": "Retrieved user info for schedule analysis",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:47:49.933268"
+    },
+    {
+      "test": "Check-in Endpoint Response",
+      "success": true,
+      "details": "Already checked in today (expected behavior)",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:47:49.995800"
+    },
+    {
+      "test": "Detailed Attendance Analysis",
+      "success": false,
+      "details": "Found 3 late tracking issues out of 3 records after 9:15 AM",
+      "expected": "All records after 9:15 AM should have correct late_minutes",
+      "actual": "Issues: 3, Records after 9:15: 3",
+      "timestamp": "2025-10-20T06:47:50.006912"
+    },
+    {
+      "test": "Authentication (super_admin)",
+      "success": true,
+      "details": "Successfully authenticated as hatem@tan-seeq.co",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:47:50.289656"
+    },
+    {
+      "test": "Deductions Integration (Super Admin)",
+      "success": false,
+      "details": "No deduction records returned",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:47:50.360604"
+    }
+  ],
+  "late_tracking_issues": [
+    {
+      "date": "2025-07-16",
+      "user_name": "Jihad",
+      "check_in": "09:21:18",
+      "late_minutes": "NOT_SET",
+      "expected_late_minutes": 6,
+      "has_field": false,
+      "issue": "Missing late_minutes field or incorrect value"
+    },
+    {
+      "date": "2025-10-07",
+      "user_name": "Jihad",
+      "check_in": "10:01:13",
+      "late_minutes": "NOT_SET",
+      "expected_late_minutes": 46,
+      "has_field": false,
+      "issue": "Missing late_minutes field or incorrect value"
+    },
+    {
+      "date": "2025-10-20",
+      "user_name": "Jihad",
+      "check_in": "09:58:29",
+      "late_minutes": "NOT_SET",
+      "expected_late_minutes": 43,
+      "has_field": false,
+      "issue": "Missing late_minutes field or incorrect value"
+    }
+  ],
+  "attendance_records_count": 11
+}
