@@ -199,8 +199,7 @@ class ArabicReview3FixesTester:
                 print(f"📊 Status Code: {status_code}")
                 
                 if status_code == 200:
-                    data = await response.json()
-                    attendance_records = data.get('attendance', [])
+                    attendance_records = await response.json()
                     
                     print(f"✅ Attendance records retrieved: {len(attendance_records)}")
                     
