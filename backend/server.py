@@ -12129,6 +12129,11 @@ from public_holidays import (
     get_public_holidays_in_range
 )
 
+from payroll_integration import (
+    merge_advanced_deductions_to_payroll,
+    recalculate_payroll_after_deductions
+)
+
 @app.post("/api/deductions/calculate-monthly")
 async def calculate_advanced_deductions(
     month: int,
