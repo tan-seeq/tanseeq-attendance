@@ -23,6 +23,7 @@ from payroll_models import (
     EmployeePayrollSummary, DeductionCeiling, EmployeeDeductionCeiling,
     PayrollDB, get_month_boundaries, validate_deduction_ceiling
 )
+from uae_datetime_utils import get_uae_now  # ✅ CRITICAL FIX: Import UAE timezone utilities
 
 try:
     from attendance_models import (
