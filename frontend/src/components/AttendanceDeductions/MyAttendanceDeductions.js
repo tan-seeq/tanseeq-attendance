@@ -40,43 +40,81 @@ const MyAttendanceDeductions = ({ currentUser }) => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      // Fetch old deductions
-      const deductionsResponse = await axios.get(
-        `${API}/deductions?employee_id=${currentUser.id}&month=${selectedMonth}`,
+      // 1. Get latest payroll cycle for current user
+      const cyclesResponse = await axios.get(
+        `${API}/payroll/cycles`,
         config
       );
       
-      // Fetch advanced deductions (attendance-based)
-      const [year, month] = selectedMonth.split('-');
-      const advancedResponse = await axios.get(
-        `${API}/deductions/report?month=${parseInt(month)}&year=${parseInt(year)}&employee_id=${currentUser.id}`,
-        config
-      );
+      let allDeductions = [];
       
-      // Fetch advances (سلف)
-      const advancesResponse = await axios.get(
-        `${API}/advances?employee_id=${currentUser.id}`,
-        config
-      );
+      if (cyclesResponse.data && cyclesResponse.data.length > 0) {
+        // Get the most recent cycle
+        const latestCycle = cyclesResponse.data[0];
+        
+        // 2. Get deductions from payroll ledger for this cycle
+        try {
+          const ledgerResponse = await axios.get(
+            `${API}/payroll/ledger?cycle_id=${latestCycle.id}&employee_id=${currentUser.id}`,
+            config
+          );
+          
+          // Transform ledger entries to deductions format
+          if (ledgerResponse.data?.entries) {
+            allDeductions = ledgerResponse.data.entries
+              .filter(entry => entry.amount < 0) // Only deductions (negative amounts)
+              .map(entry => ({
+                id: entry.id,
+                date: entry.created_at,
+                type: entry.source_type,
+                amount: Math.abs(entry.amount),
+                description: entry.description,
+                status: entry.is_reversed ? 'cancelled' : 'active',
+                cycle_name: `${latestCycle.month} ${latestCycle.year}`,
+                source: 'payroll_ledger'
+              }));
+          }
+        } catch (err) {
+          console.error('Error fetching ledger:', err);
+        }
+      }
       
-      // Combine all deductions
-      const allDeductions = [
-        ...(deductionsResponse.data || []),
-        // Add advanced deductions if exists
-        ...(advancedResponse.data?.summaries?.[0]?.daily_records || []).map(record => ({
-          ...record,
-          type: 'advanced_attendance',
-          amount: record.deduction_amount,
-          description: `تأخير/انصراف مبكر - ${record.date}`
-        }))
-      ];
+      // 3. Fetch advances with installment details
+      try {
+        const advancesResponse = await axios.get(
+          `${API}/advances?employee_id=${currentUser.id}`,
+          config
+        );
+        
+        if (advancesResponse.data?.advances) {
+          const advancesWithInstallments = [];
+          
+          for (const advance of advancesResponse.data.advances) {
+            // Get installment schedule for each advance
+            try {
+              const installmentsResponse = await axios.get(
+                `${API}/advances/${advance.id}/installments`,
+                config
+              );
+              
+              advancesWithInstallments.push({
+                ...advance,
+                schedule: installmentsResponse.data?.schedule || null,
+                installmentDetails: installmentsResponse.data?.installments || []
+              });
+            } catch (err) {
+              // If no installments, just add the advance
+              advancesWithInstallments.push(advance);
+            }
+          }
+          
+          setAdvances(advancesWithInstallments);
+        }
+      } catch (err) {
+        console.error('Error fetching advances:', err);
+      }
       
       setDeductions(allDeductions);
-      
-      // Set advances separately
-      if (advancesResponse.data?.advances) {
-        setAdvances(advancesResponse.data.advances);
-      }
       
     } catch (error) {
       console.error('Error fetching my deductions:', error);
