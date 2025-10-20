@@ -5872,9 +5872,10 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
     
     return {"message": "Attendance updated successfully", "changes": changes}
 
-@api_router.post("/attendance/check-in")
-async def check_in(current_user: User = Depends(get_current_user)):
-    """Check in attendance - with enhanced flexibility"""
+# DISABLED: Duplicate check-in endpoint - using the fixed version at line 852
+# @api_router.post("/attendance/check-in")
+# async def check_in(current_user: User = Depends(get_current_user)):
+#     """Check in attendance - with enhanced flexibility"""
     uae_time = get_uae_time()
     date_str = uae_time.strftime("%Y-%m-%d")
     time_str = uae_time.strftime("%H:%M:%S")
