@@ -36,8 +36,47 @@ const MyAttendanceDeductions = ({ currentUser }) => {
   const fetchMyDeductions = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API}/deductions?employee_id=${currentUser.id}&month=${selectedMonth}`);
-      setDeductions(response.data || []);
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      
+      // Fetch old deductions
+      const deductionsResponse = await axios.get(
+        `${API}/deductions?employee_id=${currentUser.id}&month=${selectedMonth}`,
+        config
+      );
+      
+      // Fetch advanced deductions (attendance-based)
+      const [year, month] = selectedMonth.split('-');
+      const advancedResponse = await axios.get(
+        `${API}/deductions/report?month=${parseInt(month)}&year=${parseInt(year)}&employee_id=${currentUser.id}`,
+        config
+      );
+      
+      // Fetch advances (سلف)
+      const advancesResponse = await axios.get(
+        `${API}/advances?employee_id=${currentUser.id}`,
+        config
+      );
+      
+      // Combine all deductions
+      const allDeductions = [
+        ...(deductionsResponse.data || []),
+        // Add advanced deductions if exists
+        ...(advancedResponse.data?.summaries?.[0]?.daily_records || []).map(record => ({
+          ...record,
+          type: 'advanced_attendance',
+          amount: record.deduction_amount,
+          description: `تأخير/انصراف مبكر - ${record.date}`
+        }))
+      ];
+      
+      setDeductions(allDeductions);
+      
+      // Set advances separately
+      if (advancesResponse.data?.advances) {
+        setAdvances(advancesResponse.data.advances);
+      }
+      
     } catch (error) {
       console.error('Error fetching my deductions:', error);
     } finally {
