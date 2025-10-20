@@ -14,6 +14,78 @@ from reportlab.lib import colors
 import io
 
 
+def translate_description_to_english(description):
+    """
+    Translate Arabic descriptions to English for PDF
+    """
+    # Common translations
+    translations = {
+        # General terms
+        'خصم': 'Deduction',
+        'خصومات': 'Deductions',
+        'يدوي': 'manual',
+        'حضور': 'attendance',
+        'تأخير': 'late arrival',
+        'غياب': 'absence',
+        'سلفة': 'advance',
+        'قسط': 'installment',
+        'درهم': 'AED',
+        'دقيقة': 'minute',
+        'دقائق': 'minutes',
+        'يوم': 'day',
+        'أيام': 'days',
+        'ساعة': 'hour',
+        'ساعات': 'hours',
+        'مرة': 'time',
+        'مرات': 'times',
+        'قابلة للخصم': 'deductible',
+        'الحضور والتأخير': 'Attendance & Lateness',
+        'تم تعديله بواسطة الإدارة': 'adjusted by management',
+        'رقم': '#',
+        'استحقاق': 'Due:',
+        
+        # Full phrases
+        'خصومات الحضور والتأخير': 'Attendance & Lateness Deductions',
+        'خصم حضور/تأخير': 'Attendance/Late Deduction',
+        'خصم يدوي': 'Manual Deduction',
+        'قسط سلفة': 'Advance Installment',
+        'خصم سلفة': 'Advance Deduction',
+    }
+    
+    # Start with original description
+    result = description
+    
+    # Remove " - " separator patterns with numbers (e.g., "- 93.45 -")
+    import re
+    result = re.sub(r'\s*-\s*\d+\.?\d*\s*-?\s*', ' ', result)
+    result = re.sub(r'\s*-\s*late\s*-\s*', ' ', result)
+    
+    # Replace Arabic terms
+    for arabic, english in translations.items():
+        result = result.replace(arabic, english)
+    
+    # Clean up extra spaces and dashes
+    result = re.sub(r'\s+-\s+', ' - ', result)
+    result = re.sub(r'\s+', ' ', result)
+    result = result.strip(' -')
+    
+    # If still contains Arabic or is too messy, use generic description
+    if any('\u0600' <= c <= '\u06FF' for c in result):
+        # Still has Arabic characters, use generic
+        if 'late' in description.lower() or 'تأخير' in description:
+            return 'Late arrival deduction'
+        elif 'manual' in description.lower() or 'يدوي' in description:
+            return 'Manual deduction'
+        elif 'advance' in description.lower() or 'سلفة' in description:
+            return 'Advance installment'
+        elif 'attendance' in description.lower() or 'حضور' in description:
+            return 'Attendance deduction'
+        else:
+            return 'Deduction'
+    
+    return result
+
+
 def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manual_deductions, advance_installments):
     """Generate English-only salary letter PDF"""
     
