@@ -1,0 +1,127 @@
+{
+  "summary": {
+    "total_tests": 11,
+    "passed": 4,
+    "failed": 4,
+    "warnings": 3,
+    "success_rate": 36.36363636363637
+  },
+  "test_areas": {
+    "LATE_TRACKING": {
+      "PASS": 1,
+      "FAIL": 0,
+      "WARN": 1
+    },
+    "PAYROLL_LOCK": {
+      "PASS": 0,
+      "FAIL": 3,
+      "WARN": 0
+    },
+    "CUSTODY_ADVANCE": {
+      "PASS": 2,
+      "FAIL": 0,
+      "WARN": 2
+    },
+    "DEDUCTIONS_WORKFLOW": {
+      "PASS": 1,
+      "FAIL": 0,
+      "WARN": 0
+    },
+    "SYSTEM": {
+      "PASS": 0,
+      "FAIL": 1,
+      "WARN": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "scenario": "LATE_TRACKING",
+      "test": "9:15 AM Rule - Late Detection",
+      "status": "WARN",
+      "details": "No late records after 9:15 AM found to verify rule",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:42.682796"
+    },
+    {
+      "scenario": "LATE_TRACKING",
+      "test": "9:15 AM Rule - On Time Detection",
+      "status": "PASS",
+      "details": "\u2705 Found 6 records correctly marked as on-time before 9:15 AM",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:42.682843"
+    },
+    {
+      "scenario": "PAYROLL_LOCK",
+      "test": "Lock Test - /payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f/toggle-lock",
+      "status": "FAIL",
+      "details": "\u274c Lock failed: {'detail': 'Not Found'}",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.011192"
+    },
+    {
+      "scenario": "PAYROLL_LOCK",
+      "test": "Lock Mechanism",
+      "status": "FAIL",
+      "details": "\u274c No working lock endpoint found",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.011233"
+    },
+    {
+      "scenario": "PAYROLL_LOCK",
+      "test": "Payroll Ledger Access",
+      "status": "FAIL",
+      "details": "\u274c Could not access payroll ledger: {'detail': 'Not Found'}",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.020072"
+    },
+    {
+      "scenario": "CUSTODY_ADVANCE",
+      "test": "Advance Isolation",
+      "status": "PASS",
+      "details": "\u2705 Advances correctly isolated from expenses: 7625.0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.031840"
+    },
+    {
+      "scenario": "CUSTODY_ADVANCE",
+      "test": "Custody Deduction",
+      "status": "PASS",
+      "details": "\u2705 Custody correctly reduced by expenses: 655.0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.031883"
+    },
+    {
+      "scenario": "CUSTODY_ADVANCE",
+      "test": "Overspending Detection",
+      "status": "WARN",
+      "details": "\u26a0\ufe0f No overspending scenario in current data",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.031890"
+    },
+    {
+      "scenario": "CUSTODY_ADVANCE",
+      "test": "System-wide Analysis",
+      "status": "WARN",
+      "details": "\u26a0\ufe0f No overspending cases found in system",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.049270"
+    },
+    {
+      "scenario": "DEDUCTIONS_WORKFLOW",
+      "test": "Calculate Monthly Deductions",
+      "status": "PASS",
+      "details": "\u2705 Calculated deductions for 5 employees",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.138858"
+    },
+    {
+      "scenario": "SYSTEM",
+      "test": "Critical Error",
+      "status": "FAIL",
+      "details": "0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:30:43.138906"
+    }
+  ],
+  "timestamp": "2025-10-20T06:30:43.139741"
+}
