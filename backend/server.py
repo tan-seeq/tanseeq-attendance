@@ -2246,38 +2246,39 @@ async def get_daily_attendance(
     else:
         return {"attendance": None}
 
-@api_router.post("/attendance/check-in")
-async def check_in_attendance(
-    current_user: User = Depends(get_current_user)
-):
-    """تسجيل الحضور"""
-    
-    check_in_time = datetime.now()
-    today = check_in_time.date()
-    
-    # التحقق من عدم وجود تسجيل حضور مسبق اليوم
-    existing_attendance = await db.daily_attendance.find_one({
-        "employee_id": current_user.id,
-        "date": today.isoformat(),
-        "check_in": {"$exists": True}
-    })
-    
-    if existing_attendance:
-        raise HTTPException(status_code=400, detail="تم تسجيل الحضور مسبقاً اليوم")
-    
-    # معالجة الحضور
-    attendance = await attendance_engine.process_daily_attendance(
-        employee_id=current_user.id,
-        target_date=today,
-        check_in=check_in_time
-    )
-    
-    return {
-        "success": True,
-        "message": "تم تسجيل الحضور بنجاح",
-        "check_in_time": check_in_time.isoformat(),
-        "attendance": attendance.dict()
-    }
+# DISABLED: Duplicate check-in endpoint - using the fixed version at line 852
+# @api_router.post("/attendance/check-in")
+# async def check_in_attendance(
+#     current_user: User = Depends(get_current_user)
+# ):
+#     """تسجيل الحضور"""
+#     
+#     check_in_time = datetime.now()
+#     today = check_in_time.date()
+#     
+#     # التحقق من عدم وجود تسجيل حضور مسبق اليوم
+#     existing_attendance = await db.daily_attendance.find_one({
+#         "employee_id": current_user.id,
+#         "date": today.isoformat(),
+#         "check_in": {"$exists": True}
+#     })
+#     
+#     if existing_attendance:
+#         raise HTTPException(status_code=400, detail="تم تسجيل الحضور مسبقاً اليوم")
+#     
+#     # معالجة الحضور
+#     attendance = await attendance_engine.process_daily_attendance(
+#         employee_id=current_user.id,
+#         target_date=today,
+#         check_in=check_in_time
+#     )
+#     
+#     return {
+#         "success": True,
+#         "message": "تم تسجيل الحضور بنجاح",
+#         "check_in_time": check_in_time.isoformat(),
+#         "attendance": attendance.dict()
+#     }
 
 @api_router.post("/attendance/check-out") 
 async def check_out_attendance(
