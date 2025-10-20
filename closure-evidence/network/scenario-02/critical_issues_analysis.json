@@ -1,0 +1,53 @@
+{
+  "analysis_summary": {
+    "total_findings": 6,
+    "critical_issues": 5,
+    "high_priority_issues": 1,
+    "timestamp": "2025-10-20T07:17:33.016370"
+  },
+  "detailed_findings": [
+    {
+      "category": "Database Schema",
+      "issue": "Missing late_minutes field",
+      "severity": "CRITICAL",
+      "details": "0 out of 56 records have the late_minutes field",
+      "timestamp": "2025-10-20T07:17:32.817574"
+    },
+    {
+      "category": "Database Schema",
+      "issue": "Missing early_departure_minutes field",
+      "severity": "CRITICAL",
+      "details": "0 out of 56 records have the early_departure_minutes field",
+      "timestamp": "2025-10-20T07:17:32.817596"
+    },
+    {
+      "category": "Database Schema",
+      "issue": "Missing deducted_hours field",
+      "severity": "CRITICAL",
+      "details": "0 out of 56 records have the deducted_hours field",
+      "timestamp": "2025-10-20T07:17:32.817608"
+    },
+    {
+      "category": "9:15 AM Rule",
+      "issue": "Late tracking not working",
+      "severity": "CRITICAL",
+      "details": "25 records should be late but have late_minutes=0",
+      "timestamp": "2025-10-20T07:17:32.817633"
+    },
+    {
+      "category": "Attendance Edit",
+      "issue": "late_minutes not calculated on edit",
+      "severity": "CRITICAL",
+      "details": "Edited check_in to 09:30:00 but late_minutes is MISSING (expected: 15)",
+      "timestamp": "2025-10-20T07:17:32.899991"
+    },
+    {
+      "category": "Absence Creation",
+      "issue": "Failed to create absence",
+      "severity": "HIGH",
+      "details": "Status: 400, Response: {\"detail\":\"User ID and date are required\"}",
+      "timestamp": "2025-10-20T07:17:32.958665"
+    }
+  ],
+  "backend_url": "https://payroll-hardening.preview.emergentagent.com"
+}
