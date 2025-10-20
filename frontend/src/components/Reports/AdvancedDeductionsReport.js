@@ -6,6 +6,7 @@ const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 const AdvancedDeductionsReport = () => {
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
+  const [merging, setMerging] = useState(false);
   const [reportData, setReportData] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -13,6 +14,7 @@ const AdvancedDeductionsReport = () => {
   const [expandedEmployee, setExpandedEmployee] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [cycleId, setCycleId] = useState('');
 
   // Get token from localStorage
   const token = localStorage.getItem('token');
