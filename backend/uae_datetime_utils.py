@@ -202,6 +202,46 @@ def to_iso_string_uae(dt: Optional[datetime] = None) -> str:
     return dt.isoformat()
 
 
+def normalize_datetime_fields(data: dict, fields: list = None) -> dict:
+    """
+    ✅ NEW: Normalize datetime fields to UAE timezone ISO format
+    Ensures consistent +04:00 timezone in all datetime fields
+    
+    Args:
+        data: Dictionary containing datetime fields
+        fields: List of field names to normalize (if None, auto-detect)
+        
+    Returns:
+        dict: Data with normalized datetime fields
+    """
+    if fields is None:
+        # Auto-detect common datetime field names
+        fields = [
+            'created_at', 'updated_at', 'timestamp', 'sent_at',
+            'locked_at', 'unlocked_at', 'approved_at', 'rejected_at',
+            'start_date', 'end_date', 'date', 'processed_at',
+            'completed_at', 'modified_at', 'deleted_at'
+        ]
+    
+    for field in fields:
+        if field in data and data[field] is not None:
+            value = data[field]
+            
+            # Handle datetime objects
+            if isinstance(value, datetime):
+                data[field] = to_iso_string_uae(value)
+            
+            # Handle string datetimes without timezone
+            elif isinstance(value, str) and 'T' in value and '+' not in value and 'Z' not in value:
+                try:
+                    dt = datetime.fromisoformat(value)
+                    data[field] = to_iso_string_uae(dt)
+                except:
+                    pass  # Keep original if parsing fails
+    
+    return data
+
+
 # Convenience functions for common formats
 def get_uae_date_str() -> str:
     """Get current date as string (YYYY-MM-DD)"""
