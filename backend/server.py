@@ -5875,6 +5875,10 @@ async def check_in(current_user: User = Depends(get_current_user)):
     # Default status
     status = "present"
     is_late = False
+    late_minutes = 0
+    
+    # ✅ FIXED: Calculate late_minutes based on 9:15 AM threshold
+    STANDARD_START_TIME = datetime.strptime("09:15", "%H:%M").time()
     
     # Check if late based on flexible schedule or fixed rules
     if not is_weekend:
@@ -5889,6 +5893,11 @@ async def check_in(current_user: User = Depends(get_current_user)):
             if uae_time.hour > end_hour or (uae_time.hour == end_hour and uae_time.minute > end_minute):
                 is_late = True
                 status = "late"
+                # Calculate late_minutes for flexible schedule users
+                check_in_time_obj = uae_time.time()
+                late_threshold = datetime.strptime(end_time, "%H:%M").time()
+                late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), late_threshold)
+                late_minutes = max(0, int(late_delta.total_seconds() / 60))
         else:
             # Fixed schedule rules (legacy)
             if current_user.name == "Hatem Mohamed Ahmed":
@@ -5899,13 +5908,22 @@ async def check_in(current_user: User = Depends(get_current_user)):
                 if uae_time.hour > 8 or (uae_time.hour == 8 and uae_time.minute > 0):
                     is_late = True
                     status = "late"
+                    # Calculate late_minutes for Tarek (8 AM threshold)
+                    check_in_time_obj = uae_time.time()
+                    tarek_threshold = datetime.strptime("08:00", "%H:%M").time()
+                    late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), tarek_threshold)
+                    late_minutes = max(0, int(late_delta.total_seconds() / 60))
             else:
-                # ✅ FIXED: Others should be here by 9:15 AM (not 9:00 AM)
-                if uae_time.hour > 9 or (uae_time.hour == 9 and uae_time.minute > 15):
+                # ✅ FIXED: Others should be here by 9:15 AM - Calculate late_minutes
+                check_in_time_obj = uae_time.time()
+                if check_in_time_obj > STANDARD_START_TIME:
                     is_late = True
                     status = "late"
+                    # Calculate late_minutes based on 9:15 AM threshold
+                    late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), STANDARD_START_TIME)
+                    late_minutes = int(late_delta.total_seconds() / 60)
     
-    # Create attendance record
+    # Create attendance record with late_minutes
     attendance_data = {
         "id": str(uuid.uuid4()),
         "user_id": current_user.id,
@@ -5916,6 +5934,9 @@ async def check_in(current_user: User = Depends(get_current_user)):
         "working_hours": None,
         "status": status,
         "is_late": is_late,
+        "late_minutes": late_minutes,  # ✅ NEW: Store late_minutes at check-in
+        "early_departure_minutes": 0,  # ✅ NEW: Will be calculated at check-out
+        "deducted_hours": 0.0,  # ✅ NEW: Will be calculated at check-out
         "is_weekend": is_weekend,
         "schedule_type": "flexible" if has_flexible_schedule else "fixed",
         "flexible_schedule": has_flexible_schedule,
