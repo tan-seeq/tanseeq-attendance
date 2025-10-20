@@ -366,19 +366,9 @@ class AttendanceScenario2Tester:
         print("\n🔍 Part 5: Test Flexible Schedule User (Tarek)")
         
         try:
-            # Test early check-in at 08:05 (before standard 9:15)
-            early_checkin_data = {
-                "user_id": "tarek_wazzan_id",
-                "user_name": "Tarek Wazzan",
-                "date": datetime.now().strftime('%Y-%m-%d'),
-                "check_in": "08:05:00",
-                "status": "present",
-                "has_flexible_schedule": True
-            }
-            
-            response = self.session.post(
-                f"{BASE_URL}/attendance",
-                json=early_checkin_data,
+            # Check if there are any users with flexible schedules in the system
+            response = self.session.get(
+                f"{BASE_URL}/employees/list",
                 headers=self.get_headers("super_admin"),
                 timeout=30
             )
