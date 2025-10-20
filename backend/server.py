@@ -12341,4 +12341,63 @@ async def clear_deductions(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"خطأ في حذف السجلات: {str(e)}")
 
+
+@app.post("/api/holidays/seed")
+async def seed_holidays(current_user: User = Depends(get_super_admin_user)):
+    """
+    Seed public holidays into database
+    
+    🔒 RBAC: Super Admin Only
+    
+    Seeds UAE public holidays for 2025-2026
+    """
+    try:
+        count = await seed_public_holidays(db)
+        return {
+            "success": True,
+            "message": f"تم إضافة {count} إجازة رسمية",
+            "count": count
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في إضافة الإجازات: {str(e)}")
+
+
+@app.get("/api/holidays")
+async def get_holidays(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: User = Depends(get_admin_user)
+):
+    """
+    Get public holidays
+    
+    🔒 RBAC: Admin or Super Admin
+    
+    Args:
+        start_date: Optional start date (YYYY-MM-DD)
+        end_date: Optional end date (YYYY-MM-DD)
+    """
+    try:
+        from datetime import datetime
+        
+        if start_date and end_date:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end = datetime.strptime(end_date, "%Y-%m-%d").date()
+            holidays = await get_public_holidays_in_range(db, start, end)
+        else:
+            # Get all holidays
+            holidays = await db.public_holidays.find({}).sort("date", 1).to_list(None)
+            
+            # Remove MongoDB _id
+            for h in holidays:
+                h.pop("_id", None)
+        
+        return {
+            "success": True,
+            "count": len(holidays),
+            "holidays": holidays
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في جلب الإجازات: {str(e)}")
+
     return {"message": "TANSEEQ HR System API"}
