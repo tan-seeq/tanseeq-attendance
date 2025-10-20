@@ -5829,9 +5829,16 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
                 is_admin_edited=is_admin_edited
             )
             
-            # Update fields with calculated values
+            # ✅ CRITICAL FIX: Update ALL calculated fields including late tracking
             update_fields["working_hours"] = working_hours_info.get("total_hours", 0)
+            update_fields["late_minutes"] = working_hours_info.get("late_minutes", 0)
+            update_fields["early_departure_minutes"] = working_hours_info.get("early_departure_minutes", 0)
+            update_fields["deducted_hours"] = working_hours_info.get("deducted_hours", 0.0)
+            
             changes.append(f"working_hours: {working_hours_info.get('total_hours', 0):.2f}")
+            changes.append(f"late_minutes: {working_hours_info.get('late_minutes', 0)}")
+            changes.append(f"early_departure_minutes: {working_hours_info.get('early_departure_minutes', 0)}")
+            changes.append(f"deducted_hours: {working_hours_info.get('deducted_hours', 0.0):.2f}")
             
             # Auto-correct status when times are provided (only if no explicit status change)
             if not new_status and attendance.get("status") == "absent":
