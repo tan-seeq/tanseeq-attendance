@@ -575,8 +575,7 @@ class ArabicScenariosBackendTester:
         
         # Unlock the payroll cycle
         unlock_data = {
-            "reason": "فتح لتصحيح خطأ",
-            "unlocked_by": "super_admin"
+            "unlock_reason": "فتح لتصحيح خطأ"
         }
         
         response = self.make_request("POST", f"/payroll/cycles/{self.test_cycle_id}/unlock", json=unlock_data)
