@@ -168,9 +168,9 @@ class PayrollLedgerService:
         employee_id: Optional[str] = None
     ) -> List[Dict]:
         """
-        جلب جميع القيود لدورة معينة
+        جلب جميع القيود لدورة معينة (excluding reversed entries)
         """
-        query = {"cycle_id": cycle_id}
+        query = {"cycle_id": cycle_id, "is_reversed": {"$ne": True}}  # ✅ Exclude reversed entries
         if employee_id:
             query["employee_id"] = employee_id
         
