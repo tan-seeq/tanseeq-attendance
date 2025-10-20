@@ -5900,8 +5900,8 @@ async def check_in(current_user: User = Depends(get_current_user)):
                     is_late = True
                     status = "late"
             else:
-                # Others should be here by 9 AM
-                if uae_time.hour > 9 or (uae_time.hour == 9 and uae_time.minute > 0):
+                # ✅ FIXED: Others should be here by 9:15 AM (not 9:00 AM)
+                if uae_time.hour > 9 or (uae_time.hour == 9 and uae_time.minute > 15):
                     is_late = True
                     status = "late"
     
