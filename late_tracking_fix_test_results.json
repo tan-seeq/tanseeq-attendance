@@ -1,0 +1,12 @@
+{
+  "test_results": {
+    "Check-in Response Structure": null,
+    "Database Record Structure": false,
+    "Deductions Integration": false
+  },
+  "success_rate": 0.0,
+  "check_in_data": {
+    "already_checked_in": true
+  },
+  "timestamp": "2025-10-20T06:51:22.301360"
+}
