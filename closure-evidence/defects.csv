@@ -1,1 +1,3 @@
 ID,Severity,Module,Step,Expected,Actual,Status,Evidence
+S1-001,Minor,Authentication,Admin login,Login successful,Authentication timeout,OPEN,/screenshots/scenario-01/
+S1-002,Minor,API,Users endpoint,200 OK,500 errors,OPEN,/screenshots/scenario-01/
