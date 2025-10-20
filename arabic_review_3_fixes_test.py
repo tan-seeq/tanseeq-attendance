@@ -111,8 +111,7 @@ class ArabicReview3FixesTester:
                 print(f"📊 Status Code: {status_code}")
                 
                 if status_code == 200:
-                    data = await response.json()
-                    users = data.get('users', [])
+                    users = await response.json()
                     
                     print(f"✅ SUCCESS: Status code = 200 (not 500)")
                     print(f"✅ Users returned: {len(users)} records")
