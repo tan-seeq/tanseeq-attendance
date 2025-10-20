@@ -1,0 +1,112 @@
+{
+  "test_summary": {
+    "total_tests": 10,
+    "passed_tests": 7,
+    "success_rate": 70.0,
+    "critical_issues": [
+      "3 historical records with incorrect late tracking"
+    ]
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication (regular)",
+      "success": true,
+      "details": "Successfully authenticated as jihad@tanseeq.com",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:46:38.375491"
+    },
+    {
+      "test": "Late Calculation Logic Test (09:14)",
+      "success": true,
+      "details": "Check-in at 09:14 correctly calculated",
+      "expected": "late_minutes=0, is_late=False",
+      "actual": "late_minutes=0, is_late=False",
+      "timestamp": "2025-10-20T06:46:38.375551"
+    },
+    {
+      "test": "Late Calculation Logic Test (09:15)",
+      "success": true,
+      "details": "Check-in at 09:15 correctly calculated",
+      "expected": "late_minutes=0, is_late=False",
+      "actual": "late_minutes=0, is_late=False",
+      "timestamp": "2025-10-20T06:46:38.375565"
+    },
+    {
+      "test": "Late Calculation Logic Test (09:16)",
+      "success": true,
+      "details": "Check-in at 09:16 correctly calculated",
+      "expected": "late_minutes=1, is_late=True",
+      "actual": "late_minutes=1, is_late=True",
+      "timestamp": "2025-10-20T06:46:38.375578"
+    },
+    {
+      "test": "Late Calculation Logic Test (09:30)",
+      "success": true,
+      "details": "Check-in at 09:30 correctly calculated",
+      "expected": "late_minutes=15, is_late=True",
+      "actual": "late_minutes=15, is_late=True",
+      "timestamp": "2025-10-20T06:46:38.375590"
+    },
+    {
+      "test": "Late Calculation Logic Test (10:00)",
+      "success": true,
+      "details": "Check-in at 10:00 correctly calculated",
+      "expected": "late_minutes=45, is_late=True",
+      "actual": "late_minutes=45, is_late=True",
+      "timestamp": "2025-10-20T06:46:38.375606"
+    },
+    {
+      "test": "Check-in API Response Structure",
+      "success": true,
+      "details": "Already checked in today (expected behavior)",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:46:38.399737"
+    },
+    {
+      "test": "Database Storage Verification",
+      "success": false,
+      "details": "Found 0 records with late_minutes field, 0 with late tracking after 9:15",
+      "expected": "Records should have late_minutes field",
+      "actual": "Total records: 11, with late_minutes: 0",
+      "timestamp": "2025-10-20T06:46:38.413167"
+    },
+    {
+      "test": "Historical Data Analysis",
+      "success": false,
+      "details": "Found 3 late tracking issues, 0 correct records",
+      "expected": "No late tracking issues in historical data",
+      "actual": "Issues: 3, Correct: 0",
+      "timestamp": "2025-10-20T06:46:38.413255"
+    },
+    {
+      "test": "Deductions Integration Test",
+      "success": false,
+      "details": "Deductions calculation failed: 403 - {\"detail\":\"Super admin access required\"}",
+      "expected": null,
+      "actual": null,
+      "timestamp": "2025-10-20T06:46:38.425084"
+    }
+  ],
+  "historical_issues": [
+    {
+      "date": "2025-07-16",
+      "check_in": "09:21:18",
+      "late_minutes": 0,
+      "issue": "Check-in after 9:15 but late_minutes = 0"
+    },
+    {
+      "date": "2025-10-07",
+      "check_in": "10:01:13",
+      "late_minutes": 0,
+      "issue": "Check-in after 9:15 but late_minutes = 0"
+    },
+    {
+      "date": "2025-10-20",
+      "check_in": "09:58:29",
+      "late_minutes": 0,
+      "issue": "Check-in after 9:15 but late_minutes = 0"
+    }
+  ]
+}
