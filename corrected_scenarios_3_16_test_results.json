@@ -1,0 +1,677 @@
+{
+  "summary": {
+    "total_tests": 35,
+    "passed_tests": 32,
+    "failed_tests": 3,
+    "success_rate": 91.42857142857143,
+    "test_date": "2025-10-20T07:25:04.213282"
+  },
+  "scenarios": {
+    "Authentication": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Authentication",
+          "test": "SUPER_ADMIN Login",
+          "success": true,
+          "details": "Successfully authenticated admin@tanseeq.com (ID: admin_001)",
+          "timestamp": "2025-10-20T07:25:02.930191",
+          "response_data": null
+        },
+        {
+          "scenario": "Authentication",
+          "test": "ADMIN Login",
+          "success": true,
+          "details": "Successfully authenticated mahmoud@tanseeq.com (ID: 3d3f42df-e01a-46b6-be41-eeee52ea0ec7)",
+          "timestamp": "2025-10-20T07:25:03.177427",
+          "response_data": null
+        },
+        {
+          "scenario": "Authentication",
+          "test": "USER Login",
+          "success": true,
+          "details": "Successfully authenticated jihad@tanseeq.com (ID: eed6d28b-7639-4d31-9386-4e99b9179d8f)",
+          "timestamp": "2025-10-20T07:25:03.422608",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 3": {
+      "passed": 2,
+      "failed": 1,
+      "tests": [
+        {
+          "scenario": "Scenario 3",
+          "test": "Create Leave Request",
+          "success": false,
+          "details": "Failed to create leave: 422 - {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"start_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"end_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"reason\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"days_count\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}",
+          "timestamp": "2025-10-20T07:25:03.434010",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 3",
+          "test": "Get User Leave Balance",
+          "success": true,
+          "details": "Retrieved 4 leave records for user",
+          "timestamp": "2025-10-20T07:25:03.443849",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 3",
+          "test": "Admin View All Leaves",
+          "success": true,
+          "details": "Admin retrieved 26 leave records",
+          "timestamp": "2025-10-20T07:25:03.454553",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 4": {
+      "passed": 3,
+      "failed": 1,
+      "tests": [
+        {
+          "scenario": "Scenario 4",
+          "test": "Start Marketing Visit",
+          "success": true,
+          "details": "Marketing visit started: a60704c1-9193-48b5-81c2-e7c97dc1cf37",
+          "timestamp": "2025-10-20T07:25:03.486794",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 4",
+          "test": "Get Active Marketing Visit",
+          "success": true,
+          "details": "Active visit retrieved: True",
+          "timestamp": "2025-10-20T07:25:03.496349",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 4",
+          "test": "Complete Marketing Visit",
+          "success": false,
+          "details": "Marketing visit completion: 422",
+          "timestamp": "2025-10-20T07:25:03.507916",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 4",
+          "test": "Get Marketing Visits History",
+          "success": true,
+          "details": "Retrieved 14 marketing visits from history",
+          "timestamp": "2025-10-20T07:25:03.521758",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 5": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 5",
+          "test": "Calculate Monthly Deductions",
+          "success": true,
+          "details": "Calculated deductions for 2 employees",
+          "timestamp": "2025-10-20T07:25:03.607174",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 5",
+          "test": "Get Deductions List",
+          "success": true,
+          "details": "Retrieved 21 deduction records",
+          "timestamp": "2025-10-20T07:25:03.637012",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 5",
+          "test": "Get Employees for Deductions",
+          "success": true,
+          "details": "Retrieved 8 employees for deductions",
+          "timestamp": "2025-10-20T07:25:03.645836",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 6": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 6",
+          "test": "Get Payroll Cycles",
+          "success": true,
+          "details": "Retrieved 6 payroll cycles",
+          "timestamp": "2025-10-20T07:25:03.656114",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 6",
+          "test": "Get Payroll Cycle Details",
+          "success": true,
+          "details": "Cycle details: 200",
+          "timestamp": "2025-10-20T07:25:03.705560",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 6",
+          "test": "Get Payroll Cycle Summary",
+          "success": true,
+          "details": "Summary retrieved with data: True",
+          "timestamp": "2025-10-20T07:25:03.724797",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 6",
+          "test": "Recalculate Payroll Cycle",
+          "success": true,
+          "details": "Recalculate: 200",
+          "timestamp": "2025-10-20T07:25:03.787507",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 7": {
+      "passed": 6,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 7",
+          "test": "Create Custody",
+          "success": true,
+          "details": "Custody created: 32e4d308-ab4f-49ca-a1a7-1f0d06b47822",
+          "timestamp": "2025-10-20T07:25:03.862575",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Create Advance",
+          "success": true,
+          "details": "Advance created: a14b1a84-c35b-4559-aa26-35394f10cfec",
+          "timestamp": "2025-10-20T07:25:03.877549",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Get User Balance",
+          "success": true,
+          "details": "Balance retrieved: Total available 9080.0",
+          "timestamp": "2025-10-20T07:25:03.887818",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Get All Employee Balances",
+          "success": true,
+          "details": "Retrieved balances for 5 employees",
+          "timestamp": "2025-10-20T07:25:03.905536",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Get Pending Approvals",
+          "success": true,
+          "details": "Retrieved 2 pending transactions",
+          "timestamp": "2025-10-20T07:25:03.914941",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Get All Transactions",
+          "success": true,
+          "details": "Retrieved 49 transactions",
+          "timestamp": "2025-10-20T07:25:03.929815",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 8": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 8",
+          "test": "Get Salary Letter HTML",
+          "success": true,
+          "details": "Salary letter html: 200",
+          "timestamp": "2025-10-20T07:25:03.951686",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 8",
+          "test": "Get Salary Letter PDF",
+          "success": true,
+          "details": "Salary letter pdf: 200",
+          "timestamp": "2025-10-20T07:25:03.972334",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 8",
+          "test": "Get Payroll Ledger",
+          "success": true,
+          "details": "Ledger retrieved with 17 entries",
+          "timestamp": "2025-10-20T07:25:03.983981",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 10": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 10",
+          "test": "Get User Notifications",
+          "success": true,
+          "details": "Retrieved 18 notifications",
+          "timestamp": "2025-10-20T07:25:03.995008",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 10",
+          "test": "Get Admin Notifications",
+          "success": true,
+          "details": "Admin retrieved 178 notifications",
+          "timestamp": "2025-10-20T07:25:04.018279",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 10",
+          "test": "Get Unread Mandatory Notifications",
+          "success": true,
+          "details": "Retrieved 16 unread mandatory notifications",
+          "timestamp": "2025-10-20T07:25:04.028336",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 11": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 11",
+          "test": "User Access Super Admin Endpoint",
+          "success": true,
+          "details": "Expected 403, got 403",
+          "timestamp": "2025-10-20T07:25:04.077787",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 11",
+          "test": "User Access Admin Endpoint",
+          "success": true,
+          "details": "Expected 403, got 403",
+          "timestamp": "2025-10-20T07:25:04.127372",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 11",
+          "test": "Invalid Payload Validation",
+          "success": true,
+          "details": "Expected 422, got 422",
+          "timestamp": "2025-10-20T07:25:04.136615",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 14": {
+      "passed": 2,
+      "failed": 1,
+      "tests": [
+        {
+          "scenario": "Scenario 14",
+          "test": "Get Work Reports Clients",
+          "success": true,
+          "details": "Retrieved 10 work reports clients",
+          "timestamp": "2025-10-20T07:25:04.184237",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 14",
+          "test": "Get Work Reports Logs",
+          "success": true,
+          "details": "Retrieved 0 work logs",
+          "timestamp": "2025-10-20T07:25:04.202427",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 14",
+          "test": "Update Work Log",
+          "success": false,
+          "details": "Work log update: 404",
+          "timestamp": "2025-10-20T07:25:04.212994",
+          "response_data": null
+        }
+      ]
+    }
+  },
+  "detailed_results": [
+    {
+      "scenario": "Authentication",
+      "test": "SUPER_ADMIN Login",
+      "success": true,
+      "details": "Successfully authenticated admin@tanseeq.com (ID: admin_001)",
+      "timestamp": "2025-10-20T07:25:02.930191",
+      "response_data": null
+    },
+    {
+      "scenario": "Authentication",
+      "test": "ADMIN Login",
+      "success": true,
+      "details": "Successfully authenticated mahmoud@tanseeq.com (ID: 3d3f42df-e01a-46b6-be41-eeee52ea0ec7)",
+      "timestamp": "2025-10-20T07:25:03.177427",
+      "response_data": null
+    },
+    {
+      "scenario": "Authentication",
+      "test": "USER Login",
+      "success": true,
+      "details": "Successfully authenticated jihad@tanseeq.com (ID: eed6d28b-7639-4d31-9386-4e99b9179d8f)",
+      "timestamp": "2025-10-20T07:25:03.422608",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 3",
+      "test": "Create Leave Request",
+      "success": false,
+      "details": "Failed to create leave: 422 - {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"start_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"end_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"reason\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"days_count\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}",
+      "timestamp": "2025-10-20T07:25:03.434010",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 3",
+      "test": "Get User Leave Balance",
+      "success": true,
+      "details": "Retrieved 4 leave records for user",
+      "timestamp": "2025-10-20T07:25:03.443849",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 3",
+      "test": "Admin View All Leaves",
+      "success": true,
+      "details": "Admin retrieved 26 leave records",
+      "timestamp": "2025-10-20T07:25:03.454553",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 4",
+      "test": "Start Marketing Visit",
+      "success": true,
+      "details": "Marketing visit started: a60704c1-9193-48b5-81c2-e7c97dc1cf37",
+      "timestamp": "2025-10-20T07:25:03.486794",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 4",
+      "test": "Get Active Marketing Visit",
+      "success": true,
+      "details": "Active visit retrieved: True",
+      "timestamp": "2025-10-20T07:25:03.496349",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 4",
+      "test": "Complete Marketing Visit",
+      "success": false,
+      "details": "Marketing visit completion: 422",
+      "timestamp": "2025-10-20T07:25:03.507916",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 4",
+      "test": "Get Marketing Visits History",
+      "success": true,
+      "details": "Retrieved 14 marketing visits from history",
+      "timestamp": "2025-10-20T07:25:03.521758",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 5",
+      "test": "Calculate Monthly Deductions",
+      "success": true,
+      "details": "Calculated deductions for 2 employees",
+      "timestamp": "2025-10-20T07:25:03.607174",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 5",
+      "test": "Get Deductions List",
+      "success": true,
+      "details": "Retrieved 21 deduction records",
+      "timestamp": "2025-10-20T07:25:03.637012",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 5",
+      "test": "Get Employees for Deductions",
+      "success": true,
+      "details": "Retrieved 8 employees for deductions",
+      "timestamp": "2025-10-20T07:25:03.645836",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 6",
+      "test": "Get Payroll Cycles",
+      "success": true,
+      "details": "Retrieved 6 payroll cycles",
+      "timestamp": "2025-10-20T07:25:03.656114",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 6",
+      "test": "Get Payroll Cycle Details",
+      "success": true,
+      "details": "Cycle details: 200",
+      "timestamp": "2025-10-20T07:25:03.705560",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 6",
+      "test": "Get Payroll Cycle Summary",
+      "success": true,
+      "details": "Summary retrieved with data: True",
+      "timestamp": "2025-10-20T07:25:03.724797",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 6",
+      "test": "Recalculate Payroll Cycle",
+      "success": true,
+      "details": "Recalculate: 200",
+      "timestamp": "2025-10-20T07:25:03.787507",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Create Custody",
+      "success": true,
+      "details": "Custody created: 32e4d308-ab4f-49ca-a1a7-1f0d06b47822",
+      "timestamp": "2025-10-20T07:25:03.862575",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Create Advance",
+      "success": true,
+      "details": "Advance created: a14b1a84-c35b-4559-aa26-35394f10cfec",
+      "timestamp": "2025-10-20T07:25:03.877549",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Get User Balance",
+      "success": true,
+      "details": "Balance retrieved: Total available 9080.0",
+      "timestamp": "2025-10-20T07:25:03.887818",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Get All Employee Balances",
+      "success": true,
+      "details": "Retrieved balances for 5 employees",
+      "timestamp": "2025-10-20T07:25:03.905536",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Get Pending Approvals",
+      "success": true,
+      "details": "Retrieved 2 pending transactions",
+      "timestamp": "2025-10-20T07:25:03.914941",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Get All Transactions",
+      "success": true,
+      "details": "Retrieved 49 transactions",
+      "timestamp": "2025-10-20T07:25:03.929815",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 8",
+      "test": "Get Salary Letter HTML",
+      "success": true,
+      "details": "Salary letter html: 200",
+      "timestamp": "2025-10-20T07:25:03.951686",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 8",
+      "test": "Get Salary Letter PDF",
+      "success": true,
+      "details": "Salary letter pdf: 200",
+      "timestamp": "2025-10-20T07:25:03.972334",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 8",
+      "test": "Get Payroll Ledger",
+      "success": true,
+      "details": "Ledger retrieved with 17 entries",
+      "timestamp": "2025-10-20T07:25:03.983981",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Get User Notifications",
+      "success": true,
+      "details": "Retrieved 18 notifications",
+      "timestamp": "2025-10-20T07:25:03.995008",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Get Admin Notifications",
+      "success": true,
+      "details": "Admin retrieved 178 notifications",
+      "timestamp": "2025-10-20T07:25:04.018279",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Get Unread Mandatory Notifications",
+      "success": true,
+      "details": "Retrieved 16 unread mandatory notifications",
+      "timestamp": "2025-10-20T07:25:04.028336",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 11",
+      "test": "User Access Super Admin Endpoint",
+      "success": true,
+      "details": "Expected 403, got 403",
+      "timestamp": "2025-10-20T07:25:04.077787",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 11",
+      "test": "User Access Admin Endpoint",
+      "success": true,
+      "details": "Expected 403, got 403",
+      "timestamp": "2025-10-20T07:25:04.127372",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 11",
+      "test": "Invalid Payload Validation",
+      "success": true,
+      "details": "Expected 422, got 422",
+      "timestamp": "2025-10-20T07:25:04.136615",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 14",
+      "test": "Get Work Reports Clients",
+      "success": true,
+      "details": "Retrieved 10 work reports clients",
+      "timestamp": "2025-10-20T07:25:04.184237",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 14",
+      "test": "Get Work Reports Logs",
+      "success": true,
+      "details": "Retrieved 0 work logs",
+      "timestamp": "2025-10-20T07:25:04.202427",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 14",
+      "test": "Update Work Log",
+      "success": false,
+      "details": "Work log update: 404",
+      "timestamp": "2025-10-20T07:25:04.212994",
+      "response_data": null
+    }
+  ],
+  "evidence": {
+    "marketing_visit_id": "a60704c1-9193-48b5-81c2-e7c97dc1cf37",
+    "calculated_deductions": {
+      "success": true,
+      "month": "2025-01",
+      "employees": [
+        {
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "employee_name": "Tarek Wazzan",
+          "late_deduction": 0,
+          "absence_deduction": 266.67,
+          "advance_deduction": 0,
+          "total_deduction": 266.67,
+          "deduction_details": [
+            "غياب 2 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 2,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "employee_name": "Tarek Hegazy",
+          "late_deduction": 0,
+          "absence_deduction": 333.33,
+          "advance_deduction": 0,
+          "total_deduction": 333.33,
+          "deduction_details": [
+            "غياب 2 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 2,
+          "installment_count": 0
+        }
+      ],
+      "total_deductions": 600.0,
+      "employee_count": 2
+    },
+    "existing_cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f",
+    "custody_id": "32e4d308-ab4f-49ca-a1a7-1f0d06b47822",
+    "advance_id": "a14b1a84-c35b-4559-aa26-35394f10cfec",
+    "existing_client_id": "2bcecf09-9578-4f83-b6f5-f86de04ff0b9",
+    "existing_log_id": null
+  }
+}
