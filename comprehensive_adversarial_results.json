@@ -1,0 +1,131 @@
+{
+  "summary": {
+    "total_tests": 11,
+    "passed": 7,
+    "failed": 2,
+    "warnings": 2,
+    "success_rate": 63.63636363636363
+  },
+  "scenarios": {
+    "SCENARIO_1": {
+      "PASS": 2,
+      "FAIL": 0,
+      "WARN": 1
+    },
+    "SCENARIO_2": {
+      "PASS": 2,
+      "FAIL": 1,
+      "WARN": 0
+    },
+    "SCENARIO_3": {
+      "PASS": 2,
+      "FAIL": 0,
+      "WARN": 1
+    },
+    "SCENARIO_4": {
+      "PASS": 1,
+      "FAIL": 0,
+      "WARN": 0
+    },
+    "SYSTEM": {
+      "PASS": 0,
+      "FAIL": 1,
+      "WARN": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "scenario": "SCENARIO_1",
+      "test": "Late Tracking Analysis",
+      "status": "PASS",
+      "details": "Found 0 late records, 0 early departures",
+      "evidence": {
+        "total_records": 11,
+        "late_records": 0,
+        "early_departures": 0
+      },
+      "timestamp": "2025-10-20T06:29:06.980835"
+    },
+    {
+      "scenario": "SCENARIO_1",
+      "test": "9:15 AM Rule Verification",
+      "status": "PASS",
+      "details": "Found 3 records after 9:15 AM with proper late tracking",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:06.984305"
+    },
+    {
+      "scenario": "SCENARIO_1",
+      "test": "Flexible Policy Check",
+      "status": "WARN",
+      "details": "Could not retrieve policy: {'detail': '\u063a\u064a\u0631 \u0645\u0633\u0645\u0648\u062d'}",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:06.993631"
+    },
+    {
+      "scenario": "SCENARIO_2",
+      "test": "Get Payroll Cycles",
+      "status": "PASS",
+      "details": "Retrieved 6 payroll cycles",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.245799"
+    },
+    {
+      "scenario": "SCENARIO_2",
+      "test": "Check Lock Status",
+      "status": "PASS",
+      "details": "Cycle lock status: False",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.245844"
+    },
+    {
+      "scenario": "SCENARIO_2",
+      "test": "Lock Cycle",
+      "status": "FAIL",
+      "details": "Failed to lock cycle: {'detail': 'Method Not Allowed'}",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.254153"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Balance Check",
+      "status": "PASS",
+      "details": "Current balance - Advances: 7625.0, Custody: 655.0, Total: 8280.0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.304739"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Balance Calculation",
+      "status": "PASS",
+      "details": "Balance calculation is correct",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.304773"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Overspending Detection",
+      "status": "WARN",
+      "details": "No overspending scenarios found in current data",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.321841"
+    },
+    {
+      "scenario": "SCENARIO_4",
+      "test": "Calculate Deductions",
+      "status": "PASS",
+      "details": "Calculated deductions for 5 employees",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.367814"
+    },
+    {
+      "scenario": "SYSTEM",
+      "test": "Critical Error",
+      "status": "FAIL",
+      "details": "0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:29:07.367858"
+    }
+  ],
+  "timestamp": "2025-10-20T06:29:07.368920"
+}
