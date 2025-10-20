@@ -159,14 +159,38 @@ class AttendanceScenario2Tester:
         print("\n🔍 Part 2: Create Absence Record")
         
         try:
-            # Create absence record
+            # Get a real user ID from the system first
+            users_response = self.session.get(
+                f"{BASE_URL}/employees/list",
+                headers=self.get_headers("super_admin"),
+                timeout=30
+            )
+            
+            if users_response.status_code == 200:
+                users_data = users_response.json()
+                users = users_data if isinstance(users_data, list) else users_data.get("employees", [])
+                
+                if users:
+                    # Use the first available user
+                    user = users[0]
+                    user_id = user.get("id", "jihad_user_id")
+                    user_name = user.get("name", "Test User")
+                else:
+                    # Fallback to known user
+                    user_id = "jihad_user_id"
+                    user_name = "Jihad Test User"
+            else:
+                # Fallback to known user
+                user_id = "jihad_user_id"
+                user_name = "Jihad Test User"
+            
+            # Create absence record with correct structure
             absence_data = {
-                "user_id": "test_user_absence",
-                "user_name": "Test User Absence",
+                "employee_id": user_id,
+                "employee_name": user_name,
                 "date": datetime.now().strftime('%Y-%m-%d'),
                 "reason": "مرض",
-                "leave_type": "إجازة مرضية",
-                "status": "absent"
+                "absence_type": "sick_leave"
             }
             
             response = self.session.post(
