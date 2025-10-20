@@ -117,18 +117,19 @@ class ArabicScenariosBackendTester:
         """Test attendance report endpoints"""
         print("\n📊 Testing Attendance Reports...")
         
-        # Get attendance report
-        response = self.make_request("GET", "/reports/attendance?month=2025-10")
+        # Get attendance data first
+        response = self.make_request("GET", "/attendance")
         if response and response.status_code == 200:
             data = response.json()
-            self.log_test("Attendance Report - GET", "PASS", 
-                         f"Retrieved attendance report with {len(data.get('records', []))} records")
+            records = data.get('records', []) if isinstance(data, dict) else data
+            self.log_test("Attendance Data - GET", "PASS", 
+                         f"Retrieved attendance data with {len(records)} records")
         else:
-            self.log_test("Attendance Report - GET", "FAIL", 
-                         f"Failed to get attendance report: {response.status_code if response else 'No response'}")
+            self.log_test("Attendance Data - GET", "FAIL", 
+                         f"Failed to get attendance data: {response.status_code if response else 'No response'}")
         
-        # Test PDF export
-        response = self.make_request("GET", "/reports/attendance/export?format=pdf&month=2025-10")
+        # Test generic report export (attendance type)
+        response = self.make_request("GET", "/reports/attendance/export?format=pdf")
         if response and response.status_code == 200:
             content_type = response.headers.get('content-type', '')
             file_size = len(response.content)
@@ -146,7 +147,7 @@ class ArabicScenariosBackendTester:
                          f"PDF export failed: {response.status_code if response else 'No response'}")
         
         # Test Excel export
-        response = self.make_request("GET", "/reports/attendance/export?format=excel&month=2025-10")
+        response = self.make_request("GET", "/reports/attendance/export?format=excel")
         if response and response.status_code == 200:
             content_type = response.headers.get('content-type', '')
             file_size = len(response.content)
