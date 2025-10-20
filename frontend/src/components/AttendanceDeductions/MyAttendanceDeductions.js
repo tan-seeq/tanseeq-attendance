@@ -434,56 +434,126 @@ const MyAttendanceDeductions = ({ currentUser }) => {
               <DollarSign className="w-5 h-5 text-purple-600" />
               السلف والأقساط
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {advances.map((advance) => (
                 <div
                   key={advance.id}
-                  className="border border-purple-200 rounded-lg p-4 bg-purple-50"
+                  className="border border-purple-200 rounded-lg bg-purple-50"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-medium text-purple-900">
-                          سلفة - {advance.advance_date || 'تاريخ غير محدد'}
-                        </span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          advance.status === 'approved' 
-                            ? 'bg-green-100 text-green-800' 
-                            : advance.status === 'fully_paid'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {advance.status === 'approved' ? 'معتمدة' : 
-                           advance.status === 'fully_paid' ? 'مسددة' : advance.status}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-600">المبلغ الكلي:</span>
-                          <p className="font-semibold text-purple-900">{advance.amount?.toFixed(2)} درهم</p>
+                  {/* Advance Header */}
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-medium text-purple-900">
+                            سلفة - {advance.advance_date || 'تاريخ غير محدد'}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            advance.status === 'approved' 
+                              ? 'bg-green-100 text-green-800' 
+                              : advance.status === 'fully_paid'
+                              ? 'bg-blue-100 text-blue-800'
+                              : advance.status === 'rejected'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {advance.status === 'approved' ? '✅ معتمدة' : 
+                             advance.status === 'fully_paid' ? '✅ مسددة بالكامل' : 
+                             advance.status === 'rejected' ? '❌ مرفوضة' : 
+                             '⏳ قيد المراجعة'}
+                          </span>
                         </div>
-                        <div>
-                          <span className="text-gray-600">المدفوع:</span>
-                          <p className="font-semibold text-green-600">{advance.paid_amount?.toFixed(2)} درهم</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-600">المبلغ الكلي:</span>
+                            <p className="font-semibold text-purple-900">{advance.amount?.toFixed(2)} درهم</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">المدفوع:</span>
+                            <p className="font-semibold text-green-600">{advance.paid_amount?.toFixed(2)} درهم</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">المتبقي:</span>
+                            <p className="font-semibold text-red-600">{advance.remaining_amount?.toFixed(2)} درهم</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">الأقساط:</span>
+                            <p className="font-semibold text-gray-900">
+                              {advance.paid_installments || 0} / {advance.installments || 0}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-gray-600">المتبقي:</span>
-                          <p className="font-semibold text-red-600">{advance.remaining_amount?.toFixed(2)} درهم</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">الأقساط:</span>
-                          <p className="font-semibold text-gray-900">
-                            {advance.paid_installments || 0} / {advance.installments || 0}
+                        {advance.reason && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            <strong>السبب:</strong> {advance.reason}
                           </p>
-                        </div>
+                        )}
                       </div>
-                      {advance.reason && (
-                        <p className="text-sm text-gray-600 mt-2">
-                          <strong>السبب:</strong> {advance.reason}
-                        </p>
-                      )}
                     </div>
                   </div>
+                  
+                  {/* Installments Schedule */}
+                  {advance.installmentDetails && advance.installmentDetails.length > 0 && (
+                    <div className="border-t border-purple-200 p-4 bg-white">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">📅 جدولة الأقساط</h4>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-3 py-2 text-right">#</th>
+                              <th className="px-3 py-2 text-right">الشهر</th>
+                              <th className="px-3 py-2 text-right">المبلغ</th>
+                              <th className="px-3 py-2 text-center">الحالة</th>
+                              <th className="px-3 py-2 text-right">تاريخ الدفع</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {advance.installmentDetails.map((installment) => (
+                              <tr key={installment.id} className="border-t">
+                                <td className="px-3 py-2">{installment.installment_number}</td>
+                                <td className="px-3 py-2">{installment.payroll_month}</td>
+                                <td className="px-3 py-2 font-semibold">
+                                  {installment.installment_amount?.toFixed(2)} درهم
+                                </td>
+                                <td className="px-3 py-2 text-center">
+                                  <span className={`px-2 py-1 rounded text-xs ${
+                                    installment.status === 'paid' 
+                                      ? 'bg-green-100 text-green-800'
+                                      : installment.status === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {installment.status === 'paid' ? '✅ مدفوع' : 
+                                     installment.status === 'pending' ? '⏳ معلق' : 
+                                     '⏸️ مجدول'}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 text-gray-600">
+                                  {installment.paid_date || '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      {advance.schedule && (
+                        <div className="mt-3">
+                          <div className="flex justify-between text-xs text-gray-600 mb-1">
+                            <span>التقدم</span>
+                            <span>{Math.round((advance.paid_installments / advance.installments) * 100)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-green-600 h-2 rounded-full transition-all"
+                              style={{ width: `${(advance.paid_installments / advance.installments) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
