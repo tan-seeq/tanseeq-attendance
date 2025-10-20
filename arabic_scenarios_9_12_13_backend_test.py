@@ -484,8 +484,7 @@ class ArabicScenariosBackendTester:
         
         # Lock the payroll cycle
         lock_data = {
-            "reason": "قفل دورة الرواتب - نهاية الشهر",
-            "locked_by": "admin"
+            "lock_reason": "قفل دورة الرواتب - نهاية الشهر"
         }
         
         response = self.make_request("POST", f"/payroll/cycles/{self.test_cycle_id}/lock", json=lock_data)
