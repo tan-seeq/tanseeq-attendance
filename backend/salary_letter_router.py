@@ -66,10 +66,11 @@ def build_salary_letter_router(get_current_user_dep):
             hourly_rate = daily_rate / 8 if daily_rate else 0
             minute_rate = hourly_rate / 60 if hourly_rate else 0
 
-            # ✅ Ledger parity: source_type + cycle_id
+            # ✅ FIXED: Get ledger entries excluding reversed ones and using cycle_id
             ledger_entries = await db.payroll_ledger.find({
                 "employee_id": employee_id,
-                "payroll_cycle_id": cycle_id  # ✅ FIXED: Use payroll_cycle_id (database field name)
+                "cycle_id": cycle_id,  # ✅ Use cycle_id (not payroll_cycle_id)
+                "is_reversed": {"$ne": True}  # ✅ Exclude reversed entries
             }).to_list(None)
             
             # Remove MongoDB _id
@@ -85,16 +86,17 @@ def build_salary_letter_router(get_current_user_dep):
                 amount = float(entry.get("amount", 0) or 0)
                 description = entry.get("description", "")
 
+                # ✅ Use absolute values for deductions (they are negative in ledger)
                 if source_type == "ATTENDANCE_DEDUCTION":
-                    attendance_deductions.append({"description": description, "amount": amount})
+                    attendance_deductions.append({"description": description, "amount": abs(amount)})
                 elif source_type == "LEAVE_ADJUSTMENT":
                     leave_adjustments.append({"description": description, "amount": amount})
                 elif source_type == "MANUAL_DEDUCTION":
-                    manual_deductions.append({"description": description, "amount": amount})
+                    manual_deductions.append({"description": description, "amount": abs(amount)})
                 elif source_type == "ADVANCE_INSTALLMENT":
                     advance_installments.append({
                         "description": description,
-                        "amount": amount,
+                        "amount": abs(amount),  # ✅ Convert to positive
                         "reference_id": entry.get("source_id", "")
                     })
                 elif source_type == "CUSTODY_ADJUSTMENT":
