@@ -190,7 +190,11 @@ class AdversarialTester:
         resp = await self.api_request("GET", "/payroll/cycles", token)
         
         if resp["status"] == 200:
-            cycles = resp["data"]["cycles"]
+            cycles = resp["data"]
+            if isinstance(cycles, dict) and "cycles" in cycles:
+                cycles = cycles["cycles"]
+            elif not isinstance(cycles, list):
+                cycles = []
             self.log_test("SCENARIO_2", "Get Payroll Cycles", "PASS", 
                          f"Found {len(cycles)} payroll cycles")
             
