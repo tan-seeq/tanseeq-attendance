@@ -113,6 +113,66 @@
 
 ## current_refactoring_tasks:
 backend:
+  - task: "Phase-2 Adversarial Testing - Scenario 1: Attendance Late Tracking"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 CRITICAL ISSUE FOUND: 9:15 AM Late Tracking Rule NOT working correctly. Found 3 attendance records with check-in times AFTER 9:15 AM that are NOT marked as late (late_minutes = 0). This violates the core business rule that any arrival after 9:15 AM should be marked as late. The attendance calculation logic in calculate_working_hours_and_deductions() function needs immediate fix to properly implement the 9:15 AM rule."
+
+  - task: "Phase-2 Adversarial Testing - Scenario 2: Payroll Lock Mechanism"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 CRITICAL ISSUE FOUND: Payroll lock mechanism has validation error. Lock endpoint requires 'reason' field but error message indicates missing mandatory reason field. The lock functionality exists but has improper validation. However, payroll ledger access is working correctly with 7 reversal entries found, indicating the audit trail system is functional."
+
+  - task: "Phase-2 Adversarial Testing - Scenario 3: Custody & Advance Separation"
+    implemented: true
+    working: true
+    file: "advances_model.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ CUSTODY & ADVANCE SEPARATION WORKING CORRECTLY: Comprehensive testing confirms proper business logic implementation. Advances correctly isolated from expenses (7625.0 = 7625.0), custody properly reduced by expenses (655.0), total balance calculation accurate. The system correctly implements the rule that advances should NOT be affected by expenses while custody should be reduced. No overspending scenarios found in current data but system architecture supports handling negative balances."
+
+  - task: "Phase-2 Adversarial Testing - Scenario 4: Deductions Application Workflow"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ DEDUCTIONS WORKFLOW OPERATIONAL: Monthly deductions calculation working correctly for 5 employees with proper data structure. The calculate-monthly endpoint returns required fields (employee_id, employee_name) and processes attendance data correctly. Integration with payroll cycles confirmed functional."
+
+  - task: "Phase-2 Adversarial Testing - Scenario 5: Negative Salary Boundary Conditions"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "⚠️ BOUNDARY CONDITIONS ANALYSIS: No negative salary or high deduction scenarios found in current payroll data to test boundary conditions. System architecture appears to support handling edge cases but cannot verify without test data. Recommend creating test scenarios with high deductions (>100% of salary) to verify system behavior."
+
   - task: "Fix leave attachments display issue"
     implemented: true
     working: true
