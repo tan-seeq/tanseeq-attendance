@@ -30,7 +30,16 @@ async def cleanup_duplicate_ledger_entries():
     """Remove duplicate ledger entries, keep only latest"""
     
     client = AsyncIOMotorClient(MONGO_URL)
-    db = client.get_database()
+    
+    # ✅ Extract database name from MONGO_URL or use default
+    if '/' in MONGO_URL:
+        db_name = MONGO_URL.split('/')[-1].split('?')[0]
+        if not db_name:
+            db_name = "tanseeq_hr"
+    else:
+        db_name = "tanseeq_hr"
+    
+    db = client[db_name]
     ledger_collection = db.payroll_ledger
     
     print("🔍 Analyzing payroll_ledger for duplicates...")
