@@ -12105,4 +12105,231 @@ async def shutdown_db_client():
 # Root endpoint
 @app.get("/")
 async def root():
+
+
+# ============================================
+# Advanced Deductions System
+# ============================================
+
+from advanced_deductions_system import (
+    calculate_monthly_deductions,
+    save_deductions_to_db,
+    get_employee_deduction_summary,
+    get_cycle_dates,
+    EXCLUDED_EMPLOYEES,
+    is_employee_excluded
+)
+
+@app.post("/api/deductions/calculate-monthly")
+async def calculate_advanced_deductions(
+    month: int,
+    year: int,
+    payroll_cycle_id: Optional[str] = None,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    Calculate advanced attendance deductions for all employees
+    
+    🔒 RBAC: Super Admin Only
+    
+    Args:
+        month: Month number (1-12)
+        year: Year (e.g., 2025)
+        payroll_cycle_id: Optional payroll cycle ID to link
+        
+    Returns:
+        Summary of calculated deductions for all employees
+    """
+    try:
+        print(f"\n🧮 Calculating advanced deductions for {year}-{month:02d}")
+        
+        # Calculate deductions
+        summaries = await calculate_monthly_deductions(db, month, year, payroll_cycle_id)
+        
+        # Save to database
+        records_saved = await save_deductions_to_db(db, summaries)
+        
+        # Format response
+        response_summaries = []
+        for summary in summaries:
+            response_summaries.append({
+                "employee_id": summary.employee_id,
+                "employee_name": summary.employee_name,
+                "basic_salary": summary.basic_salary,
+                "cycle_start": summary.cycle_start,
+                "cycle_end": summary.cycle_end,
+                "total_working_days": summary.total_working_days,
+                "days_present": summary.days_present,
+                "days_absent": summary.days_absent,
+                "total_late_minutes": summary.total_late_minutes,
+                "total_early_leave_minutes": summary.total_early_leave_minutes,
+                "total_deficit_minutes": summary.total_deficit_minutes,
+                "total_deduction_amount": round(summary.total_deduction_amount, 2)
+            })
+        
+        return {
+            "success": True,
+            "message": f"تم حساب الخصومات لـ {len(summaries)} موظف",
+            "month": month,
+            "year": year,
+            "cycle_start": summaries[0].cycle_start if summaries else None,
+            "cycle_end": summaries[0].cycle_end if summaries else None,
+            "total_employees": len(summaries),
+            "total_records_saved": records_saved,
+            "summaries": response_summaries
+        }
+        
+    except Exception as e:
+        print(f"❌ Error calculating deductions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
+
+
+@app.get("/api/deductions/report")
+async def get_deductions_report(
+    month: int,
+    year: int,
+    employee_id: Optional[str] = None,
+    current_user: User = Depends(get_admin_user)
+):
+    """
+    Get advanced deductions report
+    
+    🔒 RBAC: Admin or Super Admin
+    
+    Args:
+        month: Month number (1-12)
+        year: Year (e.g., 2025)
+        employee_id: Optional filter by employee
+        
+    Returns:
+        Deduction report with daily breakdown
+    """
+    try:
+        cycle_start, cycle_end = get_cycle_dates(month, year)
+        cycle_start_str = cycle_start.strftime("%Y-%m-%d")
+        cycle_end_str = cycle_end.strftime("%Y-%m-%d")
+        
+        # Build query
+        query = {
+            "cycle_start": cycle_start_str,
+            "cycle_end": cycle_end_str
+        }
+        
+        if employee_id:
+            query["employee_id"] = employee_id
+        
+        # Get all records
+        records = await db.deductions_advanced.find(query).to_list(None)
+        
+        if not records:
+            return {
+                "success": True,
+                "message": "لا توجد سجلات للفترة المحددة",
+                "month": month,
+                "year": year,
+                "cycle_start": cycle_start_str,
+                "cycle_end": cycle_end_str,
+                "summaries": []
+            }
+        
+        # Group by employee
+        employee_map = {}
+        for record in records:
+            emp_id = record["employee_id"]
+            if emp_id not in employee_map:
+                employee_map[emp_id] = {
+                    "employee_id": emp_id,
+                    "employee_name": record["employee_name"],
+                    "cycle_start": cycle_start_str,
+                    "cycle_end": cycle_end_str,
+                    "total_working_days": 0,
+                    "days_present": 0,
+                    "days_absent": 0,
+                    "total_late_minutes": 0,
+                    "total_early_leave_minutes": 0,
+                    "total_deficit_minutes": 0,
+                    "total_deduction_amount": 0.0,
+                    "daily_records": []
+                }
+            
+            emp_summary = employee_map[emp_id]
+            emp_summary["total_working_days"] += 1 if record["is_working_day"] else 0
+            emp_summary["days_present"] += 0 if record["is_absent"] else 1
+            emp_summary["days_absent"] += 1 if record["is_absent"] else 0
+            emp_summary["total_late_minutes"] += record.get("late_minutes", 0)
+            emp_summary["total_early_leave_minutes"] += record.get("early_leave_minutes", 0)
+            emp_summary["total_deficit_minutes"] += record.get("deficit_minutes", 0)
+            emp_summary["total_deduction_amount"] += record.get("deduction_amount", 0.0)
+            
+            # Remove MongoDB _id
+            if "_id" in record:
+                del record["_id"]
+            
+            emp_summary["daily_records"].append(record)
+        
+        # Convert to list and sort by deduction amount
+        summaries = list(employee_map.values())
+        summaries.sort(key=lambda x: x["total_deduction_amount"], reverse=True)
+        
+        return {
+            "success": True,
+            "message": f"تم جلب تقرير الخصومات لـ {len(summaries)} موظف",
+            "month": month,
+            "year": year,
+            "cycle_start": cycle_start_str,
+            "cycle_end": cycle_end_str,
+            "total_employees": len(summaries),
+            "summaries": summaries
+        }
+        
+    except Exception as e:
+        print(f"❌ Error getting deductions report: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في جلب التقرير: {str(e)}")
+
+
+@app.get("/api/deductions/excluded-employees")
+async def get_excluded_employees(current_user: User = Depends(get_admin_user)):
+    """
+    Get list of employees excluded from advanced deductions
+    
+    🔒 RBAC: Admin or Super Admin
+    """
+    return {
+        "success": True,
+        "excluded_employees": EXCLUDED_EMPLOYEES
+    }
+
+
+@app.delete("/api/deductions/clear")
+async def clear_deductions(
+    month: int,
+    year: int,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    Clear deductions for a specific month
+    
+    🔒 RBAC: Super Admin Only
+    
+    Useful for recalculation after attendance corrections
+    """
+    try:
+        cycle_start, cycle_end = get_cycle_dates(month, year)
+        cycle_start_str = cycle_start.strftime("%Y-%m-%d")
+        cycle_end_str = cycle_end.strftime("%Y-%m-%d")
+        
+        result = await db.deductions_advanced.delete_many({
+            "cycle_start": cycle_start_str,
+            "cycle_end": cycle_end_str
+        })
+        
+        return {
+            "success": True,
+            "message": f"تم حذف {result.deleted_count} سجل خصومات",
+            "deleted_count": result.deleted_count
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في حذف السجلات: {str(e)}")
+
     return {"message": "TANSEEQ HR System API"}
