@@ -1,0 +1,260 @@
+{
+  "audit_timestamp": "2025-10-20T06:00:32.509599",
+  "backend_url": "https://hr-system-fix.preview.emergentagent.com",
+  "test_summary": {},
+  "detailed_results": {
+    "attendance": {
+      "/attendance": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get attendance records",
+        "details": "Status 200 - Found 57 records",
+        "record_count": 57
+      },
+      "/attendance/with-absences": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get attendance with absences",
+        "details": "Status 200 - Found 57 records",
+        "record_count": 57
+      },
+      "/attendance/check-in": {
+        "success": true,
+        "status_code": 400,
+        "description": "Check-in functionality",
+        "details": "Status 400"
+      },
+      "/attendance/check-out": {
+        "success": true,
+        "status_code": 400,
+        "description": "Check-out functionality",
+        "details": "Status 400"
+      }
+    },
+    "leave_management": {
+      "/leaves": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get all leaves (admin)",
+        "record_count": 26
+      },
+      "/leaves/my": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get user leaves",
+        "record_count": 4
+      }
+    },
+    "payroll_system": {
+      "/payroll/cycles": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get payroll cycles",
+        "record_count": 6,
+        "details": "Found 6 records"
+      },
+      "/payroll/installment-schedules": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get installment schedules"
+      },
+      "/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get cycle details"
+      },
+      "/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f/summary": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get cycle summary"
+      },
+      "/payroll/cycles/026ce2ba-4471-482c-ac03-dbb8353ac13f/recalculate": {
+        "success": true,
+        "status_code": 200,
+        "description": "Recalculate cycle"
+      }
+    },
+    "deductions_system": {
+      "/deductions": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get deductions list",
+        "record_count": 21
+      },
+      "/deductions/calculate-monthly?month=2025-01": {
+        "success": true,
+        "status_code": 200,
+        "description": "Calculate monthly deductions"
+      },
+      "/deductions/apply-monthly?month=2025-01": {
+        "success": false,
+        "status_code": 422,
+        "description": "Apply monthly deductions"
+      },
+      "/employees/list": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get employees for deductions"
+      }
+    },
+    "advances_system": {
+      "/advances/admin/all-balances": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get all employee balances",
+        "record_count": 5
+      },
+      "/advances/admin/pending-approvals": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get pending approvals",
+        "record_count": 2
+      },
+      "/advances/admin/all-transactions": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get all transactions",
+        "record_count": 47
+      },
+      "/advances/my-balance": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get user balance",
+        "balance_info": "Available: 8280.0"
+      },
+      "/advances/my-transactions": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get user transactions",
+        "record_count": 32
+      }
+    },
+    "work_reports": {
+      "/work-reports/clients": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get clients",
+        "record_count": 10
+      },
+      "/work-reports/logs": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get work logs"
+      }
+    },
+    "notifications": {
+      "/notifications": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get all notifications",
+        "record_count": 176
+      },
+      "/notifications/my": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get user notifications",
+        "record_count": 18
+      },
+      "/notifications/unread-mandatory": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get unread mandatory",
+        "record_count": 16
+      }
+    },
+    "marketing_visits": {
+      "/marketing-visits/history": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get marketing visits history"
+      },
+      "/marketing-visits/active": {
+        "success": true,
+        "status_code": 200,
+        "description": "Get active marketing visit",
+        "active_visit": false
+      }
+    }
+  },
+  "critical_issues": [],
+  "working_features": [],
+  "broken_features": [],
+  "overall_health_score": 96.3,
+  "authentication": {
+    "super_admin": {
+      "success": true,
+      "user_info": {
+        "id": "admin_001",
+        "name": "مدير النظام",
+        "email": "admin@tanseeq.com",
+        "role": "super_admin",
+        "position": "مدير",
+        "monthly_salary": 15000.0,
+        "daily_rate": 500.0,
+        "working_hours_start": "08:00",
+        "working_hours_end": "18:00",
+        "phone": "+971501234567",
+        "hire_date": null,
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": true,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-11:00",
+        "flexible_end_range": "16:00-20:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      "role_verified": "super_admin"
+    },
+    "admin": {
+      "success": true,
+      "user_info": {
+        "id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+        "name": "Mahmoud",
+        "email": "mahmoud@tanseeq.com",
+        "role": "admin",
+        "position": "Operations Manager",
+        "monthly_salary": 5000.0,
+        "daily_rate": 227.27272727272728,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "+971501234567",
+        "hire_date": "2020-06-01T00:00:00",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": true,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-11:00",
+        "flexible_end_range": "15:00-24:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      "role_verified": "admin"
+    },
+    "user": {
+      "success": true,
+      "user_info": {
+        "id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "name": "Jihad",
+        "email": "jihad@tanseeq.com",
+        "role": "user",
+        "position": "Tax Consultant",
+        "monthly_salary": 2700.0,
+        "daily_rate": 122.72727272727273,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "+971501234567",
+        "hire_date": "2021-06-01T00:00:00",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": true,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-11:00",
+        "flexible_end_range": "15:00-24:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      "role_verified": "user"
+    }
+  }
+}
