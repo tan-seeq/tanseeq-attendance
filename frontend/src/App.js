@@ -81,6 +81,8 @@ import EmployeeLedger from './components/PayrollLedger/EmployeeLedger';
 import DeductionsReport from './components/Reports/DeductionsReport';
 import AdvancesReport from './components/Reports/AdvancesReport';
 import AttendanceReport from './components/Reports/AttendanceReport';
+import AdvancedDeductionsReport from './components/Reports/AdvancedDeductionsReport';
+
 
 // Import Dashboard Components
 import HRDashboard from './components/Dashboard/HRDashboard';
