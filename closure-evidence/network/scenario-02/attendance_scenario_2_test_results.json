@@ -1,107 +1,380 @@
 {
   "test_summary": {
-    "total_tests": 14,
-    "passed_tests": 4,
-    "success_rate": "28.6%",
-    "timestamp": "2025-10-20T07:13:28.132370"
+    "total_tests": 53,
+    "passed_tests": 22,
+    "success_rate": "41.5%",
+    "timestamp": "2025-10-20T07:15:13.648669"
   },
   "detailed_results": [
     {
       "test": "Authentication (super_admin)",
       "success": true,
       "details": "Successfully authenticated as admin@tanseeq.com",
-      "timestamp": "2025-10-20T07:13:27.544210",
+      "timestamp": "2025-10-20T07:15:13.121897",
       "response_data": null
     },
     {
       "test": "Authentication (user)",
       "success": true,
       "details": "Successfully authenticated as jihad@tanseeq.com",
-      "timestamp": "2025-10-20T07:13:27.787134",
+      "timestamp": "2025-10-20T07:15:13.368433",
       "response_data": null
     },
     {
-      "test": "Create Late Attendance",
+      "test": "Check-in Endpoint",
       "success": false,
-      "details": "Failed to create attendance: 405 - {\"detail\":\"Method Not Allowed\"}",
-      "timestamp": "2025-10-20T07:13:27.837761",
+      "details": "Failed check-in: 400 - {\"detail\":\"تم تسجيل الحضور مسبقاً اليوم\"}",
+      "timestamp": "2025-10-20T07:15:13.380528",
       "response_data": null
     },
     {
       "test": "Create Absence Record",
       "success": false,
-      "details": "Failed to create absence: 404 - {\"detail\":\"User not found\"}",
-      "timestamp": "2025-10-20T07:13:27.850720",
+      "details": "Failed to create absence: 400 - {\"detail\":\"User ID and date are required\"}",
+      "timestamp": "2025-10-20T07:15:13.400817",
       "response_data": null
     },
     {
       "test": "Edit Attendance Record",
       "success": false,
       "details": "late_minutes not recalculated correctly. Expected 5, got: {'message': 'Attendance updated successfully', 'changes': ['check_in: 09:20:00']}",
-      "timestamp": "2025-10-20T07:13:27.918232",
+      "timestamp": "2025-10-20T07:15:13.427880",
       "response_data": null
     },
     {
       "test": "Delete Absence Record",
       "success": false,
       "details": "Record still exists after deletion",
-      "timestamp": "2025-10-20T07:13:27.951684",
+      "timestamp": "2025-10-20T07:15:13.539754",
       "response_data": null
     },
     {
-      "test": "Flexible Schedule Early Check-in",
+      "test": "Flexible Schedule Users",
       "success": false,
-      "details": "Failed to create flexible schedule attendance: 405 - {\"detail\":\"Method Not Allowed\"}",
-      "timestamp": "2025-10-20T07:13:28.000196",
+      "details": "No users with flexible schedules found in system",
+      "timestamp": "2025-10-20T07:15:13.549519",
       "response_data": null
     },
     {
-      "test": "Edge Case 09:14",
+      "test": "9:15 Rule Check (09:20:00)",
       "success": false,
-      "details": "Failed to create attendance: 405",
-      "timestamp": "2025-10-20T07:13:28.007489",
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.562943",
       "response_data": null
     },
     {
-      "test": "Edge Case 09:15",
+      "test": "9:15 Rule Check (18:27:42)",
       "success": false,
-      "details": "Failed to create attendance: 405",
-      "timestamp": "2025-10-20T07:13:28.017602",
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.562981",
       "response_data": null
     },
     {
-      "test": "Edge Case 09:16",
+      "test": "9:15 Rule Check (19:11:27)",
       "success": false,
-      "details": "Failed to create attendance: 405",
-      "timestamp": "2025-10-20T07:13:28.065665",
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.562988",
       "response_data": null
     },
     {
-      "test": "Edge Case 10:00",
+      "test": "9:15 Rule Check (19:13:35)",
       "success": false,
-      "details": "Failed to create attendance: 405",
-      "timestamp": "2025-10-20T07:13:28.072664",
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.562994",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (19:13:36)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.562999",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (19:20:43)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563004",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (19:20:53)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563009",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (23:25:58)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563019",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (23:26:20)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563025",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (23:26:20)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563031",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563038",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:10:37)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563049",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (07:00:38)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563055",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:21:18)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563060",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (10:57:01)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563065",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (18:47:31)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563071",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563076",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:50:58)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563102",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:50:58)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563107",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563112",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (19:00:29)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563117",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (07:00:33)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563121",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563126",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563130",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (08:30:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563135",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:30:00)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563140",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (08:15:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563145",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (10:00:00)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563150",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (07:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563155",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (08:30:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563159",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563179",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (08:15:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563184",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:15:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563189",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (010:15:00)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563194",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:15:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563201",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (11:08:41)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563208",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:00:00)",
+      "success": true,
+      "details": "On-time check-in correctly marked (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563215",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (10:01:13)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563220",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (14:22:04)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563228",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:58:29)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563234",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (09:58:29)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563239",
+      "response_data": null
+    },
+    {
+      "test": "9:15 Rule Check (10:53:34)",
+      "success": false,
+      "details": "Late check-in NOT marked as late (late_minutes=0)",
+      "timestamp": "2025-10-20T07:15:13.563258",
+      "response_data": null
+    },
+    {
+      "test": "9:15 AM Rule Compliance",
+      "success": true,
+      "details": "Rule compliance: 17/42 (40.5%)",
+      "timestamp": "2025-10-20T07:15:13.563270",
       "response_data": null
     },
     {
       "test": "Monthly Deductions Calculation",
       "success": true,
       "details": "Successfully calculated monthly deductions with attendance data",
-      "timestamp": "2025-10-20T07:13:28.119440",
+      "timestamp": "2025-10-20T07:15:13.621289",
       "response_data": null
     },
     {
       "test": "Deductions Integration",
       "success": true,
       "details": "Late attendance data properly integrated with deductions system",
-      "timestamp": "2025-10-20T07:13:28.119562",
+      "timestamp": "2025-10-20T07:15:13.621418",
       "response_data": null
     },
     {
       "test": "Database Storage",
       "success": false,
       "details": "No records found with late_minutes field",
-      "timestamp": "2025-10-20T07:13:28.131990",
+      "timestamp": "2025-10-20T07:15:13.648152",
       "response_data": null
     }
   ],
