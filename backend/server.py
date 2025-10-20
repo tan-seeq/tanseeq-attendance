@@ -4328,6 +4328,57 @@ async def get_employee_ledger_entries(
         # Get entries
         entries = await db.payroll_ledger.find(query).sort("created_at", -1).to_list(1000)
         
+
+@app.get("/api/payroll/ledger")
+async def get_payroll_ledger(
+    cycle_id: Optional[str] = None,
+    employee_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get payroll ledger entries with filters
+    
+    Args:
+        cycle_id: Optional filter by cycle
+        employee_id: Optional filter by employee
+    
+    🔒 Regular users can only see their own ledger
+    """
+    try:
+        # Regular users can only see their own ledger
+        if current_user.get("role") == "user":
+            if employee_id and employee_id != current_user.get("id"):
+                raise HTTPException(status_code=403, detail="لا يمكنك الاطلاع على قيود موظف آخر")
+            employee_id = current_user.get("id")
+        
+        # Build query
+        query = {"is_reversed": {"$ne": True}}
+        
+        if cycle_id:
+            query["cycle_id"] = cycle_id
+        
+        if employee_id:
+            query["employee_id"] = employee_id
+        
+        # Get entries
+        entries = await db.payroll_ledger.find(query).sort("created_at", -1).to_list(1000)
+        
+        # Remove MongoDB _id
+        for entry in entries:
+            entry.pop("_id", None)
+        
+        return {
+            "success": True,
+            "count": len(entries),
+            "entries": entries
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching ledger: {str(e)}")
+
+@app.get("/api/payroll/ledger/employee/{employee_id}/old")
         # Get employee info
         employee = await db.users.find_one({"id": employee_id})
         employee_name = employee.get("name", "غير معروف") if employee else "غير معروف"
