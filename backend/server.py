@@ -12405,4 +12405,48 @@ async def get_holidays(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"خطأ في جلب الإجازات: {str(e)}")
 
+
+@app.post("/api/payroll/cycles/{cycle_id}/merge-advanced-deductions")
+async def merge_advanced_deductions(
+    cycle_id: str,
+    month: int,
+    year: int,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    Merge advanced deductions into payroll cycle
+    
+    🔒 RBAC: Super Admin Only
+    
+    This endpoint:
+    1. Calculates advanced deductions for the cycle period (29→28)
+    2. Merges them into employee payroll summaries
+    3. Creates ADVANCED_DEDUCTION entries in ledger
+    4. Recalculates net salaries
+    
+    ⚠️ Idempotent: Can be called multiple times safely
+    """
+    try:
+        # Check if cycle exists
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="دورة الرواتب غير موجودة")
+        
+        # Merge deductions
+        result = await merge_advanced_deductions_to_payroll(
+            db, cycle_id, month, year, current_user.id
+        )
+        
+        return {
+            "success": True,
+            "cycle_id": cycle_id,
+            **result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error merging deductions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في دمج الخصومات: {str(e)}")
+
     return {"message": "TANSEEQ HR System API"}
