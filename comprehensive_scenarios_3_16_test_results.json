@@ -1,0 +1,544 @@
+{
+  "summary": {
+    "total_tests": 27,
+    "passed_tests": 10,
+    "failed_tests": 17,
+    "success_rate": 37.03703703703704,
+    "test_date": "2025-10-20T07:23:05.302973"
+  },
+  "scenarios": {
+    "Authentication": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Authentication",
+          "test": "SUPER_ADMIN Login",
+          "success": true,
+          "details": "Successfully authenticated admin@tanseeq.com",
+          "timestamp": "2025-10-20T07:23:04.094528",
+          "response_data": null
+        },
+        {
+          "scenario": "Authentication",
+          "test": "ADMIN Login",
+          "success": true,
+          "details": "Successfully authenticated mahmoud@tanseeq.com",
+          "timestamp": "2025-10-20T07:23:04.341817",
+          "response_data": null
+        },
+        {
+          "scenario": "Authentication",
+          "test": "USER Login",
+          "success": true,
+          "details": "Successfully authenticated jihad@tanseeq.com",
+          "timestamp": "2025-10-20T07:23:04.626729",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 3": {
+      "passed": 0,
+      "failed": 3,
+      "tests": [
+        {
+          "scenario": "Scenario 3",
+          "test": "Create Leave Request",
+          "success": false,
+          "details": "Failed to create leave: 422 - {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"start_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"end_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"reason\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"days_count\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}",
+          "timestamp": "2025-10-20T07:23:04.677654",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 3",
+          "test": "Verify Leave Balance",
+          "success": false,
+          "details": "Exception: 'list' object has no attribute 'get'",
+          "timestamp": "2025-10-20T07:23:04.698585",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 3",
+          "test": "Admin View All Leaves",
+          "success": false,
+          "details": "Exception: 'list' object has no attribute 'get'",
+          "timestamp": "2025-10-20T07:23:04.714299",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 4": {
+      "passed": 0,
+      "failed": 2,
+      "tests": [
+        {
+          "scenario": "Scenario 4",
+          "test": "Start Field Exit",
+          "success": false,
+          "details": "Failed to start field exit: 404 - {\"detail\":\"Not Found\"}",
+          "timestamp": "2025-10-20T07:23:04.726582",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 4",
+          "test": "Start Marketing Visit",
+          "success": false,
+          "details": "Failed to start marketing visit: 422 - {\"detail\":[{\"type\":\"enum\",\"loc\":[\"body\",\"purpose\"],\"msg\":\"Input should be 'client_meeting', 'marketing', 'follow_up', 'new_client', 'document_collection', 'consultation', 'site_visit' or 'other'\",\"input\":\"new_client_acquisition\",\"ctx\":{\"expected\":\"'client_meeting', 'marketing', 'follow_up', 'new_client', 'document_collection', 'consultation', 'site_visit' or 'other'\"},\"url\":\"https://errors.pydantic.dev/2.11/v/enum\"}]}",
+          "timestamp": "2025-10-20T07:23:04.780838",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 5": {
+      "passed": 1,
+      "failed": 2,
+      "tests": [
+        {
+          "scenario": "Scenario 5",
+          "test": "Calculate Monthly Deductions",
+          "success": true,
+          "details": "Calculated deductions for 2 employees",
+          "timestamp": "2025-10-20T07:23:04.835085",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 5",
+          "test": "Apply Monthly Deductions",
+          "success": false,
+          "details": "Apply deductions: 422",
+          "timestamp": "2025-10-20T07:23:04.845255",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 5",
+          "test": "Create Manual Deduction",
+          "success": false,
+          "details": "Failed to create manual deduction: 400",
+          "timestamp": "2025-10-20T07:23:04.855944",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 6": {
+      "passed": 0,
+      "failed": 1,
+      "tests": [
+        {
+          "scenario": "Scenario 6",
+          "test": "Create Payroll Cycle",
+          "success": false,
+          "details": "Failed to create payroll cycle: 400 - {\"detail\":\"دورة راتب لشهر 2025-01 موجودة بالفعل\"}",
+          "timestamp": "2025-10-20T07:23:04.866771",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 7": {
+      "passed": 1,
+      "failed": 2,
+      "tests": [
+        {
+          "scenario": "Scenario 7",
+          "test": "Create Custody",
+          "success": false,
+          "details": "Failed to create custody: 422 - {\"detail\":[{\"type\":\"enum\",\"loc\":[\"body\",\"category\"],\"msg\":\"Input should be 'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\",\"input\":\"office_supplies\",\"ctx\":{\"expected\":\"'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\"},\"url\":\"https://errors.pydantic.dev/2.11/v/enum\"}]}",
+          "timestamp": "2025-10-20T07:23:04.917905",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Create Advance",
+          "success": false,
+          "details": "Failed to create advance: 422",
+          "timestamp": "2025-10-20T07:23:04.968783",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 7",
+          "test": "Verify Balance Calculation",
+          "success": true,
+          "details": "Balance retrieved: Total available 8280.0",
+          "timestamp": "2025-10-20T07:23:04.979441",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 8": {
+      "passed": 1,
+      "failed": 2,
+      "tests": [
+        {
+          "scenario": "Scenario 8",
+          "test": "Get Salary Slip HTML",
+          "success": false,
+          "details": "HTML salary slip: 404",
+          "timestamp": "2025-10-20T07:23:05.016967",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 8",
+          "test": "Get Salary Slip PDF",
+          "success": false,
+          "details": "PDF salary slip: 404",
+          "timestamp": "2025-10-20T07:23:05.028779",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 8",
+          "test": "Get Payroll Ledger",
+          "success": true,
+          "details": "Ledger retrieved with 17 entries",
+          "timestamp": "2025-10-20T07:23:05.063470",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 10": {
+      "passed": 1,
+      "failed": 4,
+      "tests": [
+        {
+          "scenario": "Scenario 10",
+          "test": "Send info Notification",
+          "success": false,
+          "details": "Notification sent: 404",
+          "timestamp": "2025-10-20T07:23:05.073600",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 10",
+          "test": "Send warning Notification",
+          "success": false,
+          "details": "Notification sent: 404",
+          "timestamp": "2025-10-20T07:23:05.124726",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 10",
+          "test": "Send alert Notification",
+          "success": false,
+          "details": "Notification sent: 404",
+          "timestamp": "2025-10-20T07:23:05.138753",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 10",
+          "test": "Get User Notifications",
+          "success": true,
+          "details": "Retrieved 18 notifications",
+          "timestamp": "2025-10-20T07:23:05.149827",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 10",
+          "test": "Mark Notification as Read",
+          "success": false,
+          "details": "Mark as read: 404",
+          "timestamp": "2025-10-20T07:23:05.209938",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 11": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "scenario": "Scenario 11",
+          "test": "User Access Super Admin Endpoint",
+          "success": true,
+          "details": "Expected 403, got 403",
+          "timestamp": "2025-10-20T07:23:05.218223",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 11",
+          "test": "Admin Delete Attendance",
+          "success": true,
+          "details": "Expected 403, got 403",
+          "timestamp": "2025-10-20T07:23:05.227017",
+          "response_data": null
+        },
+        {
+          "scenario": "Scenario 11",
+          "test": "Invalid Payload Validation",
+          "success": true,
+          "details": "Expected 422, got 422",
+          "timestamp": "2025-10-20T07:23:05.277030",
+          "response_data": null
+        }
+      ]
+    },
+    "Scenario 14": {
+      "passed": 0,
+      "failed": 1,
+      "tests": [
+        {
+          "scenario": "Scenario 14",
+          "test": "Create Work Reports Client",
+          "success": false,
+          "details": "Failed to create client: 400 - {\"detail\":\"Client code already exists\"}",
+          "timestamp": "2025-10-20T07:23:05.302644",
+          "response_data": null
+        }
+      ]
+    }
+  },
+  "detailed_results": [
+    {
+      "scenario": "Authentication",
+      "test": "SUPER_ADMIN Login",
+      "success": true,
+      "details": "Successfully authenticated admin@tanseeq.com",
+      "timestamp": "2025-10-20T07:23:04.094528",
+      "response_data": null
+    },
+    {
+      "scenario": "Authentication",
+      "test": "ADMIN Login",
+      "success": true,
+      "details": "Successfully authenticated mahmoud@tanseeq.com",
+      "timestamp": "2025-10-20T07:23:04.341817",
+      "response_data": null
+    },
+    {
+      "scenario": "Authentication",
+      "test": "USER Login",
+      "success": true,
+      "details": "Successfully authenticated jihad@tanseeq.com",
+      "timestamp": "2025-10-20T07:23:04.626729",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 3",
+      "test": "Create Leave Request",
+      "success": false,
+      "details": "Failed to create leave: 422 - {\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"start_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"end_date\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"reason\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"},{\"type\":\"missing\",\"loc\":[\"body\",\"days_count\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}",
+      "timestamp": "2025-10-20T07:23:04.677654",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 3",
+      "test": "Verify Leave Balance",
+      "success": false,
+      "details": "Exception: 'list' object has no attribute 'get'",
+      "timestamp": "2025-10-20T07:23:04.698585",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 3",
+      "test": "Admin View All Leaves",
+      "success": false,
+      "details": "Exception: 'list' object has no attribute 'get'",
+      "timestamp": "2025-10-20T07:23:04.714299",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 4",
+      "test": "Start Field Exit",
+      "success": false,
+      "details": "Failed to start field exit: 404 - {\"detail\":\"Not Found\"}",
+      "timestamp": "2025-10-20T07:23:04.726582",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 4",
+      "test": "Start Marketing Visit",
+      "success": false,
+      "details": "Failed to start marketing visit: 422 - {\"detail\":[{\"type\":\"enum\",\"loc\":[\"body\",\"purpose\"],\"msg\":\"Input should be 'client_meeting', 'marketing', 'follow_up', 'new_client', 'document_collection', 'consultation', 'site_visit' or 'other'\",\"input\":\"new_client_acquisition\",\"ctx\":{\"expected\":\"'client_meeting', 'marketing', 'follow_up', 'new_client', 'document_collection', 'consultation', 'site_visit' or 'other'\"},\"url\":\"https://errors.pydantic.dev/2.11/v/enum\"}]}",
+      "timestamp": "2025-10-20T07:23:04.780838",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 5",
+      "test": "Calculate Monthly Deductions",
+      "success": true,
+      "details": "Calculated deductions for 2 employees",
+      "timestamp": "2025-10-20T07:23:04.835085",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 5",
+      "test": "Apply Monthly Deductions",
+      "success": false,
+      "details": "Apply deductions: 422",
+      "timestamp": "2025-10-20T07:23:04.845255",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 5",
+      "test": "Create Manual Deduction",
+      "success": false,
+      "details": "Failed to create manual deduction: 400",
+      "timestamp": "2025-10-20T07:23:04.855944",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 6",
+      "test": "Create Payroll Cycle",
+      "success": false,
+      "details": "Failed to create payroll cycle: 400 - {\"detail\":\"دورة راتب لشهر 2025-01 موجودة بالفعل\"}",
+      "timestamp": "2025-10-20T07:23:04.866771",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Create Custody",
+      "success": false,
+      "details": "Failed to create custody: 422 - {\"detail\":[{\"type\":\"enum\",\"loc\":[\"body\",\"category\"],\"msg\":\"Input should be 'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\",\"input\":\"office_supplies\",\"ctx\":{\"expected\":\"'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\"},\"url\":\"https://errors.pydantic.dev/2.11/v/enum\"}]}",
+      "timestamp": "2025-10-20T07:23:04.917905",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Create Advance",
+      "success": false,
+      "details": "Failed to create advance: 422",
+      "timestamp": "2025-10-20T07:23:04.968783",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 7",
+      "test": "Verify Balance Calculation",
+      "success": true,
+      "details": "Balance retrieved: Total available 8280.0",
+      "timestamp": "2025-10-20T07:23:04.979441",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 8",
+      "test": "Get Salary Slip HTML",
+      "success": false,
+      "details": "HTML salary slip: 404",
+      "timestamp": "2025-10-20T07:23:05.016967",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 8",
+      "test": "Get Salary Slip PDF",
+      "success": false,
+      "details": "PDF salary slip: 404",
+      "timestamp": "2025-10-20T07:23:05.028779",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 8",
+      "test": "Get Payroll Ledger",
+      "success": true,
+      "details": "Ledger retrieved with 17 entries",
+      "timestamp": "2025-10-20T07:23:05.063470",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Send info Notification",
+      "success": false,
+      "details": "Notification sent: 404",
+      "timestamp": "2025-10-20T07:23:05.073600",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Send warning Notification",
+      "success": false,
+      "details": "Notification sent: 404",
+      "timestamp": "2025-10-20T07:23:05.124726",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Send alert Notification",
+      "success": false,
+      "details": "Notification sent: 404",
+      "timestamp": "2025-10-20T07:23:05.138753",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Get User Notifications",
+      "success": true,
+      "details": "Retrieved 18 notifications",
+      "timestamp": "2025-10-20T07:23:05.149827",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 10",
+      "test": "Mark Notification as Read",
+      "success": false,
+      "details": "Mark as read: 404",
+      "timestamp": "2025-10-20T07:23:05.209938",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 11",
+      "test": "User Access Super Admin Endpoint",
+      "success": true,
+      "details": "Expected 403, got 403",
+      "timestamp": "2025-10-20T07:23:05.218223",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 11",
+      "test": "Admin Delete Attendance",
+      "success": true,
+      "details": "Expected 403, got 403",
+      "timestamp": "2025-10-20T07:23:05.227017",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 11",
+      "test": "Invalid Payload Validation",
+      "success": true,
+      "details": "Expected 422, got 422",
+      "timestamp": "2025-10-20T07:23:05.277030",
+      "response_data": null
+    },
+    {
+      "scenario": "Scenario 14",
+      "test": "Create Work Reports Client",
+      "success": false,
+      "details": "Failed to create client: 400 - {\"detail\":\"Client code already exists\"}",
+      "timestamp": "2025-10-20T07:23:05.302644",
+      "response_data": null
+    }
+  ],
+  "evidence": {
+    "calculated_deductions": {
+      "success": true,
+      "month": "2025-01",
+      "employees": [
+        {
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "employee_name": "Tarek Wazzan",
+          "late_deduction": 0,
+          "absence_deduction": 266.67,
+          "advance_deduction": 0,
+          "total_deduction": 266.67,
+          "deduction_details": [
+            "غياب 2 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 2,
+          "installment_count": 0
+        },
+        {
+          "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "employee_name": "Tarek Hegazy",
+          "late_deduction": 0,
+          "absence_deduction": 333.33,
+          "advance_deduction": 0,
+          "total_deduction": 333.33,
+          "deduction_details": [
+            "غياب 2 يوم"
+          ],
+          "late_count": 0,
+          "absence_count": 2,
+          "installment_count": 0
+        }
+      ],
+      "total_deductions": 600.0,
+      "employee_count": 2
+    },
+    "test_cycle_id": "026ce2ba-4471-482c-ac03-dbb8353ac13f"
+  }
+}
