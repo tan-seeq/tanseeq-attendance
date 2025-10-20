@@ -165,7 +165,7 @@ const AdvancedDeductionsReport = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           {/* Month Selector */}
           <div>
             <label className="block text-gray-700 font-bold mb-2">الشهر</label>
