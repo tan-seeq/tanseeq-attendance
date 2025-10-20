@@ -1,1 +1,7 @@
 Scenario,Step,Role,Pass/Fail,Notes,EvidenceLink
+Scenario 1,Super Admin Login,Super Admin,Pass,Full access confirmed,/screenshots/scenario-01/
+Scenario 1,Super Admin Navigation,Super Admin,Pass,25+ menus visible,/screenshots/scenario-01/
+Scenario 1,Admin Login,Admin,Fail,Authentication issues,/screenshots/scenario-01/
+Scenario 1,User Login,User,Pass,Restricted access working,/screenshots/scenario-01/
+Scenario 1,RBAC Enforcement,User,Pass,403 responses correct,/screenshots/scenario-01/
+Scenario 1,Arabic RTL,All,Pass,Excellent display,/screenshots/scenario-01/
