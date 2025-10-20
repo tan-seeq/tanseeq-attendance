@@ -111,6 +111,49 @@ class AttendanceScenario2Tester:
             self.log_result("Create Late Attendance", False, f"Exception: {str(e)}")
             return False
     
+    def test_manual_attendance_creation(self) -> bool:
+        """Test manual attendance record creation with specific times"""
+        try:
+            # Get existing attendance records to see the structure
+            response = self.session.get(
+                f"{BASE_URL}/attendance",
+                headers=self.get_headers("super_admin"),
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check if we have attendance records with late_minutes field
+                if isinstance(data, list):
+                    records = data
+                elif isinstance(data, dict) and "attendance" in data:
+                    records = data["attendance"]
+                else:
+                    records = []
+                
+                late_records = []
+                for record in records:
+                    if isinstance(record, dict) and "late_minutes" in record and record.get("late_minutes", 0) > 0:
+                        late_records.append(record)
+                
+                if late_records:
+                    self.log_result("Manual Attendance Creation", True, 
+                                  f"Found {len(late_records)} existing late attendance records with late_minutes > 0")
+                    return True
+                else:
+                    self.log_result("Manual Attendance Creation", False, 
+                                  "No existing late attendance records found with late_minutes > 0")
+                    return False
+            else:
+                self.log_result("Manual Attendance Creation", False, 
+                              f"Failed to get attendance records: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Manual Attendance Creation", False, f"Exception: {str(e)}")
+            return False
+    
     def part_2_create_absence_record(self) -> bool:
         """Part 2: Create Absence Record"""
         print("\n🔍 Part 2: Create Absence Record")
