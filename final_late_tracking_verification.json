@@ -19,7 +19,7 @@
       "details": "Successfully authenticated as jihad@tanseeq.com",
       "expected": null,
       "actual": null,
-      "timestamp": "2025-10-20T06:49:21.616868"
+      "timestamp": "2025-10-20T06:50:32.300860"
     },
     {
       "test": "Fix Implementation Verification",
@@ -27,7 +27,7 @@
       "details": "Unexpected 400 error: \u062a\u0645 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062d\u0636\u0648\u0631 \u0645\u0633\u0628\u0642\u0627\u064b \u0627\u0644\u064a\u0648\u0645",
       "expected": null,
       "actual": null,
-      "timestamp": "2025-10-20T06:49:21.681266"
+      "timestamp": "2025-10-20T06:50:32.325965"
     },
     {
       "test": "Business Logic Scenarios Test",
@@ -35,7 +35,7 @@
       "details": "All 5 scenarios match expected 9:15 AM rule behavior",
       "expected": "All scenarios should calculate correctly",
       "actual": "Scenarios correct: 5/5",
-      "timestamp": "2025-10-20T06:49:21.681368"
+      "timestamp": "2025-10-20T06:50:32.326074"
     },
     {
       "test": "Database Schema Update Verification",
@@ -43,7 +43,7 @@
       "details": "Found 0 recent records with new fields out of 5",
       "expected": "At least some recent records should have new fields",
       "actual": "Records with new fields: 0/5",
-      "timestamp": "2025-10-20T06:49:21.694644"
+      "timestamp": "2025-10-20T06:50:32.341355"
     },
     {
       "test": "Historical vs New Records Analysis",
@@ -51,7 +51,7 @@
       "details": "Historical issues (expected): 1, New record issues (critical): 2, Correct new records: 0",
       "expected": "New records should have correct late tracking",
       "actual": "New record issues: 2, Historical issues: 1",
-      "timestamp": "2025-10-20T06:49:21.694758"
+      "timestamp": "2025-10-20T06:50:32.341496"
     },
     {
       "test": "Authentication (super_admin)",
@@ -59,7 +59,7 @@
       "details": "Successfully authenticated as hatem@tan-seeq.co",
       "expected": null,
       "actual": null,
-      "timestamp": "2025-10-20T06:49:21.978568"
+      "timestamp": "2025-10-20T06:50:32.630352"
     },
     {
       "test": "Deductions Integration Test",
@@ -67,7 +67,7 @@
       "details": "No deduction records returned from calculation",
       "expected": null,
       "actual": null,
-      "timestamp": "2025-10-20T06:49:22.027557"
+      "timestamp": "2025-10-20T06:50:32.685133"
     }
   ],
   "historical_issues": [
