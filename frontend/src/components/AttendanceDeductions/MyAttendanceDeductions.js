@@ -20,6 +20,7 @@ const API = `${BACKEND_URL}/api`;
 
 const MyAttendanceDeductions = ({ currentUser }) => {
   const [deductions, setDeductions] = useState([]);
+  const [advances, setAdvances] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [loading, setLoading] = useState(false);
