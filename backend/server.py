@@ -4641,6 +4641,47 @@ async def get_installment_schedule(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching installment schedule: {str(e)}")
 
+
+@app.get("/api/advances")
+async def get_employee_advances(
+    employee_id: Optional[str] = None,
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    جلب سلف موظف محدد أو كل السلف
+    Get advances for specific employee or all
+    
+    Args:
+        employee_id: Optional employee ID (if not provided, returns current user's advances)
+        status: Optional filter by status (approved, pending, rejected, fully_paid)
+    """
+    try:
+        # If no employee_id provided, use current user
+        target_employee_id = employee_id if employee_id else current_user.get("id")
+        
+        # Build query
+        query = {"employee_id": target_employee_id}
+        
+        if status:
+            query["status"] = status
+        
+        # Get advances
+        advances = await db.advance_transactions.find(query).sort("created_at", -1).to_list(None)
+        
+        # Remove MongoDB _id
+        for advance in advances:
+            advance.pop("_id", None)
+        
+        return {
+            "success": True,
+            "count": len(advances),
+            "advances": advances
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching advances: {str(e)}")
+
 @app.get("/api/payroll/installment-schedules")
 async def get_all_installment_schedules(
     current_user: User = Depends(get_super_admin_user)  # 🔒 RBAC: Super Admin Only
