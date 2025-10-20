@@ -5588,9 +5588,33 @@ async def send_warning_notification(notification_data: dict, current_user: User 
 
 @api_router.get("/users", response_model=List[UserResponse])
 async def get_users(current_user: User = Depends(get_admin_user)):
-    """Get all users (Admin only)"""
-    users = await db.users.find().to_list(1000)
-    return [UserResponse(**user) for user in users]
+    """Get all users (Admin only) - Fixed: Handle MongoDB ObjectId"""
+    try:
+        users = await db.users.find().to_list(1000)
+        
+        # ✅ FIX: Clean users data before Pydantic validation
+        cleaned_users = []
+        for user in users:
+            # Remove MongoDB internal fields that cause serialization issues
+            user.pop('_id', None)  # Remove MongoDB ObjectId
+            
+            # Ensure all required fields exist with defaults
+            if 'role' not in user:
+                user['role'] = 'user'
+            if 'is_active' not in user:
+                user['is_active'] = True
+            if 'monthly_salary' not in user:
+                user['monthly_salary'] = 0.0
+            if 'position' not in user:
+                user['position'] = 'موظف'
+            
+            cleaned_users.append(user)
+        
+        return [UserResponse(**user) for user in cleaned_users]
+        
+    except Exception as e:
+        logger.error(f"Error fetching users: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في جلب بيانات المستخدمين: {str(e)}")
 
 @api_router.post("/users", response_model=UserResponse)
 async def create_user(user: UserCreate, current_user: User = Depends(get_admin_user)):
