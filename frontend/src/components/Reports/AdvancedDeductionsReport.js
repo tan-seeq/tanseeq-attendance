@@ -217,6 +217,33 @@ const AdvancedDeductionsReport = () => {
           </div>
         </div>
 
+        {/* Payroll Integration Section */}
+        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <h3 className="font-bold text-orange-800 mb-3">🔗 الدمج مع دورة الرواتب</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-gray-700 font-bold mb-2">معرّف دورة الرواتب (Cycle ID)</label>
+              <input
+                type="text"
+                value={cycleId}
+                onChange={(e) => setCycleId(e.target.value)}
+                placeholder="أدخل Cycle ID من صفحة الرواتب"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">يمكنك الحصول على Cycle ID من صفحة "إدارة دورات الرواتب"</p>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleMergeWithPayroll}
+                disabled={merging || !cycleId || !reportData}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+              >
+                {merging ? '🔄 جاري الدمج...' : '🔗 دمج مع الدورة'}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Cycle Info */}
         {reportData && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
