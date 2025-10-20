@@ -1,0 +1,198 @@
+[
+  {
+    "test": "Authentication - super_admin",
+    "status": "PASS",
+    "details": "Login successful for admin@tanseeq.com",
+    "timestamp": "2025-10-20T07:44:20.276606",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Cycles - GET",
+    "status": "PASS",
+    "details": "Found 6 payroll cycles, using cycle: دورة راتب ديسمبر 2025",
+    "timestamp": "2025-10-20T07:44:20.287557",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Cycle Summary",
+    "status": "PASS",
+    "details": "Retrieved cycle summary with 0 employees",
+    "timestamp": "2025-10-20T07:44:20.307025",
+    "response_data": null
+  },
+  {
+    "test": "Payroll PDF Export",
+    "status": "PASS",
+    "details": "PDF generated successfully, size: 2847 bytes",
+    "timestamp": "2025-10-20T07:44:20.323214",
+    "response_data": null
+  },
+  {
+    "test": "Payroll PDF Content Check",
+    "status": "PASS",
+    "details": "PDF appears to have content (size > 1KB)",
+    "timestamp": "2025-10-20T07:44:20.323398",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Excel Export",
+    "status": "PASS",
+    "details": "Excel generated successfully, size: 5741 bytes",
+    "timestamp": "2025-10-20T07:44:20.350571",
+    "response_data": null
+  },
+  {
+    "test": "Installment Schedules - GET",
+    "status": "PASS",
+    "details": "Retrieved 5 installment schedules",
+    "timestamp": "2025-10-20T07:44:20.361512",
+    "response_data": null
+  },
+  {
+    "test": "Installment Schedules - Content Verification",
+    "status": "PASS",
+    "details": "Schedule contains 4/5 required fields",
+    "timestamp": "2025-10-20T07:44:20.361611",
+    "response_data": null
+  },
+  {
+    "test": "Installment Schedules - Missing Fields",
+    "status": "WARN",
+    "details": "Missing fields: ['status']",
+    "timestamp": "2025-10-20T07:44:20.361638",
+    "response_data": null
+  },
+  {
+    "test": "Installment Schedules - Due Dates",
+    "status": "WARN",
+    "details": "No due date information found in schedule",
+    "timestamp": "2025-10-20T07:44:20.361645",
+    "response_data": null
+  },
+  {
+    "test": "Advances Transactions - GET",
+    "status": "PASS",
+    "details": "Retrieved 49 advance transactions",
+    "timestamp": "2025-10-20T07:44:20.375713",
+    "response_data": null
+  },
+  {
+    "test": "Advances Transactions - Content Verification",
+    "status": "PASS",
+    "details": "Transaction contains 5/5 required fields",
+    "timestamp": "2025-10-20T07:44:20.375751",
+    "response_data": null
+  },
+  {
+    "test": "Advances Transactions - Types Found",
+    "status": "PASS",
+    "details": "Found transaction types: advance, custody, expense, advance_settlement",
+    "timestamp": "2025-10-20T07:44:20.375767",
+    "response_data": null
+  },
+  {
+    "test": "Advances Transactions - Balance Data",
+    "status": "PASS",
+    "details": "Found: 20 custody, 14 advances, 12 expenses",
+    "timestamp": "2025-10-20T07:44:20.375788",
+    "response_data": null
+  },
+  {
+    "test": "Advances Balances - GET",
+    "status": "PASS",
+    "details": "Retrieved balances for 5 employees",
+    "timestamp": "2025-10-20T07:44:20.395541",
+    "response_data": null
+  },
+  {
+    "test": "Advances Balances - Content Verification",
+    "status": "PASS",
+    "details": "Balance contains 5/5 required fields",
+    "timestamp": "2025-10-20T07:44:20.395576",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Recalculation",
+    "status": "PASS",
+    "details": "Payroll recalculated successfully",
+    "timestamp": "2025-10-20T07:44:20.424394",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Ledger Access",
+    "status": "PASS",
+    "details": "Retrieved ledger with 17 entries",
+    "timestamp": "2025-10-20T07:44:20.437023",
+    "response_data": null
+  },
+  {
+    "test": "Edge Cases Analysis",
+    "status": "INFO",
+    "details": "No negative salary or high deduction scenarios found in current data",
+    "timestamp": "2025-10-20T07:44:20.437065",
+    "response_data": null
+  },
+  {
+    "test": "Ledger Balance Check",
+    "status": "PASS",
+    "details": "Total ledger amount: -1676.5 AED",
+    "timestamp": "2025-10-20T07:44:20.437082",
+    "response_data": null
+  },
+  {
+    "test": "Salary Slip Generation",
+    "status": "FAIL",
+    "details": "No employees found in cycle summary",
+    "timestamp": "2025-10-20T07:44:20.457886",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Ledger Access",
+    "status": "PASS",
+    "details": "Retrieved ledger with 17 entries",
+    "timestamp": "2025-10-20T07:44:20.469765",
+    "response_data": null
+  },
+  {
+    "test": "Reversal Entries Found",
+    "status": "INFO",
+    "details": "No explicit reversal entries found",
+    "timestamp": "2025-10-20T07:44:20.469826",
+    "response_data": null
+  },
+  {
+    "test": "Ledger Balance Verification",
+    "status": "PASS",
+    "details": "Ledger balance: 0 AED (debits: 0, credits: 0)",
+    "timestamp": "2025-10-20T07:44:20.469838",
+    "response_data": null
+  },
+  {
+    "test": "Ledger Balance Status",
+    "status": "PASS",
+    "details": "Ledger is properly balanced",
+    "timestamp": "2025-10-20T07:44:20.469843",
+    "response_data": null
+  },
+  {
+    "test": "Cycle Status Check",
+    "status": "PASS",
+    "details": "Cycle status: open, locked: False",
+    "timestamp": "2025-10-20T07:44:20.481676",
+    "response_data": null
+  },
+  {
+    "test": "Unlocked Cycle Operations",
+    "status": "PASS",
+    "details": "Recalculation allowed on unlocked cycle",
+    "timestamp": "2025-10-20T07:44:20.546790",
+    "response_data": null
+  },
+  {
+    "test": "Cycle Summary Access",
+    "status": "PASS",
+    "details": "Cycle summary accessible regardless of lock status",
+    "timestamp": "2025-10-20T07:44:20.562322",
+    "response_data": null
+  }
+]
