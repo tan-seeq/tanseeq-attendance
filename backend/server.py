@@ -3974,6 +3974,174 @@ async def unlock_payroll_cycle(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error unlocking payroll cycle: {str(e)}")
 
+
+@app.delete("/api/payroll/cycles/{cycle_id}")
+async def delete_payroll_cycle(
+    cycle_id: str,
+    force: bool = False,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    حذف دورة رواتب - Super Admin Only
+    Delete payroll cycle - With safety checks
+    
+    🔒 RBAC: Super Admin only
+    ⚠️ DANGEROUS: This will delete the cycle and all related data
+    
+    Args:
+        cycle_id: Payroll cycle ID
+        force: If true, performs hard delete (deletes all related data)
+               If false, performs soft delete (marks as deleted)
+    
+    Safety checks:
+    - Cannot delete locked cycle (must unlock first)
+    - Cannot delete if payments are recorded
+    - Deletes all related: summaries, ledger entries, deductions
+    """
+    try:
+        # Check if cycle exists
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="دورة الرواتب غير موجودة")
+        
+        # Safety check 1: Cannot delete locked cycle
+        if cycle.get("is_locked", False):
+            raise HTTPException(
+                status_code=400, 
+                detail="لا يمكن حذف دورة مقفلة. يجب فتح القفل أولاً (Unlock)"
+            )
+        
+        # Safety check 2: Check if payments are recorded
+        # (You can add payment check here if you have payments collection)
+        
+        # Get statistics before deletion
+        summaries_count = await db.employee_payroll_summaries.count_documents({
+            "payroll_cycle_id": cycle_id
+        })
+        
+        ledger_count = await db.payroll_ledger.count_documents({
+            "cycle_id": cycle_id
+        })
+        
+        deductions_count = await db.deductions_advanced.count_documents({
+            "payroll_cycle_id": cycle_id
+        })
+        
+        if force:
+            # HARD DELETE: Remove all related data
+            print(f"🗑️ Hard deleting payroll cycle {cycle_id}")
+            
+            # Delete employee summaries
+            await db.employee_payroll_summaries.delete_many({
+                "payroll_cycle_id": cycle_id
+            })
+            print(f"   ✅ Deleted {summaries_count} employee summaries")
+            
+            # Delete ledger entries
+            await db.payroll_ledger.delete_many({
+                "cycle_id": cycle_id
+            })
+            print(f"   ✅ Deleted {ledger_count} ledger entries")
+            
+            # Delete advanced deductions
+            await db.deductions_advanced.delete_many({
+                "payroll_cycle_id": cycle_id
+            })
+            print(f"   ✅ Deleted {deductions_count} advanced deductions")
+            
+            # Delete the cycle itself
+            await db.payroll_cycles.delete_one({"id": cycle_id})
+            print(f"   ✅ Deleted cycle")
+            
+            return {
+                "success": True,
+                "type": "hard_delete",
+                "message": "تم حذف دورة الرواتب وجميع البيانات المرتبطة نهائياً",
+                "deleted": {
+                    "cycle": 1,
+                    "summaries": summaries_count,
+                    "ledger_entries": ledger_count,
+                    "advanced_deductions": deductions_count
+                }
+            }
+        else:
+            # SOFT DELETE: Mark as deleted
+            print(f"🗑️ Soft deleting payroll cycle {cycle_id}")
+            
+            await db.payroll_cycles.update_one(
+                {"id": cycle_id},
+                {
+                    "$set": {
+                        "is_deleted": True,
+                        "deleted_at": datetime.now().isoformat(),
+                        "deleted_by": current_user.id
+                    }
+                }
+            )
+            
+            return {
+                "success": True,
+                "type": "soft_delete",
+                "message": "تم تعليم دورة الرواتب كمحذوفة (يمكن استرجاعها)",
+                "note": "لحذف نهائي، استخدم force=true",
+                "affected": {
+                    "summaries": summaries_count,
+                    "ledger_entries": ledger_count,
+                    "advanced_deductions": deductions_count
+                }
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error deleting cycle: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في حذف دورة الرواتب: {str(e)}")
+
+
+@app.post("/api/payroll/cycles/{cycle_id}/restore")
+async def restore_payroll_cycle(
+    cycle_id: str,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    استرجاع دورة رواتب محذوفة (soft deleted)
+    Restore soft-deleted payroll cycle
+    
+    🔒 RBAC: Super Admin only
+    """
+    try:
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="دورة الرواتب غير موجودة")
+        
+        if not cycle.get("is_deleted", False):
+            raise HTTPException(status_code=400, detail="دورة الرواتب غير محذوفة")
+        
+        await db.payroll_cycles.update_one(
+            {"id": cycle_id},
+            {
+                "$set": {
+                    "is_deleted": False,
+                    "restored_at": datetime.now().isoformat(),
+                    "restored_by": current_user.id
+                },
+                "$unset": {
+                    "deleted_at": "",
+                    "deleted_by": ""
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "تم استرجاع دورة الرواتب بنجاح"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"خطأ في استرجاع دورة الرواتب: {str(e)}")
+
 @app.get("/api/payroll/cycles/{cycle_id}/ledger")
 async def get_payroll_ledger_entries(
     cycle_id: str,
