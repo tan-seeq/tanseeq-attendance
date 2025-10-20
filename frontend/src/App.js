@@ -531,6 +531,7 @@ const Layout = ({ children }) => {
           { name: 'لوحة التحكم التحليلية', href: '/hr-dashboard', icon: ChartBarIcon },
           { name: 'تقرير الحضور والإنصراف', href: '/reports/attendance', icon: ClockIcon },
           { name: 'تقارير الخصومات الشهرية', href: '/reports/deductions', icon: ExclamationTriangleIcon },
+          { name: 'نظام الخصومات المتقدم', href: '/reports/advanced-deductions', icon: ExclamationTriangleIcon },
           { name: 'تقارير السُلف والأقساط', href: '/reports/advances', icon: BanknotesIcon },
           { name: 'تقارير الرواتب', href: '/reports', icon: DocumentTextIcon },
           { name: 'تقارير الإجازات', href: '/leave-management', icon: CalendarIcon },
