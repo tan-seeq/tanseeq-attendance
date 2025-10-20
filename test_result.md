@@ -115,11 +115,11 @@
 
 ## current_refactoring_tasks:
 backend:
-  - task: "Phase-2 Adversarial Testing - Scenario 1: Attendance Late Tracking"
+  - task: "السيناريو 2 — إدارة الحضور: إنشاء/تعديل/حذف + قاعدة 9:15"
     implemented: true
-    working: true
+    working: false
     file: "server.py"
-    stuck_count: 0
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -132,6 +132,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ URGENT FIX VERIFICATION COMPLETED: Successfully verified the 9:15 AM late tracking fix implementation. CRITICAL FINDINGS: 1) ✅ API RESPONSE WORKING: Check-in endpoint now returns late_minutes, is_late, and schedule_type fields correctly 2) ✅ BUSINESS LOGIC CORRECT: All 5 test scenarios (09:14→0min, 09:15→0min, 09:16→1min, 09:30→15min, 10:00→45min) calculate correctly based on 9:15 AM threshold 3) ✅ DUPLICATE ENDPOINTS RESOLVED: Fixed multiple conflicting check-in endpoints by disabling duplicates and keeping only the corrected version at line 852 4) ✅ LIVE TESTING SUCCESSFUL: Admin user check-in at 10:53 AM correctly returned late_minutes=0, is_late=false (flexible schedule) 5) ⚠️ ARCHITECTURE NOTE: System uses two attendance collections (attendance vs daily_attendance) with attendance_engine processing, but primary check-in endpoint is working correctly. The 9:15 AM late tracking fix is FULLY OPERATIONAL and ready for production use."
+      - working: false
+        agent: "testing"
+        comment: "🚨 COMPREHENSIVE ATTENDANCE SCENARIO 2 TESTING COMPLETED - CRITICAL ISSUES FOUND: Conducted complete testing of attendance management with 9:15 AM rule as requested in Arabic review. CRITICAL FINDINGS: 1) ❌ DATABASE SCHEMA MISSING FIELDS: 0 out of 56 attendance records have late_minutes, early_departure_minutes, or deducted_hours fields - these critical fields are completely missing from stored records 2) ❌ 9:15 AM RULE NOT WORKING: Found 25 attendance records with check-in times after 9:15 AM that have late_minutes=0 (should be >0) - examples: محمود 09:30:00 (expected 15 min late), طارق 18:27:42 (expected 552 min late) 3) ❌ ATTENDANCE EDIT BROKEN: PUT /attendance/{id} endpoint does NOT store calculated late_minutes, early_departure_minutes, deducted_hours fields even though calculate_working_hours_and_deductions() function calculates them correctly 4) ❌ ABSENCE CREATION FAILING: POST /attendance/create-absence returns 400 'User ID and date are required' 5) ✅ DEDUCTIONS INTEGRATION WORKING: Monthly deductions calculation includes attendance data. ROOT CAUSE: The attendance update endpoint calculates working hours but ignores the late tracking fields returned by calculate_working_hours_and_deductions(). PRODUCTION IMPACT: The 9:15 AM late tracking rule is NOT functional in production - employees arriving late are not being tracked or penalized correctly."
 
   - task: "Phase-2 Adversarial Testing - Scenario 2: Payroll Lock Mechanism"
     implemented: true
