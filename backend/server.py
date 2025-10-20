@@ -5605,8 +5605,30 @@ async def get_users(current_user: User = Depends(get_admin_user)):
                 user['is_active'] = True
             if 'monthly_salary' not in user:
                 user['monthly_salary'] = 0.0
+            if 'daily_rate' not in user:
+                user['daily_rate'] = 0.0
             if 'position' not in user:
                 user['position'] = 'موظف'
+            if 'working_hours_start' not in user:
+                user['working_hours_start'] = '09:00'
+            if 'working_hours_end' not in user:
+                user['working_hours_end'] = '18:00'
+            if 'phone' not in user:
+                user['phone'] = ''
+            if 'hire_date' not in user:
+                user['hire_date'] = None
+            if 'has_flexible_schedule' not in user:
+                user['has_flexible_schedule'] = False
+            if 'flexible_hours_per_day' not in user:
+                user['flexible_hours_per_day'] = 8.0
+            if 'flexible_start_range' not in user:
+                user['flexible_start_range'] = '07:00-10:00'
+            if 'flexible_end_range' not in user:
+                user['flexible_end_range'] = '16:00-19:00'
+            if 'flexible_core_hours' not in user:
+                user['flexible_core_hours'] = '10:00-15:00'
+            if 'flexible_days_per_week' not in user:
+                user['flexible_days_per_week'] = 5
             
             cleaned_users.append(user)
         
