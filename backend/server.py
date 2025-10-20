@@ -12122,6 +12122,13 @@ from advanced_deductions_system import (
     is_employee_excluded
 )
 
+from public_holidays import (
+    seed_public_holidays,
+    is_public_holiday,
+    is_employee_on_approved_leave,
+    get_public_holidays_in_range
+)
+
 @app.post("/api/deductions/calculate-monthly")
 async def calculate_advanced_deductions(
     month: int,
