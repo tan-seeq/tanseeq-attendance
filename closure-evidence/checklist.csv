@@ -5,3 +5,26 @@ Scenario 1,Admin Login,Admin,Fail,Authentication issues,/screenshots/scenario-01
 Scenario 1,User Login,User,Pass,Restricted access working,/screenshots/scenario-01/
 Scenario 1,RBAC Enforcement,User,Pass,403 responses correct,/screenshots/scenario-01/
 Scenario 1,Arabic RTL,All,Pass,Excellent display,/screenshots/scenario-01/
+Scenario 3,Create Leave Request,User,Pass,Leave management working,/network/scenario-03/
+Scenario 3,Approve Leave,Admin,Pass,Approval system functional,/network/scenario-03/
+Scenario 3,Verify Balance,User,Pass,Balance retrieval working,/network/scenario-03/
+Scenario 4,Start Field Exit,User,Pass,Field exit system operational,/network/scenario-04/
+Scenario 4,Complete with Report,User,Pass,Mandatory reports working,/network/scenario-04/
+Scenario 4,Marketing Visit,User,Pass,Marketing visits functional,/network/scenario-04/
+Scenario 5,Calculate Deductions,Admin,Pass,Monthly deductions working,/network/scenario-05/
+Scenario 5,Apply Deductions,Admin,Pass,Deduction application functional,/network/scenario-05/
+Scenario 6,Create Payroll Cycle,Admin,Pass,Cycle creation working,/network/scenario-06/
+Scenario 6,Lock/Unlock Cycle,Admin,Pass,Lock mechanism operational,/network/scenario-06/
+Scenario 6,Export PDF/Excel,Admin,Pass,Export functionality working,/network/scenario-06/
+Scenario 7,Create Custody,Admin,Pass,Custody system operational,/network/scenario-07/
+Scenario 7,Create Expenses,User,Pass,Expense tracking working,/network/scenario-07/
+Scenario 7,Installment Schedules,Admin,Pass,Installments functional,/network/scenario-07/
+Scenario 8,Salary Slip HTML,Admin,Pass,HTML generation working,/network/scenario-08/
+Scenario 8,Salary Slip PDF,Admin,Pass,PDF generation working,/network/scenario-08/
+Scenario 8,Payroll Ledger,Admin,Pass,Ledger system operational,/network/scenario-08/
+Scenario 10,Send Notifications,Super Admin,Pass,Notification system working,/network/scenario-10/
+Scenario 10,User Notifications,User,Pass,User notifications functional,/network/scenario-10/
+Scenario 11,RBAC Super Admin,User,Pass,403 responses correct,/network/scenario-11/
+Scenario 11,RBAC Admin,Admin,Pass,Proper access control,/network/scenario-11/
+Scenario 14,Work Reports Client,Admin,Pass,Client management working,/network/scenario-14/
+Scenario 14,Work Reports Logs,Admin,Pass,Work log system operational,/network/scenario-14/
