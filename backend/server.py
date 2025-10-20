@@ -5720,17 +5720,19 @@ async def change_user_password(user_id: str, password_data: dict, current_user: 
 
 @api_router.get("/attendance")
 async def get_attendance(current_user: User = Depends(get_current_user)):
-    """Get attendance records"""
+    """Get attendance records - ✅ FIXED: Consistent timezone formatting"""
+    from uae_datetime_utils import normalize_datetime_fields
+    
     query = {}
     if current_user.role == "user":
         query["user_id"] = current_user.id
     
     attendance_records = await db.attendance.find(query).to_list(1000)
     
-    # Convert to clean format without ObjectId
+    # Convert to clean format without ObjectId with normalized timestamps
     attendance_list = []
     for record in attendance_records:
-        attendance_list.append({
+        clean_record = {
             "id": record.get("id", str(record.get("_id", ""))),
             "user_id": record.get("user_id", ""),
             "user_name": record.get("user_name", ""),
@@ -5740,9 +5742,17 @@ async def get_attendance(current_user: User = Depends(get_current_user)):
             "working_hours": record.get("working_hours"),
             "status": record.get("status", ""),
             "is_late": record.get("is_late", False),
+            "late_minutes": record.get("late_minutes", 0),
+            "early_departure_minutes": record.get("early_departure_minutes", 0),
+            "deducted_hours": record.get("deducted_hours", 0.0),
             "field_exit": record.get("field_exit"),
-            "created_at": record.get("created_at")
-        })
+            "created_at": record.get("created_at"),
+            "updated_at": record.get("updated_at")
+        }
+        
+        # ✅ Normalize datetime fields to include +04:00
+        clean_record = normalize_datetime_fields(clean_record)
+        attendance_list.append(clean_record)
     
     return attendance_list
 
