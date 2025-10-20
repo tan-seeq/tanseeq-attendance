@@ -261,6 +261,8 @@ async def calculate_monthly_deductions(
     Returns:
         List of EmployeeDeductionSummary for all employees (excluding exempted ones)
     """
+    from public_holidays import is_public_holiday, is_employee_on_approved_leave
+    
     # Get cycle dates
     cycle_start, cycle_end = get_cycle_dates(month, year)
     cycle_start_str = cycle_start.strftime("%Y-%m-%d")
@@ -322,6 +324,44 @@ async def calculate_monthly_deductions(
         # Process each working day
         for work_date in working_days_list:
             date_str = work_date.strftime("%Y-%m-%d")
+            
+            # ✅ Feature 3: Check if public holiday
+            is_holiday = await is_public_holiday(db, work_date)
+            
+            # ✅ Feature 2: Check if employee on approved leave
+            is_on_leave = await is_employee_on_approved_leave(db, employee_id, work_date)
+            
+            # Skip deduction if public holiday or approved leave
+            if is_holiday or is_on_leave:
+                # Create record but with zero deduction
+                daily_record = AdvancedDeduction(
+                    employee_id=employee_id,
+                    employee_name=employee_name,
+                    date=date_str,
+                    check_in=None,
+                    check_out=None,
+                    is_working_day=True,
+                    is_absent=False,
+                    late_minutes=0,
+                    early_leave_minutes=0,
+                    total_work_minutes=0,
+                    deficit_minutes=0,
+                    deduction_amount=0.0,
+                    cycle_start=cycle_start_str,
+                    cycle_end=cycle_end_str,
+                    payroll_cycle_id=payroll_cycle_id
+                )
+                
+                if is_holiday:
+                    print(f"   🎉 {date_str}: Public Holiday - No deduction")
+                if is_on_leave:
+                    print(f"   🏖️ {date_str}: Approved Leave - No deduction")
+                
+                summary.daily_records.append(daily_record)
+                summary.days_present += 1  # Count as present
+                continue
+            
+            # Normal processing for regular working days
             attendance = attendance_map.get(date_str)
             
             check_in = attendance.get("check_in") if attendance else None
