@@ -98,6 +98,40 @@ const AdvancedDeductionsReport = () => {
     link.click();
   };
 
+  // Merge with payroll cycle
+  const handleMergeWithPayroll = async () => {
+    if (!cycleId) {
+      alert('الرجاء إدخال معرّف دورة الرواتب (Cycle ID)');
+      return;
+    }
+
+    if (!window.confirm(`هل تريد دمج الخصومات المتقدمة مع دورة الرواتب؟\n\nسيتم:\n- إضافة الخصومات للموظفين\n- تحديث صافي الراتب\n- إنشاء قيود محاسبية`)) {
+      return;
+    }
+
+    setMerging(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/payroll/cycles/${cycleId}/merge-advanced-deductions?month=${selectedMonth}&year=${selectedYear}`,
+        {},
+        config
+      );
+
+      setSuccessMessage(response.data.message || 'تم الدمج بنجاح');
+      alert(`✅ تم الدمج بنجاح!\n\nالموظفين المحدّثين: ${response.data.employees_updated}\nإجمالي الخصومات: ${response.data.total_deduction_amount} درهم`);
+
+    } catch (err) {
+      const errorMsg = err.response?.data?.detail || 'فشل الدمج مع دورة الرواتب';
+      setError(errorMsg);
+      alert('❌ ' + errorMsg);
+    } finally {
+      setMerging(false);
+    }
+  };
+
   // Toggle employee details
   const toggleEmployeeDetails = (employeeId) => {
     setExpandedEmployee(expandedEmployee === employeeId ? null : employeeId);
