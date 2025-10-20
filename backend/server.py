@@ -5953,12 +5953,13 @@ async def check_in(current_user: User = Depends(get_current_user)):
         # Create new record
         await db.attendance.insert_one(attendance_data)
     
-    await log_activity(current_user.id, "check_in", f"Checked in at {time_str} ({'flexible' if has_flexible_schedule else 'fixed'} schedule)")
+    await log_activity(current_user.id, "check_in", f"Checked in at {time_str} ({'flexible' if has_flexible_schedule else 'fixed'} schedule, late_minutes: {late_minutes})")
     
     return {
         "message": "Checked in successfully", 
         "time": time_str, 
-        "is_late": is_late, 
+        "is_late": is_late,
+        "late_minutes": late_minutes,  # ✅ NEW: Return late_minutes in response
         "schedule_type": attendance_data["schedule_type"],
         "flexible_schedule": has_flexible_schedule
     }
