@@ -1,0 +1,113 @@
+{
+  "test_summary": {
+    "total_tests": 14,
+    "passed_tests": 4,
+    "success_rate": "28.6%",
+    "timestamp": "2025-10-20T07:13:28.132370"
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication (super_admin)",
+      "success": true,
+      "details": "Successfully authenticated as admin@tanseeq.com",
+      "timestamp": "2025-10-20T07:13:27.544210",
+      "response_data": null
+    },
+    {
+      "test": "Authentication (user)",
+      "success": true,
+      "details": "Successfully authenticated as jihad@tanseeq.com",
+      "timestamp": "2025-10-20T07:13:27.787134",
+      "response_data": null
+    },
+    {
+      "test": "Create Late Attendance",
+      "success": false,
+      "details": "Failed to create attendance: 405 - {\"detail\":\"Method Not Allowed\"}",
+      "timestamp": "2025-10-20T07:13:27.837761",
+      "response_data": null
+    },
+    {
+      "test": "Create Absence Record",
+      "success": false,
+      "details": "Failed to create absence: 404 - {\"detail\":\"User not found\"}",
+      "timestamp": "2025-10-20T07:13:27.850720",
+      "response_data": null
+    },
+    {
+      "test": "Edit Attendance Record",
+      "success": false,
+      "details": "late_minutes not recalculated correctly. Expected 5, got: {'message': 'Attendance updated successfully', 'changes': ['check_in: 09:20:00']}",
+      "timestamp": "2025-10-20T07:13:27.918232",
+      "response_data": null
+    },
+    {
+      "test": "Delete Absence Record",
+      "success": false,
+      "details": "Record still exists after deletion",
+      "timestamp": "2025-10-20T07:13:27.951684",
+      "response_data": null
+    },
+    {
+      "test": "Flexible Schedule Early Check-in",
+      "success": false,
+      "details": "Failed to create flexible schedule attendance: 405 - {\"detail\":\"Method Not Allowed\"}",
+      "timestamp": "2025-10-20T07:13:28.000196",
+      "response_data": null
+    },
+    {
+      "test": "Edge Case 09:14",
+      "success": false,
+      "details": "Failed to create attendance: 405",
+      "timestamp": "2025-10-20T07:13:28.007489",
+      "response_data": null
+    },
+    {
+      "test": "Edge Case 09:15",
+      "success": false,
+      "details": "Failed to create attendance: 405",
+      "timestamp": "2025-10-20T07:13:28.017602",
+      "response_data": null
+    },
+    {
+      "test": "Edge Case 09:16",
+      "success": false,
+      "details": "Failed to create attendance: 405",
+      "timestamp": "2025-10-20T07:13:28.065665",
+      "response_data": null
+    },
+    {
+      "test": "Edge Case 10:00",
+      "success": false,
+      "details": "Failed to create attendance: 405",
+      "timestamp": "2025-10-20T07:13:28.072664",
+      "response_data": null
+    },
+    {
+      "test": "Monthly Deductions Calculation",
+      "success": true,
+      "details": "Successfully calculated monthly deductions with attendance data",
+      "timestamp": "2025-10-20T07:13:28.119440",
+      "response_data": null
+    },
+    {
+      "test": "Deductions Integration",
+      "success": true,
+      "details": "Late attendance data properly integrated with deductions system",
+      "timestamp": "2025-10-20T07:13:28.119562",
+      "response_data": null
+    },
+    {
+      "test": "Database Storage",
+      "success": false,
+      "details": "No records found with late_minutes field",
+      "timestamp": "2025-10-20T07:13:28.131990",
+      "response_data": null
+    }
+  ],
+  "backend_url": "https://payroll-hardening.preview.emergentagent.com",
+  "test_accounts": [
+    "super_admin",
+    "user"
+  ]
+}
