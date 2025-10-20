@@ -77,23 +77,13 @@ class AttendanceScenario2Tester:
         print("\n🔍 Part 1: Create Late Attendance Record (9:15 AM Rule)")
         
         try:
-            # Get today's date
-            today = datetime.now().strftime('%Y-%m-%d')
+            # Test the check-in endpoint to create a late attendance record
+            # First, simulate a check-in at 09:30 (15 minutes late)
             
-            # Create attendance record with check-in AFTER 9:15 AM (09:30)
-            attendance_data = {
-                "user_id": "test_user_jihad",
-                "user_name": "jihad@tanseeq.com",
-                "date": today,
-                "check_in": "09:30:00",
-                "check_out": "18:00:00",
-                "status": "late"
-            }
-            
+            # Use the actual check-in endpoint
             response = self.session.post(
-                f"{BASE_URL}/attendance",
-                json=attendance_data,
-                headers=self.get_headers("super_admin"),
+                f"{BASE_URL}/attendance/check-in",
+                headers=self.get_headers("user"),  # Use regular user for check-in
                 timeout=30
             )
             
