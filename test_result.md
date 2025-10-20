@@ -285,7 +285,7 @@ backend:
 
 
 
-user_problem_statement: "🚨 COMPREHENSIVE AUDIT & FIX - TANSEEQ HR (Arabic Review): النظام يحتوي على أخطاء حرجة عديدة يجب إصلاحها فوراً. المشاكل الأساسية: 1) صفحات معطلة، روابط وأزرار لا تعمل (حفظ/تعديل/حذف/تحميل/تصدير) 2) رسائل الرواتب معطلة والتواريخ خاطئة (هجري بدلاً من ميلادي dd/MM/yyyy – Asia/Dubai UTC+4) 3) حسابات الرواتب خاطئة بسبب عدم ربط Payroll Ledger 4) الادعاء السابق بأن النظام '100% مكتمل' غير صحيح. نطاق العمل المطلوب: Phase 1 (HIGHEST PRIORITY): Ledger Idempotency + Installments → Phase 2: RBAC → Phase 3: Timezone Unification → Phase 4: UI/Exports Parity. المتطلبات الإلزامية: 1) توحيد source_type في جميع الكود وقاعدة البيانات 2) تعزيز idempotency في PayrollLedgerService 3) تطبيق RBAC صارم على endpoints الحساسة 4) ضمان التواريخ الميلادية بصيغة dd/MM/yyyy مع +04:00 5) ربط Salary Letters بـ Payroll Ledger فقط 6) إنشاء حساب Super Admin مؤقت مع 2FA/TOTP. يجب تقديم: تقرير T+24h، قائمة Bugs مع الأسباب الجذرية، Changelog، فيديو لدورة راتب كاملة."
+user_problem_statement: "🔥 PHASE-2 HARDENING - ADVERSARIAL UAT & HIDDEN DEFECTS HUNT: Comprehensive adversarial testing to expose edge cases, race conditions, and silent failures that escaped Phase-1. Testing 5 critical scenarios: 1) Attendance with Flexible Policy + Late Tracking (multiple check-ins/outs, 9:15 AM rule) 2) Modify After Payroll Lock (reversal entries, audit trails) 3) Custody Overspending + Advance Isolation (balance separation, overspending handling) 4) Apply Deductions from Reports Page (workflow integration) 5) Negative Net Salary (boundary conditions, high deductions). Success criteria: All scenarios must PASS with evidence, 0 Sev1/Sev2 defects, complete reconciliation for October 2025 data."
 
 frontend:
   - task: "Comprehensive E2E Frontend Testing"
