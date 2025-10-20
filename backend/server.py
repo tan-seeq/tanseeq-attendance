@@ -2781,18 +2781,39 @@ async def calculate_monthly_deductions(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
 
+class ApplyDeductionsRequest(BaseModel):
+    """Request model for applying monthly deductions"""
+    month: str  # Format: YYYY-MM
+    employees: List[dict]  # Employee deduction data
+    notes: Optional[str] = None
+
 @api_router.post("/deductions/apply-monthly")
 async def apply_monthly_deductions(
-    apply_data: dict,
+    apply_data: ApplyDeductionsRequest,
     current_user: User = Depends(get_super_admin_user)
 ):
     """
     تطبيق الخصومات المحسوبة على دورة الرواتب
     Creates/updates payroll cycle with calculated deductions
+    
+    Request Body:
+    {
+        "month": "2025-10",  # Required: YYYY-MM format
+        "employees": [       # Required: List of employee deductions
+            {
+                "employee_id": "emp-001",
+                "employee_name": "محمد أحمد",
+                "late_deduction": 150.50,
+                "absence_deduction": 500.00,
+                "advance_deduction": 300.00
+            }
+        ],
+        "notes": "Optional notes"  # Optional
+    }
     """
     try:
-        month = apply_data.get("month")
-        employees_data = apply_data.get("employees", [])
+        month = apply_data.month
+        employees_data = apply_data.employees
         
         if not month or not employees_data:
             raise HTTPException(status_code=400, detail="البيانات غير مكتملة")
