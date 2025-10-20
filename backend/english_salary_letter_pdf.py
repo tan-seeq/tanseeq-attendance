@@ -184,10 +184,7 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
     # Attendance deductions
     if attendance_deductions and len(attendance_deductions) > 0:
         for d in attendance_deductions:
-            desc_english = d['description'].replace('خصومات الحضور والتأخير', 'Attendance & Lateness')
-            desc_english = desc_english.replace('تأخير', 'late')
-            desc_english = desc_english.replace('مرات', 'times')
-            desc_english = desc_english.replace('دقيقة قابلة للخصم', 'deductible minutes')
+            desc_english = translate_description_to_english(d['description'])
             deductions_data.append([
                 "Attendance",
                 desc_english,
@@ -197,17 +194,17 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
     # Manual deductions
     if manual_deductions and len(manual_deductions) > 0:
         for d in manual_deductions:
+            desc_english = translate_description_to_english(d['description'])
             deductions_data.append([
                 "Manual",
-                d['description'],
+                desc_english,
                 f"{d['amount']:.2f}"
             ])
     
     # Advance installments
     if advance_installments and len(advance_installments) > 0:
         for d in advance_installments:
-            desc_english = d['description'].replace('قسط سلفة رقم', 'Installment #')
-            desc_english = desc_english.replace('استحقاق', 'Due:')
+            desc_english = translate_description_to_english(d['description'])
             deductions_data.append([
                 "Advance",
                 desc_english,
