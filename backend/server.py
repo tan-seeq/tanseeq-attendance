@@ -5876,113 +5876,114 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
 # @api_router.post("/attendance/check-in")
 # async def check_in(current_user: User = Depends(get_current_user)):
 #     """Check in attendance - with enhanced flexibility"""
-    uae_time = get_uae_time()
-    date_str = uae_time.strftime("%Y-%m-%d")
-    time_str = uae_time.strftime("%H:%M:%S")
-    
-    # Check if it's weekend
-    is_weekend = uae_time.weekday() >= 5  # Saturday=5, Sunday=6
-    
-    # Check if already checked in today
-    existing_attendance = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
-    if existing_attendance and existing_attendance.get("check_in"):
-        raise HTTPException(status_code=400, detail="Already checked in today")
-    
-    # Get user details for flexible schedule
-    user_details = await db.users.find_one({"id": current_user.id})
-    has_flexible_schedule = user_details.get("has_flexible_schedule", False)
-    
-    # Default status
-    status = "present"
-    is_late = False
-    late_minutes = 0
-    
-    # ✅ FIXED: Calculate late_minutes based on 9:15 AM threshold
-    STANDARD_START_TIME = datetime.strptime("09:15", "%H:%M").time()
-    
-    # Check if late based on flexible schedule or fixed rules
-    if not is_weekend:
-        if has_flexible_schedule:
-            # For flexible schedule users - very lenient rules
-            flexible_start_range = user_details.get("flexible_start_range", "07:00-11:00")
-            start_time, end_time = flexible_start_range.split("-")
-            start_hour, start_minute = map(int, start_time.split(":"))
-            end_hour, end_minute = map(int, end_time.split(":"))
-            
-            # Only mark as late if they come after the flexible end time
-            if uae_time.hour > end_hour or (uae_time.hour == end_hour and uae_time.minute > end_minute):
-                is_late = True
-                status = "late"
-                # Calculate late_minutes for flexible schedule users
-                check_in_time_obj = uae_time.time()
-                late_threshold = datetime.strptime(end_time, "%H:%M").time()
-                late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), late_threshold)
-                late_minutes = max(0, int(late_delta.total_seconds() / 60))
-        else:
-            # Fixed schedule rules (legacy)
-            if current_user.name == "Hatem Mohamed Ahmed":
-                # Hatem has no time restrictions
-                pass
-            elif current_user.name == "Tarek Wazzan":
-                # Tarek can start from 8 AM
-                if uae_time.hour > 8 or (uae_time.hour == 8 and uae_time.minute > 0):
-                    is_late = True
-                    status = "late"
-                    # Calculate late_minutes for Tarek (8 AM threshold)
-                    check_in_time_obj = uae_time.time()
-                    tarek_threshold = datetime.strptime("08:00", "%H:%M").time()
-                    late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), tarek_threshold)
-                    late_minutes = max(0, int(late_delta.total_seconds() / 60))
-            else:
-                # ✅ FIXED: Others should be here by 9:15 AM - Calculate late_minutes
-                check_in_time_obj = uae_time.time()
-                if check_in_time_obj > STANDARD_START_TIME:
-                    is_late = True
-                    status = "late"
-                    # Calculate late_minutes based on 9:15 AM threshold
-                    late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), STANDARD_START_TIME)
-                    late_minutes = int(late_delta.total_seconds() / 60)
-    
-    # Create attendance record with late_minutes
-    attendance_data = {
-        "id": str(uuid.uuid4()),
-        "user_id": current_user.id,
-        "user_name": current_user.name,
-        "date": date_str,
-        "check_in": time_str,
-        "check_out": None,
-        "working_hours": None,
-        "status": status,
-        "is_late": is_late,
-        "late_minutes": late_minutes,  # ✅ NEW: Store late_minutes at check-in
-        "early_departure_minutes": 0,  # ✅ NEW: Will be calculated at check-out
-        "deducted_hours": 0.0,  # ✅ NEW: Will be calculated at check-out
-        "is_weekend": is_weekend,
-        "schedule_type": "flexible" if has_flexible_schedule else "fixed",
-        "flexible_schedule": has_flexible_schedule,
-        "created_at": datetime.utcnow()
-    }
-    
-    if existing_attendance:
-        # Update existing record
-        await db.attendance.update_one(
-            {"user_id": current_user.id, "date": date_str},
-            {"$set": attendance_data}
-        )
-    else:
-        # Create new record
-        await db.attendance.insert_one(attendance_data)
-    
-    await log_activity(current_user.id, "check_in", f"Checked in at {time_str} ({'flexible' if has_flexible_schedule else 'fixed'} schedule, late_minutes: {late_minutes})")
-    
-    return {
-        "message": "Checked in successfully", 
-        "time": time_str, 
-        "is_late": is_late,
-        "late_minutes": late_minutes,  # ✅ NEW: Return late_minutes in response
-        "schedule_type": attendance_data["schedule_type"],
-        "flexible_schedule": has_flexible_schedule
-    }
+#     uae_time = get_uae_time()
+#     date_str = uae_time.strftime("%Y-%m-%d")
+#     time_str = uae_time.strftime("%H:%M:%S")
+#     
+#     # Check if it's weekend
+#     is_weekend = uae_time.weekday() >= 5  # Saturday=5, Sunday=6
+#     
+#     # Check if already checked in today
+#     existing_attendance = await db.attendance.find_one({"user_id": current_user.id, "date": date_str})
+#     if existing_attendance and existing_attendance.get("check_in"):
+#         raise HTTPException(status_code=400, detail="Already checked in today")
+#     
+#     # Get user details for flexible schedule
+#     user_details = await db.users.find_one({"id": current_user.id})
+#     has_flexible_schedule = user_details.get("has_flexible_schedule", False)
+#     
+#     # Default status
+#     status = "present"
+#     is_late = False
+#     late_minutes = 0
+#     
+#     # ✅ FIXED: Calculate late_minutes based on 9:15 AM threshold
+#     STANDARD_START_TIME = datetime.strptime("09:15", "%H:%M").time()
+#     
+#     # Check if late based on flexible schedule or fixed rules
+#     if not is_weekend:
+#         if has_flexible_schedule:
+#             # For flexible schedule users - very lenient rules
+#             flexible_start_range = user_details.get("flexible_start_range", "07:00-11:00")
+#             start_time, end_time = flexible_start_range.split("-")
+#             start_hour, start_minute = map(int, start_time.split(":"))
+#             end_hour, end_minute = map(int, end_time.split(":"))
+#             
+#             # Only mark as late if they come after the flexible end time
+#             if uae_time.hour > end_hour or (uae_time.hour == end_hour and uae_time.minute > end_minute):
+#                 is_late = True
+#                 status = "late"
+#                 # Calculate late_minutes for flexible schedule users
+#                 check_in_time_obj = uae_time.time()
+#                 late_threshold = datetime.strptime(end_time, "%H:%M").time()
+#                 late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), late_threshold)
+#                 late_minutes = max(0, int(late_delta.total_seconds() / 60))
+#         else:
+#             # Fixed schedule rules (legacy)
+#             if current_user.name == "Hatem Mohamed Ahmed":
+#                 # Hatem has no time restrictions
+#                 pass
+#             elif current_user.name == "Tarek Wazzan":
+#                 # Tarek can start from 8 AM
+#                 if uae_time.hour > 8 or (uae_time.hour == 8 and uae_time.minute > 0):
+#                     is_late = True
+#                     status = "late"
+#                     # Calculate late_minutes for Tarek (8 AM threshold)
+#                     check_in_time_obj = uae_time.time()
+#                     tarek_threshold = datetime.strptime("08:00", "%H:%M").time()
+#                     late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), tarek_threshold)
+#                     late_minutes = max(0, int(late_delta.total_seconds() / 60))
+#             else:
+#                 # ✅ FIXED: Others should be here by 9:15 AM - Calculate late_minutes
+#                 check_in_time_obj = uae_time.time()
+#                 if check_in_time_obj > STANDARD_START_TIME:
+#                     is_late = True
+#                     status = "late"
+#                     # Calculate late_minutes based on 9:15 AM threshold
+#                     late_delta = datetime.combine(uae_time.date(), check_in_time_obj) - datetime.combine(uae_time.date(), STANDARD_START_TIME)
+#                     late_minutes = int(late_delta.total_seconds() / 60)
+#     
+#     # Create attendance record with late_minutes
+#     attendance_data = {
+#         "id": str(uuid.uuid4()),
+#         "user_id": current_user.id,
+#         "user_name": current_user.name,
+#         "date": date_str,
+#         "check_in": time_str,
+#         "check_out": None,
+#         "working_hours": None,
+#         "status": status,
+#         "is_late": is_late,
+#         "late_minutes": late_minutes,  # ✅ NEW: Store late_minutes at check-in
+#         "early_departure_minutes": 0,  # ✅ NEW: Will be calculated at check-out
+#         "deducted_hours": 0.0,  # ✅ NEW: Will be calculated at check-out
+#         "is_weekend": is_weekend,
+#         "schedule_type": "flexible" if has_flexible_schedule else "fixed",
+#         "flexible_schedule": has_flexible_schedule,
+#         "created_at": datetime.utcnow()
+#     }
+#     
+#     if existing_attendance:
+#         # Update existing record
+#         await db.attendance.update_one(
+#             {"user_id": current_user.id, "date": date_str},
+#             {"$set": attendance_data}
+#         )
+#     else:
+#         # Create new record
+#         await db.attendance.insert_one(attendance_data)
+#     
+#     await log_activity(current_user.id, "check_in", f"Checked in at {time_str} ({'flexible' if has_flexible_schedule else 'fixed'} schedule, late_minutes: {late_minutes})")
+#     
+#     return {
+#         "message": "Checked in successfully", 
+#         "time": time_str, 
+#         "is_late": is_late,
+#         "late_minutes": late_minutes,  # ✅ NEW: Return late_minutes in response
+#         "schedule_type": attendance_data["schedule_type"],
+#         "flexible_schedule": has_flexible_schedule
+#     }
+    pass  # Placeholder for disabled function
 
 @api_router.post("/attendance/check-out")
 async def check_out(current_user: User = Depends(get_current_user)):
