@@ -851,7 +851,7 @@ async def get_super_admin_user(current_user: User = Depends(get_current_user)):
 
 @api_router.post("/attendance/check-in")
 async def check_in(current_user: User = Depends(get_current_user)):
-    """Check in (Normal attendance without QR verification)"""
+    """Check in attendance - ✅ FIXED: 9:15 AM Late Tracking with late_minutes calculation"""
     # Check if already checked in today
     today = get_uae_time().date().strftime('%Y-%m-%d')
     existing_attendance = await db.attendance.find_one({
@@ -866,8 +866,12 @@ async def check_in(current_user: User = Depends(get_current_user)):
     current_time = get_uae_time()
     check_in_time = current_time.strftime('%H:%M:%S')
     
-    # Determine if late based on user's schedule
+    # ✅ CRITICAL FIX: Calculate late_minutes based on 9:15 AM threshold
+    STANDARD_START_TIME = datetime.strptime("09:15", "%H:%M").time()
     is_late = False
+    late_minutes = 0
+    
+    # Determine if late based on user's schedule
     if current_user.has_flexible_schedule:
         # Flexible schedule - check against flexible start range
         flexible_start = current_user.flexible_start_range or "07:00-11:00"
@@ -875,20 +879,32 @@ async def check_in(current_user: User = Depends(get_current_user)):
         latest_hour, latest_minute = map(int, latest_start.split(':'))
         if current_time.hour > latest_hour or (current_time.hour == latest_hour and current_time.minute > latest_minute):
             is_late = True
+            # Calculate late_minutes for flexible schedule users
+            check_in_time_obj = current_time.time()
+            late_threshold = datetime.strptime(latest_start, "%H:%M").time()
+            late_delta = datetime.combine(current_time.date(), check_in_time_obj) - datetime.combine(current_time.date(), late_threshold)
+            late_minutes = max(0, int(late_delta.total_seconds() / 60))
     else:
-        # Fixed schedule - check against working_hours_start
-        start_time = datetime.strptime(current_user.working_hours_start, '%H:%M').time()
-        if current_time.time() > start_time:
+        # ✅ FIXED: Standard 9:15 AM rule for all non-flexible users
+        check_in_time_obj = current_time.time()
+        if check_in_time_obj > STANDARD_START_TIME:
             is_late = True
+            # Calculate late_minutes based on 9:15 AM threshold
+            late_delta = datetime.combine(current_time.date(), check_in_time_obj) - datetime.combine(current_time.date(), STANDARD_START_TIME)
+            late_minutes = int(late_delta.total_seconds() / 60)
     
-    # Create or update attendance record
+    # ✅ FIXED: Create attendance record with late_minutes and deduction fields
     attendance_data = {
         "user_id": current_user.id,
         "user_name": current_user.name,
         "date": today,
         "check_in": check_in_time,
         "status": "late" if is_late else "present",
-        "is_late": is_late
+        "is_late": is_late,
+        "late_minutes": late_minutes,  # ✅ NEW: Store late_minutes at check-in
+        "early_departure_minutes": 0,  # ✅ NEW: Will be calculated at check-out
+        "deducted_hours": 0.0,  # ✅ NEW: Will be calculated at check-out
+        "schedule_type": "flexible" if current_user.has_flexible_schedule else "fixed"
     }
     
     if existing_attendance:
@@ -913,14 +929,16 @@ async def check_in(current_user: User = Depends(get_current_user)):
         await db.attendance.insert_one(attendance_data)
         attendance_id = attendance_record.id
     
-    # Log activity
-    await log_activity(current_user.id, "check_in", f"Checked in at {check_in_time}")
+    # Log activity with late_minutes info
+    await log_activity(current_user.id, "check_in", f"Checked in at {check_in_time} (late_minutes: {late_minutes})")
     
     return {
         "message": "تم تسجيل الحضور بنجاح ✅",
-        "check_in_time": check_in_time,
+        "time": check_in_time,
         "status": "متأخر" if is_late else "في الوقت",
-        "is_late": is_late
+        "is_late": is_late,
+        "late_minutes": late_minutes,  # ✅ NEW: Return late_minutes in response
+        "schedule_type": attendance_data["schedule_type"]
     }
 
 @api_router.post("/attendance/check-out")
