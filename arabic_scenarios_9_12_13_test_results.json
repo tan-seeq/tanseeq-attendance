@@ -1,0 +1,212 @@
+[
+  {
+    "test": "Authentication - super_admin",
+    "status": "PASS",
+    "details": "Login successful for admin@tanseeq.com",
+    "timestamp": "2025-10-20T07:42:16.402118",
+    "response_data": null
+  },
+  {
+    "test": "Attendance Data - GET",
+    "status": "PASS",
+    "details": "Retrieved attendance data with 56 records",
+    "timestamp": "2025-10-20T07:42:16.416356",
+    "response_data": null
+  },
+  {
+    "test": "Attendance Report - PDF Export",
+    "status": "FAIL",
+    "details": "PDF export failed: No response",
+    "timestamp": "2025-10-20T07:42:16.428051",
+    "response_data": null
+  },
+  {
+    "test": "Attendance Report - Excel Export",
+    "status": "FAIL",
+    "details": "Excel export failed: No response",
+    "timestamp": "2025-10-20T07:42:16.477937",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Cycles - GET",
+    "status": "PASS",
+    "details": "Found 6 payroll cycles",
+    "timestamp": "2025-10-20T07:42:16.491386",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Report - GET",
+    "status": "FAIL",
+    "details": "Failed to get payroll report: No response",
+    "timestamp": "2025-10-20T07:42:16.503260",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Report - PDF Export",
+    "status": "PASS",
+    "details": "PDF generated successfully, size: 2847 bytes",
+    "timestamp": "2025-10-20T07:42:16.519144",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Report - Excel Export",
+    "status": "PASS",
+    "details": "Excel generated successfully, size: 5742 bytes",
+    "timestamp": "2025-10-20T07:42:16.550891",
+    "response_data": null
+  },
+  {
+    "test": "Advances Report - GET",
+    "status": "FAIL",
+    "details": "Failed to get advances report: No response",
+    "timestamp": "2025-10-20T07:42:16.562868",
+    "response_data": null
+  },
+  {
+    "test": "Advances Report - Custody PDF",
+    "status": "FAIL",
+    "details": "PDF export failed: No response",
+    "timestamp": "2025-10-20T07:42:16.574761",
+    "response_data": null
+  },
+  {
+    "test": "Advances Report - Advance PDF",
+    "status": "FAIL",
+    "details": "PDF export failed: No response",
+    "timestamp": "2025-10-20T07:42:16.624494",
+    "response_data": null
+  },
+  {
+    "test": "Advances Report - Expense PDF",
+    "status": "FAIL",
+    "details": "PDF export failed: No response",
+    "timestamp": "2025-10-20T07:42:16.676574",
+    "response_data": null
+  },
+  {
+    "test": "Installment Schedules - GET",
+    "status": "FAIL",
+    "details": "Failed to get installment schedules: No response",
+    "timestamp": "2025-10-20T07:42:16.685863",
+    "response_data": null
+  },
+  {
+    "test": "Test Employee Setup",
+    "status": "FAIL",
+    "details": "Failed to update employee: No response",
+    "timestamp": "2025-10-20T07:42:16.746257",
+    "response_data": null
+  },
+  {
+    "test": "Deduction - late",
+    "status": "FAIL",
+    "details": "Failed to apply deduction: No response",
+    "timestamp": "2025-10-20T07:42:16.756842",
+    "response_data": null
+  },
+  {
+    "test": "Deduction - absence",
+    "status": "FAIL",
+    "details": "Failed to apply deduction: No response",
+    "timestamp": "2025-10-20T07:42:16.766387",
+    "response_data": null
+  },
+  {
+    "test": "Deduction - advance_installment",
+    "status": "FAIL",
+    "details": "Failed to apply deduction: No response",
+    "timestamp": "2025-10-20T07:42:16.816185",
+    "response_data": null
+  },
+  {
+    "test": "Deduction - manual",
+    "status": "FAIL",
+    "details": "Failed to apply deduction: No response",
+    "timestamp": "2025-10-20T07:42:16.824726",
+    "response_data": null
+  },
+  {
+    "test": "Total Deductions Applied",
+    "status": "INFO",
+    "details": "Total deductions: 3600.0 AED (exceeds 3500 AED gross)",
+    "timestamp": "2025-10-20T07:42:16.824767",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Recalculation",
+    "status": "PASS",
+    "details": "Payroll recalculated successfully",
+    "timestamp": "2025-10-20T07:42:16.847180",
+    "response_data": null
+  },
+  {
+    "test": "Negative Salary Prevention",
+    "status": "INFO",
+    "details": "System may be preventing negative salary calculations",
+    "timestamp": "2025-10-20T07:42:16.861290",
+    "response_data": null
+  },
+  {
+    "test": "Negative Salary Slip - PDF",
+    "status": "PASS",
+    "details": "Salary slip generated, size: 3477 bytes",
+    "timestamp": "2025-10-20T07:42:16.876643",
+    "response_data": null
+  },
+  {
+    "test": "Negative Salary Slip - Arabic Content",
+    "status": "PASS",
+    "details": "Arabic content detected in salary slip",
+    "timestamp": "2025-10-20T07:42:16.876854",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Cycle Lock",
+    "status": "FAIL",
+    "details": "Failed to lock cycle: No response",
+    "timestamp": "2025-10-20T07:42:16.888336",
+    "response_data": null
+  },
+  {
+    "test": "Salary Edit After Lock",
+    "status": "FAIL",
+    "details": "Unexpected response: No response",
+    "timestamp": "2025-10-20T07:42:16.898505",
+    "response_data": null
+  },
+  {
+    "test": "Installment Add After Lock",
+    "status": "FAIL",
+    "details": "Unexpected response: No response",
+    "timestamp": "2025-10-20T07:42:16.947738",
+    "response_data": null
+  },
+  {
+    "test": "Attendance Delete After Lock",
+    "status": "INFO",
+    "details": "Attendance deletion allowed - checking for reversal entry",
+    "timestamp": "2025-10-20T07:42:16.972824",
+    "response_data": null
+  },
+  {
+    "test": "Payroll Cycle Unlock",
+    "status": "FAIL",
+    "details": "Failed to unlock cycle: No response",
+    "timestamp": "2025-10-20T07:42:16.981619",
+    "response_data": null
+  },
+  {
+    "test": "Reversal Entries Found",
+    "status": "INFO",
+    "details": "No reversal entries found - system may prevent modifications instead",
+    "timestamp": "2025-10-20T07:42:16.993965",
+    "response_data": null
+  },
+  {
+    "test": "Cycle Deletion",
+    "status": "FAIL",
+    "details": "Failed to delete cycle: No response",
+    "timestamp": "2025-10-20T07:42:17.001509",
+    "response_data": null
+  }
+]
