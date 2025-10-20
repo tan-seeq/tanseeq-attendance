@@ -548,7 +548,8 @@ class ArabicScenariosBackendTester:
         # First get an attendance record
         response = self.make_request("GET", "/attendance")
         if response and response.status_code == 200:
-            attendance_records = response.json().get('records', [])
+            data = response.json()
+            attendance_records = data.get('records', []) if isinstance(data, dict) else data
             if attendance_records:
                 attendance_id = attendance_records[0]['id']
                 
