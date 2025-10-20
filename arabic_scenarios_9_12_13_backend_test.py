@@ -170,7 +170,12 @@ class ArabicScenariosBackendTester:
         # First get available payroll cycles
         response = self.make_request("GET", "/payroll/cycles")
         if response and response.status_code == 200:
-            cycles = response.json().get('cycles', [])
+            data = response.json()
+            # Handle both list and dict responses
+            if isinstance(data, list):
+                cycles = data
+            else:
+                cycles = data.get('cycles', [])
             if cycles:
                 cycle_id = cycles[0]['id']
                 self.test_cycle_id = cycle_id
