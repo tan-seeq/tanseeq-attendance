@@ -18,7 +18,7 @@ from pathlib import Path
 import time
 
 # Configuration - Use environment variable
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://hr-system-fix.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://payroll-hardening.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 # Test accounts

@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://hr-system-fix.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-hardening.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

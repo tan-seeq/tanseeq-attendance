@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://hr-system-fix.preview.emergentagent.com",
+			"value": "https://payroll-hardening.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

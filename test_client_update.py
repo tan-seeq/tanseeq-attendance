@@ -7,7 +7,7 @@ import requests
 import json
 import time
 
-BASE_URL = "https://hr-system-fix.preview.emergentagent.com/api"
+BASE_URL = "https://payroll-hardening.preview.emergentagent.com/api"
 
 def test_client_update():
     session = requests.Session()

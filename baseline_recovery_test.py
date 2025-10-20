@@ -15,7 +15,7 @@ import uuid
 import re
 
 # Backend URL from environment
-BACKEND_URL = "https://hr-system-fix.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-hardening.preview.emergentagent.com/api"
 
 # Test credentials
 CREDENTIALS = {

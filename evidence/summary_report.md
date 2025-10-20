@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://hr-system-fix.preview.emergentagent.com
-    - **Backend URL**: https://hr-system-fix.preview.emergentagent.com/api
+    - **Frontend URL**: https://payroll-hardening.preview.emergentagent.com
+    - **Backend URL**: https://payroll-hardening.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 
