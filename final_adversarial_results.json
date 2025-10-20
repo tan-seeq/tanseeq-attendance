@@ -1,0 +1,135 @@
+{
+  "summary": {
+    "total_tests": 12,
+    "passed": 6,
+    "failed": 3,
+    "warnings": 3,
+    "success_rate": 50.0
+  },
+  "scenarios": {
+    "SCENARIO_1": {
+      "PASS": 1,
+      "FAIL": 1,
+      "WARN": 1
+    },
+    "SCENARIO_2": {
+      "PASS": 1,
+      "FAIL": 1,
+      "WARN": 0
+    },
+    "SCENARIO_3": {
+      "PASS": 3,
+      "FAIL": 0,
+      "WARN": 2
+    },
+    "SCENARIO_4": {
+      "PASS": 1,
+      "FAIL": 0,
+      "WARN": 0
+    },
+    "SYSTEM": {
+      "PASS": 0,
+      "FAIL": 1,
+      "WARN": 0
+    }
+  },
+  "detailed_results": [
+    {
+      "scenario": "SCENARIO_1",
+      "test": "9:15 AM Rule Violations",
+      "status": "FAIL",
+      "details": "\u274c 3 records NOT marked late after 9:15 AM",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:42.730120"
+    },
+    {
+      "scenario": "SCENARIO_1",
+      "test": "On-Time Detection",
+      "status": "PASS",
+      "details": "\u2705 6/6 records correctly marked on-time",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:42.730158"
+    },
+    {
+      "scenario": "SCENARIO_1",
+      "test": "Early Check-in Analysis",
+      "status": "WARN",
+      "details": "\u26a0\ufe0f No early check-ins found to test compensation logic",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:42.730352"
+    },
+    {
+      "scenario": "SCENARIO_2",
+      "test": "Lock Cycle",
+      "status": "FAIL",
+      "details": "\u274c Failed to lock cycle: {'detail': '\u0633\u0628\u0628 \u0627\u0644\u0642\u0641\u0644 \u0625\u0644\u0632\u0627\u0645\u064a. \u064a\u062c\u0628 \u062a\u0648\u0636\u064a\u062d \u0633\u0628\u0628 \u0642\u0641\u0644 \u062f\u0648\u0631\u0629 \u0627\u0644\u0631\u0627\u062a\u0628.'}",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.044882"
+    },
+    {
+      "scenario": "SCENARIO_2",
+      "test": "Payroll Ledger Access",
+      "status": "PASS",
+      "details": "\u2705 Ledger accessible, found 7 reversal entries",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.059260"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Advance Isolation",
+      "status": "PASS",
+      "details": "\u2705 Advances correctly isolated: 7625.0 = 7625.0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.112356"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Custody Expense Deduction",
+      "status": "PASS",
+      "details": "\u2705 Custody correctly reduced by expenses: 655.0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.112400"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Overspending Test",
+      "status": "WARN",
+      "details": "\u26a0\ufe0f No overspending in current data (custody = 655.0 AED)",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.112409"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "Total Balance Calculation",
+      "status": "PASS",
+      "details": "\u2705 Total balance calculation correct",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.112416"
+    },
+    {
+      "scenario": "SCENARIO_3",
+      "test": "System-wide Overspending",
+      "status": "WARN",
+      "details": "\u26a0\ufe0f No overspending scenarios found in system",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.132794"
+    },
+    {
+      "scenario": "SCENARIO_4",
+      "test": "Calculate Monthly Deductions",
+      "status": "PASS",
+      "details": "\u2705 Calculated deductions for 5 employees",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.226986"
+    },
+    {
+      "scenario": "SYSTEM",
+      "test": "Critical Error",
+      "status": "FAIL",
+      "details": "0",
+      "evidence": {},
+      "timestamp": "2025-10-20T06:32:43.227031"
+    }
+  ],
+  "timestamp": "2025-10-20T06:32:43.227832"
+}
