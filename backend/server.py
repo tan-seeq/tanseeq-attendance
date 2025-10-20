@@ -4676,10 +4676,11 @@ async def generate_salary_letter(
         minute_rate = hourly_rate / 60
         
         # جلب تفاصيل الخصومات من Payroll Ledger
-        # ✅ FIXED: Use payroll_cycle_id (database field name)
+        # ✅ FIXED: Use cycle_id (not payroll_cycle_id) and exclude reversed entries
         ledger_entries = await db.payroll_ledger.find({
             "employee_id": employee_id,
-            "payroll_cycle_id": cycle_id
+            "cycle_id": cycle_id,
+            "is_reversed": {"$ne": True}  # ✅ Exclude reversed entries
         }).to_list(None)
         
         # تصنيف البنود
@@ -4694,31 +4695,32 @@ async def generate_salary_letter(
             amount = entry.get("amount", 0)
             description = entry.get("description", "")
             
+            # ✅ Use absolute values for display (amounts are negative in ledger)
             if source_type == "ATTENDANCE_DEDUCTION":
                 attendance_deductions.append({
                     "description": description,
-                    "amount": amount
+                    "amount": abs(amount)  # ✅ Convert to positive for display
                 })
             elif source_type == "LEAVE_ADJUSTMENT":
                 leave_adjustments.append({
                     "description": description,
-                    "amount": amount
+                    "amount": amount  # Keep sign (can be positive or negative)
                 })
             elif source_type == "MANUAL_DEDUCTION":
                 manual_deductions.append({
                     "description": description,
-                    "amount": amount
+                    "amount": abs(amount)  # ✅ Convert to positive for display
                 })
             elif source_type == "ADVANCE_INSTALLMENT":
                 advance_installments.append({
                     "description": description,
-                    "amount": amount,
+                    "amount": abs(amount),  # ✅ Convert to positive for display
                     "reference_id": entry.get("reference_id", "")
                 })
             elif source_type == "CUSTODY_ADJUSTMENT":
                 custody_adjustments.append({
                     "description": description,
-                    "amount": amount
+                    "amount": amount  # Keep sign (can be positive or negative)
                 })
         
         # حساب الإجماليات
