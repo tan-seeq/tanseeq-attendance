@@ -97,7 +97,7 @@ const MonthlyDeductionsCalculator = () => {
 
     const confirmApply = window.confirm(
       `هل أنت متأكد من تطبيق الخصومات على ${calculatedData.employee_count} موظف؟\n` +
-      `إجمالي الخصومات: ${calculatedData.total_deductions.toFixed(2)} درهم\n\n` +
+      `إجمالي الخصومات: ${(calculatedData.total_deductions || 0).toFixed(2)} درهم\n\n` +
       `سيتم:\n` +
       `• إضافة/تحديث دورة الرواتب لشهر ${selectedMonth}\n` +
       `• تطبيق جميع الخصومات (التأخير، الغياب، السلف)\n` +
