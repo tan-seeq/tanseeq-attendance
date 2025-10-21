@@ -246,12 +246,11 @@ const MonthlyDeductionsCalculator = () => {
           </div>
         </div>
 
-        {/* Custom Mode Warning */}
+        {/* Custom Mode Info */}
         {mode === 'custom' && (
-          <div className="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-            <p className="text-sm text-yellow-800 font-semibold">
-              ⚠️ <strong>ملاحظة هامة:</strong> هذه معاينة فقط – لا يتم حفظ النتائج في النظام. 
-              الحد الأقصى للفترة: 93 يوم (3 أشهر).
+          <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-400 rounded-lg">
+            <p className="text-sm text-blue-800 font-semibold">
+              ℹ️ <strong>ملاحظة:</strong> يمكنك حساب الخصومات لأي فترة زمنية مخصصة (الحد الأقصى: 93 يوم).
             </p>
           </div>
         )}
