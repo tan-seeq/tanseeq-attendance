@@ -9326,9 +9326,7 @@ async def get_penalty_history(user_id: str, current_user: User = Depends(get_cur
     try:
         penalty_records = await db.late_penalties.find(
             {"user_id": user_id}
-        )
-        
-        records_saved = await save_deductions_to_db(db, summaries).sort("applied_at", -1).to_list(1000)
+        ).sort("applied_at", -1).to_list(1000)
         
         return penalty_records
         
