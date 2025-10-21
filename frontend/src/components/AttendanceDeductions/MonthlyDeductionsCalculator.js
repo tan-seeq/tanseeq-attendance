@@ -133,34 +133,60 @@ const MonthlyDeductionsCalculator = () => {
   };
 
   const handleApply = async () => {
-    // Parse month (YYYY-MM)
-    const monthParts = selectedMonth.split('-');
-    if (monthParts.length !== 2) {
-      alert('Invalid month format');
-      return;
-    }
-    const year = parseInt(monthParts[0]);
-    const month = parseInt(monthParts[1]);
-    
-    if (!window.confirm(
-      `Apply deductions for ${calculatedData.employee_count} employees?\n` +
-      `Total Deductions: ${(calculatedData.total_deductions || 0).toFixed(2)} AED\n\n` +
-      `This will:\n` +
-      `• Update payroll cycle for ${selectedMonth}\n` +
-      `• Apply all deductions (Late, Absence)\n` +
-      `• Send notifications to employees`
-    )) {
-      return;
-    }
-    
     try {
+      // Validate selectedMonth
+      if (!selectedMonth || typeof selectedMonth !== 'string') {
+        alert('Please select a valid month');
+        return;
+      }
+      
+      // Parse month (YYYY-MM)
+      const monthParts = selectedMonth.split('-');
+      if (monthParts.length !== 2) {
+        alert(`Invalid month format: ${selectedMonth}`);
+        return;
+      }
+      const year = parseInt(monthParts[0]);
+      const month = parseInt(monthParts[1]);
+      
+      if (isNaN(year) || isNaN(month)) {
+        alert('Invalid month or year values');
+        return;
+      }
+      
+      if (!window.confirm(
+        `Apply deductions for ${calculatedData.employee_count} employees?\n` +
+        `Total Deductions: ${(calculatedData.total_deductions || 0).toFixed(2)} AED\n\n` +
+        `This will:\n` +
+        `• Update payroll cycle for ${selectedMonth}\n` +
+        `• Apply all deductions (Late, Absence)\n` +
+        `• Send notifications to employees`
+      )) {
+        return;
+      }
+      
       setApplying(true);
-      const response = await axios.post(`${API}/deductions/apply-monthly?month=${month}&year=${year}`);
+      const apiUrl = `${API}/deductions/apply-monthly?month=${month}&year=${year}`;
+      console.log('Apply API URL:', apiUrl);
+      
+      const response = await axios.post(apiUrl);
+      
       alert(`Deductions applied successfully!\nEmployees: ${response.data.employees_affected || 0}\nTotal: ${response.data.total_deduction_amount || 0} AED`);
       handleCalculate();
     } catch (error) {
       console.error('Error applying deductions:', error);
-      alert('Error applying deductions: ' + (error.response?.data?.detail || error.message));
+      
+      // Better error message extraction
+      let errorMessage = 'Error applying deductions';
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(`Error applying deductions:\n${errorMessage}`);
     } finally {
       setApplying(false);
     }
