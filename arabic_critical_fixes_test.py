@@ -15,7 +15,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 
 # Backend URL from environment
-BACKEND_URL = "https://tanseeq-deduct.preview.emergentagent.com/api"
+BACKEND_URL = "https://hr-tanseeq-app.preview.emergentagent.com/api"
 
 # Test credentials from Arabic review
 ADMIN_CREDENTIALS = {"email": "admin@tanseeq.com", "password": "ADMIN"}

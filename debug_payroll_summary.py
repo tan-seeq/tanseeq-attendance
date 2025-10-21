@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-BASE_URL = "https://tanseeq-deduct.preview.emergentagent.com/api"
+BASE_URL = "https://hr-tanseeq-app.preview.emergentagent.com/api"
 TEST_ACCOUNT = {"email": "admin@tanseeq.com", "password": "ADMIN"}
 
 def debug_payroll_summary():

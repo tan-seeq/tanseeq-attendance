@@ -38,7 +38,7 @@ ADMIN_PASSWORD="hatem123"  # ⚠️ CHANGE FOR PRODUCTION
 
 **Current Frontend ENV:**
 ```bash
-REACT_APP_BACKEND_URL=https://tanseeq-deduct.preview.emergentagent.com  # ⚠️ UPDATE TO PRODUCTION URL
+REACT_APP_BACKEND_URL=https://hr-tanseeq-app.preview.emergentagent.com  # ⚠️ UPDATE TO PRODUCTION URL
 ```
 
 **🔴 CRITICAL - Must Change for Production:**

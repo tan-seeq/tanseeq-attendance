@@ -13,7 +13,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 # Configuration
-BACKEND_URL = "https://tanseeq-deduct.preview.emergentagent.com"
+BACKEND_URL = "https://hr-tanseeq-app.preview.emergentagent.com"
 VIEWPORT = {"width": 1920, "height": 800}
 SCREENSHOT_QUALITY = 20
 

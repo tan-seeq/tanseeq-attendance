@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://tanseeq-deduct.preview.emergentagent.com",
+			"value": "https://hr-tanseeq-app.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

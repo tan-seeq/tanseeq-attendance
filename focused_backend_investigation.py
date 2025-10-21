@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://tanseeq-deduct.preview.emergentagent.com/api"
+BACKEND_URL = "https://hr-tanseeq-app.preview.emergentagent.com/api"
 CREDENTIALS = {
     "super_admin": {"email": "hatem@tan-seeq.co", "password": "hatem123"},
     "admin": {"email": "admin@tanseeq.com", "password": "ADMIN"},
