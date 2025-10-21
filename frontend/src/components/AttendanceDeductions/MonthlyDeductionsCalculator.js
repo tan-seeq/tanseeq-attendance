@@ -346,7 +346,7 @@ const MonthlyDeductionsCalculator = () => {
                 <div>
                   <p className="text-sm text-red-700 font-medium">إجمالي الخصومات</p>
                   <p className="text-3xl font-bold text-red-800">
-                    {calculatedData.total_deductions.toFixed(2)} <span className="text-xl">درهم</span>
+                    {(calculatedData.total_deductions || 0).toFixed(2)} <span className="text-xl">درهم</span>
                   </p>
                 </div>
                 <CurrencyDollarIcon className="h-12 w-12 text-red-500" />
