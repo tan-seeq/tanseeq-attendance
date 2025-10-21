@@ -38,26 +38,73 @@ const AdvancedDeductionsReport = () => {
     7: 'يوليو', 8: 'أغسطس', 9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر'
   };
 
-  // Calculate deductions for selected month
+  // Calculate deductions based on mode
   const handleCalculate = async () => {
     setCalculating(true);
     setError('');
     setSuccessMessage('');
     
     try {
-      const response = await axios.post(
-        `${API_URL}/api/deductions/calculate-monthly?month=${selectedMonth}&year=${selectedYear}`,
-        {},
-        config
-      );
+      let url = `${API_URL}/api/deductions/calculate?preview=true`;
       
-      setSuccessMessage(response.data.message || 'تم حساب الخصومات بنجاح');
+      if (mode === 'monthly') {
+        url += `&mode=monthly&month=${selectedMonth}&year=${selectedYear}`;
+      } else {
+        // Validate custom dates
+        if (!fromDate || !toDate) {
+          setError('الرجاء إدخال تاريخ البداية والنهاية');
+          setCalculating(false);
+          return;
+        }
+        
+        url += `&mode=custom&from_date=${fromDate}&to_date=${toDate}`;
+      }
       
-      // Refresh report
-      setTimeout(() => {
-        fetchReport();
-        setSuccessMessage('');
-      }, 1500);
+      const response = await axios.post(url, {}, config);
+      
+      // Transform to report format
+      const transformedData = {
+        mode: response.data.mode,
+        cycle_start: response.data.from,
+        cycle_end: response.data.to,
+        total_employees: response.data.employees_count,
+        summaries: response.data.items.map(item => ({
+          employee_id: item.employee_id,
+          employee_name: item.employee_name,
+          total_working_days: item.breakdown.length,
+          days_present: item.breakdown.filter(d => d.amount > 0).length,
+          days_absent: item.breakdown.filter(d => d.reason === 'absent').length,
+          total_late_minutes: item.breakdown.reduce((sum, d) => sum + d.late_minutes, 0),
+          total_early_leave_minutes: item.breakdown.reduce((sum, d) => sum + d.early_out_minutes, 0),
+          total_deficit_minutes: item.minutes,
+          total_deduction_amount: item.amount,
+          daily_records: item.breakdown.map(b => ({
+            date: b.date,
+            check_in: null,
+            check_out: null,
+            is_working_day: true,
+            is_absent: b.reason === 'absent',
+            late_minutes: b.late_minutes,
+            early_leave_minutes: b.early_out_minutes,
+            total_work_minutes: 480 - b.under_hours_minutes,
+            deficit_minutes: b.under_hours_minutes,
+            deduction_amount: b.amount
+          }))
+        }))
+      };
+      
+      setReportData(transformedData);
+      setSuccessMessage(`تم حساب الخصومات لـ ${response.data.employees_count} موظف`);
+      
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+    } catch (err) {
+      const errorMsg = err.response?.data?.detail || 'فشل حساب الخصومات';
+      setError(errorMsg);
+    } finally {
+      setCalculating(false);
+    }
+  };
       
     } catch (err) {
       setError(err.response?.data?.detail || 'فشل حساب الخصومات');
