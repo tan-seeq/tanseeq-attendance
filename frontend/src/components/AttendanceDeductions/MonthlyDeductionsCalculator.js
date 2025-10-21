@@ -63,21 +63,34 @@ const MonthlyDeductionsCalculator = () => {
       
       const response = await axios.post(apiUrl, {});
       
-      if (response.data.success) {
-        // Ensure total_deductions exists
-        if (!response.data.total_deductions && response.data.employees) {
-          response.data.total_deductions = response.data.employees.reduce((sum, emp) => sum + (emp.total_deduction || emp.amount || 0), 0);
-        }
-        setCalculatedData(response.data);
-      } else if (response.data.items) {
-        // Transform new API response format
-        setCalculatedData({
+      // Handle response based on API format
+      let transformedData = null;
+      
+      if (response.data.items) {
+        // New API format (from /api/deductions/calculate)
+        transformedData = {
           success: true,
           employees: response.data.items,
           employee_count: response.data.employees_count,
           total_deductions: response.data.items.reduce((sum, emp) => sum + (emp.amount || 0), 0)
-        });
+        };
+      } else if (response.data.success && response.data.employees) {
+        // Old API format (from /api/deductions/calculate-monthly)
+        if (!response.data.total_deductions) {
+          response.data.total_deductions = response.data.employees.reduce((sum, emp) => sum + (emp.total_deduction || emp.amount || 0), 0);
+        }
+        transformedData = response.data;
+      } else {
+        // Fallback: empty result
+        transformedData = {
+          success: true,
+          employees: [],
+          employee_count: 0,
+          total_deductions: 0
+        };
       }
+      
+      setCalculatedData(transformedData);
     } catch (err) {
       console.error('Error calculating deductions:', err);
       const errorMsg = typeof err.response?.data?.detail === 'string' 
