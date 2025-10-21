@@ -956,8 +956,11 @@ const Dashboard = () => {
     
     setPenaltyLoading(true);
     try {
-      // Use new advanced deductions API
-      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${selectedMonth}`);
+      // Parse month string (YYYY-MM) to separate values
+      const [year, month] = selectedMonth.split('-').map(Number);
+      
+      // Use new advanced deductions API with proper parameters
+      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${month}&year=${year}`);
       
       if (response.data.success && response.data.employees) {
         // Transform to old penalty format for display
@@ -965,12 +968,13 @@ const Dashboard = () => {
           employee_id: emp.employee_id,
           employee_name: emp.employee_name,
           late_count: emp.late_count || 0,
+          absence_count: emp.absence_count || 0,
           total_late_minutes: emp.total_late_minutes || 0,
           penalty_amount: emp.total_deduction || 0,
           late_deduction: emp.late_deduction || 0,
           absence_deduction: emp.absence_deduction || 0,
           advance_deduction: emp.advance_deduction || 0,
-          details: emp.deduction_details || []
+          details: emp.deduction_details || emp.details || []
         }));
         
         setPenalties(transformedPenalties);
