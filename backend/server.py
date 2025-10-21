@@ -12696,7 +12696,7 @@ async def apply_monthly_deductions(
         # First calculate deductions to get the data
         from advanced_deductions_system import calculate_monthly_deductions
         
-        summaries, records_saved = await calculate_monthly_deductions(
+        summaries = await calculate_monthly_deductions(db, 
             month=month,
             year=year,
             save_to_db=True  # Save to database
