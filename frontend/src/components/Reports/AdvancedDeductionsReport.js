@@ -200,8 +200,8 @@ const AdvancedDeductionsReport = () => {
   return (
     <div className="container mx-auto p-6" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-lg shadow-lg mb-6">
-        <h1 className="text-3xl font-bold mb-2">📊 نظام الخصومات المتقدم</h1>
+      <div className="bg-gradient-to-r from-purple-600 to-pink-800 text-white p-6 rounded-lg shadow-lg mb-6">
+        <h1 className="text-3xl font-bold mb-2">🔥 TEST VERSION 2.0 - نظام الخصومات المتقدم</h1>
         <p className="text-blue-100">احتساب التأخير والانصراف المبكر</p>
       </div>
 
