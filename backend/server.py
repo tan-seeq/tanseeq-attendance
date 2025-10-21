@@ -4387,44 +4387,7 @@ async def get_payroll_ledger(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching ledger: {str(e)}")
 
-@app.get("/api/payroll/ledger/employee/{employee_id}/old")
-        # Get employee info
-        employee = await db.users.find_one({"id": employee_id})
-        employee_name = employee.get("name", "غير معروف") if employee else "غير معروف"
-        
-        # Calculate totals by type
-        totals_by_type = {}
-        for entry in entries:
-            source_type_name = entry.get("source_type", "UNKNOWN")
-            amount = entry.get("amount", 0)
-            
-            if source_type_name not in totals_by_type:
-                totals_by_type[source_type_name] = {"count": 0, "total_amount": 0}
-            
-            totals_by_type[source_type_name]["count"] += 1
-            totals_by_type[source_type_name]["total_amount"] += amount
-        
-        # Remove _id for JSON serialization
-        for entry in entries:
-            entry.pop("_id", None)
-        
-        return {
-            "employee_id": employee_id,
-            "employee_name": employee_name,
-            "total_entries": len(entries),
-            "entries": entries,
-            "totals_by_type": totals_by_type,
-            "filters": {
-                "start_date": start_date,
-                "end_date": end_date,
-                "source_type": source_type
-            }
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching employee ledger: {str(e)}")
+# Old/duplicate endpoint removed - see line 4297 for correct implementation
 
 @app.put("/api/payroll/cycles/{cycle_id}/update-employees")
 async def update_payroll_cycle_employees(
