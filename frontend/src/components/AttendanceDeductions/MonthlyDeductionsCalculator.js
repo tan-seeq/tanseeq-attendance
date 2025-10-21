@@ -312,7 +312,7 @@ const MonthlyDeductionsCalculator = () => {
               ) : (
                 <>
                   <CalculatorIcon className="h-5 w-5" />
-                  🧮 حساب الخصومات{mode === 'custom' ? ' (معاينة)' : ''}
+                  🧮 حساب الخصومات
                 </>
               )}
             </button>
