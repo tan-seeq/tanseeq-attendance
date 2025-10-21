@@ -3655,15 +3655,13 @@ const Payroll = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">كشف المرتبات - TANSEEQ Tax Consultancy</h2>
           <div className="flex space-x-2">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-                  <div className="text-xs text-gray-500 mt-1">
-                    Cycle: 29th prev month → 28th current month
-                  </div>
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {Array.from({length: 12}, (_, i) => {
+            <div className="flex flex-col">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {Array.from({length: 12}, (_, i) => {
                 const date = new Date();
                 date.setMonth(date.getMonth() - i);
                 const monthStr = date.toISOString().slice(0, 7);
