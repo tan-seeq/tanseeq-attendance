@@ -26,7 +26,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Get backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://timecalc-hr.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://tanseeq-deduct.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class ManualDeductionsTestSuite:

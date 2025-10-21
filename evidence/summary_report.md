@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://timecalc-hr.preview.emergentagent.com
-    - **Backend URL**: https://timecalc-hr.preview.emergentagent.com/api
+    - **Frontend URL**: https://tanseeq-deduct.preview.emergentagent.com
+    - **Backend URL**: https://tanseeq-deduct.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 

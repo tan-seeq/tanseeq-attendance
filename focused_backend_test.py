@@ -441,7 +441,7 @@ class FocusedTanseeqTester:
 
 if __name__ == "__main__":
     # Get backend URL from environment or use default
-    backend_url = "https://timecalc-hr.preview.emergentagent.com"
+    backend_url = "https://tanseeq-deduct.preview.emergentagent.com"
     print(f"🔗 Using backend URL: {backend_url}")
     
     tester = FocusedTanseeqTester(backend_url)
