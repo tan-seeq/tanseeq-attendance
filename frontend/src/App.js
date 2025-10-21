@@ -1511,15 +1511,17 @@ const Dashboard = () => {
                 نظام خصومات التأخير المتقدم
               </h3>
               <div className="flex items-center space-x-2">
-                <input
-                  type="month"
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
+                <div className="flex flex-col">
+                  <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  />
                   <div className="text-xs text-gray-500 mt-1">
-                    Cycle: 29th prev month → 28th current month
+                    📅 Cycle: 29th prev month → 28th current month
                   </div>
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                />
+                </div>
                 <button
                   onClick={calculateLatePenalties}
                   disabled={penaltyLoading}
