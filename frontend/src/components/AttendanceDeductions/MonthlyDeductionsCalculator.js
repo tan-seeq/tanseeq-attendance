@@ -439,23 +439,26 @@ const MonthlyDeductionsCalculator = () => {
             <div className="flex items-center gap-4">
               <CalendarIcon className="h-6 w-6 text-gray-500" />
               <label className="text-sm font-medium text-gray-700">Select Month:</label>
-              <input
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => {
-                  setSelectedMonth(e.target.value);
-                  setCalculatedData(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              {selectedMonth && (() => {
-                const cycleDates = getCycleDates(selectedMonth);
-                return cycleDates ? (
-                  <div className="text-xs text-gray-600 bg-blue-50 px-3 py-1 rounded border">
-                    📅 Cycle: {cycleDates.cycleStart} → {cycleDates.cycleEnd}
-                  </div>
-                ) : null;
-              })()}
-              />
+              <div className="flex flex-col">
+                <input
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => {
+                    setSelectedMonth(e.target.value);
+                    setCalculatedData(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+                {selectedMonth && (() => {
+                  const cycleDates = getCycleDates(selectedMonth);
+                  return cycleDates ? (
+                    <div className="text-xs text-gray-600 bg-blue-50 px-3 py-1 rounded border mt-1">
+                      📅 Cycle: {cycleDates.cycleStart} → {cycleDates.cycleEnd}
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+            </div>
             </div>
           ) : (
             <div className="flex items-center gap-4 flex-wrap">
