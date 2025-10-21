@@ -950,6 +950,104 @@ const Dashboard = () => {
     }
   }, [user]);
 
+
+  // Export functions for home page penalties
+  const exportEmployeeToExcel = (employee, month) => {
+    let csvContent = `تقرير خصومات الموظف\nالموظف: ${employee.employee_name}\nالفترة: ${month}\n\n`;
+    csvContent += 'الملخص\n';
+    csvContent += 'المقياس,القيمة\n';
+    csvContent += `أيام التأخير,${employee.late_count || 0}\n`;
+    csvContent += `أيام الغياب,${employee.absence_count || 0}\n`;
+    csvContent += `إجمالي الدقائق,${employee.total_late_minutes || 0}\n`;
+    csvContent += `خصم التأخير,${(employee.late_deduction || 0).toFixed(2)} درهم\n`;
+    csvContent += `خصم الغياب,${(employee.absence_deduction || 0).toFixed(2)} درهم\n`;
+    csvContent += `إجمالي الخصم,${(employee.penalty_amount || 0).toFixed(2)} درهم\n\n`;
+    
+    // Daily breakdown
+    if (employee.daily_records && employee.daily_records.length > 0) {
+      csvContent += 'التفاصيل اليومية\n';
+      csvContent += 'التاريخ,الحضور,الانصراف,التأخير (د),الخروج المبكر (د),النقص (د),الخصم (درهم),الحالة\n';
+      employee.daily_records.forEach(record => {
+        csvContent += `${record.date},${record.check_in || '-'},${record.check_out || '-'},${record.late_minutes || 0},${record.early_leave_minutes || 0},${record.deficit_minutes || 0},${(record.deduction_amount || 0).toFixed(2)},${record.is_absent ? 'غياب' : record.deficit_minutes > 0 ? 'خصم' : 'مكتمل'}\n`;
+      });
+    }
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${employee.employee_name}_deductions.csv`;
+    link.click();
+  };
+
+  const exportEmployeeToPDF = (employee, month) => {
+    // Simple PDF export using window.print
+    const printWindow = window.open('', '', 'height=600,width=800');
+    
+    let dailyTable = '';
+    if (employee.daily_records && employee.daily_records.length > 0) {
+      dailyTable = `
+        <h3>التفاصيل اليومية</h3>
+        <table border="1" cellpadding="5" cellspacing="0" style="width:100%; border-collapse: collapse;">
+          <thead style="background-color: #f0f0f0;">
+            <tr>
+              <th>التاريخ</th>
+              <th>الحضور</th>
+              <th>الانصراف</th>
+              <th>التأخير (د)</th>
+              <th>خروج مبكر (د)</th>
+              <th>النقص (د)</th>
+              <th>الخصم (درهم)</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${employee.daily_records.map(record => `
+              <tr style="${record.is_absent ? 'background-color: #fee' : ''}">
+                <td>${record.date}</td>
+                <td>${record.check_in || '-'}</td>
+                <td>${record.check_out || '-'}</td>
+                <td>${record.late_minutes || 0}</td>
+                <td>${record.early_leave_minutes || 0}</td>
+                <td>${record.deficit_minutes || 0}</td>
+                <td>${(record.deduction_amount || 0).toFixed(2)}</td>
+                <td>${record.is_absent ? 'غياب' : record.deficit_minutes > 0 ? 'خصم' : 'مكتمل'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+    
+    printWindow.document.write(`
+      <html dir="rtl">
+        <head>
+          <title>تقرير الخصومات - ${employee.employee_name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { color: #333; }
+            table { margin-top: 10px; }
+            th { background-color: #4CAF50; color: white; }
+          </style>
+        </head>
+        <body>
+          <h2>تقرير الخصومات: ${employee.employee_name}</h2>
+          <p><strong>الفترة:</strong> ${month}</p>
+          <hr>
+          <h3>الملخص</h3>
+          <p>أيام التأخير: ${employee.late_count || 0}</p>
+          <p>أيام الغياب: ${employee.absence_count || 0}</p>
+          <p>إجمالي الدقائق: ${employee.total_late_minutes || 0}</p>
+          <p>خصم التأخير: ${(employee.late_deduction || 0).toFixed(2)} درهم</p>
+          <p>خصم الغياب: ${(employee.absence_deduction || 0).toFixed(2)} درهم</p>
+          <p><strong>إجمالي الخصم: ${(employee.penalty_amount || 0).toFixed(2)} درهم</strong></p>
+          ${dailyTable}
+          <script>window.print(); window.close();</script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   // Penalty functions (Super Admin only)
   const calculateLatePenalties = async () => {
     if (user?.name !== "Hatem Mohamed Ahmed") return;
