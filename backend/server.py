@@ -10030,7 +10030,7 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
                 "filename": backup_name,
                 "created_at": datetime.now().isoformat(),
                 "version": "1.0",
-                "database": "tanseeq_hr",
+                "database": os.environ.get("DB_NAME", "tanseeq_hr"),
                 "total_collections": 0,
                 "total_records": 0
             },
