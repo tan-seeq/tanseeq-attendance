@@ -963,7 +963,7 @@ const Dashboard = () => {
       const response = await axios.post(`${API}/deductions/calculate-monthly?month=${month}&year=${year}`);
       
       if (response.data.success && response.data.employees) {
-        // Transform to old penalty format for display
+        // Transform to old penalty format for display with daily records
         const transformedPenalties = response.data.employees.map(emp => ({
           employee_id: emp.employee_id,
           employee_name: emp.employee_name,
@@ -974,7 +974,8 @@ const Dashboard = () => {
           late_deduction: emp.late_deduction || 0,
           absence_deduction: emp.absence_deduction || 0,
           advance_deduction: emp.advance_deduction || 0,
-          details: emp.deduction_details || emp.details || []
+          details: emp.deduction_details || emp.details || [],
+          daily_records: emp.daily_records || []  // Add daily records
         }));
         
         setPenalties(transformedPenalties);
