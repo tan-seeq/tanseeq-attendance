@@ -63,23 +63,35 @@ const MonthlyDeductionsCalculator = () => {
       
       const response = await axios.post(apiUrl, {});
       
-      // Handle response based on API format
+      // Handle response and transform to consistent format
       let transformedData = null;
       
       if (response.data.items) {
-        // New API format (from /api/deductions/calculate)
+        // Custom API format - transform to match monthly format
         transformedData = {
           success: true,
-          employees: response.data.items,
-          employee_count: response.data.employees_count,
-          total_deductions: response.data.items.reduce((sum, emp) => sum + (emp.amount || 0), 0)
+          employee_count: response.data.employees_count || response.data.items.length,
+          total_deductions: response.data.items.reduce((sum, emp) => sum + (emp.amount || 0), 0),
+          employees: response.data.items.map(item => ({
+            employee_id: item.employee_id,
+            employee_name: item.employee_name,
+            // Map custom API fields to monthly API structure
+            late_deduction: 0, // Custom API doesn't provide breakdown
+            absence_deduction: 0,
+            advance_deduction: 0,
+            total_deduction: item.amount || 0,
+            late_count: 0,
+            absence_count: 0,
+            installment_count: 0,
+            deduction_details: [`إجمالي الخصومات: ${(item.amount || 0).toFixed(2)} درهم`]
+          }))
         };
       } else if (response.data.success && response.data.employees) {
-        // Old API format (from /api/deductions/calculate-monthly)
-        if (!response.data.total_deductions) {
-          response.data.total_deductions = response.data.employees.reduce((sum, emp) => sum + (emp.total_deduction || emp.amount || 0), 0);
-        }
+        // Monthly API format - use as is
         transformedData = response.data;
+        if (!transformedData.total_deductions) {
+          transformedData.total_deductions = transformedData.employees.reduce((sum, emp) => sum + (emp.total_deduction || 0), 0);
+        }
       } else {
         // Fallback: empty result
         transformedData = {
