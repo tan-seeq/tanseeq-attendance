@@ -4915,9 +4915,7 @@ async def get_payroll_cycle_summary(
                     ledger_summary["attendance_deductions"] +
                     ledger_summary["manual_deductions"] +
                     ledger_summary["advance_installments"]
-                )
-        
-        records_saved = await save_deductions_to_db(db, summaries),
+                ),
                 
                 # حساب صافي الراتب
                 "net_salary": max(0, 
@@ -4927,9 +4925,7 @@ async def get_payroll_cycle_summary(
                     (ledger_summary["attendance_deductions"] +
                      ledger_summary["manual_deductions"] +
                      ledger_summary["advance_installments"])
-                )
-        
-        records_saved = await save_deductions_to_db(db, summaries),
+                ),
                 
                 "ledger_entries_count": ledger_summary["entries_count"]
             }
