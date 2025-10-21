@@ -1666,8 +1666,94 @@ const Dashboard = () => {
                               </div>
                             </td>
                           </tr>
-                          {expandedPenalties[index] && penalty.details && penalty.details.length > 0 && (
+                          {expandedPenalties[index] && (
                             <tr>
+                              <td colSpan="8" className="bg-gray-50 p-4">
+                                <div className="bg-white rounded-lg p-4 border-2 border-blue-200">
+                                  <h4 className="font-bold text-lg mb-3 text-gray-700 flex items-center justify-between">
+                                    <span>📋 التفاصيل اليومية - {penalty.employee_name}</span>
+                                    <span className="text-sm text-gray-500">
+                                      الفترة: {selectedMonth}
+                                    </span>
+                                  </h4>
+                                  
+                                  {/* Daily Details Table */}
+                                  {penalty.daily_records && penalty.daily_records.length > 0 ? (
+                                    <div className="overflow-x-auto">
+                                      <table className="min-w-full border border-gray-300">
+                                        <thead className="bg-blue-100">
+                                          <tr>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">التاريخ</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">الحضور</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">الانصراف</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">ساعات العمل</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">التأخير (د)</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">خروج مبكر (د)</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">النقص (د)</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">الخصم (درهم)</th>
+                                            <th className="border border-gray-300 px-3 py-2 text-sm">الحالة</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {penalty.daily_records.map((record, idx) => (
+                                            <tr key={idx} className={record.is_absent ? 'bg-red-50' : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center">{record.date}</td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                                {record.check_in || '-'}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                                {record.check_out || '-'}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                                {record.total_work_minutes ? `${Math.floor(record.total_work_minutes / 60)}:${(record.total_work_minutes % 60).toString().padStart(2, '0')}` : '-'}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center text-orange-600 font-medium">
+                                                {record.late_minutes || 0}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center text-orange-600 font-medium">
+                                                {record.early_leave_minutes || 0}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center text-red-600 font-medium">
+                                                {record.deficit_minutes || 0}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center text-red-700 font-bold">
+                                                {(record.deduction_amount || 0).toFixed(2)}
+                                              </td>
+                                              <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                                {record.is_absent ? (
+                                                  <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">غياب</span>
+                                                ) : record.deficit_minutes > 0 ? (
+                                                  <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">خصم</span>
+                                                ) : (
+                                                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">مكتمل</span>
+                                                )}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  ) : (
+                                    <div className="text-center py-4 text-gray-500">
+                                      لا توجد سجلات يومية متاحة
+                                    </div>
+                                  )}
+                                  
+                                  {/* Summary at bottom */}
+                                  {penalty.details && penalty.details.length > 0 && (
+                                    <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                                      <h5 className="font-semibold text-gray-700 mb-2">الملخص:</h5>
+                                      <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                        {penalty.details.map((detail, idx) => (
+                                          <li key={idx}>{detail}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
                               <td colSpan="8" className="px-4 py-3 bg-gray-50">
                                 <div className="text-sm">
                                   <h5 className="font-semibold text-gray-700 mb-2">📋 تفاصيل الخصومات:</h5>
