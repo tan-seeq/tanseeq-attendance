@@ -215,34 +215,65 @@ const AdvancedDeductionsReport = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          {/* Month Selector */}
-          <div>
-            <label className="block text-gray-700 font-bold mb-2">الشهر</label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {Object.entries(monthNames).map(([num, name]) => (
-                <option key={num} value={num}>{name}</option>
-              ))}
-            </select>
+        {/* Mode Selector */}
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <label className="block text-gray-700 font-bold mb-3">نوع الحساب</label>
+          <div className="flex gap-4">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="mode"
+                value="monthly"
+                checked={mode === 'monthly'}
+                onChange={(e) => setMode(e.target.value)}
+                className="ml-2 h-4 w-4 text-blue-600"
+              />
+              <span className="text-gray-700 font-medium">حساب شهري (29 → 28)</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="mode"
+                value="custom"
+                checked={mode === 'custom'}
+                onChange={(e) => setMode(e.target.value)}
+                className="ml-2 h-4 w-4 text-blue-600"
+              />
+              <span className="text-gray-700 font-medium">فترة مخصصة</span>
+            </label>
           </div>
+        </div>
 
-          {/* Year Selector */}
-          <div>
-            <label className="block text-gray-700 font-bold mb-2">السنة</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {[2024, 2025, 2026].map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
+        {/* Monthly Mode Fields */}
+        {mode === 'monthly' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            {/* Month Selector */}
+            <div>
+              <label className="block text-gray-700 font-bold mb-2">الشهر</label>
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {Object.entries(monthNames).map(([num, name]) => (
+                  <option key={num} value={num}>{name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Year Selector */}
+            <div>
+              <label className="block text-gray-700 font-bold mb-2">السنة</label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {[2024, 2025, 2026].map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
 
           {/* Calculate Button */}
           <div className="flex items-end">
