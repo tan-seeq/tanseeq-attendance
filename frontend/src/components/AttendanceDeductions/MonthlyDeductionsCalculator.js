@@ -514,22 +514,38 @@ const MonthlyDeductionsCalculator = () => {
                         {(emp.total_deduction || 0).toFixed(2)} AED
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => toggleEmployeeDetails(emp.employee_id)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1 mx-auto"
-                        >
-                          {expandedEmployees[emp.employee_id] ? (
-                            <>
-                              <ChevronUpIcon className="h-4 w-4" />
-                              Hide
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDownIcon className="h-4 w-4" />
-                              View
-                            </>
-                          )}
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => toggleEmployeeDetails(emp.employee_id)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                          >
+                            {expandedEmployees[emp.employee_id] ? (
+                              <>
+                                <ChevronUpIcon className="h-4 w-4" />
+                                Hide
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDownIcon className="h-4 w-4" />
+                                View
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => exportEmployeeToExcel(emp)}
+                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs"
+                            title="Download Excel"
+                          >
+                            📥 XLS
+                          </button>
+                          <button
+                            onClick={() => exportEmployeeToPDF(emp)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs"
+                            title="Download PDF"
+                          >
+                            📄 PDF
+                          </button>
+                        </div>
                       </td>
                     </tr>
 
