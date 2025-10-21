@@ -20,6 +20,7 @@ const AdvancedDeductionsReport = () => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   
+  const [selectedEmployee, setSelectedEmployee] = useState('');
   const [expandedEmployee, setExpandedEmployee] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -44,35 +45,20 @@ const AdvancedDeductionsReport = () => {
     setSuccessMessage('');
     
     try {
-      // Validation for custom mode
-      if (mode === 'custom') {
+      let url = `${API_URL}/api/deductions/calculate?preview=true`;
+      
+      if (mode === 'monthly') {
+        url += `&mode=monthly&month=${selectedMonth}&year=${selectedYear}`;
+      } else {
+        // Validate custom dates
         if (!fromDate || !toDate) {
-          setError('يرجى تحديد الفترة كاملة (من وإلى)');
+          setError('الرجاء إدخال تاريخ البداية والنهاية');
           setCalculating(false);
           return;
         }
         
-        const diffDays = Math.floor((new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24));
-        
-        if (new Date(fromDate) > new Date(toDate)) {
-          setError('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
-          setCalculating(false);
-          return;
-        }
-        
-        if (diffDays > 93) {
-          setError('الفترة المحددة تتجاوز 93 يومًا، الرجاء تقليص النطاق');
-          setCalculating(false);
-          return;
-        }
+        url += `&mode=custom&from_date=${fromDate}&to_date=${toDate}`;
       }
-      
-      // Build API URL based on mode
-      const params = mode === 'monthly'
-        ? `mode=monthly&month=${selectedMonth}&year=${selectedYear}&preview=true`
-        : `mode=custom&from_date=${fromDate}&to_date=${toDate}&preview=true`;
-      
-      const url = `${API_URL}/api/deductions/calculate?${params}`;
       
       const response = await axios.post(url, {}, config);
       
@@ -120,6 +106,26 @@ const AdvancedDeductionsReport = () => {
     }
   };
 
+  // Fetch report data
+  const fetchReport = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const url = selectedEmployee 
+        ? `${API_URL}/api/deductions/report?month=${selectedMonth}&year=${selectedYear}&employee_id=${selectedEmployee}`
+        : `${API_URL}/api/deductions/report?month=${selectedMonth}&year=${selectedYear}`;
+      
+      const response = await axios.get(url, config);
+      setReportData(response.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'فشل جلب التقرير');
+      setReportData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Export to Excel
   const handleExportExcel = () => {
     if (!reportData || !reportData.summaries || reportData.summaries.length === 0) {
@@ -138,10 +144,7 @@ const AdvancedDeductionsReport = () => {
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    const filename = mode === 'monthly' 
-      ? `deductions_${selectedYear}_${selectedMonth}.csv`
-      : `deductions_${fromDate}_to_${toDate}.csv`;
-    link.download = filename;
+    link.download = `advanced_deductions_${selectedYear}_${selectedMonth}.csv`;
     link.click();
   };
 
@@ -197,42 +200,46 @@ const AdvancedDeductionsReport = () => {
     return `${hours}:${mins.toString().padStart(2, '0')}`;
   };
 
+  // Initial load
+  useEffect(() => {
+    fetchReport();
+  }, [selectedMonth, selectedYear]);
+
   return (
     <div className="container mx-auto p-6" dir="rtl">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-lg shadow-lg mb-6">
         <h1 className="text-3xl font-bold mb-2">📊 نظام الخصومات المتقدم</h1>
-        <p className="text-blue-100">احتساب التأخير والانصراف المبكر</p>
+        <p className="text-blue-100">احتساب التأخير والانصراف المبكر - الدورة من 29 إلى 28</p>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        {/* Mode Selector - THIS IS THE KEY PART */}
-        <div className="mb-6 pb-4 border-b-2 border-gray-300">
-          <label className="block text-gray-800 font-bold mb-3 text-lg">📋 نوع الحساب</label>
-          <div className="flex flex-wrap items-center gap-6">
-            <label className="flex items-center gap-2 cursor-pointer bg-blue-50 px-4 py-3 rounded-lg border-2 border-blue-200 hover:bg-blue-100 transition">
+        {/* Mode Selector */}
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <label className="block text-gray-700 font-bold mb-3">نوع الحساب</label>
+          <div className="flex gap-4">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 name="mode"
                 value="monthly"
                 checked={mode === 'monthly'}
-                onChange={() => setMode('monthly')}
-                className="w-5 h-5 text-blue-600"
+                onChange={(e) => setMode(e.target.value)}
+                className="ml-2 h-4 w-4 text-blue-600"
               />
-              <span className="text-gray-800 font-semibold text-base">🗓️ حساب شهري (29 → 28)</span>
+              <span className="text-gray-700 font-medium">حساب شهري (29 → 28)</span>
             </label>
-
-            <label className="flex items-center gap-2 cursor-pointer bg-green-50 px-4 py-3 rounded-lg border-2 border-green-200 hover:bg-green-100 transition">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 name="mode"
                 value="custom"
                 checked={mode === 'custom'}
-                onChange={() => setMode('custom')}
-                className="w-5 h-5 text-green-600"
+                onChange={(e) => setMode(e.target.value)}
+                className="ml-2 h-4 w-4 text-blue-600"
               />
-              <span className="text-gray-800 font-semibold text-base">📅 فترة مخصصة</span>
+              <span className="text-gray-700 font-medium">فترة مخصصة</span>
             </label>
           </div>
         </div>
@@ -246,7 +253,7 @@ const AdvancedDeductionsReport = () => {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {Object.entries(monthNames).map(([num, name]) => (
                   <option key={num} value={num}>{name}</option>
@@ -260,7 +267,7 @@ const AdvancedDeductionsReport = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {[2024, 2025, 2026].map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -273,7 +280,7 @@ const AdvancedDeductionsReport = () => {
               <button
                 onClick={handleCalculate}
                 disabled={calculating}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-gray-400 shadow-md"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
               >
                 {calculating ? '🔄 جاري الحساب...' : '🧮 حساب الخصومات'}
               </button>
@@ -284,7 +291,7 @@ const AdvancedDeductionsReport = () => {
               <button
                 onClick={handleExportExcel}
                 disabled={!reportData || !reportData.summaries || reportData.summaries.length === 0}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-gray-400 shadow-md"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
               >
                 📥 تصدير Excel
               </button>
@@ -294,67 +301,88 @@ const AdvancedDeductionsReport = () => {
 
         {/* Custom Mode Fields */}
         {mode === 'custom' && (
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              {/* From Date */}
-              <div>
-                <label className="block text-gray-700 font-bold mb-2">📅 من تاريخ</label>
-                <input
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-
-              {/* To Date */}
-              <div>
-                <label className="block text-gray-700 font-bold mb-2">📅 إلى تاريخ</label>
-                <input
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-
-              {/* Calculate Button */}
-              <div className="flex items-end">
-                <button
-                  onClick={handleCalculate}
-                  disabled={calculating || !fromDate || !toDate}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-gray-400 shadow-md"
-                >
-                  {calculating ? '🔄 جاري الحساب...' : '🧮 حساب (معاينة)'}
-                </button>
-              </div>
-
-              {/* Export Button */}
-              <div className="flex items-end">
-                <button
-                  onClick={handleExportExcel}
-                  disabled={!reportData || !reportData.summaries || reportData.summaries.length === 0}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-gray-400 shadow-md"
-                >
-                  📥 تصدير Excel
-                </button>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            {/* From Date */}
+            <div>
+              <label className="block text-gray-700 font-bold mb-2">من تاريخ</label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => {
+                  setFromDate(e.target.value);
+                  // Validate range
+                  if (toDate && e.target.value && new Date(e.target.value) > new Date(toDate)) {
+                    setError('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+                  } else {
+                    setError('');
+                  }
+                }}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            {/* Warning for Custom Mode */}
-            <div className="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-              <p className="text-sm text-yellow-800 font-semibold">
-                ⚠️ <strong>ملاحظة هامة:</strong> هذه معاينة فقط – لا يتم حفظ النتائج في النظام. 
-                الحد الأقصى للفترة: 93 يوم (3 أشهر).
-              </p>
+            {/* To Date */}
+            <div>
+              <label className="block text-gray-700 font-bold mb-2">إلى تاريخ</label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => {
+                  setToDate(e.target.value);
+                  // Validate range
+                  if (fromDate && e.target.value) {
+                    const daysDiff = Math.floor((new Date(e.target.value) - new Date(fromDate)) / (1000 * 60 * 60 * 24));
+                    if (new Date(e.target.value) < new Date(fromDate)) {
+                      setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية');
+                    } else if (daysDiff > 93) {
+                      setError('الحد الأقصى للفترة 93 يوم (3 أشهر)');
+                    } else {
+                      setError('');
+                    }
+                  }
+                }}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Calculate Button */}
+            <div className="flex items-end">
+              <button
+                onClick={handleCalculate}
+                disabled={calculating || !fromDate || !toDate}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+              >
+                {calculating ? '🔄 جاري الحساب...' : '🧮 حساب (معاينة)'}
+              </button>
+            </div>
+
+            {/* Export Button */}
+            <div className="flex items-end">
+              <button
+                onClick={handleExportExcel}
+                disabled={!reportData || !reportData.summaries || reportData.summaries.length === 0}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+              >
+                📥 تصدير Excel
+              </button>
             </div>
           </div>
         )}
 
+        {/* Validation Info for Custom Mode */}
+        {mode === 'custom' && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              ℹ️ <strong>ملاحظة:</strong> الفترة المخصصة هي معاينة فقط ولن يتم حفظها في قاعدة البيانات. 
+              الحد الأقصى للفترة: 93 يوم (3 أشهر).
+            </p>
+          </div>
+        )}
+
         {/* Payroll Integration Section - Only for Monthly Mode */}
-        {mode === 'monthly' && reportData && (
-          <div className="mt-6 p-4 bg-orange-50 border-2 border-orange-300 rounded-lg">
-            <h3 className="font-bold text-orange-800 mb-3 text-lg">🔗 الدمج مع دورة الرواتب</h3>
+        {mode === 'monthly' && (
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <h3 className="font-bold text-orange-800 mb-3">🔗 الدمج مع دورة الرواتب</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-gray-700 font-bold mb-2">معرّف دورة الرواتب (Cycle ID)</label>
@@ -363,7 +391,7 @@ const AdvancedDeductionsReport = () => {
                   value={cycleId}
                   onChange={(e) => setCycleId(e.target.value)}
                   placeholder="أدخل Cycle ID من صفحة الرواتب"
-                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">يمكنك الحصول على Cycle ID من صفحة "إدارة دورات الرواتب"</p>
               </div>
@@ -371,7 +399,7 @@ const AdvancedDeductionsReport = () => {
                 <button
                   onClick={handleMergeWithPayroll}
                   disabled={merging || !cycleId || !reportData}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-gray-400 shadow-md"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
                 >
                   {merging ? '🔄 جاري الدمج...' : '🔗 دمج مع الدورة'}
                 </button>
@@ -382,8 +410,8 @@ const AdvancedDeductionsReport = () => {
 
         {/* Cycle Info */}
         {reportData && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border-2 border-blue-300">
-            <p className="text-sm text-blue-800 font-semibold">
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
               📅 <strong>دورة الحساب:</strong> من {reportData.cycle_start} إلى {reportData.cycle_end}
             </p>
           </div>
@@ -392,13 +420,13 @@ const AdvancedDeductionsReport = () => {
 
       {/* Messages */}
       {error && (
-        <div className="bg-red-100 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 font-semibold">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
           ❌ {error}
         </div>
       )}
 
       {successMessage && (
-        <div className="bg-green-100 border-2 border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4 font-semibold">
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
           ✅ {successMessage}
         </div>
       )}
