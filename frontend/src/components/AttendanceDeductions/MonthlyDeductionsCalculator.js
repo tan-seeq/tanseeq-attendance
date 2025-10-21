@@ -179,18 +179,67 @@ const MonthlyDeductionsCalculator = () => {
 
       {/* Month Selection & Actions */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        {/* Mode Selector */}
+        <div className="mb-6 pb-4 border-b-2 border-gray-300">
+          <label className="block text-gray-800 font-bold mb-3 text-lg">📋 نوع الحساب</label>
+          <div className="flex flex-wrap items-center gap-6">
+            <label className="flex items-center gap-2 cursor-pointer bg-blue-50 px-4 py-3 rounded-lg border-2 border-blue-200 hover:bg-blue-100 transition">
+              <input
+                type="radio"
+                name="mode"
+                value="monthly"
+                checked={mode === 'monthly'}
+                onChange={() => {
+                  setMode('monthly');
+                  setCalculatedData(null);
+                  setError('');
+                }}
+                className="w-5 h-5 text-blue-600"
+              />
+              <span className="text-gray-800 font-semibold text-base">🗓️ حساب شهري</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer bg-green-50 px-4 py-3 rounded-lg border-2 border-green-200 hover:bg-green-100 transition">
+              <input
+                type="radio"
+                name="mode"
+                value="custom"
+                checked={mode === 'custom'}
+                onChange={() => {
+                  setMode('custom');
+                  setCalculatedData(null);
+                  setError('');
+                }}
+                className="w-5 h-5 text-green-600"
+              />
+              <span className="text-gray-800 font-semibold text-base">📅 فترة مخصصة</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Custom Mode Warning */}
+        {mode === 'custom' && (
+          <div className="mb-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+            <p className="text-sm text-yellow-800 font-semibold">
+              ⚠️ <strong>ملاحظة هامة:</strong> هذه معاينة فقط – لا يتم حفظ النتائج في النظام. 
+              الحد الأقصى للفترة: 93 يوم (3 أشهر).
+            </p>
+          </div>
+        )}
+
         <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <CalendarIcon className="h-6 w-6 text-gray-500" />
-            <label className="text-sm font-medium text-gray-700">اختر الشهر:</label>
-            <input
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => {
-                setSelectedMonth(e.target.value);
-                setCalculatedData(null); // Clear previous calculations
-              }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          {mode === 'monthly' ? (
+            <div className="flex items-center gap-4">
+              <CalendarIcon className="h-6 w-6 text-gray-500" />
+              <label className="text-sm font-medium text-gray-700">اختر الشهر:</label>
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(e) => {
+                  setSelectedMonth(e.target.value);
+                  setCalculatedData(null); // Clear previous calculations
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
