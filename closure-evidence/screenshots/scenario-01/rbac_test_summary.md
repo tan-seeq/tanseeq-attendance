@@ -1,7 +1,7 @@
 # RBAC Testing Summary - Arabic Review Scenario 1
 
 ## Test Environment
-- **URL**: https://tanseeq-hr-3.preview.emergentagent.com
+- **URL**: https://attendance-pro-39.preview.emergentagent.com
 - **Timezone**: Asia/Dubai
 - **Date**: October 20, 2025
 

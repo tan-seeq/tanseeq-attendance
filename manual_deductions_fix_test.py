@@ -20,7 +20,7 @@ import json
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://tanseeq-hr-3.preview.emergentagent.com/api"
+BASE_URL = "https://attendance-pro-39.preview.emergentagent.com/api"
 
 # Test account - Super Admin
 TEST_ACCOUNT = {"email": "admin@tanseeq.com", "password": "ADMIN"}

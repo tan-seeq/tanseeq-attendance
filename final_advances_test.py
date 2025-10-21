@@ -375,7 +375,7 @@ startxref 300
         return self.tests_passed == self.tests_run
 
 def main():
-    backend_url = "https://tanseeq-hr-3.preview.emergentagent.com"
+    backend_url = "https://attendance-pro-39.preview.emergentagent.com"
     
     print(f"🔧 Backend URL: {backend_url}")
     

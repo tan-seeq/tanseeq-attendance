@@ -326,7 +326,7 @@ class PayrollTester:
 
 if __name__ == "__main__":
     # Use the backend URL from environment
-    backend_url = "https://tanseeq-hr-3.preview.emergentagent.com"
+    backend_url = "https://attendance-pro-39.preview.emergentagent.com"
     
     tester = PayrollTester(backend_url)
     success = tester.run_focused_payroll_tests()

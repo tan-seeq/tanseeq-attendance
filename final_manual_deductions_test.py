@@ -8,7 +8,7 @@ import json
 import time
 
 # Configuration
-BASE_URL = "https://tanseeq-hr-3.preview.emergentagent.com/api"
+BASE_URL = "https://attendance-pro-39.preview.emergentagent.com/api"
 TEST_ACCOUNT = {"email": "admin@tanseeq.com", "password": "ADMIN"}
 
 def test_manual_deductions_fix():

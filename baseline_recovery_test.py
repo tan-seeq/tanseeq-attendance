@@ -15,7 +15,7 @@ import uuid
 import re
 
 # Backend URL from environment
-BACKEND_URL = "https://tanseeq-hr-3.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-pro-39.preview.emergentagent.com/api"
 
 # Test credentials
 CREDENTIALS = {

@@ -1,76 +1,106 @@
 <analysis>
-The trajectory details the AI engineer's comprehensive development and hardening process for the TANSEEQ HR application. Initially, the focus was on critical  logic in  to ensure accurate  calculation and storage, directly addressing Phase-2 Hardening requirements and 16 adversarial UAT scenarios. This involved fixing attendance update logic for  persistence and resolving a  import in . Subsequently, efforts shifted to stability and UX, tackling a  500 error via  serialization in , enforcing  timezone consistency using , and improving frontend report Export buttons in . The latest task involves debugging a deployment yarn install v1.22.22
+The AI engineer's trajectory demonstrates an iterative, problem-solving approach to developing and hardening the TANSEEQ HR application. Initially, the focus was on critical  logic and resolving a deployment yarn install v1.22.22
 [1/4] Resolving packages...
 success Already up-to-date.
-Done in 0.29s. build error, which the AI is addressing by configuring  and  in the  directory.
+Done in 0.12s. error. However, the work quickly pivoted to addressing user-reported issues: first, rectifying payroll ledger duplication and Salary Statement PDF display, then implementing a comprehensive advanced attendance deduction system with exclusions for specific employees, approved leaves, and public holidays. The AI encountered and resolved several technical challenges, including  serialization, timezone consistency, fixing incorrect API endpoints for PDF generation, and handling database schema and data integrity issues. The work then expanded to include payroll cycle deletion, displaying detailed deductions and advances on employee pages, and most recently, adding a custom date-range calculation to the advanced deductions feature. Throughout, the AI documented its progress and plans, ensuring a structured development process.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application is envisioned as a bilingual HR management system encompassing UI/UX, accurate payroll, idempotent ledger, RBAC, salary letters, comprehensive reports, notifications, and Super Admin account management. The development process involved several key phases to enhance its stability and functionality:
+The TANSEEQ HR application is a bilingual HR management system with UI/UX, accurate payroll, idempotent ledger, RBAC, salary letters, comprehensive reports, notifications, and Super Admin account management.
 
-1.  **Initial Fixes**: Addressing foundational issues such as deployment stability (520 errors), Error updating employees, zero deductions display, various payroll calculation failures (late, advances, absence), Salary Letter generation, payroll schedule edits, and the integration of Leave Type functionality into attendance records.
-2.  **Phase-2 Hardening**: A critical phase mandating 100% functionality. This involved a detailed audit against 16 adversarial User Acceptance Testing (UAT) scenarios covering authentication, attendance, leaves, external visits, advanced deductions, payroll cycles, advances/expenses, salary slips, reports, notifications, Role-Based Access Control (RBAC), edge cases, backup/restore, and performance. A significant part of this phase included fixing  logic to correctly calculate and persist  for late arrival deductions.
-3.  **Post-Hardening Fixes**: Subsequent refinements included resolving an Admin login issue, intermittent 500 errors on the  endpoint, improving the user experience by making Export buttons fixed in reports, and standardizing  timezone formatting across the application.
-4.  **Current Requirement**: The immediate task is to resolve a deployment-blocking yarn install v1.22.22
+1.  **Initial Focus (AI Engineer's initial summary):**
+    *   Critical  logic ( calculation/storage).
+    *   Fixing attendance update logic for  persistence.
+    *   Resolving  import in .
+    *   Fixing  500 error due to  serialization.
+    *   Enforcing  timezone consistency ().
+    *   Improving frontend report Export buttons in .
+    *   Addressing a deployment yarn install v1.22.22
 [1/4] Resolving packages...
 success Already up-to-date.
-Done in 0.17s. build failure, specifically a  when trying to download a package.
+Done in 0.10s. build error (500 Internal Server Error).
+2.  **Payroll Journal & PDF Fixes (User request):**
+    *   Prevent payroll ledger entry duplication (add new instead of update/delete old).
+    *   Ensure Salary Statement PDF displays detailed deductions (type + amount), not No deductions.
+3.  **Advanced Attendance Deduction System (User request):**
+    *   Automate late arrival, early departure, and under-hours deductions.
+    *   Exclude specific employees (Hatem, Tariq).
+    *   Define official working hours (9 AM - 6 PM, 8 actual hours + 1 hr break).
+    *   Implement a monthly calculation cycle (29th previous month to 28th current month).
+    *   Generate a  table and a report page.
+    *   Integrate approved leaves and public holidays into deduction exemptions.
+4.  **Payroll Cycle Management (User request):** Add functionality to delete payroll cycles (soft and hard delete with safety checks).
+5.  **Employee My Deductions Page (User requests):** Display all deductions (from  and advanced deductions) and detailed advance schedules for individual employees.
+6.  **Custom Date-Range for Advanced Deductions (User request):** Extend the advanced deductions calculation to support custom date ranges (with preview mode) in addition to monthly calculation.
 </product_requirements>
 
 <key_technical_concepts>
-
--   **Backend**: FastAPI, Motor (async MongoDB driver), Pydantic for data validation.
--   **Frontend**: React.js, Axios for API calls, Tailwind CSS for styling.
--   **Database**: MongoDB (utilizing UUIDs, lazy initialization,  serialization handling).
--   **Deployment**: Kubernetes container environment, backend                          RUNNING   pid 33, uptime 0:00:17
-code-server                      RUNNING   pid 34, uptime 0:00:17
-frontend                         STOPPED   Oct 20 09:18 AM
-mongodb                          RUNNING   pid 36, uptime 0:00:17
-supervisor>  for service management, Yarn/npm for package management with registry configurations.
--   **Utilities**:  for UAE-specific date/time operations and consistent  timestamp formatting.
+-   **Backend:** FastAPI for API, MongoDB (via Motor driver) for data storage, Pydantic for data validation/serialization.
+-   **Frontend:** React.js for UI, Axios for API calls, Tailwind CSS for styling.
+-   **Database:** MongoDB, UUIDs for IDs (avoiding ), careful date/time serialization.
+-   **Deployment/Environment:** Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:07
+code-server                      RUNNING   pid 28, uptime 0:00:07
+frontend                         STOPPED   Oct 21 05:12 AM
+mongodb                          RUNNING   pid 30, uptime 0:00:07
+supervisor> , Yarn for package management, / for registry configuration.
+-   **Date/Time Handling:**  for UAE-specific timezone management.
+-   **Idempotency:** Crucial for payroll updates (delete/recreate logic).
 </key_technical_concepts>
 
 <code_architecture>
-The application uses a monorepo structure, organizing a React frontend and a FastAPI backend within a single repository.
+The application employs a monorepo structure with a React frontend and a FastAPI backend.
 
 
--   ****: This is the core FastAPI application, serving as the main entry point for all API routes. It encapsulates critical business logic, including  mechanisms, attendance updates, and user management.
-    -   **Changes**: The  endpoint logic (around line 5856) was modified to accurately calculate and store . The  endpoint was updated to ensure  is correctly persisted. The  endpoint was fixed to handle MongoDB  serialization issues by converting  to uid=0(root) gid=0(root) groups=0(root) for  model instantiation. Additionally, a  wrapper was introduced to standardize date/time responses using  for  timezone consistency.
--   ****: Centralizes the lazy initialization and management of the MongoDB client and database instance, ensuring efficient resource handling. No changes were reported in this specific trajectory.
--   ****: This module contains the essential logic for payroll calculations and integration processes within the HR system.
-    -   **Changes**: A  for  was resolved by adding the import statement .
--   ****: Provides specialized utility functions for handling date and time operations relevant to the UAE timezone.
-    -   **Changes**: The  function, which ensures consistent timestamp formatting, was confirmed to exist and is actively used in  to maintain timezone uniformity.
--   ****: The main React application file, responsible for defining the application's routing structure and integrating various user interface components, particularly those related to reports.
-    -   **Changes**: Modifications were made to ensure Export buttons within report sections are fixed and always visible, significantly improving the user experience by preventing them from scrolling out of view.
--   ****: **NEWLY CREATED**. This Yarn configuration file was introduced to address package management issues during deployment, likely by specifying alternative package registries or proxy settings.
--   ****: **NEWLY CREATED**. An npm configuration file, created as a complementary or fallback mechanism to help resolve package dependencies, especially if Yarn encounters registry-related problems.
+
+-   ****: The core FastAPI application.
+    -   **Changes**: Initially fixed  logic,  serialization, and timezone. Later,  was modified to delete old payroll ledger entries before inserting new ones to prevent duplication (lines ~4200-4450). New endpoints were added for seeding public holidays (), integrating advanced deductions into payroll (), payroll cycle deletion (, ), fetching employee advances (), and a more flexible payroll ledger query (). Most recently, the  endpoint was updated and aliased as  to support custom date-range calculations.
+-   ****: Logic for payroll calculations.
+    -   **Changes**: Resolved  for  (initial fix).
+-   ****: Date/time utilities.
+    -   **Changes**: Confirmed  for timezone consistency (initial fix).
+-   ****: Manages payroll ledger entries.
+    -   **Changes**:  was modified to exclude reversed ledger entries when fetching data to ensure accurate summaries.
+-   ****: Handles salary letter PDF generation.
+    -   **Changes**: Corrected the PDF generation logic to properly fetch and display detailed deductions, addressing the No deductions bug.
+-   ****: Generates English salary letters.
+    -   **Changes**: Modified to ensure all deduction descriptions in the PDF are rendered in English.
+-   ****: **NEWLY CREATED**. Contains the core logic for calculating advanced deductions (late, early leave, under-hours) and now includes logic for excluding holidays and approved leaves.
+-   ****: **NEWLY CREATED**. Defines models and operations for managing public holidays.
+-   ****: **NEWLY CREATED**. Contains helper functions for integrating advanced deductions into the main payroll cycle.
+-   ****: **NEWLY CREATED**. A script to remove duplicate entries from  and fix database configuration ().
+-   ****: Main React application file.
+    -   **Changes**: Fixed Export buttons (initial fix). Updated routing to include  and added a link to it in the sidebar.
+-   ****: **NEWLY CREATED**. Frontend component for displaying advanced deductions reports.
+    -   **Changes**: Implemented UI for displaying monthly advanced deductions, a button to merge with payroll, and UI to select monthly/custom date ranges for calculation.
+-   ****: Displays employee-specific deductions and advances.
+    -   **Changes**: Updated to fetch and display *all* deductions (from  and advanced deductions) and detailed advance installment schedules.
+-   ****: **NEWLY CREATED**. Yarn configuration file to resolve deployment package issues (initial fix).
+-   ****: **NEWLY CREATED**. NPM configuration file to complement Yarn settings (initial fix).
 </code_architecture>
 
 <pending_tasks>
--   Resolve yarn install v1.22.22
-[1/4] Resolving packages...
-success Already up-to-date.
-Done in 0.40s. build failure during deployment (500 Internal Server Error when fetching ).
--   Fully document and verify Scenario 9 (Comprehensive Reports + PDF/Excel export).
--   Execute and document Scenario 12 (Financial Edge Cases: Negative Salary).
--   Execute and document Scenario 13 (Lock/Unlock Cycle + Reversals).
--   Execute and document Scenario 15 (Backup/Restore drill).
--   Execute and document Scenario 16 (Performance & Reliability testing).
--   Deliver a final Playwright Report with 0 failures.
--   Implement Early-Warning Monitors.
--   Create a final, comprehensive deployment documentation file.
+-   **Deployment-related:** Fully document and verify Scenario 9 (Comprehensive Reports + PDF/Excel export), Scenario 12 (Financial Edge Cases: Negative Salary), Scenario 13 (Lock/Unlock Cycle + Reversals), Scenario 15 (Backup/Restore drill), Scenario 16 (Performance & Reliability testing).
+-   **Advanced Deductions Feature:** Complete frontend implementation for the custom date range calculation mode.
+-   **General:** Deliver a final Playwright Report with 0 failures, implement Early-Warning Monitors, and create a final, comprehensive deployment documentation file.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary request, the AI engineer was dedicated to resolving a critical frontend deployment failure. The build logs indicated a yarn install v1.22.22
-[1/4] Resolving packages...
-success Already up-to-date.
-Done in 0.18s. error: specifically, a Request failed 500 Internal Server Error occurred while attempting to download the  package from . The user's explicit instruction was to only make code-level changes, strictly prohibiting any modifications to Docker configurations. After internal consultation, the AI determined the issue was likely related to package registry access or configuration. To mitigate this, the AI created two new configuration files within the  directory:  and , presumably to manage Yarn's and npm's registry settings or add proxy configurations. Basic checks confirmed that , , , and  were correctly set up.
+Immediately prior to this summary, the AI engineer was working on enhancing the Advanced Attendance Deduction System to support custom date-range calculations. Previously, this system only calculated deductions on a fixed monthly cycle (29th of the previous month to 28th of the current month).
 
-Direct Quote for the current objective: The immediate objective is to address this deployment-blocking issue.
+The user explicitly requested to modify the  endpoint to support two modes:  (existing functionality) and . For  mode, the endpoint should accept  and  date parameters in ISO  format. A  parameter (default ) was also introduced, indicating that custom range calculations should *not* write to the database () or integrate with the , but only return a calculated preview. Validation rules were specified for custom ranges (e.g., , max 93-day difference). The response format includes a detailed breakdown per employee.
+
+The AI engineer has already implemented the backend changes:
+1.  **Modified **: The existing  endpoint was updated and aliased as . This new endpoint now accepts , , , , , and  query parameters, and includes the logic to switch between monthly and custom calculation modes.
+    
+2.  **Restarted Backend**: Confirmed the backend is running without errors after the changes.
+
+On the frontend, the AI engineer started modifying  to:
+1.  Introduce a toggle (radio buttons) for selecting between  and  calculation modes.
+2.  Dynamically display month/year selectors for  mode or a date range picker for  mode.
+
+The trajectory concludes with the AI having made the necessary structural changes in the frontend component  to accommodate both modes, and is now at the point of adding the UI elements for mode selection and date range input.
 </current_work>
 
 <optional_next_step>
-Verify the impact of the new  and  files by triggering a build or deployment, and then reviewing the logs for success or further errors.
+Continue the frontend implementation in  by adding the radio buttons for / mode selection and the corresponding input fields (month/year or date range picker).
 </optional_next_step>
