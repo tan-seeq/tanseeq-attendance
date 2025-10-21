@@ -57,16 +57,31 @@ const MonthlyDeductionsCalculator = () => {
       
       let apiUrl;
       if (mode === 'monthly') {
+        // Validate selectedMonth
+        if (!selectedMonth || typeof selectedMonth !== 'string') {
+          setError('Please select a valid month');
+          setCalculating(false);
+          return;
+        }
+        
         // Parse month (YYYY-MM) to separate month and year
         const monthParts = selectedMonth.split('-');
         if (monthParts.length !== 2) {
-          setError('Invalid month format. Please select a valid month.');
+          setError(`Invalid month format: ${selectedMonth}. Expected format: YYYY-MM`);
           setCalculating(false);
           return;
         }
         const year = parseInt(monthParts[0]);
         const month = parseInt(monthParts[1]);
+        
+        if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+          setError('Invalid month or year values');
+          setCalculating(false);
+          return;
+        }
+        
         apiUrl = `${API}/deductions/calculate-monthly?month=${month}&year=${year}`;
+        console.log('API URL:', apiUrl);
       } else {
         apiUrl = `${API}/deductions/calculate?mode=custom&from_date=${fromDate}&to_date=${toDate}`;
       }
