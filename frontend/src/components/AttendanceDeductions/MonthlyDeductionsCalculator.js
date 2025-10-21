@@ -30,10 +30,49 @@ const MonthlyDeductionsCalculator = () => {
       setCalculating(true);
       setError('');
       
-      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${selectedMonth}`, {});
+      // Validation for custom mode
+      if (mode === 'custom') {
+        if (!fromDate || !toDate) {
+          setError('يرجى تحديد الفترة كاملة (من وإلى)');
+          setCalculating(false);
+          return;
+        }
+        
+        const diffDays = Math.floor((new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24));
+        
+        if (new Date(fromDate) > new Date(toDate)) {
+          setError('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+          setCalculating(false);
+          return;
+        }
+        
+        if (diffDays > 93) {
+          setError('الفترة المحددة تتجاوز 93 يومًا، الرجاء تقليص النطاق');
+          setCalculating(false);
+          return;
+        }
+      }
+      
+      // Build API URL based on mode
+      let apiUrl;
+      if (mode === 'monthly') {
+        apiUrl = `${API}/deductions/calculate-monthly?month=${selectedMonth}`;
+      } else {
+        apiUrl = `${API}/deductions/calculate?mode=custom&from_date=${fromDate}&to_date=${toDate}&preview=true`;
+      }
+      
+      const response = await axios.post(apiUrl, {});
       
       if (response.data.success) {
         setCalculatedData(response.data);
+      } else if (response.data.items) {
+        // Transform new API response format
+        setCalculatedData({
+          success: true,
+          employees: response.data.items,
+          employee_count: response.data.employees_count,
+          total_deductions: response.data.items.reduce((sum, emp) => sum + emp.amount, 0)
+        });
       }
     } catch (err) {
       console.error('Error calculating deductions:', err);
