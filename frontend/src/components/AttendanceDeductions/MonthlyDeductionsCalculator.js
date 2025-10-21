@@ -514,37 +514,39 @@ const MonthlyDeductionsCalculator = () => {
                         {(emp.total_deduction || 0).toFixed(2)} AED
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex flex-col items-center gap-2">
                           <button
                             onClick={() => toggleEmployeeDetails(emp.employee_id)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-semibold flex items-center justify-center gap-1"
                           >
                             {expandedEmployees[emp.employee_id] ? (
                               <>
                                 <ChevronUpIcon className="h-4 w-4" />
-                                Hide
+                                Hide Details
                               </>
                             ) : (
                               <>
                                 <ChevronDownIcon className="h-4 w-4" />
-                                View
+                                View Details
                               </>
                             )}
                           </button>
-                          <button
-                            onClick={() => exportEmployeeToExcel(emp)}
-                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs"
-                            title="Download Excel"
-                          >
-                            📥 XLS
-                          </button>
-                          <button
-                            onClick={() => exportEmployeeToPDF(emp)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs"
-                            title="Download PDF"
-                          >
-                            📄 PDF
-                          </button>
+                          <div className="flex gap-2 w-full">
+                            <button
+                              onClick={() => exportEmployeeToExcel(emp)}
+                              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-2 py-1.5 rounded text-xs font-semibold"
+                              title="Download Excel"
+                            >
+                              📥 Excel
+                            </button>
+                            <button
+                              onClick={() => exportEmployeeToPDF(emp)}
+                              className="flex-1 bg-red-500 hover:bg-red-600 text-white px-2 py-1.5 rounded text-xs font-semibold"
+                              title="Download PDF"
+                            >
+                              📄 PDF
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>
