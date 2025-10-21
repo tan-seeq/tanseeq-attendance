@@ -477,7 +477,7 @@ const MonthlyDeductionsCalculator = () => {
                       إجمالي الخصومات:
                     </td>
                     <td colSpan="2" className="px-6 py-4 text-sm font-bold text-red-700">
-                      {calculatedData.total_deductions.toFixed(2)} درهم
+                      {(calculatedData.total_deductions || 0).toFixed(2)} درهم
                     </td>
                   </tr>
                 </tfoot>
