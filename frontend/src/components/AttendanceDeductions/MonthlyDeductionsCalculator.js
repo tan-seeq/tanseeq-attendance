@@ -18,6 +18,22 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const MonthlyDeductionsCalculator = () => {
+  // Helper function to calculate cycle dates
+  const getCycleDates = (monthStr) => {
+    if (!monthStr || typeof monthStr !== "string") return null;
+    const [year, month] = monthStr.split("-").map(Number);
+    if (isNaN(year) || isNaN(month)) return null;
+    
+    // Start: 29th of previous month
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+    const cycleStart = `${prevYear}-${prevMonth.toString().padStart(2, "0")}-29`;
+    
+    // End: 28th of current month
+    const cycleEnd = `${year}-${month.toString().padStart(2, "0")}-28`;
+    
+    return { cycleStart, cycleEnd };
+  };
   const [mode, setMode] = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
