@@ -12618,7 +12618,7 @@ async def calculate_advanced_deductions(
                 for record in summary.daily_records:
                     daily_records_formatted.append({
                         "date": record.date,
-                        "check_in": record.check_in_time,
+                        "check_in": record.check_in,
                         "check_out": record.check_out_time,
                         "is_working_day": record.is_working_day,
                         "is_absent": record.is_absent,
