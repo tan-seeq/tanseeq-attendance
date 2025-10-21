@@ -447,6 +447,14 @@ const MonthlyDeductionsCalculator = () => {
                   setCalculatedData(null);
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              {selectedMonth && (() => {
+                const cycleDates = getCycleDates(selectedMonth);
+                return cycleDates ? (
+                  <div className="text-xs text-gray-600 bg-blue-50 px-3 py-1 rounded border">
+                    📅 Cycle: {cycleDates.cycleStart} → {cycleDates.cycleEnd}
+                  </div>
+                ) : null;
+              })()}
               />
             </div>
           ) : (
