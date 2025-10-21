@@ -8,8 +8,18 @@ const AdvancedDeductionsReport = () => {
   const [calculating, setCalculating] = useState(false);
   const [merging, setMerging] = useState(false);
   const [reportData, setReportData] = useState(null);
+  
+  // Mode: monthly or custom
+  const [mode, setMode] = useState('monthly');
+  
+  // Monthly mode
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  
+  // Custom mode
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [expandedEmployee, setExpandedEmployee] = useState(null);
   const [error, setError] = useState('');
