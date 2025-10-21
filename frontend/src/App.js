@@ -1554,8 +1554,27 @@ const Dashboard = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b pb-2">
                   <h4 className="font-semibold text-gray-800">نتائج حساب الخصومات - {selectedMonth}</h4>
-                  <div className="text-sm text-gray-600">
-                    إجمالي الموظفين المتأخرين: <strong>{penalties.length}</strong>
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm text-gray-600">
+                      إجمالي الموظفين المتأخرين: <strong>{penalties.length}</strong>
+                    </div>
+                    <button
+                      onClick={() => {
+                        // Export to Excel
+                        let csvContent = 'الموظف,مرات التأخير,إجمالي الدقائق,خصم التأخير,خصم الغياب,خصم السلف,إجمالي الخصم\n';
+                        penalties.forEach(p => {
+                          csvContent += `${p.employee_name || p.user_name},${p.late_count || 0},${p.total_late_minutes || 0},${(p.late_deduction || 0).toFixed(2)},${(p.absence_deduction || 0).toFixed(2)},${(p.advance_deduction || 0).toFixed(2)},${(p.penalty_amount || 0).toFixed(2)}\n`;
+                        });
+                        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `deductions_${selectedMonth}.csv`;
+                        link.click();
+                      }}
+                      className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm flex items-center gap-1"
+                    >
+                      📥 تحميل Excel
+                    </button>
                   </div>
                 </div>
                 
@@ -1565,6 +1584,7 @@ const Dashboard = () => {
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">الموظف</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">مرات التأخير</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">أيام الغياب</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">إجمالي الدقائق</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">خصم التأخير</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">خصم الغياب</th>
@@ -1574,42 +1594,61 @@ const Dashboard = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {penalties.map((penalty, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {penalty.employee_name || penalty.user_name}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-center">
-                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
-                              {penalty.late_count || 0}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-center text-red-600 font-medium">
-                            {penalty.total_late_minutes || 0} دقيقة
-                          </td>
-                          <td className="px-4 py-4 text-sm text-center text-orange-600 font-medium">
-                            {penalty.late_deduction ? `${penalty.late_deduction.toFixed(2)} درهم` : '-'}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-center text-red-600 font-medium">
-                            {penalty.absence_deduction ? `${penalty.absence_deduction.toFixed(2)} درهم` : '-'}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-center font-bold text-red-700">
-                            {penalty.penalty_amount ? `${penalty.penalty_amount.toFixed(2)} درهم` : '-'}
-                          </td>
-                          <td className="px-4 py-4 text-sm">
-                            {penalty.details && penalty.details.length > 0 ? (
-                              <ul className="text-xs text-gray-600 space-y-1">
-                                {penalty.details.slice(0, 3).map((detail, idx) => (
-                                  <li key={idx}>{detail}</li>
-                                ))}
-                                {penalty.details.length > 3 && (
-                                  <li className="text-blue-600 font-semibold">+{penalty.details.length - 3} أخرى</li>
-                                )}
-                              </ul>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </td>
-                        </tr>
+                        <React.Fragment key={index}>
+                          <tr className="hover:bg-gray-50">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                              {penalty.employee_name || penalty.user_name}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center">
+                              <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                                {penalty.late_count || 0}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center">
+                              <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
+                                {penalty.absence_count || 0}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center text-orange-600 font-medium">
+                              {penalty.total_late_minutes || 0} دقيقة
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center text-orange-600 font-medium">
+                              {penalty.late_deduction ? `${penalty.late_deduction.toFixed(2)} درهم` : '-'}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center text-red-600 font-medium">
+                              {penalty.absence_deduction ? `${penalty.absence_deduction.toFixed(2)} درهم` : '-'}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center font-bold text-red-700">
+                              {penalty.penalty_amount ? `${penalty.penalty_amount.toFixed(2)} درهم` : '-'}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-center">
+                              <button
+                                onClick={() => {
+                                  const newExpanded = {...expandedPenalties};
+                                  newExpanded[index] = !newExpanded[index];
+                                  setExpandedPenalties(newExpanded);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 font-semibold"
+                              >
+                                {expandedPenalties[index] ? '▲ إخفاء' : '▼ عرض'}
+                              </button>
+                            </td>
+                          </tr>
+                          {expandedPenalties[index] && penalty.details && penalty.details.length > 0 && (
+                            <tr>
+                              <td colSpan="8" className="px-4 py-3 bg-gray-50">
+                                <div className="text-sm">
+                                  <h5 className="font-semibold text-gray-700 mb-2">📋 تفاصيل الخصومات:</h5>
+                                  <ul className="list-disc list-inside space-y-1 text-gray-600">
+                                    {penalty.details.map((detail, idx) => (
+                                      <li key={idx}>{detail}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>
