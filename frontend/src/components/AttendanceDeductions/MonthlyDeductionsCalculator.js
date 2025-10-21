@@ -15,7 +15,11 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const MonthlyDeductionsCalculator = () => {
+  // Mode: 'monthly' or 'custom'
+  const [mode, setMode] = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [calculating, setCalculating] = useState(false);
   const [applying, setApplying] = useState(false);
   const [calculatedData, setCalculatedData] = useState(null);
