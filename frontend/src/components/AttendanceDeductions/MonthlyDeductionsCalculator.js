@@ -203,7 +203,7 @@ const MonthlyDeductionsCalculator = () => {
     const doc = new jsPDF();
     
     doc.setFontSize(16);
-    doc.text(`Deduction Details: ${emp.employee_name}`, 14, 15);
+    doc.text(`Deduction Report: ${emp.employee_name}`, 14, 15);
     doc.setFontSize(10);
     doc.text(`Period: ${mode === 'monthly' ? selectedMonth : `${fromDate} to ${toDate}`}`, 14, 22);
     
@@ -218,15 +218,36 @@ const MonthlyDeductionsCalculator = () => {
     doc.text(`Absence Deduction: ${(emp.absence_deduction || 0).toFixed(2)} AED`, 20, 62);
     doc.text(`Total Deduction: ${(emp.total_deduction || 0).toFixed(2)} AED`, 20, 68);
     
-    // Details
-    if (emp.deduction_details && emp.deduction_details.length > 0) {
-      doc.setFontSize(12);
-      doc.text('Details:', 14, 78);
-      doc.setFontSize(9);
-      let yPos = 84;
-      emp.deduction_details.forEach((detail, idx) => {
-        doc.text(`${idx + 1}. ${detail}`, 20, yPos);
-        yPos += 6;
+    // Daily breakdown table
+    if (emp.daily_records && emp.daily_records.length > 0) {
+      const tableData = emp.daily_records.map(record => [
+        record.date,
+        record.check_in || '-',
+        record.check_out || '-',
+        record.late_minutes || 0,
+        record.early_leave_minutes || 0,
+        record.deficit_minutes || 0,
+        (record.deduction_amount || 0).toFixed(2),
+        record.is_absent ? 'Absent' : record.deficit_minutes > 0 ? 'Deducted' : 'Complete'
+      ]);
+      
+      doc.autoTable({
+        startY: 75,
+        head: [['Date', 'In', 'Out', 'Late', 'Early', 'Deficit', 'Deduction', 'Status']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [59, 130, 246], fontSize: 8 },
+        bodyStyles: { fontSize: 8 },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 15 },
+          4: { cellWidth: 15 },
+          5: { cellWidth: 15 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 25 }
+        }
       });
     }
     
@@ -235,6 +256,7 @@ const MonthlyDeductionsCalculator = () => {
 
   const exportEmployeeToExcel = (emp) => {
     let csvContent = `Employee Deduction Report\nEmployee: ${emp.employee_name}\nPeriod: ${mode === 'monthly' ? selectedMonth : `${fromDate} to ${toDate}`}\n\n`;
+    csvContent += 'Summary\n';
     csvContent += 'Metric,Value\n';
     csvContent += `Late Days,${emp.late_count || 0}\n`;
     csvContent += `Absent Days,${emp.absence_count || 0}\n`;
@@ -243,10 +265,12 @@ const MonthlyDeductionsCalculator = () => {
     csvContent += `Absence Deduction,${(emp.absence_deduction || 0).toFixed(2)} AED\n`;
     csvContent += `Total Deduction,${(emp.total_deduction || 0).toFixed(2)} AED\n\n`;
     
-    if (emp.deduction_details && emp.deduction_details.length > 0) {
-      csvContent += 'Details\n';
-      emp.deduction_details.forEach(detail => {
-        csvContent += `"${detail}"\n`;
+    // Daily breakdown
+    if (emp.daily_records && emp.daily_records.length > 0) {
+      csvContent += 'Daily Breakdown\n';
+      csvContent += 'Date,Check-In,Check-Out,Late (min),Early Leave (min),Deficit (min),Deduction (AED),Status\n';
+      emp.daily_records.forEach(record => {
+        csvContent += `${record.date},${record.check_in || '-'},${record.check_out || '-'},${record.late_minutes || 0},${record.early_leave_minutes || 0},${record.deficit_minutes || 0},${(record.deduction_amount || 0).toFixed(2)},${record.is_absent ? 'Absent' : record.deficit_minutes > 0 ? 'Deducted' : 'Complete'}\n`;
       });
     }
 
