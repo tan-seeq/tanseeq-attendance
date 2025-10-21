@@ -57,7 +57,9 @@ const MonthlyDeductionsCalculator = () => {
       
       let apiUrl;
       if (mode === 'monthly') {
-        apiUrl = `${API}/deductions/calculate-monthly?month=${selectedMonth}`;
+        // Parse month (YYYY-MM) to separate month and year
+        const [year, month] = selectedMonth.split('-').map(Number);
+        apiUrl = `${API}/deductions/calculate-monthly?month=${month}&year=${year}`;
       } else {
         apiUrl = `${API}/deductions/calculate?mode=custom&from_date=${fromDate}&to_date=${toDate}`;
       }
