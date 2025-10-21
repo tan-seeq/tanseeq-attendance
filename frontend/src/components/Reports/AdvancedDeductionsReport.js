@@ -105,13 +105,6 @@ const AdvancedDeductionsReport = () => {
       setCalculating(false);
     }
   };
-      
-    } catch (err) {
-      setError(err.response?.data?.detail || 'فشل حساب الخصومات');
-    } finally {
-      setCalculating(false);
-    }
-  };
 
   // Fetch report data
   const fetchReport = async () => {
