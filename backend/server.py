@@ -11987,9 +11987,7 @@ async def setup_sample_data(
                 WorkLog.client_id == sample_client.id,
                 WorkLog.date >= log_date.replace(hour=0, minute=0, second=0),
                 WorkLog.date < log_date.replace(hour=23, minute=59, second=59)
-            )
-        
-        records_saved = await save_deductions_to_db(db, summaries).first()
+            ).first()
             
             if not existing_log:
                 start_time = log_date.replace(hour=log_data["start_hour"], minute=0, second=0)
