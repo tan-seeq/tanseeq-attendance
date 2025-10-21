@@ -12674,6 +12674,67 @@ async def calculate_advanced_deductions(
         raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
 
 
+
+
+@app.post("/api/deductions/apply-monthly")
+async def apply_monthly_deductions(
+    month: int,
+    year: int,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    Apply calculated deductions to payroll system
+    This creates/updates payroll cycle with the deductions
+    """
+    try:
+        print(f"\n{'='*60}")
+        print(f"📝 Applying Monthly Deductions")
+        print(f"   Month: {month}/{year}")
+        print(f"   User: {current_user.name}")
+        print(f"{'='*60}\n")
+        
+        # First calculate deductions to get the data
+        from advanced_deductions_system import calculate_monthly_deductions
+        
+        summaries, records_saved = await calculate_monthly_deductions(
+            month=month,
+            year=year,
+            save_to_db=True  # Save to database
+        )
+        
+        if not summaries:
+            return {
+                "success": False,
+                "message": "No employees with deductions found",
+                "employees_affected": 0,
+                "total_deduction_amount": 0
+            }
+        
+        # Calculate totals
+        total_deduction = sum(s.total_deduction_amount for s in summaries)
+        employees_affected = len(summaries)
+        
+        print(f"✅ Deductions applied successfully")
+        print(f"   Employees affected: {employees_affected}")
+        print(f"   Total deductions: {total_deduction:.2f} AED")
+        print(f"   Records saved: {records_saved}")
+        
+        return {
+            "success": True,
+            "message": f"تم تطبيق الخصومات على {employees_affected} موظف",
+            "employees_affected": employees_affected,
+            "total_deduction_amount": round(total_deduction, 2),
+            "records_saved": records_saved,
+            "month": month,
+            "year": year
+        }
+        
+    except Exception as e:
+        print(f"❌ Error applying deductions: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"خطأ في تطبيق الخصومات: {str(e)}")
+
 @app.get("/api/deductions/report")
 async def get_deductions_report(
     month: int,
