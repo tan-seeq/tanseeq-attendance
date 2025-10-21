@@ -1754,18 +1754,6 @@ const Dashboard = () => {
                               </td>
                             </tr>
                           )}
-                              <td colSpan="8" className="px-4 py-3 bg-gray-50">
-                                <div className="text-sm">
-                                  <h5 className="font-semibold text-gray-700 mb-2">📋 تفاصيل الخصومات:</h5>
-                                  <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                    {penalty.details.map((detail, idx) => (
-                                      <li key={idx}>{detail}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
                         </React.Fragment>
                       ))}
                     </tbody>
