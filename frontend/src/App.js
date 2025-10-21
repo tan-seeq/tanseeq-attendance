@@ -1515,6 +1515,9 @@ const Dashboard = () => {
                   type="month"
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
+                  <div className="text-xs text-gray-500 mt-1">
+                    Cycle: 29th prev month → 28th current month
+                  </div>
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 />
                 <button
@@ -3653,6 +3656,9 @@ const Payroll = () => {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
+                  <div className="text-xs text-gray-500 mt-1">
+                    Cycle: 29th prev month → 28th current month
+                  </div>
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {Array.from({length: 12}, (_, i) => {
@@ -6680,6 +6686,9 @@ const OvertimeReport = () => {
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
+                  <div className="text-xs text-gray-500 mt-1">
+                    Cycle: 29th prev month → 28th current month
+                  </div>
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
