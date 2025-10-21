@@ -11679,9 +11679,7 @@ async def import_clients_from_excel(
                 # Check for duplicate
                 existing_client = db.query(Client).filter(
                     Client.company_name == company_name
-                )
-        
-        records_saved = await save_deductions_to_db(db, summaries).first()
+                ).first()
                 
                 if existing_client:
                     errors.append(f"Row {row_num}: Client '{company_name}' already exists")
