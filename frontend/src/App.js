@@ -1635,17 +1635,35 @@ const Dashboard = () => {
                             <td className="px-4 py-4 text-sm text-center font-bold text-red-700">
                               {penalty.penalty_amount ? `${penalty.penalty_amount.toFixed(2)} درهم` : '-'}
                             </td>
-                            <td className="px-4 py-4 text-sm text-center">
-                              <button
-                                onClick={() => {
-                                  const newExpanded = {...expandedPenalties};
-                                  newExpanded[index] = !newExpanded[index];
-                                  setExpandedPenalties(newExpanded);
-                                }}
-                                className="text-blue-600 hover:text-blue-800 font-semibold"
-                              >
-                                {expandedPenalties[index] ? '▲ إخفاء' : '▼ عرض'}
-                              </button>
+                            <td className="px-4 py-4 text-sm">
+                              <div className="flex flex-col gap-2">
+                                <button
+                                  onClick={() => {
+                                    const newExpanded = {...expandedPenalties};
+                                    newExpanded[index] = !newExpanded[index];
+                                    setExpandedPenalties(newExpanded);
+                                  }}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-semibold"
+                                >
+                                  {expandedPenalties[index] ? '▲ إخفاء' : '▼ عرض التفاصيل'}
+                                </button>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => exportEmployeeToExcel(penalty, selectedMonth)}
+                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold"
+                                    title="تحميل Excel"
+                                  >
+                                    📥 Excel
+                                  </button>
+                                  <button
+                                    onClick={() => exportEmployeeToPDF(penalty, selectedMonth)}
+                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold"
+                                    title="تحميل PDF"
+                                  >
+                                    📄 PDF
+                                  </button>
+                                </div>
+                              </div>
                             </td>
                           </tr>
                           {expandedPenalties[index] && penalty.details && penalty.details.length > 0 && (
