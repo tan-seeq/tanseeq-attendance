@@ -1569,48 +1569,48 @@ const Dashboard = () => {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">الموظف</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">مرات التأخير</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">إجمالي الدقائق</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">دقائق مجانية</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">دقائق خصم</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">نوع الخصم</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">مبلغ الخصم</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">خصم التأخير</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">خصم الغياب</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">إجمالي الخصم</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">التفاصيل</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {penalties.map((penalty, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {penalty.user_name}
+                            {penalty.employee_name || penalty.user_name}
                           </td>
                           <td className="px-4 py-4 text-sm text-center">
                             <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
-                              {penalty.late_incidents}
+                              {penalty.late_count || 0}
                             </span>
                           </td>
                           <td className="px-4 py-4 text-sm text-center text-red-600 font-medium">
-                            {penalty.total_late_minutes} دقيقة
+                            {penalty.total_late_minutes || 0} دقيقة
                           </td>
-                          <td className="px-4 py-4 text-sm text-center text-green-600 font-medium">
-                            {penalty.free_late_minutes} دقيقة
+                          <td className="px-4 py-4 text-sm text-center text-orange-600 font-medium">
+                            {penalty.late_deduction ? `${penalty.late_deduction.toFixed(2)} درهم` : '-'}
                           </td>
-                          <td className="px-4 py-4 text-sm text-center text-red-600 font-bold">
-                            {penalty.penalty_minutes} دقيقة
+                          <td className="px-4 py-4 text-sm text-center text-red-600 font-medium">
+                            {penalty.absence_deduction ? `${penalty.absence_deduction.toFixed(2)} درهم` : '-'}
                           </td>
-                          <td className="px-4 py-4 text-sm text-center">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              penalty.penalty_type === 'minutes' ? 'bg-blue-100 text-blue-800' :
-                              penalty.penalty_type === 'actual_time' ? 'bg-orange-100 text-orange-800' :
-                              penalty.penalty_type === 'half_day' ? 'bg-red-100 text-red-800' :
-                              penalty.penalty_type === 'full_day' ? 'bg-red-200 text-red-900' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {penalty.penalty_type === 'minutes' ? 'دقائق' :
-                               penalty.penalty_type === 'actual_time' ? 'وقت فعلي' :
-                               penalty.penalty_type === 'half_day' ? 'نصف يوم' :
-                               penalty.penalty_type === 'full_day' ? 'يوم كامل' : 'لا يوجد'}
-                            </span>
+                          <td className="px-4 py-4 text-sm text-center font-bold text-red-700">
+                            {penalty.penalty_amount ? `${penalty.penalty_amount.toFixed(2)} درهم` : '-'}
                           </td>
-                          <td className="px-4 py-4 text-sm text-center font-bold text-red-600">
-                            {penalty.penalty_amount > 0 ? `${penalty.penalty_amount.toFixed(2)} درهم` : '-'}
+                          <td className="px-4 py-4 text-sm">
+                            {penalty.details && penalty.details.length > 0 ? (
+                              <ul className="text-xs text-gray-600 space-y-1">
+                                {penalty.details.slice(0, 3).map((detail, idx) => (
+                                  <li key={idx}>{detail}</li>
+                                ))}
+                                {penalty.details.length > 3 && (
+                                  <li className="text-blue-600 font-semibold">+{penalty.details.length - 3} أخرى</li>
+                                )}
+                              </ul>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
                           </td>
                         </tr>
                       ))}
