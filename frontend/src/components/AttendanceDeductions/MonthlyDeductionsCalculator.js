@@ -119,7 +119,13 @@ const MonthlyDeductionsCalculator = () => {
 
   const handleApply = async () => {
     // Parse month (YYYY-MM)
-    const [year, month] = selectedMonth.split('-').map(Number);
+    const monthParts = selectedMonth.split('-');
+    if (monthParts.length !== 2) {
+      alert('Invalid month format');
+      return;
+    }
+    const year = parseInt(monthParts[0]);
+    const month = parseInt(monthParts[1]);
     
     if (!window.confirm(
       `Apply deductions for ${calculatedData.employee_count} employees?\n` +
