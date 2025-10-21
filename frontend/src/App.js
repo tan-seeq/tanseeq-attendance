@@ -1015,9 +1015,6 @@ const Dashboard = () => {
       alert('حدث خطأ في تطبيق الخصومات: ' + errorMsg);
     }
   };
-      alert('حدث خطأ في تطبيق الخصومات');
-    }
-  };
 
   const fetchDashboardStats = async () => {
     try {
