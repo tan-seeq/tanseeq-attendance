@@ -204,8 +204,6 @@ async def ensure_test_super_admin():
             timeout=5.0  # 5 second timeout
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     except asyncio.TimeoutError:
         print("⚠️ Index creation timed out, continuing...")
         return  # Exit early if timeout
@@ -223,8 +221,6 @@ async def ensure_test_super_admin():
             timeout=5.0  # 5 second timeout
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         if not existing:
             now = get_uae_now()  # UAE timezone
             test_user = {
@@ -823,8 +819,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         user = await db.users.find_one({"id": user_id})
         if user is None:
             raise HTTPException(
@@ -833,8 +827,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         return User(**user)
     except JWTError:
         raise HTTPException(
@@ -843,8 +835,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
 
 async def get_admin_user(current_user: User = Depends(get_current_user)):
     """Require admin or super_admin role"""
@@ -854,8 +844,6 @@ async def get_admin_user(current_user: User = Depends(get_current_user)):
             detail="Admin access required"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     return current_user
 
 async def get_super_admin_user(current_user: User = Depends(get_current_user)):
@@ -866,8 +854,6 @@ async def get_super_admin_user(current_user: User = Depends(get_current_user)):
             detail="Super admin access required"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     return current_user
 
 @api_router.post("/attendance/check-in")
@@ -935,8 +921,6 @@ async def check_in(current_user: User = Depends(get_current_user)):
             {"$set": attendance_data}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         attendance_id = existing_attendance["id"]
     else:
         # Create new record
@@ -949,8 +933,6 @@ async def check_in(current_user: User = Depends(get_current_user)):
             is_late=is_late
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         attendance_data["id"] = attendance_record.id
         attendance_data["created_at"] = to_iso_string_uae()  # UAE timezone as ISO string
         await db.attendance.insert_one(attendance_data)
@@ -1003,8 +985,6 @@ async def check_out(current_user: User = Depends(get_current_user)):
             is_admin_edited=False
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         working_hours = work_calc.get("total_hours", 0)
         late_minutes = work_calc.get("late_minutes", 0)
@@ -1047,8 +1027,6 @@ async def login(request: LoginRequest):
             detail="Invalid credentials"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     if not user["is_active"]:
         raise HTTPException(
@@ -1056,8 +1034,6 @@ async def login(request: LoginRequest):
             detail="Account is inactive"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     access_token = create_access_token(data={"sub": user["id"]})
     user_response = UserResponse(**user)
@@ -1236,8 +1212,6 @@ async def create_expense_with_invoice(
                 detail=f"المبلغ المطلوب ({amount} درهم) يتجاوز الرصيد المتاح ({total_available} درهم)"
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # إنشاء معاملة المصروف
         transaction = AdvanceTransaction(
@@ -1253,8 +1227,6 @@ async def create_expense_with_invoice(
             notes=notes
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # حفظ في قاعدة البيانات
         transaction_dict = AdvancesDB.transaction_to_dict(transaction)
@@ -1270,8 +1242,6 @@ async def create_expense_with_invoice(
             f"تقديم مصروف بمبلغ {amount} درهم - {EXPENSE_CATEGORY_AR[expense_category]} مع {len(attachments)} فاتورة"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "success": True,
@@ -1337,24 +1307,18 @@ async def get_my_transactions(
                 TransactionType(transaction["transaction_type"]), transaction["transaction_type"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if transaction.get("status"):
             transaction["status_ar"] = TRANSACTION_STATUS_AR.get(
                 TransactionStatus(transaction["status"]), transaction["status"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if transaction.get("category"):
             transaction["category_ar"] = EXPENSE_CATEGORY_AR.get(
                 ExpenseCategory(transaction["category"]), transaction["category"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"transactions": transactions}
 
@@ -1400,24 +1364,18 @@ async def get_all_transactions_admin(
                 TransactionType(transaction["transaction_type"]), transaction["transaction_type"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if transaction.get("status"):
             transaction["status_ar"] = TRANSACTION_STATUS_AR.get(
                 TransactionStatus(transaction["status"]), transaction["status"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if transaction.get("category"):
             transaction["category_ar"] = EXPENSE_CATEGORY_AR.get(
                 ExpenseCategory(transaction["category"]), transaction["category"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"transactions": transactions}
 
@@ -1464,16 +1422,12 @@ async def get_pending_approvals(current_user: User = Depends(get_super_admin_use
                 TransactionType(transaction["transaction_type"]), transaction["transaction_type"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if transaction.get("category"):
             transaction["category_ar"] = EXPENSE_CATEGORY_AR.get(
                 ExpenseCategory(transaction["category"]), transaction["category"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"pending_transactions": pending_transactions}
 
@@ -1660,8 +1614,6 @@ async def send_expense_approval_notification(employee, transaction, attachments)
             sent_at=datetime.utcnow()
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         await db.notifications.insert_one(notification.dict())
 
@@ -1738,8 +1690,6 @@ async def start_marketing_visit(
             detail="لديك زيارة خارجية قيد التنفيذ بالفعل. يجب إنهاؤها أولاً قبل بدء زيارة جديدة"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     # إنشاء زيارة جديدة بوقت السيرفر
     visit = MarketingVisit(
@@ -1825,8 +1775,6 @@ async def complete_marketing_visit(
             detail="الزيارة غير موجودة أو مكتملة بالفعل"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     # التحقق من اكتمال التقرير
     report = completion_request.visit_report
@@ -1841,8 +1789,6 @@ async def complete_marketing_visit(
             detail="يجب تعبئة جميع حقول التقرير الإلزامية بالشكل المطلوب"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     # حساب مدة الزيارة
     start_time = datetime.fromisoformat(visit["start_time"].replace("Z", "+00:00"))
@@ -2085,8 +2031,6 @@ async def delete_advance_transaction(
             detail="لا يمكن حذف معاملة تمت الموافقة عليها. يرجى استخدام خاصية 'التسوية' بدلاً من ذلك"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     # حذف المعاملة من قاعدة البيانات
     result = await db.advance_transactions.delete_one({"id": transaction_id})
@@ -2450,8 +2394,6 @@ async def recompute_attendance(
                     force_recompute=True
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 recomputed_count += 1
             
             current_date += timedelta(days=1)
@@ -2502,14 +2444,10 @@ async def get_my_deductions(
             DeductionType(deduction["deduction_type"]), deduction["deduction_type"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         deduction["category_ar"] = DEDUCTION_CATEGORY_AR.get(
             DeductionCategory(deduction["category"]), deduction["category"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"deductions": deductions}
 
@@ -2740,14 +2678,10 @@ async def get_all_deductions_admin(
             DeductionType(deduction["deduction_type"]), deduction["deduction_type"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         deduction["category_ar"] = DEDUCTION_CATEGORY_AR.get(
             DeductionCategory(deduction["category"]), deduction["category"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"deductions": deductions}
 
@@ -2817,8 +2751,6 @@ async def calculate_monthly_deductions(
                             for r in attendance_records
                         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                         if billable_minutes > 0:
                             hourly_rate = employee_salary / 30 / 8  # Per hour
                             late_deduction = (billable_minutes / 60) * hourly_rate
@@ -2826,8 +2758,6 @@ async def calculate_monthly_deductions(
                                 f"تأخير {late_count} مرات - {billable_minutes} دقيقة قابلة للخصم"
                             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 else:
                     # More than 4 times: accumulate all minutes
                     billable_minutes = max(0, total_late_minutes - free_minutes)
@@ -2838,8 +2768,6 @@ async def calculate_monthly_deductions(
                             f"تأخير {late_count} مرات - {billable_minutes} دقيقة (بعد خصم المجاني)"
                         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # 2. Calculate Absence Deductions (الغياب)
             # ✅ Fixed: attendance table uses 'user_id' not 'employee_id'
@@ -2876,8 +2804,6 @@ async def calculate_monthly_deductions(
                                 f"(استحقاق {inst.get('due_date', '')[:10]})"
                             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 if installment_details:
                     deduction_details.extend(installment_details)
@@ -3034,8 +2960,6 @@ async def apply_monthly_deductions(
                 {"$set": update_fields}
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # 🆕 CREATE AUTOMATIC LEDGER ENTRIES using PayrollLedgerService
             from payroll_ledger_service import PayrollLedgerService
@@ -3056,8 +2980,6 @@ async def apply_monthly_deductions(
                     metadata={"month": month}
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # 2. Advance Installment Ledger Entries
             if advance_deduction > 0:
@@ -3080,8 +3002,6 @@ async def apply_monthly_deductions(
                         metadata={"installment_number": installment.get('installment_number')}
                     )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # Mark installments as applied
             await db.individual_installments.update_many(
@@ -3097,8 +3017,6 @@ async def apply_monthly_deductions(
                 }}
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             applied_count += 1
             
@@ -3127,8 +3045,6 @@ async def apply_monthly_deductions(
                 reference_id=cycle_id
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             await db.system_notifications.insert_one(prepare_for_mongo(notification.dict()))
             notifications_sent += 1
@@ -3148,8 +3064,6 @@ async def apply_monthly_deductions(
             {"$set": cycle_totals}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "success": True,
@@ -3190,8 +3104,6 @@ async def get_my_notifications(
             NotificationSeverity(notification["severity"]), notification["severity"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"notifications": notifications}
 
@@ -3216,8 +3128,6 @@ async def get_unread_mandatory_notifications(
             NotificationSeverity(notification["severity"]), notification["severity"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"notifications": notifications}
 
@@ -3294,8 +3204,6 @@ async def get_unread_notifications(
                 NotificationSeverity(notification["severity"]), notification["severity"]
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"notifications": notifications}
 
@@ -3518,8 +3426,6 @@ async def send_visit_completion_notification(visit_data, report, employee, durat
             sent_at=datetime.utcnow()
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         await db.notifications.insert_one(notification.dict())
 
@@ -3561,7 +3467,6 @@ async def get_deductions(
             filters
         )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries).sort([("date", -1)]).to_list(length=100)
         
         # إضافة أسماء الموظفين
@@ -3645,8 +3550,6 @@ async def create_manual_deduction(
             created_by=current_user.id
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # 🆕 TRIGGER: إنشاء قيد محاسبي تلقائياً في Payroll Ledger
         try:
@@ -3670,8 +3573,6 @@ async def create_manual_deduction(
                     created_by=current_user.id
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 print(f"✅ تم إنشاء قيد محاسبي تلقائياً للخصم {deduction['id']}")
             else:
                 print(f"ℹ️ لا توجد دورة مفتوحة لشهر {month} - سيتم إنشاء القيد عند فتح الدورة")
@@ -3699,8 +3600,6 @@ async def create_manual_deduction(
                     created_by_name=current_user.name
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 # ربط مع دورة الراتب
                 linked = await payroll_engine.link_deduction_to_payroll(deduction_obj)
@@ -3753,8 +3652,6 @@ async def update_deduction(
             {"$set": update_fields}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Deduction not found or no changes made")
@@ -3826,8 +3723,6 @@ async def void_deduction(
             {"$set": void_fields}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if result.modified_count == 0:
             raise HTTPException(status_code=404, detail="Deduction not found")
@@ -3915,8 +3810,6 @@ async def recompute_attendance(
                     force_recompute=True
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 message = f"Recomputed attendance for employee {employee_id} on {target_date}"
             else:
                 # Recompute for all employees on that date
@@ -3928,8 +3821,6 @@ async def recompute_attendance(
                         force_recompute=True
                     )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 message = f"Recomputed attendance for all employees on {target_date}"
                 
         elif "month" in recompute_data:
@@ -3949,8 +3840,6 @@ async def recompute_attendance(
                         force_recompute=True
                     )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 message = f"Recomputed attendance for employee {employee_id} for month {month}"
             else:
                 employees = await db.users.find({"role": {"$in": ["user", "admin"]}}).to_list(length=None)
@@ -3963,8 +3852,6 @@ async def recompute_attendance(
                             force_recompute=True
                         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 message = f"Recomputed attendance for all employees for month {month}"
         else:
             raise HTTPException(status_code=400, detail="Either 'date' or 'month' is required")
@@ -4018,8 +3905,6 @@ async def create_payroll_cycle(
             notes=notes
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": f"تم إنشاء دورة راتب {month} بنجاح",
@@ -4093,8 +3978,6 @@ async def lock_payroll_cycle(
             lock_reason=lock_reason.strip()
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if success:
             return {
@@ -4138,8 +4021,6 @@ async def unlock_payroll_cycle(
             unlock_reason=unlock_reason.strip()
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if success:
             return {
@@ -4191,8 +4072,6 @@ async def delete_payroll_cycle(
                 detail="لا يمكن حذف دورة مقفلة. يجب فتح القفل أولاً (Unlock)"
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Safety check 2: Check if payments are recorded
         # (You can add payment check here if you have payments collection)
@@ -4262,8 +4141,6 @@ async def delete_payroll_cycle(
                 }
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             return {
                 "success": True,
@@ -4318,8 +4195,6 @@ async def restore_payroll_cycle(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "success": True,
@@ -4351,8 +4226,6 @@ async def get_payroll_ledger_entries(
             employee_id=employee_id
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # تجميع حسب نوع القيد
         summary_by_type = {}
@@ -4426,8 +4299,6 @@ async def recalculate_payroll_cycle_from_ledger(
                 allowances=allowances
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # تحديث employee_payroll_summaries
             await db.employee_payroll_summaries.update_one(
@@ -4453,8 +4324,6 @@ async def recalculate_payroll_cycle_from_ledger(
                 upsert=True
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             total_gross += calculation["gross_salary"]
             total_deductions += calculation["total_deductions"]
@@ -4476,8 +4345,6 @@ async def recalculate_payroll_cycle_from_ledger(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "تم إعادة حساب الرواتب بنجاح باستخدام Payroll Ledger",
@@ -4674,8 +4541,6 @@ async def update_payroll_cycle_employees(
                 {"$set": update_fields}
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # ✅ FIXED: DELETE old ledger entries instead of reversal to prevent duplication
             from uae_datetime_utils import get_uae_now
@@ -4702,8 +4567,6 @@ async def update_payroll_cycle_employees(
                     created_by=current_user.id
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # 2. Create new Attendance Deduction entry (if amount > 0)
             new_attendance_ded = emp_data.get("attendance_deductions", 0)
@@ -4718,8 +4581,6 @@ async def update_payroll_cycle_employees(
                     created_by=current_user.id
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # 3. Create new Advance Installment entry (if amount > 0)
             new_advance_ded = emp_data.get("advance_deductions", 0)
@@ -4734,8 +4595,6 @@ async def update_payroll_cycle_employees(
                     created_by=current_user.id
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             if result.modified_count > 0:
                 updated_count += 1
@@ -4761,8 +4620,6 @@ async def update_payroll_cycle_employees(
             {"$set": cycle_totals}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": f"تم تحديث {updated_count} موظف بنجاح",
@@ -4828,8 +4685,6 @@ async def create_installment_schedule(
             respect_ceiling=schedule_data.get("respect_ceiling", True)
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "تم إنشاء جدولة الأقساط بنجاح",
@@ -4984,8 +4839,6 @@ async def calculate_payroll_cycle(
                     payroll_cycle_id=cycle_id
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 results.append({
                     "employee_id": employee_id,
                     "employee_name": summary.employee_name,
@@ -5064,7 +4917,6 @@ async def get_payroll_cycle_summary(
                     ledger_summary["advance_installments"]
                 )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries),
                 
                 # حساب صافي الراتب
@@ -5077,7 +4929,6 @@ async def get_payroll_cycle_summary(
                      ledger_summary["advance_installments"])
                 )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries),
                 
                 "ledger_entries_count": ledger_summary["entries_count"]
@@ -5269,8 +5120,6 @@ async def generate_salary_letter(
                 advance_installments
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             return Response(
                 content=pdf_content,
@@ -5278,8 +5127,6 @@ async def generate_salary_letter(
                 headers={"Content-Disposition": f"attachment; filename=salary_letter_{cycle_id}_{employee_id}.pdf"}
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         else:
             # Return HTML using template
             from fastapi.responses import HTMLResponse
@@ -5399,8 +5246,6 @@ async def generate_salary_letter(
                 cycle_code=letter_data['cycle_code']
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             return HTMLResponse(content=html_content)
             
@@ -5465,8 +5310,6 @@ async def export_payroll_pdf(
             spaceAfter=20
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         title = Paragraph(f"كشف الرواتب - {cycle.get('display_name', 'غير محدد')}", title_style)
         elements.append(title)
@@ -5570,8 +5413,6 @@ async def export_payroll_pdf(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting PDF: {str(e)}")
@@ -5618,8 +5459,6 @@ async def export_payroll_excel(
             bottom=Side(style='thin')
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # العنوان
         ws.merge_cells('A1:I1')
@@ -5729,8 +5568,6 @@ async def export_payroll_excel(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting Excel: {str(e)}")
@@ -5857,8 +5694,6 @@ async def mark_notification_read(
             {"$set": {"is_read": True, "read_at": datetime.now().isoformat()}}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if result.matched_count == 0:
             # Try with ObjectId format
@@ -5868,8 +5703,6 @@ async def mark_notification_read(
                     {"$set": {"is_read": True, "read_at": datetime.now().isoformat()}}
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             except:
                 raise HTTPException(status_code=404, detail="Notification not found")
         
@@ -5899,8 +5732,6 @@ async def mark_all_notifications_read(current_user: User = Depends(get_current_u
             {"$set": {"is_read": True, "read_at": datetime.now().isoformat()}}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "All notifications marked as read", 
@@ -6330,8 +6161,6 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
                 is_admin_edited=is_admin_edited
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             # ✅ CRITICAL FIX: Update ALL calculated fields including late tracking
             update_fields["working_hours"] = working_hours_info.get("total_hours", 0)
@@ -6377,8 +6206,6 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
             f"Updated attendance for {attendance.get('user_name', 'Unknown')}: {change_summary}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         logger.info(f"Successfully updated attendance {attendance_id}")
     else:
@@ -6484,8 +6311,6 @@ async def update_attendance(attendance_id: str, update_data: dict, current_user:
 #             {"$set": attendance_data}
 #         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
 #     else:
 #         # Create new record
 #         await db.attendance.insert_one(attendance_data)
@@ -6849,8 +6674,6 @@ async def process_daily_absences(date_data: dict, current_user: User = Depends(g
             f"Auto-created absence record for {employee['name']} on {target_date}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {
         "message": f"Processed daily absences for {target_date}",
@@ -7475,8 +7298,6 @@ async def end_field_exit(field_exit_id: str, current_user: User = Depends(get_cu
             detail="يجب كتابة تقرير مفصل عن الزيارة قبل تسجيل وقت العودة"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     # Get current UAE time
     uae_time = datetime.now(UAE_TZ)
@@ -7953,8 +7774,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
                 bottom=Side(style='medium', color='000000')
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         ws.row_dimensions[header_row].height = 40
         
         # Data rows
@@ -8005,8 +7824,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
                     bottom=Side(style='thin', color='CCCCCC')
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             ws.row_dimensions[row_idx].height = 20
         
         # Footer
@@ -8028,8 +7845,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_{report_type}_report_{start_date}_{end_date}.xlsx"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     elif format == "pdf":
         # Create PDF with enhanced professional design and logo
@@ -8050,8 +7865,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         logo_style = ParagraphStyle(
             'LogoStyle',
@@ -8063,8 +7876,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             fontName='Helvetica-Oblique'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         title_style = ParagraphStyle(
             'CustomTitle',
@@ -8076,8 +7887,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         subtitle_style = ParagraphStyle(
             'CustomSubtitle',
@@ -8089,8 +7898,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         info_style = ParagraphStyle(
             'InfoStyle',
@@ -8102,8 +7909,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             fontName='Helvetica'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Enhanced company header with logo simulation
         company_header = Paragraph("TANSEEQ TAX CONSULTANCY", company_style)
@@ -8133,8 +7938,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             textColor=colors.Color(0.8, 0.8, 0.8)
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         decorative_line = Paragraph("=" * 60, line_style)
         story.append(decorative_line)
         
@@ -8205,8 +8008,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             textColor=colors.Color(0.5, 0.5, 0.5)  # Gray
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         footer = Paragraph("TANSEEQ TAX CONSULTANCY - Employee Management System", footer_style)
         story.append(footer)
         
@@ -8219,8 +8020,6 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_{report_type}_report_{start_date}_{end_date}.pdf"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'excel' or 'pdf'")
@@ -8423,8 +8222,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
                 bottom=Side(style='thin', color='000000')
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         ws.row_dimensions[header_row].height = 35
         
         # Data rows
@@ -8475,8 +8272,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
                     bottom=Side(style='thin', color='CCCCCC')
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             ws.row_dimensions[row_idx].height = 20
         
         # Footer
@@ -8498,8 +8293,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_{report_type}_report_{month}.xlsx"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     elif format == "pdf":
         # Create PDF with professional design
@@ -8529,8 +8322,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         subtitle_style = ParagraphStyle(
             'CustomSubtitle',
@@ -8541,8 +8332,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
             textColor=colors.Color(0.27, 0.45, 0.77)  # Medium blue
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         info_style = ParagraphStyle(
             'InfoStyle',
@@ -8553,8 +8342,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
             textColor=colors.Color(0.4, 0.4, 0.4)  # Gray
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Company header
         company_title = Paragraph("TANSEEQ TAX CONSULTANCY", title_style)
@@ -8637,8 +8424,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
             textColor=colors.Color(0.5, 0.5, 0.5)  # Gray
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         footer = Paragraph("TANSEEQ TAX CONSULTANCY - Employee Management System", footer_style)
         story.append(footer)
         
@@ -8651,8 +8436,6 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_{report_type}_report_{month}.pdf"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'excel' or 'pdf'")
@@ -8705,8 +8488,6 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
                     is_admin_edited=record.get("admin_edited", False)
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 total_working_hours += working_calc.get("regular_hours", 0)
                 total_deducted_hours += working_calc.get("deducted_hours", 0)
@@ -8992,8 +8773,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             top=Side(style='thin'), bottom=Side(style='thin')
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         for row in ws.iter_rows(min_row=6, max_row=row_num-1, min_col=1, max_col=9):
             for cell in row:
@@ -9060,8 +8839,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
                 bottom=Side(style='medium', color='000000')
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         ws.row_dimensions[header_row].height = 40
         
         # Data rows with enhanced formatting
@@ -9094,8 +8871,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
                     bottom=Side(style='thin', color='CCCCCC')
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             ws.row_dimensions[row_idx].height = 20
         
         # Footer with enhanced styling
@@ -9117,8 +8892,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_payroll_report_{month}.xlsx"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     elif format == "pdf":
         from reportlab.lib.pagesizes import letter, A4
@@ -9145,8 +8918,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         logo_style = ParagraphStyle(
             'LogoStyle',
@@ -9158,8 +8929,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica-Oblique'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         title_style = ParagraphStyle(
             'CustomTitle',
@@ -9171,8 +8940,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         subtitle_style = ParagraphStyle(
             'CustomSubtitle',
@@ -9184,8 +8951,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         info_style = ParagraphStyle(
             'InfoStyle',
@@ -9197,8 +8962,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Enhanced company header
         company_header = Paragraph("TANSEEQ TAX CONSULTANCY", company_style)
@@ -9228,8 +8991,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             textColor=colors.Color(0.8, 0.8, 0.8)
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         decorative_line = Paragraph("=" * 60, line_style)
         story.append(decorative_line)
         
@@ -9277,8 +9038,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica-Bold'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Calculate totals
         total_monthly_salary = sum(emp['monthly_salary'] for emp in payroll_data)
@@ -9308,8 +9067,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             fontName='Helvetica-Oblique'
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         footer_text = Paragraph("TANSEEQ TAX CONSULTANCY - Comprehensive HR Management System", footer_style)
         story.append(footer_text)
         
@@ -9323,8 +9080,6 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_payroll_report_{month}.pdf"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'excel' or 'pdf'")
@@ -9506,8 +9261,6 @@ async def calculate_late_penalties(month: str, current_user: User = Depends(get_
                 details=details
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             penalties.append(penalty)
         
@@ -9547,8 +9300,6 @@ async def apply_late_penalties(month: str, current_user: User = Depends(get_supe
                 upsert=True
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             penalty_records.append(penalty_record)
         
@@ -9560,8 +9311,6 @@ async def apply_late_penalties(month: str, current_user: User = Depends(get_supe
             f"Applied late penalties for {month}: {len(penalties)} employees, AED {total_penalties:.2f}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": f"Late penalties applied successfully for {month}",
@@ -9585,7 +9334,6 @@ async def get_penalty_history(user_id: str, current_user: User = Depends(get_cur
             {"user_id": user_id}
         )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries).sort("applied_at", -1).to_list(1000)
         
         return penalty_records
@@ -9878,8 +9626,6 @@ TANSEEQ TAX CONSULTANCY"""
                 priority="high"
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             await db.messages.insert_one(message.dict())
             notifications_sent += 1
@@ -9977,8 +9723,6 @@ TANSEEQ TAX CONSULTANCY"""
                 priority="urgent"
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             
             await db.messages.insert_one(message.dict())
             notifications_sent += 1
@@ -10032,8 +9776,6 @@ TANSEEQ TAX CONSULTANCY"""
             priority="high"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         await db.messages.insert_one(message.dict())
         
@@ -10129,7 +9871,6 @@ async def get_messages(current_user: User = Depends(get_current_user)):
             time_ago=get_time_ago(message["created_at"])
         )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries))
     
     return response_messages
@@ -10350,8 +10091,6 @@ async def create_backup_for_download(current_user: User = Depends(get_super_admi
             f"Created backup file on server: {backup_name} ({file_size} bytes, {total_records} records)"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "تم إنشاء النسخة الاحتياطية وحفظها على الخادم بنجاح",
@@ -10510,8 +10249,6 @@ async def download_backup_file(
             f"Downloaded backup file: {filename}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if filename.endswith('.zip'):
             # Create ZIP file containing the JSON backup
@@ -10531,8 +10268,6 @@ async def download_backup_file(
                 }
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         else:
             # Return JSON file directly
             return StreamingResponse(
@@ -10544,8 +10279,6 @@ async def download_backup_file(
                 }
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error downloading backup: {str(e)}")
@@ -10581,8 +10314,6 @@ async def delete_backup_file(
             f"Deleted backup file: {filename}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": f"تم حذف الملف {filename} بنجاح",
@@ -10637,8 +10368,6 @@ async def restore_backup(
             f"Simulated restore from backup: {backup_file.filename} ({len(backup_content)} bytes, {records_restored} records)"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "تم محاكاة استعادة النسخة الاحتياطية بنجاح ✅",
@@ -10702,8 +10431,6 @@ async def create_leave_request_for_employee(
             approved_by=current_user.name
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Add additional fields for admin-created requests
         leave_dict = leave_request.dict()
@@ -10727,8 +10454,6 @@ async def create_leave_request_for_employee(
             f"Created leave request for {employee['name']} from {start_date} to {end_date}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Send notification to employee
         message = Message(
@@ -10754,8 +10479,6 @@ TANSEEQ TAX CONSULTANCY""",
             priority="normal"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         await db.messages.insert_one(message.dict())
         
@@ -10801,8 +10524,6 @@ async def create_field_exit_request_for_employee(
             approved_by=current_user.name
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Add additional fields for admin-created requests
         field_exit_dict = field_exit_request.dict()
@@ -10830,8 +10551,6 @@ async def create_field_exit_request_for_employee(
             f"Created field exit request for {employee['name']} on {date} - {visit_type}"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Send notification to employee
         message = Message(
@@ -10858,8 +10577,6 @@ TANSEEQ TAX CONSULTANCY""",
             priority="normal"
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         await db.messages.insert_one(message.dict())
         
@@ -11206,8 +10923,6 @@ async def export_overtime_report(month: str, format: str = "excel", current_user
             top=Side(style='thin'), bottom=Side(style='thin')
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         for row in ws.iter_rows(min_row=4, max_row=row_num-1, min_col=1, max_col=10):
             for cell in row:
@@ -11233,8 +10948,6 @@ async def export_overtime_report(month: str, format: str = "excel", current_user
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_overtime_report_{month}.xlsx"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     else:  # PDF format
         from reportlab.lib.pagesizes import A4, landscape
@@ -11300,8 +11013,6 @@ async def export_overtime_report(month: str, format: str = "excel", current_user
             headers={"Content-Disposition": f"attachment; filename=TANSEEQ_overtime_report_{month}.pdf"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
 
 @api_router.get("/automation/status")
 async def get_automation_status(current_user: User = Depends(get_super_admin_user)):
@@ -11318,8 +11029,6 @@ async def get_automation_status(current_user: User = Depends(get_super_admin_use
                 capture_output=True, text=True
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             automation_running = bool(result.returncode == 0)
         except:
             automation_running = False
@@ -11679,8 +11388,6 @@ async def init_work_reports_indexes():
                     name="worklog_text_index"
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 logger.info("✅ Work Reports indexes created successfully")
             except Exception as e:
                 logger.warning(f"Work Reports index creation warning: {e}")
@@ -11957,8 +11664,6 @@ async def import_clients_from_excel(
                     row_data.get("الشركة") or ""
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 email = (
                     row_data.get("أميل") or
@@ -11967,7 +11672,6 @@ async def import_clients_from_excel(
                     row_data.get("البريد الالكتروني") or ""
                 )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries).strip() if row_data.get("أميل") or row_data.get("ايميل") else ""
                 
                 if not company_name or company_name.strip() == "":
@@ -11989,7 +11693,6 @@ async def import_clients_from_excel(
                     Client.company_name == company_name
                 )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries).first()
                 
                 if existing_client:
@@ -12012,8 +11715,6 @@ async def import_clients_from_excel(
                     created_by=current_user.name
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 db.add(client)
                 
@@ -12036,8 +11737,6 @@ async def import_clients_from_excel(
                         description="بيانات الإيميل الأساسي للشركة"
                     )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                     db.add(email_credential)
                 
                 # إضافة بيانات اعتماد الهيئة
@@ -12052,8 +11751,6 @@ async def import_clients_from_excel(
                         description="بوابة الهيئة الاتحادية للضرائب"
                     )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                     db.add(fta_credential)
                 
                 imported_clients.append({
@@ -12082,8 +11779,6 @@ async def import_clients_from_excel(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "استيراد مكتمل - Import Status",
@@ -12261,8 +11956,6 @@ async def setup_sample_data(
                 created_by=current_user.name
             )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
             db.add(sample_client)
             db.commit()
             db.refresh(sample_client)
@@ -12310,7 +12003,6 @@ async def setup_sample_data(
                 WorkLog.date < log_date.replace(hour=23, minute=59, second=59)
             )
         
-        # Save to database
         records_saved = await save_deductions_to_db(db, summaries).first()
             
             if not existing_log:
@@ -12335,8 +12027,6 @@ async def setup_sample_data(
                     status="active"
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 db.add(work_log)
                 created_logs.append({
@@ -12355,8 +12045,6 @@ async def setup_sample_data(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "message": "تم إنشاء البيانات النموذجية بنجاح",
@@ -12391,8 +12079,6 @@ def get_user_permissions(db: Session, user_id: str) -> UserWorkReportsPermission
             **PERMISSION_TEMPLATES["user"]["permissions"]
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         db.add(permissions)
         db.commit()
         db.refresh(permissions)
@@ -12492,8 +12178,6 @@ async def create_or_update_user_permissions(
             **template_permissions
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Override with specific permissions from request
         update_data = permission_data.dict(exclude_unset=True, exclude={"permission_level", "notes"})
@@ -12588,8 +12272,6 @@ async def revoke_user_permissions(
             table_name="user_work_reports_permissions", record_id=str(permissions.id)
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     
     return {"message": "تم إلغاء صلاحيات المستخدم بنجاح"}
 
@@ -12610,16 +12292,12 @@ async def generate_daily_pdf_report(
             db=db
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         log_work_reports_activity(
             db, current_user.id, current_user.name, "generate_daily_report",
             after_value={"date": date}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return Response(
             content=pdf_buffer.getvalue(),
@@ -12627,8 +12305,6 @@ async def generate_daily_pdf_report(
             headers={"Content-Disposition": f"attachment; filename=daily_report_{date}.pdf"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
 
@@ -12648,16 +12324,12 @@ async def generate_monthly_pdf_report(
             db=db
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         log_work_reports_activity(
             db, current_user.id, current_user.name, "generate_monthly_report",
             after_value={"year": year, "month": month}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return Response(
             content=pdf_buffer.getvalue(),
@@ -12665,8 +12337,6 @@ async def generate_monthly_pdf_report(
             headers={"Content-Disposition": f"attachment; filename=monthly_report_{year}_{month:02d}.pdf"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Monthly report generation failed: {str(e)}")
 
@@ -12694,8 +12364,6 @@ async def generate_client_pdf_report(
             db=db
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         log_work_reports_activity(
             db, current_user.id, current_user.name, "generate_client_report",
@@ -12706,8 +12374,6 @@ async def generate_client_pdf_report(
             }
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         filename = f"client_report_{client_name.replace(' ', '_')}_{start_date}_to_{end_date}.pdf"
         
@@ -12717,8 +12383,6 @@ async def generate_client_pdf_report(
             headers={"Content-Disposition": f"attachment; filename={filename}"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Client report generation failed: {str(e)}")
 
@@ -12810,8 +12474,6 @@ async def export_work_logs_excel(
             after_value={"records_count": len(work_logs)}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         filename = f"work_logs_export_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
         
@@ -12821,8 +12483,6 @@ async def export_work_logs_excel(
             headers={"Content-Disposition": f"attachment; filename={filename}"}
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Excel export failed: {str(e)}")
@@ -12929,8 +12589,6 @@ async def calculate_deductions_flexible(
             get_cycle_dates
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         from public_holidays import is_public_holiday, is_employee_on_approved_leave
         
         # Validation
@@ -12963,8 +12621,6 @@ async def calculate_deductions_flexible(
                     detail=f"Date range too large ({days_diff} days). Maximum is 93 days (3 months)"
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         else:
             raise HTTPException(status_code=400, detail="mode must be 'monthly' or 'custom'")
         
@@ -13048,8 +12704,6 @@ async def calculate_deductions_flexible(
                     check_in, check_out, basic_salary, total_working_days
                 )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 if calc["deficit_minutes"] > 0 or calc["is_absent"]:
                     reason = "absent" if calc["is_absent"] else "late>9:15" if calc["late_minutes"] > 0 else "early_out" if calc["early_leave_minutes"] > 0 else "under_hours"
@@ -13137,8 +12791,6 @@ async def calculate_advanced_deductions(
         # Calculate deductions
         summaries = await calculate_monthly_deductions(db, month, year, payroll_cycle_id)
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         # Format response
         response_summaries = []
@@ -13232,8 +12884,6 @@ async def apply_monthly_deductions(
             year=year,
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         if not summaries:
             return {
@@ -13507,8 +13157,6 @@ async def merge_advanced_deductions(
             db, cycle_id, month, year, current_user.id
         )
         
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
         
         return {
             "success": True,
