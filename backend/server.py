@@ -1199,13 +1199,10 @@ async def create_expense_with_invoice(
                         status_code=400, 
                         detail=f"نوع الملف {file.content_type} غير مدعوم. المسموح: صور أو PDF"
                     )
-        
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 
                 # إنشاء مجلد الحفظ
                 # ✅ Use ROOT_DIR for deployment compatibility
-from pathlib import Path
+                from pathlib import Path
                 ROOT_DIR = Path(__file__).parent
                 upload_dir = ROOT_DIR / "uploads" / "expenses" / current_user.id
                 upload_dir.mkdir(parents=True, exist_ok=True)
@@ -1227,9 +1224,6 @@ from pathlib import Path
                     file_size=os.path.getsize(file_path),
                     file_type=file.content_type
                 )
-        
-        # Save to database
-        records_saved = await save_deductions_to_db(db, summaries)
                 attachments.append(attachment)
         
         # التحقق من الرصيد المتبقي
