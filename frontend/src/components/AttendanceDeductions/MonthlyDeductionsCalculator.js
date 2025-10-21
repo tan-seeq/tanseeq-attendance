@@ -459,7 +459,6 @@ const MonthlyDeductionsCalculator = () => {
                 })()}
               </div>
             </div>
-            </div>
           ) : (
             <div className="flex items-center gap-4 flex-wrap">
               <CalendarIcon className="h-6 w-6 text-gray-500" />
