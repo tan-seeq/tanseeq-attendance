@@ -12621,10 +12621,20 @@ async def calculate_advanced_deductions(
                 "total_working_days": summary.total_working_days,
                 "days_present": summary.days_present,
                 "days_absent": summary.days_absent,
+                "late_count": getattr(summary, 'late_count', 0),
+                "absence_count": summary.days_absent,
+                "installment_count": getattr(summary, 'installment_count', 0),
                 "total_late_minutes": summary.total_late_minutes,
                 "total_early_leave_minutes": summary.total_early_leave_minutes,
                 "total_deficit_minutes": summary.total_deficit_minutes,
-                "total_deduction_amount": round(summary.total_deduction_amount, 2)
+                "late_deduction": getattr(summary, 'late_deduction', 0),
+                "absence_deduction": getattr(summary, 'absence_deduction', 0),
+                "advance_deduction": getattr(summary, 'advance_deduction', 0),
+                "total_deduction": round(summary.total_deduction_amount, 2),
+                "total_deduction_amount": round(summary.total_deduction_amount, 2),
+                "penalty_amount": round(summary.total_deduction_amount, 2),
+                "deduction_details": getattr(summary, 'deduction_details', []),
+                "details": getattr(summary, 'deduction_details', [])
             })
         
         return {
@@ -12635,8 +12645,10 @@ async def calculate_advanced_deductions(
             "cycle_start": summaries[0].cycle_start if summaries else None,
             "cycle_end": summaries[0].cycle_end if summaries else None,
             "total_employees": len(summaries),
+            "employee_count": len(summaries),
             "total_records_saved": records_saved,
-            "summaries": response_summaries
+            "summaries": response_summaries,
+            "employees": response_summaries
         }
         
     except Exception as e:
