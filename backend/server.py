@@ -12699,7 +12699,6 @@ async def apply_monthly_deductions(
         summaries = await calculate_monthly_deductions(db, 
             month=month,
             year=year,
-            save_to_db=True  # Save to database
         )
         
         if not summaries:
