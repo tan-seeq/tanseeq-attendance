@@ -3465,9 +3465,7 @@ async def get_deductions(
         
         deductions = await db.payroll_deductions.find(
             filters
-        )
-        
-        records_saved = await save_deductions_to_db(db, summaries).sort([("date", -1)]).to_list(length=100)
+        ).sort([("date", -1)]).to_list(length=100)
         
         # إضافة أسماء الموظفين
         for deduction in deductions:
