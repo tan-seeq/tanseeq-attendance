@@ -57,10 +57,17 @@ class EmployeeDeductionSummary(BaseModel):
     total_working_days: int  # Only Sun-Thu in the period
     days_present: int
     days_absent: int
+    late_count: int = 0  # Number of late days
+    absence_count: int = 0  # Number of absent days
+    installment_count: int = 0  # Number of advance installments
     total_late_minutes: int
     total_early_leave_minutes: int
     total_deficit_minutes: int
+    late_deduction: float = 0.0  # Deduction for late arrivals
+    absence_deduction: float = 0.0  # Deduction for absences
+    advance_deduction: float = 0.0  # Deduction for advances
     total_deduction_amount: float
+    deduction_details: List[str] = []  # Human-readable details
     daily_records: List[AdvancedDeduction] = []
 
 
