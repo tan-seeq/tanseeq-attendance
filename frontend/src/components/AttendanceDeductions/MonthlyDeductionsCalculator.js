@@ -406,7 +406,7 @@ const MonthlyDeductionsCalculator = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {calculatedData.employees.map((emp, index) => (
+                  {calculatedData.employees && calculatedData.employees.map((emp, index) => (
                     <tr key={emp.employee_id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
