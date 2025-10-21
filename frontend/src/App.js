@@ -996,11 +996,25 @@ const Dashboard = () => {
     if (!confirm) return;
     
     try {
-      const response = await axios.post(`${API}/penalties/apply/${selectedMonth}`);
-      alert(`تم تطبيق خصومات التأخير بنجاح!\nعدد الموظفين: ${response.data.total_employees}\nإجمالي الخصم: ${response.data.total_penalty_amount} درهم`);
+      // Use new API to apply deductions to payroll
+      const response = await axios.post(`${API}/deductions/apply-monthly?month=${selectedMonth}`);
+      
+      const totalEmployees = response.data.employees_affected || response.data.total_employees || 0;
+      const totalAmount = response.data.total_deduction_amount || response.data.total_penalty_amount || 0;
+      
+      alert(
+        `تم تطبيق خصومات التأخير بنجاح!\n` +
+        `عدد الموظفين: ${totalEmployees}\n` +
+        `إجمالي الخصم: ${totalAmount.toFixed(2)} درهم`
+      );
+      
       calculateLatePenalties(); // Refresh data
     } catch (error) {
       console.error('Error applying penalties:', error);
+      const errorMsg = error.response?.data?.detail || error.message || 'حدث خطأ في تطبيق الخصومات';
+      alert('حدث خطأ في تطبيق الخصومات: ' + errorMsg);
+    }
+  };
       alert('حدث خطأ في تطبيق الخصومات');
     }
   };
