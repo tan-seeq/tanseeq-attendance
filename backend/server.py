@@ -11664,9 +11664,7 @@ async def import_clients_from_excel(
                     row_data.get("ايميل") or
                     row_data.get("Email") or
                     row_data.get("البريد الالكتروني") or ""
-                )
-        
-        records_saved = await save_deductions_to_db(db, summaries).strip() if row_data.get("أميل") or row_data.get("ايميل") else ""
+                ).strip() if row_data.get("أميل") or row_data.get("ايميل") or row_data.get("Email") or row_data.get("البريد الالكتروني") else ""
                 
                 if not company_name or company_name.strip() == "":
                     errors.append(f"Row {row_num}: اسم الشركة مفقود - Missing company name")
