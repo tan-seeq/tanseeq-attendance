@@ -111,6 +111,9 @@ const MonthlyDeductionsCalculator = () => {
   };
 
   const handleApply = async () => {
+    // Parse month (YYYY-MM)
+    const [year, month] = selectedMonth.split('-').map(Number);
+    
     if (!window.confirm(
       `Apply deductions for ${calculatedData.employee_count} employees?\n` +
       `Total Deductions: ${(calculatedData.total_deductions || 0).toFixed(2)} AED\n\n` +
@@ -124,12 +127,12 @@ const MonthlyDeductionsCalculator = () => {
     
     try {
       setApplying(true);
-      const response = await axios.post(`${API}/deductions/apply-monthly?month=${selectedMonth}`);
+      const response = await axios.post(`${API}/deductions/apply-monthly?month=${month}&year=${year}`);
       alert(`Deductions applied successfully!\nEmployees: ${response.data.employees_affected || 0}\nTotal: ${response.data.total_deduction_amount || 0} AED`);
       handleCalculate();
     } catch (error) {
       console.error('Error applying deductions:', error);
-      alert('Error applying deductions');
+      alert('Error applying deductions: ' + (error.response?.data?.detail || error.message));
     } finally {
       setApplying(false);
     }
