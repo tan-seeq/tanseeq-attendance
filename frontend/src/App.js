@@ -727,6 +727,7 @@ const Dashboard = () => {
   const [showPenaltySection, setShowPenaltySection] = useState(false);
   const [penaltyLoading, setPenaltyLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [expandedPenalties, setExpandedPenalties] = useState({});
 
   useEffect(() => {
     fetchDashboardStats();
