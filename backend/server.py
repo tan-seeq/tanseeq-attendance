@@ -12612,6 +12612,23 @@ async def calculate_advanced_deductions(
         # Format response
         response_summaries = []
         for summary in summaries:
+            # Transform daily_records to proper format
+            daily_records_formatted = []
+            if summary.daily_records:
+                for record in summary.daily_records:
+                    daily_records_formatted.append({
+                        "date": record.date,
+                        "check_in": record.check_in_time,
+                        "check_out": record.check_out_time,
+                        "is_working_day": record.is_working_day,
+                        "is_absent": record.is_absent,
+                        "late_minutes": record.late_minutes,
+                        "early_leave_minutes": record.early_leave_minutes,
+                        "total_work_minutes": record.total_work_minutes,
+                        "deficit_minutes": record.deficit_minutes,
+                        "deduction_amount": round(record.deduction_amount, 2)
+                    })
+            
             response_summaries.append({
                 "employee_id": summary.employee_id,
                 "employee_name": summary.employee_name,
@@ -12634,7 +12651,8 @@ async def calculate_advanced_deductions(
                 "total_deduction_amount": round(summary.total_deduction_amount, 2),
                 "penalty_amount": round(summary.total_deduction_amount, 2),
                 "deduction_details": getattr(summary, 'deduction_details', []),
-                "details": getattr(summary, 'deduction_details', [])
+                "details": getattr(summary, 'deduction_details', []),
+                "daily_records": daily_records_formatted
             })
         
         return {
