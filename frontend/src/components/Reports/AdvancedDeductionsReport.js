@@ -275,55 +275,138 @@ const AdvancedDeductionsReport = () => {
               </select>
             </div>
 
-          {/* Calculate Button */}
-          <div className="flex items-end">
-            <button
-              onClick={handleCalculate}
-              disabled={calculating}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
-            >
-              {calculating ? '🔄 جاري الحساب...' : '🧮 حساب الخصومات'}
-            </button>
-          </div>
-
-          {/* Export Button */}
-          <div className="flex items-end">
-            <button
-              onClick={handleExportExcel}
-              disabled={!reportData || !reportData.summaries || reportData.summaries.length === 0}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
-            >
-              📥 تصدير Excel
-            </button>
-          </div>
-        </div>
-
-        {/* Payroll Integration Section */}
-        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <h3 className="font-bold text-orange-800 mb-3">🔗 الدمج مع دورة الرواتب</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-gray-700 font-bold mb-2">معرّف دورة الرواتب (Cycle ID)</label>
-              <input
-                type="text"
-                value={cycleId}
-                onChange={(e) => setCycleId(e.target.value)}
-                placeholder="أدخل Cycle ID من صفحة الرواتب"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">يمكنك الحصول على Cycle ID من صفحة "إدارة دورات الرواتب"</p>
-            </div>
+            {/* Calculate Button */}
             <div className="flex items-end">
               <button
-                onClick={handleMergeWithPayroll}
-                disabled={merging || !cycleId || !reportData}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+                onClick={handleCalculate}
+                disabled={calculating}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
               >
-                {merging ? '🔄 جاري الدمج...' : '🔗 دمج مع الدورة'}
+                {calculating ? '🔄 جاري الحساب...' : '🧮 حساب الخصومات'}
+              </button>
+            </div>
+
+            {/* Export Button */}
+            <div className="flex items-end">
+              <button
+                onClick={handleExportExcel}
+                disabled={!reportData || !reportData.summaries || reportData.summaries.length === 0}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+              >
+                📥 تصدير Excel
               </button>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Custom Mode Fields */}
+        {mode === 'custom' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            {/* From Date */}
+            <div>
+              <label className="block text-gray-700 font-bold mb-2">من تاريخ</label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => {
+                  setFromDate(e.target.value);
+                  // Validate range
+                  if (toDate && e.target.value && new Date(e.target.value) > new Date(toDate)) {
+                    setError('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
+                  } else {
+                    setError('');
+                  }
+                }}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* To Date */}
+            <div>
+              <label className="block text-gray-700 font-bold mb-2">إلى تاريخ</label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => {
+                  setToDate(e.target.value);
+                  // Validate range
+                  if (fromDate && e.target.value) {
+                    const daysDiff = Math.floor((new Date(e.target.value) - new Date(fromDate)) / (1000 * 60 * 60 * 24));
+                    if (new Date(e.target.value) < new Date(fromDate)) {
+                      setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية');
+                    } else if (daysDiff > 93) {
+                      setError('الحد الأقصى للفترة 93 يوم (3 أشهر)');
+                    } else {
+                      setError('');
+                    }
+                  }
+                }}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Calculate Button */}
+            <div className="flex items-end">
+              <button
+                onClick={handleCalculate}
+                disabled={calculating || !fromDate || !toDate}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+              >
+                {calculating ? '🔄 جاري الحساب...' : '🧮 حساب (معاينة)'}
+              </button>
+            </div>
+
+            {/* Export Button */}
+            <div className="flex items-end">
+              <button
+                onClick={handleExportExcel}
+                disabled={!reportData || !reportData.summaries || reportData.summaries.length === 0}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+              >
+                📥 تصدير Excel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Validation Info for Custom Mode */}
+        {mode === 'custom' && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              ℹ️ <strong>ملاحظة:</strong> الفترة المخصصة هي معاينة فقط ولن يتم حفظها في قاعدة البيانات. 
+              الحد الأقصى للفترة: 93 يوم (3 أشهر).
+            </p>
+          </div>
+        )}
+
+        {/* Payroll Integration Section - Only for Monthly Mode */}
+        {mode === 'monthly' && (
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <h3 className="font-bold text-orange-800 mb-3">🔗 الدمج مع دورة الرواتب</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-gray-700 font-bold mb-2">معرّف دورة الرواتب (Cycle ID)</label>
+                <input
+                  type="text"
+                  value={cycleId}
+                  onChange={(e) => setCycleId(e.target.value)}
+                  placeholder="أدخل Cycle ID من صفحة الرواتب"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">يمكنك الحصول على Cycle ID من صفحة "إدارة دورات الرواتب"</p>
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleMergeWithPayroll}
+                  disabled={merging || !cycleId || !reportData}
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-gray-400"
+                >
+                  {merging ? '🔄 جاري الدمج...' : '🔗 دمج مع الدورة'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Cycle Info */}
         {reportData && (
