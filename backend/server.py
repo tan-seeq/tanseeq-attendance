@@ -9865,9 +9865,7 @@ async def get_messages(current_user: User = Depends(get_current_user)):
             is_active=message["is_active"],
             is_read=is_read,
             time_ago=get_time_ago(message["created_at"])
-        )
-        
-        records_saved = await save_deductions_to_db(db, summaries))
+        ))
     
     return response_messages
 
