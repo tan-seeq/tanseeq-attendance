@@ -199,6 +199,64 @@ const MonthlyDeductionsCalculator = () => {
     doc.save(filename);
   };
 
+  const exportEmployeeToPDF = (emp) => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.text(`Deduction Details: ${emp.employee_name}`, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Period: ${mode === 'monthly' ? selectedMonth : `${fromDate} to ${toDate}`}`, 14, 22);
+    
+    // Summary
+    doc.setFontSize(12);
+    doc.text('Summary:', 14, 32);
+    doc.setFontSize(10);
+    doc.text(`Late Days: ${emp.late_count || 0}`, 20, 38);
+    doc.text(`Absent Days: ${emp.absence_count || 0}`, 20, 44);
+    doc.text(`Total Late Minutes: ${emp.total_late_minutes || 0}`, 20, 50);
+    doc.text(`Late Deduction: ${(emp.late_deduction || 0).toFixed(2)} AED`, 20, 56);
+    doc.text(`Absence Deduction: ${(emp.absence_deduction || 0).toFixed(2)} AED`, 20, 62);
+    doc.text(`Total Deduction: ${(emp.total_deduction || 0).toFixed(2)} AED`, 20, 68);
+    
+    // Details
+    if (emp.deduction_details && emp.deduction_details.length > 0) {
+      doc.setFontSize(12);
+      doc.text('Details:', 14, 78);
+      doc.setFontSize(9);
+      let yPos = 84;
+      emp.deduction_details.forEach((detail, idx) => {
+        doc.text(`${idx + 1}. ${detail}`, 20, yPos);
+        yPos += 6;
+      });
+    }
+    
+    doc.save(`${emp.employee_name}_deductions.pdf`);
+  };
+
+  const exportEmployeeToExcel = (emp) => {
+    let csvContent = `Employee Deduction Report\nEmployee: ${emp.employee_name}\nPeriod: ${mode === 'monthly' ? selectedMonth : `${fromDate} to ${toDate}`}\n\n`;
+    csvContent += 'Metric,Value\n';
+    csvContent += `Late Days,${emp.late_count || 0}\n`;
+    csvContent += `Absent Days,${emp.absence_count || 0}\n`;
+    csvContent += `Total Late Minutes,${emp.total_late_minutes || 0}\n`;
+    csvContent += `Late Deduction,${(emp.late_deduction || 0).toFixed(2)} AED\n`;
+    csvContent += `Absence Deduction,${(emp.absence_deduction || 0).toFixed(2)} AED\n`;
+    csvContent += `Total Deduction,${(emp.total_deduction || 0).toFixed(2)} AED\n\n`;
+    
+    if (emp.deduction_details && emp.deduction_details.length > 0) {
+      csvContent += 'Details\n';
+      emp.deduction_details.forEach(detail => {
+        csvContent += `"${detail}"\n`;
+      });
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${emp.employee_name}_deductions.csv`;
+    link.click();
+  };
+
   const toggleEmployeeDetails = (employeeId) => {
     setExpandedEmployees(prev => ({
       ...prev,
