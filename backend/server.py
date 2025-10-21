@@ -4328,6 +4328,15 @@ async def get_employee_ledger_entries(
         # Get entries
         entries = await db.payroll_ledger.find(query).sort("created_at", -1).to_list(1000)
         
+        return {
+            "success": True,
+            "entries": entries
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching ledger: {str(e)}")
 
 @app.get("/api/payroll/ledger")
 async def get_payroll_ledger(
