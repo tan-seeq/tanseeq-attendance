@@ -553,15 +553,87 @@ const MonthlyDeductionsCalculator = () => {
                       <tr>
                         <td colSpan="9" className="bg-gray-50 p-4">
                           <div className="bg-white rounded-lg p-4 border-2 border-blue-200">
-                            <h4 className="font-bold text-lg mb-3 text-gray-700">📋 Deduction Details</h4>
-                            {emp.deduction_details && emp.deduction_details.length > 0 ? (
-                              <ul className="list-disc list-inside space-y-2 text-gray-700">
-                                {emp.deduction_details.map((detail, idx) => (
-                                  <li key={idx} className="text-sm">{detail}</li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-gray-500 text-sm">No detailed information available</p>
+                            <h4 className="font-bold text-lg mb-3 text-gray-700 flex items-center justify-between">
+                              <span>📋 Daily Breakdown</span>
+                              <span className="text-sm text-gray-500">
+                                Period: {mode === 'monthly' ? selectedMonth : `${fromDate} to ${toDate}`}
+                              </span>
+                            </h4>
+                            
+                            {/* Daily Details Table */}
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full border border-gray-300">
+                                <thead className="bg-blue-100">
+                                  <tr>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Date</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Check-In</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Check-Out</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Working Hours</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Late (min)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Early Leave (min)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Deficit (min)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Deduction (AED)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm">Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {emp.daily_records && emp.daily_records.length > 0 ? (
+                                    emp.daily_records.map((record, idx) => (
+                                      <tr key={idx} className={record.is_absent ? 'bg-red-50' : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">{record.date}</td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                          {record.check_in || '-'}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                          {record.check_out || '-'}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                          {record.total_work_minutes ? `${Math.floor(record.total_work_minutes / 60)}:${(record.total_work_minutes % 60).toString().padStart(2, '0')}` : '-'}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-orange-600 font-medium">
+                                          {record.late_minutes || 0}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-orange-600 font-medium">
+                                          {record.early_leave_minutes || 0}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-red-600 font-medium">
+                                          {record.deficit_minutes || 0}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-red-700 font-bold">
+                                          {(record.deduction_amount || 0).toFixed(2)}
+                                        </td>
+                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                          {record.is_absent ? (
+                                            <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">Absent</span>
+                                          ) : record.deficit_minutes > 0 ? (
+                                            <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">Deducted</span>
+                                          ) : (
+                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Complete</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan="9" className="border border-gray-300 px-3 py-4 text-center text-gray-500">
+                                        No daily records available. Please try Monthly Calculation mode for detailed breakdown.
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                            
+                            {/* Summary at bottom */}
+                            {emp.deduction_details && emp.deduction_details.length > 0 && (
+                              <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                                <h5 className="font-semibold text-gray-700 mb-2">Summary:</h5>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                  {emp.deduction_details.map((detail, idx) => (
+                                    <li key={idx}>{detail}</li>
+                                  ))}
+                                </ul>
+                              </div>
                             )}
                           </div>
                         </td>
