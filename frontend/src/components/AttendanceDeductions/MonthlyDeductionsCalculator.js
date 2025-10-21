@@ -19,7 +19,10 @@ const API = `${BACKEND_URL}/api`;
 
 const MonthlyDeductionsCalculator = () => {
   const [mode, setMode] = useState('monthly');
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return now.toISOString().slice(0, 7);
+  });
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [calculating, setCalculating] = useState(false);
