@@ -466,16 +466,16 @@ const MonthlyDeductionsCalculator = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-yellow-600">
-                        {emp.late_deduction > 0 ? `${emp.late_deduction.toFixed(2)} درهم` : '-'}
+                        {(emp.late_deduction || 0) > 0 ? `${(emp.late_deduction || 0).toFixed(2)} درهم` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
-                        {emp.absence_deduction > 0 ? `${emp.absence_deduction.toFixed(2)} درهم` : '-'}
+                        {(emp.absence_deduction || 0) > 0 ? `${(emp.absence_deduction || 0).toFixed(2)} درهم` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-purple-600">
-                        {emp.advance_deduction > 0 ? `${emp.advance_deduction.toFixed(2)} درهم` : '-'}
+                        {(emp.advance_deduction || 0) > 0 ? `${(emp.advance_deduction || 0).toFixed(2)} درهم` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-700">
-                        {emp.total_deduction.toFixed(2)} درهم
+                        {(emp.total_deduction || 0).toFixed(2)} درهم
                       </td>
                       <td className="px-6 py-4">
                         <div className="max-w-xs">
