@@ -410,6 +410,27 @@ async def calculate_monthly_deductions(
             summary.total_early_leave_minutes += calc["early_leave_minutes"]
             summary.total_deficit_minutes += calc["deficit_minutes"]
             summary.total_deduction_amount += calc["deduction_amount"]
+            
+            # Count late days and absences
+            if calc["late_minutes"] > 0:
+                summary.late_count += 1
+            if calc["is_absent"]:
+                summary.absence_count += 1
+                summary.absence_deduction += calc["deduction_amount"]
+            elif calc["late_minutes"] > 0 or calc["early_leave_minutes"] > 0:
+                summary.late_deduction += calc["deduction_amount"]
+        
+        # Build deduction details
+        if summary.late_count > 0:
+            summary.deduction_details.append(f"• {summary.late_count} يوم تأخير - {summary.total_late_minutes} دقيقة")
+        if summary.absence_count > 0:
+            summary.deduction_details.append(f"• {summary.absence_count} يوم غياب")
+        if summary.total_early_leave_minutes > 0:
+            summary.deduction_details.append(f"• انصراف مبكر: {summary.total_early_leave_minutes} دقيقة")
+        if summary.late_deduction > 0:
+            summary.deduction_details.append(f"• خصم التأخير: {summary.late_deduction:.2f} درهم")
+        if summary.absence_deduction > 0:
+            summary.deduction_details.append(f"• خصم الغياب: {summary.absence_deduction:.2f} درهم")
         
         print(f"   Present: {summary.days_present}/{total_working_days}")
         print(f"   Total Deduction: {summary.total_deduction_amount:.2f} AED")
