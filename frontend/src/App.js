@@ -3672,7 +3672,11 @@ const Payroll = () => {
                 );
               })}
             </select>
+            <div className="text-xs text-gray-500 mt-1">
+              📅 Cycle: 29th prev month → 28th current month
+            </div>
           </div>
+        </div>
           
           {/* ✅ FIXED: Export buttons now sticky and always visible */}
           <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-3 flex gap-3">
