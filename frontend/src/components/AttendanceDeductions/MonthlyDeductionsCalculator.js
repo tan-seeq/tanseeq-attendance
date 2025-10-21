@@ -58,7 +58,7 @@ const MonthlyDeductionsCalculator = () => {
       if (mode === 'monthly') {
         apiUrl = `${API}/deductions/calculate-monthly?month=${selectedMonth}`;
       } else {
-        apiUrl = `${API}/deductions/calculate?mode=custom&from_date=${fromDate}&to_date=${toDate}&preview=true`;
+        apiUrl = `${API}/deductions/calculate?mode=custom&from_date=${fromDate}&to_date=${toDate}`;
       }
       
       const response = await axios.post(apiUrl, {});
