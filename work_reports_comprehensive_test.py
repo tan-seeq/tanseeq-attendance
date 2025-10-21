@@ -8,7 +8,7 @@ import json
 import time
 from datetime import datetime, timedelta
 
-BASE_URL = "https://attendance-pro-39.preview.emergentagent.com/api"
+BASE_URL = "https://timecalc-hr.preview.emergentagent.com/api"
 
 def comprehensive_work_reports_test():
     session = requests.Session()

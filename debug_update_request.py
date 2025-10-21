@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-BASE_URL = "https://attendance-pro-39.preview.emergentagent.com/api"
+BASE_URL = "https://timecalc-hr.preview.emergentagent.com/api"
 TEST_ACCOUNT = {"email": "admin@tanseeq.com", "password": "ADMIN"}
 
 def debug_update_request():

@@ -83,7 +83,7 @@ def login_and_test(email, password, base_url):
         return False
 
 if __name__ == "__main__":
-    backend_url = "https://attendance-pro-39.preview.emergentagent.com"
+    backend_url = "https://timecalc-hr.preview.emergentagent.com"
     
     print("🔍 Testing payroll calculation in detail...")
     print("=" * 50)

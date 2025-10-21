@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-BACKEND_URL = "https://attendance-pro-39.preview.emergentagent.com/api"
+BACKEND_URL = "https://timecalc-hr.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

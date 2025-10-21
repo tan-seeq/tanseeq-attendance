@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://attendance-pro-39.preview.emergentagent.com
-    - **Backend URL**: https://attendance-pro-39.preview.emergentagent.com/api
+    - **Frontend URL**: https://timecalc-hr.preview.emergentagent.com
+    - **Backend URL**: https://timecalc-hr.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 
