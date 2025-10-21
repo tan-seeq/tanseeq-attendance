@@ -318,7 +318,7 @@ const MonthlyDeductionsCalculator = () => {
               )}
             </button>
 
-            {calculatedData && mode === 'monthly' && (
+            {calculatedData && (
               <button
                 onClick={handleApply}
                 disabled={applying}
