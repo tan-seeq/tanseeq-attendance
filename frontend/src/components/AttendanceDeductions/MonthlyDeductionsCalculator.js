@@ -240,13 +240,40 @@ const MonthlyDeductionsCalculator = () => {
                   setCalculatedData(null); // Clear previous calculations
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 flex-wrap">
+              <CalendarIcon className="h-6 w-6 text-gray-500" />
+              <label className="text-sm font-medium text-gray-700">من تاريخ:</label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => {
+                  setFromDate(e.target.value);
+                  setCalculatedData(null);
+                  setError('');
+                }}
+                className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              />
+              <label className="text-sm font-medium text-gray-700">إلى تاريخ:</label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => {
+                  setToDate(e.target.value);
+                  setCalculatedData(null);
+                  setError('');
+                }}
+                className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          )}
           
           <div className="flex gap-3">
             <button
               onClick={handleCalculate}
-              disabled={calculating}
+              disabled={calculating || (mode === 'custom' && (!fromDate || !toDate))}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold shadow-md"
             >
               {calculating ? (
@@ -257,7 +284,7 @@ const MonthlyDeductionsCalculator = () => {
               ) : (
                 <>
                   <CalculatorIcon className="h-5 w-5" />
-                  🧮 حساب الخصومات
+                  🧮 حساب الخصومات{mode === 'custom' ? ' (معاينة)' : ''}
                 </>
               )}
             </button>
