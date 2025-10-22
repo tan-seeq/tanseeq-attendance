@@ -2915,6 +2915,7 @@ async def calculate_custom_deductions(
     """
     حساب خصومات التأخير والغياب لفترة مخصصة
     Custom Period Calculation (Max 93 days)
+    ⚠️ Uses advanced_deductions_system for accurate calculations
     Returns: قائمة الموظفين مع الخصومات والتفاصيل اليومية
     """
     try:
