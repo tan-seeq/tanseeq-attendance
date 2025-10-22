@@ -110,14 +110,13 @@ const MonthlyDeductionsCalculator = () => {
       
       let transformedData = null;
       
-      // ✅ Handle response from new backend API
+      // ✅ Handle response from backend API - support both old and new formats
       if (response.data.success && response.data.employees) {
-        // Calculate total if missing
+        // NEW FORMAT: employees array
         if (!response.data.total_deductions) {
           response.data.total_deductions = response.data.employees.reduce((sum, emp) => sum + (emp.total_deduction || 0), 0);
         }
         
-        // Use response data directly - it already has the correct structure
         transformedData = {
           success: response.data.success,
           employee_count: response.data.employee_count,
@@ -126,6 +125,43 @@ const MonthlyDeductionsCalculator = () => {
           mode: response.data.mode,
           cycle_window: response.data.cycle_window,
           period: response.data.period
+        };
+      } else if (response.data.success && response.data.items) {
+        // OLD FORMAT: items array (from legacy endpoint)
+        // Transform to new format
+        const employees = response.data.items.map(item => ({
+          employee_id: item.employee_id,
+          employee_name: item.employee_name,
+          late_count: 0,
+          absence_count: 0,
+          total_late_minutes: item.minutes || 0,
+          late_deduction: item.amount || 0,
+          absence_deduction: 0,
+          total_deduction: item.amount || 0,
+          deduction_details: [`Total: ${(item.amount || 0).toFixed(2)} AED`],
+          // Transform breakdown to daily_records format
+          daily_records: (item.breakdown || []).map(day => ({
+            date: day.date,
+            check_in: '-',
+            check_out: '-',
+            total_work_minutes: 0,
+            late_minutes: day.late_minutes || 0,
+            early_leave_minutes: day.early_out_minutes || 0,
+            deficit_minutes: day.under_hours_minutes || 0,
+            deduction_amount: day.amount || 0,
+            is_absent: day.reason === 'absent',
+            status: day.reason === 'absent' ? 'Absent' : day.reason === 'approved_leave' ? 'Leave' : day.reason === 'public_holiday' ? 'Holiday' : 'Deducted'
+          }))
+        }));
+        
+        transformedData = {
+          success: true,
+          employee_count: response.data.employees_count || employees.length,
+          total_deductions: response.data.total_amount || 0,
+          employees: employees,
+          mode: response.data.mode,
+          from: response.data.from,
+          to: response.data.to
         };
       } else {
         // Fallback for empty or error responses
