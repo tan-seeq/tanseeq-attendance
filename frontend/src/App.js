@@ -1090,9 +1090,6 @@ const Dashboard = () => {
   const applyLatePenalties = async () => {
     if (user?.name !== "Hatem Mohamed Ahmed") return;
     
-    // Parse month string (YYYY-MM)
-    const [year, month] = selectedMonth.split('-').map(Number);
-    
     const confirm = window.confirm(
       `هل أنت متأكد من تطبيق خصومات التأخير لشهر ${selectedMonth}؟\nسيتم خصم المبالغ من الرواتب تلقائياً.`
     );
@@ -1100,8 +1097,14 @@ const Dashboard = () => {
     if (!confirm) return;
     
     try {
-      // Use new API to apply deductions to payroll
-      const response = await axios.post(`${API}/deductions/apply-monthly?month=${month}&year=${year}`);
+      // ✅ FIXED: Send request body with month and employees data
+      const requestBody = {
+        month: selectedMonth,  // YYYY-MM format
+        employees: penalties || [],  // Current calculated penalties
+        notes: `Applied from Dashboard on ${new Date().toISOString()}`
+      };
+      
+      const response = await axios.post(`${API}/deductions/apply-monthly`, requestBody);
       
       const totalEmployees = response.data.employees_affected || response.data.total_employees || 0;
       const totalAmount = response.data.total_deduction_amount || response.data.total_penalty_amount || 0;
