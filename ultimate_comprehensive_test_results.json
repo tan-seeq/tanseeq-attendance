@@ -1,0 +1,142 @@
+{
+  "summary": {
+    "total_tests": 10,
+    "passed": 5,
+    "failed": 5,
+    "success_rate": 50.0,
+    "total_time": 0.9359328746795654,
+    "timestamp": "2025-10-22T07:57:21.301647"
+  },
+  "sections": {
+    "authentication": {
+      "passed": 3,
+      "failed": 3,
+      "details": [
+        {
+          "test": "Login super_admin",
+          "status": "FAIL",
+          "error": "Login failed: 401"
+        },
+        {
+          "test": "Login admin1",
+          "status": "PASS",
+          "user": "mahmoud@tanseeq.com",
+          "role": "admin",
+          "response_time": 254.3199062347412
+        },
+        {
+          "test": "Login admin2",
+          "status": "FAIL",
+          "error": "Login failed: 401"
+        },
+        {
+          "test": "Login user1",
+          "status": "FAIL",
+          "error": "Login failed: 401"
+        },
+        {
+          "test": "Login user2",
+          "status": "PASS",
+          "user": "jihad@tanseeq.com",
+          "role": "user",
+          "response_time": 247.12133407592773
+        },
+        {
+          "test": "Invalid credentials",
+          "status": "PASS",
+          "message": "Correctly returned 401"
+        }
+      ]
+    },
+    "rbac": {
+      "passed": 0,
+      "failed": 0,
+      "details": []
+    },
+    "core_functionality": {
+      "passed": 0,
+      "failed": 0,
+      "details": []
+    },
+    "load_stress": {
+      "passed": 0,
+      "failed": 1,
+      "details": [
+        {
+          "test": "Performance targets",
+          "status": "FAIL",
+          "targets_met": "0/0"
+        }
+      ],
+      "metrics": {
+        "p50": 13.741016387939453,
+        "p95": 296.85091972351074,
+        "p99": 296.85091972351074
+      }
+    },
+    "security": {
+      "passed": 2,
+      "failed": 0,
+      "details": [
+        {
+          "test": "Invalid JWT rejection",
+          "status": "PASS",
+          "message": "Invalid token correctly rejected"
+        },
+        {
+          "test": "Expired JWT rejection",
+          "status": "PASS",
+          "message": "Expired token correctly rejected"
+        }
+      ]
+    },
+    "race_conditions": {
+      "passed": 0,
+      "failed": 1,
+      "details": [
+        {
+          "test": "Double check-in prevention",
+          "status": "FAIL",
+          "success_count": 0,
+          "failure_count": 2
+        }
+      ]
+    },
+    "edge_cases": {
+      "passed": 0,
+      "failed": 0,
+      "details": []
+    },
+    "data_integrity": {
+      "passed": 0,
+      "failed": 0,
+      "details": []
+    },
+    "business_logic": {
+      "passed": 0,
+      "failed": 0,
+      "details": []
+    },
+    "chaos_engineering": {
+      "passed": 0,
+      "failed": 0,
+      "details": []
+    }
+  },
+  "performance_metrics": {
+    "p50": 13.741016387939453,
+    "p95": 296.85091972351074,
+    "p99": 296.85091972351074
+  },
+  "criteria_evaluation": {
+    "met": [
+      "RBAC correctly enforced"
+    ],
+    "failed": [
+      "Not all users can authenticate",
+      "Core functionality issues",
+      "Performance below targets"
+    ],
+    "overall_success": false
+  }
+}
