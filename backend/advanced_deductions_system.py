@@ -254,7 +254,9 @@ async def calculate_monthly_deductions(
     db: AsyncIOMotorDatabase,
     month: int,
     year: int,
-    payroll_cycle_id: Optional[str] = None
+    payroll_cycle_id: Optional[str] = None,
+    custom_start_date: Optional[date] = None,
+    custom_end_date: Optional[date] = None
 ) -> List[EmployeeDeductionSummary]:
     """
     Calculate advanced deductions for all employees in a cycle
@@ -264,14 +266,21 @@ async def calculate_monthly_deductions(
         month: Month number (1-12)
         year: Year (e.g., 2025)
         payroll_cycle_id: Optional payroll cycle ID to link
+        custom_start_date: Optional custom start date (overrides cycle calculation)
+        custom_end_date: Optional custom end date (overrides cycle calculation)
         
     Returns:
         List of EmployeeDeductionSummary for all employees (excluding exempted ones)
     """
     from public_holidays import is_public_holiday, is_employee_on_approved_leave
     
-    # Get cycle dates
-    cycle_start, cycle_end = get_cycle_dates(month, year)
+    # Get cycle dates (use custom dates if provided)
+    if custom_start_date and custom_end_date:
+        cycle_start = custom_start_date
+        cycle_end = custom_end_date
+    else:
+        cycle_start, cycle_end = get_cycle_dates(month, year)
+    
     cycle_start_str = cycle_start.strftime("%Y-%m-%d")
     cycle_end_str = cycle_end.strftime("%Y-%m-%d")
     
