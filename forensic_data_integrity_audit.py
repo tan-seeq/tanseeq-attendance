@@ -155,7 +155,24 @@ class ForensicAudit:
             # Check late_minutes calculation for check_in > 09:15
             if check_in:
                 try:
-                    check_in_time = datetime.strptime(check_in, "%H:%M:%S").time()
+                    # Handle different time formats
+                    check_in_clean = check_in.strip()
+                    
+                    # Try different time formats
+                    time_formats = ["%H:%M:%S", "%H:%M", "%H%M"]
+                    check_in_time = None
+                    
+                    for fmt in time_formats:
+                        try:
+                            check_in_time = datetime.strptime(check_in_clean, fmt).time()
+                            break
+                        except ValueError:
+                            continue
+                    
+                    if check_in_time is None:
+                        # Skip malformed times
+                        continue
+                        
                     late_threshold = datetime.strptime("09:15:00", "%H:%M:%S").time()
                     
                     if check_in_time > late_threshold:
