@@ -2749,13 +2749,11 @@ async def calculate_monthly_deductions_endpoint(
         
         cycle_end = date(year, month_num, 28)
         
-        # Get all active employees
-        employees = await db.users.find({"is_active": True}).to_list(None)
-        
+        # ✅ Convert EmployeeDeductionSummary objects to API response format
         results = []
         total_deductions = 0
         
-        for emp in employees:
+        for summary in deduction_summaries:
             employee_id = emp["id"]
             employee_name = emp["name"]
             employee_salary = emp.get("monthly_salary", 0)
