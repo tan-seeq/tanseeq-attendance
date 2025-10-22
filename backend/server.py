@@ -2965,6 +2965,14 @@ async def apply_monthly_deductions(
             from payroll_ledger_service import PayrollLedgerService
             ledger_service = PayrollLedgerService(db)
             
+            # ✅ CRITICAL FIX: Delete old attendance deduction entries before creating new ones (Idempotency)
+            # This prevents ledger duplication when recalculating/reapplying deductions
+            await ledger_service.delete_entries_for_employee_cycle(
+                employee_id=employee_id,
+                cycle_id=cycle_id,
+                source_types=["ATTENDANCE_DEDUCTION"]  # Only delete attendance deductions
+            )
+            
             # 1. Attendance Deduction Ledger Entry
             if late_deduction + absence_deduction > 0:
                 attendance_desc = f"خصومات الحضور والتأخير - {month}: " + ", ".join([d for d in deduction_details if "تأخير" in d or "غياب" in d])
