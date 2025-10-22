@@ -2864,36 +2864,14 @@ async def calculate_monthly_deductions(
             if absence_count > 0:
                 deduction_details.append(f"غياب {absence_count} يوم")
             
-            # 3. Calculate Due Advance Installments (أقساط السلف المستحقة)
-            due_installments = await db.individual_installments.find({
-                "employee_id": employee_id,
-                "due_date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
-                "status": "pending"
-            }).to_list(None)
-            
-            if len(due_installments) > 0:
-                advance_deduction = sum(inst.get("installment_amount", 0) for inst in due_installments)
-                installment_details = []
-                for inst in due_installments:
-                    schedule_id = inst.get("schedule_id", "")
-                    schedule = await db.installment_schedules.find_one({"id": schedule_id})
-                    if schedule:
-                        advance_info = await db.advance_transactions.find_one({"id": schedule.get("advance_id")})
-                        if advance_info:
-                            installment_details.append(
-                                f"قسط {inst.get('installment_number', 0)}/{schedule.get('number_of_installments', 0)} "
-                                f"من سلفة {advance_info.get('amount', 0):.2f} درهم "
-                                f"(استحقاق {inst.get('due_date', '')[:10]})"
-                            )
-        
-                
-                if installment_details:
-                    deduction_details.extend(installment_details)
+            # ❌ NO ADVANCES IN ADVANCED DEDUCTIONS SYSTEM
+            # Advances are handled separately in payroll cycle settlement
+            # Advanced Deductions = Late + Absence + Early Leave ONLY
             
             # Calculate totals
-            total_employee_deduction = late_deduction + absence_deduction + advance_deduction
+            total_employee_deduction = late_deduction + absence_deduction
             
-            if total_employee_deduction > 0:
+            if total_employee_deduction > 0 or len(daily_breakdown) > 0:
                 results.append({
                     "employee_id": employee_id,
                     "employee_name": employee_name,
