@@ -1,0 +1,128 @@
+{
+  "test_run": {
+    "timestamp": "2025-10-22T07:03:42.629293",
+    "total_tests": 6,
+    "passed_tests": 4,
+    "success_rate": 66.66666666666666
+  },
+  "test_results": [
+    {
+      "test": "9:15 AM Late Tracking Analysis",
+      "success": false,
+      "details": "Found 21 records that should be late but aren't marked. Total records: 57, Records with late_minutes > 0: 10",
+      "timestamp": "2025-10-22T07:03:42.298526",
+      "response_data": {
+        "total_records": 57,
+        "records_with_late_minutes": 10,
+        "potentially_incorrect_records": 21,
+        "sample_incorrect": [
+          {
+            "user_name": "طارق",
+            "date": "2025-07-15",
+            "check_in": "18:27:42",
+            "late_minutes": 0,
+            "expected_late_minutes": 552
+          },
+          {
+            "user_name": "Hatem Mohamed Ahmed",
+            "date": "2025-07-15",
+            "check_in": "19:11:27",
+            "late_minutes": 0,
+            "expected_late_minutes": 596
+          },
+          {
+            "user_name": "Jihad",
+            "date": "2025-07-15",
+            "check_in": "19:13:35",
+            "late_minutes": 0,
+            "expected_late_minutes": 598
+          }
+        ]
+      }
+    },
+    {
+      "test": "Payroll Ledger Idempotency",
+      "success": true,
+      "details": "Ledger entries before: 0, after: 0. Recalc status: 200",
+      "timestamp": "2025-10-22T07:03:42.438855",
+      "response_data": {
+        "entries_before": 0,
+        "entries_after": 0,
+        "recalc_status": 200,
+        "no_duplication": true
+      }
+    },
+    {
+      "test": "Advances vs Custody Separation",
+      "success": true,
+      "details": "Advances: 8125.0 → 8125.0 (should be equal), Custody: 1300.0 → 955.0 (can be reduced), Expenses: 345.0",
+      "timestamp": "2025-10-22T07:03:42.467233",
+      "response_data": {
+        "total_advances": 8125.0,
+        "remaining_advance": 8125.0,
+        "advances_not_reduced": true,
+        "total_custody": 1300.0,
+        "remaining_custody": 955.0,
+        "custody_can_be_reduced": true,
+        "total_expenses": 345.0
+      }
+    },
+    {
+      "test": "Deduction Notifications Analysis",
+      "success": true,
+      "details": "Found 34 deduction-related notifications out of 178 total",
+      "timestamp": "2025-10-22T07:03:42.504553",
+      "response_data": {
+        "total_notifications": 178,
+        "deduction_notifications": 34,
+        "sample_deduction_notifications": [
+          {
+            "_id": "68e6468fdeefbd2d050d3800",
+            "id": null,
+            "recipient_id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+            "recipient_name": "Mohamed Mostafa",
+            "sender_id": "admin_001",
+            "sender_name": "مدير النظام",
+            "subject": "💰 سلفة جديدة بمبلغ 1000.0 درهم",
+            "message": "💰 سلفة جديدة\n\n👤 الموظف: Mohamed Mostafa\n💵 المبلغ: 1000.0 درهم\n📝 الوصف: Test advance for October 2025 installment investigation\n👤 تم الإنشاء من: مدير النظام\n📅 التاريخ: 2025-10-08 11:10\n\n📋 ملاحظات: Created for testing October 2025 installment deduction flow\n\nيمكنك الآن استخدام هذا المبلغ في مصروفاتك.",
+            "type": "success",
+            "priority": "normal",
+            "is_read": false,
+            "sent_at": "2025-10-08T11:10:07.662000"
+          },
+          {
+            "_id": "68e63b5bb584fe6315c78f58",
+            "id": null,
+            "recipient_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+            "recipient_name": "Jihad",
+            "sender_id": "admin_001",
+            "sender_name": "مدير النظام",
+            "subject": "✅ تمت الموافقة على مصروفك",
+            "message": "✅ تمت الموافقة على مصروفك\n\n💵 المبلغ: 50.0 درهم\n📂 التصنيف: لوازم مكتبية\n📅 تاريخ المصروف: 2024-01-17\n👤 تمت الموافقة من: مدير النظام\n\n\n\nتم خصم المبلغ من رصيدك المتاح.",
+            "type": "success",
+            "priority": "normal",
+            "is_read": false,
+            "sent_at": "2025-10-08T10:22:19.145000"
+          }
+        ]
+      }
+    },
+    {
+      "test": "Exempted Employees Analysis",
+      "success": true,
+      "details": "Found 0 potentially exempted employees in deductions calculation",
+      "timestamp": "2025-10-22T07:03:42.580349",
+      "response_data": {
+        "found_exempted": [],
+        "total_employees_in_calculation": 0
+      }
+    },
+    {
+      "test": "Salary Letters Generation",
+      "success": false,
+      "details": "No employee ID found in payroll cycle",
+      "timestamp": "2025-10-22T07:03:42.628285",
+      "response_data": null
+    }
+  ]
+}
