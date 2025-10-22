@@ -481,7 +481,10 @@ class ForensicAudit:
         }
         
         # Create employee lookup
-        employee_lookup = {emp.get("id"): emp for emp in employees}
+        employee_lookup = {}
+        for emp in employees:
+            if isinstance(emp, dict) and emp.get("id"):
+                employee_lookup[emp.get("id")] = emp
         
         for cycle in cycles[:3]:  # Test first 3 cycles to avoid too much data
             cycle_id = cycle.get("id")
