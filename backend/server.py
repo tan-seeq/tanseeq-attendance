@@ -12826,8 +12826,10 @@ async def calculate_deductions_flexible(
         raise HTTPException(status_code=500, detail=f"خطأ في الحساب: {str(e)}")
 
 
-@app.post("/api/deductions/calculate-monthly")
-async def calculate_advanced_deductions(
+# ❌ DEPRECATED - This endpoint is replaced by /api/deductions/calculate-monthly with YYYY-MM format
+# Keeping for backward compatibility but redirecting to new implementation
+@app.post("/api/deductions/calculate-monthly-old")
+async def calculate_advanced_deductions_deprecated(
     month: int,
     year: int,
     payroll_cycle_id: Optional[str] = None,
