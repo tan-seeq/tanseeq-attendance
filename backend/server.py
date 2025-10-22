@@ -2907,7 +2907,7 @@ async def calculate_monthly_deductions_endpoint(
         raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
 
 
-@api_router.post("/deductions/calculate")
+@api_router.post("/deductions/calculate-custom")
 async def calculate_custom_deductions(
     mode: str = Query(..., description="Mode: custom"),
     from_date: str = Query(..., description="Start date YYYY-MM-DD"),
