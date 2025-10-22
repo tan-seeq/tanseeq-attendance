@@ -1,0 +1,365 @@
+{
+  "success": true,
+  "mode": "custom",
+  "from": "2025-10-01",
+  "to": "2025-10-14",
+  "preview": true,
+  "employees_count": 5,
+  "total_minutes": 6466,
+  "total_amount": 3689.77,
+  "records_saved": 0,
+  "items": [
+    {
+      "employee_id": "09b65295-3506-4722-8ee3-927ff046b026",
+      "employee_name": "TAREK ABDELMONEM ZAKI ALWAZAN",
+      "minutes": 1035,
+      "amount": 862.5,
+      "breakdown": [
+        {
+          "date": "2025-10-01",
+          "late_minutes": 0,
+          "early_out_minutes": 172,
+          "under_hours_minutes": 124,
+          "amount": 103.33,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-02",
+          "late_minutes": 0,
+          "early_out_minutes": 147,
+          "under_hours_minutes": 121,
+          "amount": 100.83,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-05",
+          "late_minutes": 0,
+          "early_out_minutes": 138,
+          "under_hours_minutes": 102,
+          "amount": 85.0,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-06",
+          "late_minutes": 0,
+          "early_out_minutes": 147,
+          "under_hours_minutes": 111,
+          "amount": 92.5,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-07",
+          "late_minutes": 0,
+          "early_out_minutes": 152,
+          "under_hours_minutes": 118,
+          "amount": 98.33,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-08",
+          "late_minutes": 0,
+          "early_out_minutes": 155,
+          "under_hours_minutes": 106,
+          "amount": 88.33,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-09",
+          "late_minutes": 0,
+          "early_out_minutes": 165,
+          "under_hours_minutes": 129,
+          "amount": 107.5,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-12",
+          "late_minutes": 0,
+          "early_out_minutes": 140,
+          "under_hours_minutes": 92,
+          "amount": 76.67,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-13",
+          "late_minutes": 0,
+          "early_out_minutes": 130,
+          "under_hours_minutes": 132,
+          "amount": 110.0,
+          "reason": "early_out"
+        }
+      ]
+    },
+    {
+      "employee_id": "6e76ecda-3f55-454c-a075-505ecf6472e2",
+      "employee_name": "GEHAD MOHAMED KAMAL AHMED",
+      "minutes": 881,
+      "amount": 495.56,
+      "breakdown": [
+        {
+          "date": "2025-10-01",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 270.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-02",
+          "late_minutes": 1,
+          "early_out_minutes": 4,
+          "under_hours_minutes": 7,
+          "amount": 3.94,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-05",
+          "late_minutes": 0,
+          "early_out_minutes": 3,
+          "under_hours_minutes": 5,
+          "amount": 2.81,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-07",
+          "late_minutes": 5,
+          "early_out_minutes": 3,
+          "under_hours_minutes": 9,
+          "amount": 5.06,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-08",
+          "late_minutes": 0,
+          "early_out_minutes": 5,
+          "under_hours_minutes": 2,
+          "amount": 1.12,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-09",
+          "late_minutes": 7,
+          "early_out_minutes": 370,
+          "under_hours_minutes": 378,
+          "amount": 212.62,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-12",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 0,
+          "amount": 0.0,
+          "reason": "approved_leave"
+        },
+        {
+          "date": "2025-10-13",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 0,
+          "amount": 0.0,
+          "reason": "approved_leave"
+        },
+        {
+          "date": "2025-10-14",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 0,
+          "amount": 0.0,
+          "reason": "approved_leave"
+        }
+      ]
+    },
+    {
+      "employee_id": "0f907fb8-1414-45bd-8db8-fb1a1fb5be65",
+      "employee_name": "KARIM MOHAMED MOUSTAFA ABDELMEGEUID",
+      "minutes": 1003,
+      "amount": 532.84,
+      "breakdown": [
+        {
+          "date": "2025-10-01",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 255.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-02",
+          "late_minutes": 7,
+          "early_out_minutes": 5,
+          "under_hours_minutes": 13,
+          "amount": 6.91,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-06",
+          "late_minutes": 0,
+          "early_out_minutes": 9,
+          "under_hours_minutes": 3,
+          "amount": 1.59,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-07",
+          "late_minutes": 0,
+          "early_out_minutes": 7,
+          "under_hours_minutes": 4,
+          "amount": 2.12,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-08",
+          "late_minutes": 0,
+          "early_out_minutes": 20,
+          "under_hours_minutes": 15,
+          "amount": 7.97,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-09",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 255.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-12",
+          "late_minutes": 0,
+          "early_out_minutes": 15,
+          "under_hours_minutes": 8,
+          "amount": 4.25,
+          "reason": "early_out"
+        }
+      ]
+    },
+    {
+      "employee_id": "b996b8d7-6bbc-41e9-832b-4e22f2124200",
+      "employee_name": "HESHAM AHMED MOHAMED MOSTAFA",
+      "minutes": 1553,
+      "amount": 760.32,
+      "breakdown": [
+        {
+          "date": "2025-10-01",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 235.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-02",
+          "late_minutes": 60,
+          "early_out_minutes": 3,
+          "under_hours_minutes": 65,
+          "amount": 31.82,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-06",
+          "late_minutes": 6,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 6,
+          "amount": 2.94,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-07",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 235.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-08",
+          "late_minutes": 10,
+          "early_out_minutes": 5,
+          "under_hours_minutes": 16,
+          "amount": 7.83,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-09",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 235.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-12",
+          "late_minutes": 11,
+          "early_out_minutes": 6,
+          "under_hours_minutes": 18,
+          "amount": 8.81,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-13",
+          "late_minutes": 2,
+          "early_out_minutes": 4,
+          "under_hours_minutes": 8,
+          "amount": 3.92,
+          "reason": "late>9:15"
+        }
+      ]
+    },
+    {
+      "employee_id": "5e4856d8-6fb6-4e96-bd86-39f5deaa52ba",
+      "employee_name": "Mohamed AHMED MOHAMED MOSTAFA",
+      "minutes": 1994,
+      "amount": 1038.54,
+      "breakdown": [
+        {
+          "date": "2025-10-02",
+          "late_minutes": 0,
+          "early_out_minutes": 19,
+          "under_hours_minutes": 15,
+          "amount": 7.81,
+          "reason": "early_out"
+        },
+        {
+          "date": "2025-10-06",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 250.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-07",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 250.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-08",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 250.0,
+          "reason": "absent"
+        },
+        {
+          "date": "2025-10-09",
+          "late_minutes": 79,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 59,
+          "amount": 30.73,
+          "reason": "late>9:15"
+        },
+        {
+          "date": "2025-10-14",
+          "late_minutes": 0,
+          "early_out_minutes": 0,
+          "under_hours_minutes": 480,
+          "amount": 250.0,
+          "reason": "absent"
+        }
+      ]
+    }
+  ]
+}
