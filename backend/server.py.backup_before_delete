@@ -12807,6 +12807,234 @@ from payroll_integration import (
 )
 
 # ❌ DEPRECATED: Old endpoint - replaced by api_router version at line 2908
+# ❌ DELETED: Old deprecated endpoint - DO NOT USE
+# @app.post("/api/deductions/calculate")
+async def calculate_deductions_flexible_OLD_DEPRECATED_DISABLED(
+    mode: str = "monthly",  # monthly or custom
+    month: Optional[int] = None,
+    year: Optional[int] = None,
+    from_date: Optional[str] = None,  # YYYY-MM-DD
+    to_date: Optional[str] = None,    # YYYY-MM-DD
+    preview: bool = True,
+    payroll_cycle_id: Optional[str] = None,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    Calculate advanced deductions - Supports monthly and custom date range
+    
+    🔒 RBAC: Super Admin Only
+    
+    Modes:
+    - monthly: Calculate for a specific month (29th prev → 28th current)
+    - custom: Calculate for custom date range
+    
+    Args:
+        mode: "monthly" or "custom"
+        month: Month number (1-12) - required for monthly mode
+        year: Year (e.g., 2025) - required for monthly mode
+        from_date: Start date (YYYY-MM-DD) - required for custom mode
+        to_date: End date (YYYY-MM-DD) - required for custom mode
+        preview: If true, don't save to DB (default: true)
+        payroll_cycle_id: Optional cycle ID to link (monthly mode only)
+    
+    Returns:
+        Deductions summary with breakdown for all employees
+    """
+    try:
+        from datetime import datetime, date, timedelta
+        from advanced_deductions_system import (
+            calculate_daily_deduction,
+            is_employee_excluded,
+            get_working_days_in_cycle,
+            get_cycle_dates
+        )
+        
+        from public_holidays import is_public_holiday, is_employee_on_approved_leave
+        
+        # Validation
+        if mode == "monthly":
+            if not month or not year:
+                raise HTTPException(status_code=400, detail="month and year are required for monthly mode")
+            
+            # Get cycle dates (29 → 28)
+            cycle_start, cycle_end = get_cycle_dates(month, year)
+            
+        elif mode == "custom":
+            if not from_date or not to_date:
+                raise HTTPException(status_code=400, detail="from_date and to_date are required for custom mode")
+            
+            try:
+                cycle_start = datetime.strptime(from_date, "%Y-%m-%d").date()
+                cycle_end = datetime.strptime(to_date, "%Y-%m-%d").date()
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+            
+            # Validation: from <= to
+            if cycle_start > cycle_end:
+                raise HTTPException(status_code=400, detail="from_date must be <= to_date")
+            
+            # Validation: Max 93 days
+            days_diff = (cycle_end - cycle_start).days
+            if days_diff > 93:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Date range too large ({days_diff} days). Maximum is 93 days (3 months)"
+                )
+        
+        else:
+            raise HTTPException(status_code=400, detail="mode must be 'monthly' or 'custom'")
+        
+        cycle_start_str = cycle_start.strftime("%Y-%m-%d")
+        cycle_end_str = cycle_end.strftime("%Y-%m-%d")
+        
+        print(f"\n🧮 Calculating deductions [{mode} mode]")
+        print(f"   From: {cycle_start_str}")
+        print(f"   To: {cycle_end_str}")
+        print(f"   Preview: {preview}")
+        
+        # Get working days (Sun-Thu only)
+        working_days_list = []
+        current = cycle_start
+        while current <= cycle_end:
+            day_of_week = (current.weekday() + 1) % 7  # Sunday=0
+            if day_of_week <= 4:  # Sun-Thu
+                working_days_list.append(current)
+            current += timedelta(days=1)
+        
+        total_working_days = len(working_days_list)
+        
+        print(f"   Working days (Sun-Thu): {total_working_days}")
+        
+        # Get all active employees
+        employees = await db.users.find({"is_active": True}).to_list(None)
+        
+        results = []
+        total_minutes = 0
+        total_amount = 0.0
+        
+        for emp in employees:
+            employee_id = emp["id"]
+            employee_name = emp["name"]
+            basic_salary = float(emp.get("monthly_salary", 0) or 0)
+            
+            # Skip excluded employees
+            if is_employee_excluded(employee_name):
+                print(f"   ⏭️ Skipping: {employee_name}")
+                continue
+            
+            # Get attendance
+            attendance_records = await db.attendance.find({
+                "user_id": employee_id,
+                "date": {"$gte": cycle_start_str, "$lte": cycle_end_str}
+            }).to_list(None)
+            
+            attendance_map = {rec["date"]: rec for rec in attendance_records}
+            
+            # Calculate for each working day
+            employee_minutes = 0
+            employee_amount = 0.0
+            breakdown = []
+            
+            for work_date in working_days_list:
+                date_str = work_date.strftime("%Y-%m-%d")
+                
+                # Check exclusions
+                is_holiday = await is_public_holiday(db, work_date)
+                is_on_leave = await is_employee_on_approved_leave(db, employee_id, work_date)
+                
+                if is_holiday or is_on_leave:
+                    reason = "public_holiday" if is_holiday else "approved_leave"
+                    breakdown.append({
+                        "date": date_str,
+                        "late_minutes": 0,
+                        "early_out_minutes": 0,
+                        "under_hours_minutes": 0,
+                        "amount": 0.0,
+                        "reason": reason
+                    })
+                    continue
+                
+                # Get attendance
+                attendance = attendance_map.get(date_str)
+                check_in = attendance.get("check_in") if attendance else None
+                check_out = attendance.get("check_out") if attendance else None
+                
+                # Calculate
+                calc = calculate_daily_deduction(
+                    check_in, check_out, basic_salary, total_working_days
+                )
+        
+                
+                if calc["deficit_minutes"] > 0 or calc["is_absent"]:
+                    reason = "absent" if calc["is_absent"] else "late>9:15" if calc["late_minutes"] > 0 else "early_out" if calc["early_leave_minutes"] > 0 else "under_hours"
+                    
+                    breakdown.append({
+                        "date": date_str,
+                        "late_minutes": calc["late_minutes"],
+                        "early_out_minutes": calc["early_leave_minutes"],
+                        "under_hours_minutes": calc["deficit_minutes"],
+                        "amount": round(calc["deduction_amount"], 2),
+                        "reason": reason
+                    })
+                    
+                    employee_minutes += calc["deficit_minutes"]
+                    employee_amount += calc["deduction_amount"]
+            
+            if employee_amount > 0:
+                results.append({
+                    "employee_id": employee_id,
+                    "employee_name": employee_name,
+                    "minutes": employee_minutes,
+                    "amount": round(employee_amount, 2),
+                    "breakdown": breakdown
+                })
+                
+                total_minutes += employee_minutes
+                total_amount += employee_amount
+        
+        # Save to DB if not preview and monthly mode
+        records_saved = 0
+        if not preview and mode == "monthly":
+            print(f"   💾 Saving to database...")
+            # Use the original function
+            from advanced_deductions_system import calculate_monthly_deductions, save_deductions_to_db
+            summaries = await calculate_monthly_deductions(db, month, year, payroll_cycle_id)
+            records_saved = await save_deductions_to_db(db, summaries)
+        
+        print(f"   ✅ Done! {len(results)} employees, {total_minutes} min, {total_amount:.2f} AED")
+        
+        return {
+            "success": True,
+            "mode": mode,
+            "from": cycle_start_str,
+            "to": cycle_end_str,
+            "preview": preview,
+            "employees_count": len(results),
+            "total_minutes": total_minutes,
+            "total_amount": round(total_amount, 2),
+            "records_saved": records_saved,
+            "items": results
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"خطأ في الحساب: {str(e)}")
+
+
+# ================================================================
+# ❌ OLD DEPRECATED ENDPOINT - REMOVED
+# The new /api/deductions/calculate-monthly endpoint (line 2688) 
+# accepts YYYY-MM format and includes all fixes:
+# - 29→28 cycle
+# - Daily breakdown with full details
+# - No advances in advanced deductions
+# - Cycle window in response
+# ================================================================
+
 @app.post("/api/deductions/apply-monthly")
 async def apply_monthly_deductions(
     month: int,
