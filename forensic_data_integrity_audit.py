@@ -579,9 +579,26 @@ class ForensicAudit:
         users_response = self.make_request("GET", "/users")
         attendance_response = self.make_request("GET", "/attendance")
         
-        employees = employees_response.json() if employees_response and employees_response.status_code == 200 else []
-        users = users_response.json() if users_response and users_response.status_code == 200 else []
-        attendance_records = attendance_response.json() if attendance_response and attendance_response.status_code == 200 else []
+        # Handle employees data
+        if employees_response and employees_response.status_code == 200:
+            emp_data = employees_response.json()
+            employees = emp_data if isinstance(emp_data, list) else emp_data.get('employees', [])
+        else:
+            employees = []
+            
+        # Handle users data  
+        if users_response and users_response.status_code == 200:
+            users_data = users_response.json()
+            users = users_data if isinstance(users_data, list) else users_data.get('users', [])
+        else:
+            users = []
+            
+        # Handle attendance data
+        if attendance_response and attendance_response.status_code == 200:
+            att_data = attendance_response.json()
+            attendance_records = att_data if isinstance(att_data, list) else att_data.get('attendance', [])
+        else:
+            attendance_records = []
         
         print(f"📊 Data sources: {len(employees)} employees, {len(users)} users, {len(attendance_records)} attendance records")
         
