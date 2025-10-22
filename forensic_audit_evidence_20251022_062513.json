@@ -1,0 +1,655 @@
+{
+  "audit_metadata": {
+    "timestamp": "20251022_062513",
+    "audit_type": "FORENSIC_DATA_INTEGRITY_AUDIT_PHASE_2",
+    "base_url": "https://hr-tanseeq-app.preview.emergentagent.com/api",
+    "total_issues_found": 70,
+    "critical_categories_affected": 4,
+    "affected_employees_count": 26,
+    "affected_records_count": 51
+  },
+  "executive_summary": {
+    "status": "CRITICAL",
+    "production_readiness": "BLOCKED",
+    "immediate_action_required": true
+  },
+  "detailed_findings": {
+    "attendance_integrity": {
+      "duplicate_checkins": [],
+      "incomplete_records": [
+        {
+          "record_id": "012125d5-ba57-4459-b8a2-a611235c75f5",
+          "employee_id": "069b8d05-de76-4bce-a6e4-aedfbbac51bc",
+          "date": "2025-07-15",
+          "check_in": "18:27:42"
+        },
+        {
+          "record_id": "75538955-8cef-4670-8819-8b6189f40c3d",
+          "employee_id": "b93e81e2-4e43-4e63-8841-3f7b489123cb",
+          "date": "2025-07-15",
+          "check_in": "19:11:27"
+        },
+        {
+          "record_id": "0bf0f6aa-e90b-49c8-a977-192f9a80c590",
+          "employee_id": "b8345695-ffff-4591-bae9-eb1b45e6f508",
+          "date": "2025-07-15",
+          "check_in": "19:13:36"
+        },
+        {
+          "record_id": "5dfb8e53-ea9e-40e3-87bb-2ecdbff81582",
+          "employee_id": "17e1f6f2-0127-4534-adb6-28c93a67ab31",
+          "date": "2025-07-15",
+          "check_in": "19:20:43"
+        },
+        {
+          "record_id": "8b14f124-8f2c-42c6-9f39-1add937b121c",
+          "employee_id": "726983ab-de60-4e52-948f-8c392ce2e77b",
+          "date": "2025-07-15",
+          "check_in": "19:20:53"
+        },
+        {
+          "record_id": "c80663e7-5b5f-407a-a960-1320a7d1a864",
+          "employee_id": "d5619426-7203-4093-ac5e-138bbe1d4d40",
+          "date": "2025-07-15",
+          "check_in": "23:25:58"
+        },
+        {
+          "record_id": "cbccadf9-2be5-43ed-931b-a6b81ff2665e",
+          "employee_id": "f206e6e1-b1e5-4f7d-b680-4520a6b49d07",
+          "date": "2025-07-15",
+          "check_in": "23:26:20"
+        },
+        {
+          "record_id": "7b7d3d02-812b-44dc-a353-677f4a5e88c0",
+          "employee_id": "526d691c-c5e6-4f3e-8a0f-dc12db8ae59d",
+          "date": "2025-07-15",
+          "check_in": "23:26:20"
+        },
+        {
+          "record_id": "b5d085fc-b820-461b-bf0b-748170327fd6",
+          "employee_id": "b1388630-129a-47ae-8fb2-d2963808a081",
+          "date": "2025-07-16",
+          "check_in": "09:10:37"
+        },
+        {
+          "record_id": "3fdd4b91-7c1b-4820-a37a-f63cf56303df",
+          "employee_id": "dc7575fa-f94f-4941-bc2d-254102b29b17",
+          "date": "2025-07-16",
+          "check_in": "07:00:38"
+        },
+        {
+          "record_id": "023fa86f-31dd-42b9-b05f-6e2e05235f4e",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-07-16",
+          "check_in": "10:57:01"
+        },
+        {
+          "record_id": "b4556147-6d4e-4da3-be50-0787722b91dc",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-07-20",
+          "check_in": "09:50:58"
+        },
+        {
+          "record_id": "ba444090-f920-484f-a406-f23172934220",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "date": "2025-07-20",
+          "check_in": "09:50:58"
+        },
+        {
+          "record_id": "19ec5f35-7295-4a6a-893b-a8dbd5bba0b4",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-10-20",
+          "check_in": "10:53:34"
+        },
+        {
+          "record_id": "78dabbbb-13c9-41ff-bf1a-149d5b57bae2",
+          "employee_id": "admin_001",
+          "date": "2025-10-21",
+          "check_in": "13:55:48"
+        }
+      ],
+      "late_calculation_errors": [
+        {
+          "record_id": "012125d5-ba57-4459-b8a2-a611235c75f5",
+          "employee_id": "069b8d05-de76-4bce-a6e4-aedfbbac51bc",
+          "date": "2025-07-15",
+          "check_in": "18:27:42",
+          "expected_late_minutes": 552,
+          "actual_late_minutes": 0,
+          "discrepancy": 552
+        },
+        {
+          "record_id": "75538955-8cef-4670-8819-8b6189f40c3d",
+          "employee_id": "b93e81e2-4e43-4e63-8841-3f7b489123cb",
+          "date": "2025-07-15",
+          "check_in": "19:11:27",
+          "expected_late_minutes": 596,
+          "actual_late_minutes": 0,
+          "discrepancy": 596
+        },
+        {
+          "record_id": "a02735ea-1444-453c-abba-e48fcda07616",
+          "employee_id": "598106d6-e0e5-40f3-8873-82ba4462f725",
+          "date": "2025-07-15",
+          "check_in": "19:13:35",
+          "expected_late_minutes": 598,
+          "actual_late_minutes": 0,
+          "discrepancy": 598
+        },
+        {
+          "record_id": "0bf0f6aa-e90b-49c8-a977-192f9a80c590",
+          "employee_id": "b8345695-ffff-4591-bae9-eb1b45e6f508",
+          "date": "2025-07-15",
+          "check_in": "19:13:36",
+          "expected_late_minutes": 598,
+          "actual_late_minutes": 0,
+          "discrepancy": 598
+        },
+        {
+          "record_id": "5dfb8e53-ea9e-40e3-87bb-2ecdbff81582",
+          "employee_id": "17e1f6f2-0127-4534-adb6-28c93a67ab31",
+          "date": "2025-07-15",
+          "check_in": "19:20:43",
+          "expected_late_minutes": 605,
+          "actual_late_minutes": 0,
+          "discrepancy": 605
+        },
+        {
+          "record_id": "8b14f124-8f2c-42c6-9f39-1add937b121c",
+          "employee_id": "726983ab-de60-4e52-948f-8c392ce2e77b",
+          "date": "2025-07-15",
+          "check_in": "19:20:53",
+          "expected_late_minutes": 605,
+          "actual_late_minutes": 0,
+          "discrepancy": 605
+        },
+        {
+          "record_id": "c80663e7-5b5f-407a-a960-1320a7d1a864",
+          "employee_id": "d5619426-7203-4093-ac5e-138bbe1d4d40",
+          "date": "2025-07-15",
+          "check_in": "23:25:58",
+          "expected_late_minutes": 850,
+          "actual_late_minutes": 0,
+          "discrepancy": 850
+        },
+        {
+          "record_id": "cbccadf9-2be5-43ed-931b-a6b81ff2665e",
+          "employee_id": "f206e6e1-b1e5-4f7d-b680-4520a6b49d07",
+          "date": "2025-07-15",
+          "check_in": "23:26:20",
+          "expected_late_minutes": 851,
+          "actual_late_minutes": 0,
+          "discrepancy": 851
+        },
+        {
+          "record_id": "7b7d3d02-812b-44dc-a353-677f4a5e88c0",
+          "employee_id": "526d691c-c5e6-4f3e-8a0f-dc12db8ae59d",
+          "date": "2025-07-15",
+          "check_in": "23:26:20",
+          "expected_late_minutes": 851,
+          "actual_late_minutes": 0,
+          "discrepancy": 851
+        },
+        {
+          "record_id": "1a6661c1-6ee0-4bfa-98a0-d53a65b41b87",
+          "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+          "date": "2025-07-16",
+          "check_in": "09:21:18",
+          "expected_late_minutes": 6,
+          "actual_late_minutes": 0,
+          "discrepancy": 6
+        },
+        {
+          "record_id": "023fa86f-31dd-42b9-b05f-6e2e05235f4e",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-07-16",
+          "check_in": "10:57:01",
+          "expected_late_minutes": 102,
+          "actual_late_minutes": 0,
+          "discrepancy": 102
+        },
+        {
+          "record_id": "47228661-9c85-4cd2-821f-cd2ba18a749c",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "date": "2025-07-16",
+          "check_in": "18:47:31",
+          "expected_late_minutes": 572,
+          "actual_late_minutes": 0,
+          "discrepancy": 572
+        },
+        {
+          "record_id": "b4556147-6d4e-4da3-be50-0787722b91dc",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-07-20",
+          "check_in": "09:50:58",
+          "expected_late_minutes": 35,
+          "actual_late_minutes": 0,
+          "discrepancy": 35
+        },
+        {
+          "record_id": "ba444090-f920-484f-a406-f23172934220",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "date": "2025-07-20",
+          "check_in": "09:50:58",
+          "expected_late_minutes": 35,
+          "actual_late_minutes": 0,
+          "discrepancy": 35
+        },
+        {
+          "record_id": "baa0d364-1afc-471e-b642-0b2c26ae9ce4",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-07-23",
+          "check_in": "19:00:29",
+          "expected_late_minutes": 585,
+          "actual_late_minutes": 0,
+          "discrepancy": 585
+        },
+        {
+          "record_id": "64a8b9fe-d80b-4858-b078-90e205a44669",
+          "employee_id": "test-user-123",
+          "date": "2025-01-28",
+          "check_in": "09:30:00",
+          "expected_late_minutes": 15,
+          "actual_late_minutes": 0,
+          "discrepancy": 15
+        },
+        {
+          "record_id": "c8958a20-86ec-409c-93ef-040aec34d759",
+          "employee_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+          "date": "2025-08-21",
+          "check_in": "10:00:00",
+          "expected_late_minutes": 45,
+          "actual_late_minutes": 0,
+          "discrepancy": 45
+        },
+        {
+          "record_id": "c7a52edd-86b9-403f-9865-57449a56ec32",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-08-28",
+          "check_in": "11:08:41",
+          "expected_late_minutes": 113,
+          "actual_late_minutes": 0,
+          "discrepancy": 113
+        },
+        {
+          "record_id": "2c981070-e0aa-42d7-9fb9-06710cfe2eb3",
+          "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+          "date": "2025-10-07",
+          "check_in": "10:01:13",
+          "expected_late_minutes": 46,
+          "actual_late_minutes": 0,
+          "discrepancy": 46
+        },
+        {
+          "record_id": "3da9f9af-606e-4bf3-95d5-f79bdd803cbb",
+          "employee_id": "admin_001",
+          "date": "2025-10-09",
+          "check_in": "14:22:04",
+          "expected_late_minutes": 307,
+          "actual_late_minutes": 322,
+          "discrepancy": -15
+        },
+        {
+          "record_id": "19ec5f35-7295-4a6a-893b-a8dbd5bba0b4",
+          "employee_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+          "date": "2025-10-20",
+          "check_in": "10:53:34",
+          "expected_late_minutes": 98,
+          "actual_late_minutes": 0,
+          "discrepancy": 98
+        },
+        {
+          "record_id": "78dabbbb-13c9-41ff-bf1a-149d5b57bae2",
+          "employee_id": "admin_001",
+          "date": "2025-10-21",
+          "check_in": "13:55:48",
+          "expected_late_minutes": 280,
+          "actual_late_minutes": 175,
+          "discrepancy": 105
+        }
+      ],
+      "timezone_inconsistencies": [],
+      "missing_fields": [
+        {
+          "record_id": "d69cf1ba-1df5-40f3-a1eb-eae1b557f231",
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "date": "2025-01-25",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "542216d2-df36-4fbc-b749-1f51cb036df9",
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "date": "2025-01-26",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "b6c8919e-003e-46d3-8bef-00b9beb1d1a3",
+          "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "date": "2025-01-25",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "d16b42a0-5058-4bcd-8689-76747277a71b",
+          "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "date": "2025-01-26",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "b0e392b1-197d-47c5-8bc3-cd9f08b222bd",
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "date": "2025-10-07",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "ed3df9c6-4022-4152-8d17-7366b4f2dc30",
+          "employee_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "date": "2025-10-07",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "1631bb8e-d06f-45fb-b07b-0ee9026cd078",
+          "employee_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+          "date": "2025-10-07",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "c2670f23-1954-47f7-865e-4ced37db6ca4",
+          "employee_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+          "date": "2025-10-07",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "d784fb96-be93-4175-9b2b-69cbc01edfc6",
+          "employee_id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+          "date": "2025-10-07",
+          "missing": [
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "55C��.O��K���\u0016V�",
+          "employee_id": "",
+          "date": "2025-10-01",
+          "missing": [
+            "user_id",
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "�>\u0017�91N��{�����",
+          "employee_id": "",
+          "date": "2025-10-02",
+          "missing": [
+            "user_id",
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "\u001e�6<�HJ�\u0007�g\u0005oRi",
+          "employee_id": "",
+          "date": "2025-10-03",
+          "missing": [
+            "user_id",
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "��Ը�H;��i�U�7c",
+          "employee_id": "",
+          "date": "2025-10-06",
+          "missing": [
+            "user_id",
+            "check_in"
+          ]
+        },
+        {
+          "record_id": "NFB�'�G9�\n�?[�\u001a\u0018",
+          "employee_id": "",
+          "date": "2025-10-07",
+          "missing": [
+            "user_id",
+            "check_in"
+          ]
+        }
+      ]
+    },
+    "payroll_ledger_duplication": {
+      "duplicate_ledger_entries": [],
+      "summary_ledger_mismatches": [
+        {
+          "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+          "summary_deductions": 2066.38,
+          "ledger_total": -886.6199999999999,
+          "discrepancy": 2953.0
+        },
+        {
+          "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "summary_deductions": 200.0,
+          "ledger_total": -200.0,
+          "discrepancy": 400.0
+        }
+      ],
+      "recalculation_issues": []
+    },
+    "salary_calculation_reconciliation": {
+      "salary_calculation_errors": [],
+      "missing_employee_data": [
+        {
+          "employee_id": "admin_001",
+          "cycle_id": "e70625f9-f78e-4be3-b02e-1c51cdf5385e",
+          "issue": "Employee not found in employees list"
+        },
+        {
+          "employee_id": "a72bd4f9-03a8-4465-87c7-d7ef6fd5d0fe",
+          "cycle_id": "e70625f9-f78e-4be3-b02e-1c51cdf5385e",
+          "issue": "Employee not found in employees list"
+        }
+      ],
+      "payroll_data_issues": []
+    },
+    "employee_data_consistency": {
+      "email_mismatches": [],
+      "name_mismatches": [],
+      "role_mismatches": [],
+      "missing_references": [
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "069b8d05-de76-4bce-a6e4-aedfbbac51bc",
+          "attendance_record_id": "012125d5-ba57-4459-b8a2-a611235c75f5",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "b93e81e2-4e43-4e63-8841-3f7b489123cb",
+          "attendance_record_id": "75538955-8cef-4670-8819-8b6189f40c3d",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "598106d6-e0e5-40f3-8873-82ba4462f725",
+          "attendance_record_id": "a02735ea-1444-453c-abba-e48fcda07616",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "b8345695-ffff-4591-bae9-eb1b45e6f508",
+          "attendance_record_id": "0bf0f6aa-e90b-49c8-a977-192f9a80c590",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "17e1f6f2-0127-4534-adb6-28c93a67ab31",
+          "attendance_record_id": "5dfb8e53-ea9e-40e3-87bb-2ecdbff81582",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "726983ab-de60-4e52-948f-8c392ce2e77b",
+          "attendance_record_id": "8b14f124-8f2c-42c6-9f39-1add937b121c",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "d5619426-7203-4093-ac5e-138bbe1d4d40",
+          "attendance_record_id": "c80663e7-5b5f-407a-a960-1320a7d1a864",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "f206e6e1-b1e5-4f7d-b680-4520a6b49d07",
+          "attendance_record_id": "cbccadf9-2be5-43ed-931b-a6b81ff2665e",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "526d691c-c5e6-4f3e-8a0f-dc12db8ae59d",
+          "attendance_record_id": "7b7d3d02-812b-44dc-a353-677f4a5e88c0",
+          "date": "2025-07-15"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "8834c7a2-faac-48b4-81e5-4150fe3f8ad3",
+          "attendance_record_id": "f4c90b92-21d4-4d1f-89d1-35e5d1246571",
+          "date": "2025-07-16"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "b1388630-129a-47ae-8fb2-d2963808a081",
+          "attendance_record_id": "b5d085fc-b820-461b-bf0b-748170327fd6",
+          "date": "2025-07-16"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "dc7575fa-f94f-4941-bc2d-254102b29b17",
+          "attendance_record_id": "3fdd4b91-7c1b-4820-a37a-f63cf56303df",
+          "date": "2025-07-16"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "test-user-123",
+          "attendance_record_id": "64a8b9fe-d80b-4858-b078-90e205a44669",
+          "date": "2025-01-28"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "test-user-456",
+          "attendance_record_id": "8df4be32-186f-486d-9f91-a33acdfed92d",
+          "date": "2025-01-29"
+        },
+        {
+          "type": "attendance_orphaned_employee",
+          "employee_id": "test-user-auto-absence",
+          "attendance_record_id": "6ea81a0e-d5d1-44c1-8ac4-fd20f24018ef",
+          "date": "2025-08-21"
+        }
+      ]
+    },
+    "advances_custody_logic": {
+      "custody_deduction_errors": [],
+      "advance_deduction_errors": [],
+      "overspending_scenarios": [],
+      "balance_calculation_errors": []
+    },
+    "summary": {
+      "total_issues": 70,
+      "critical_issues": 4,
+      "affected_employees": [
+        "",
+        "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+        "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+        "069b8d05-de76-4bce-a6e4-aedfbbac51bc",
+        "b1388630-129a-47ae-8fb2-d2963808a081",
+        "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+        "test-user-123",
+        "test-user-auto-absence",
+        "726983ab-de60-4e52-948f-8c392ce2e77b",
+        "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+        "test-user-456",
+        "a72bd4f9-03a8-4465-87c7-d7ef6fd5d0fe",
+        "dc7575fa-f94f-4941-bc2d-254102b29b17",
+        "16d4a924-ff1f-401c-b95e-9b57db963d42",
+        "48613bd9-9007-441f-9495-095408c49889",
+        "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+        "b8345695-ffff-4591-bae9-eb1b45e6f508",
+        "598106d6-e0e5-40f3-8873-82ba4462f725",
+        "8834c7a2-faac-48b4-81e5-4150fe3f8ad3",
+        "526d691c-c5e6-4f3e-8a0f-dc12db8ae59d",
+        "17e1f6f2-0127-4534-adb6-28c93a67ab31",
+        "d5619426-7203-4093-ac5e-138bbe1d4d40",
+        "b93e81e2-4e43-4e63-8841-3f7b489123cb",
+        "admin_001",
+        "f206e6e1-b1e5-4f7d-b680-4520a6b49d07"
+      ],
+      "affected_records": [
+        "012125d5-ba57-4459-b8a2-a611235c75f5",
+        "75538955-8cef-4670-8819-8b6189f40c3d",
+        "0bf0f6aa-e90b-49c8-a977-192f9a80c590",
+        "5dfb8e53-ea9e-40e3-87bb-2ecdbff81582",
+        "8b14f124-8f2c-42c6-9f39-1add937b121c",
+        "c80663e7-5b5f-407a-a960-1320a7d1a864",
+        "cbccadf9-2be5-43ed-931b-a6b81ff2665e",
+        "7b7d3d02-812b-44dc-a353-677f4a5e88c0",
+        "b5d085fc-b820-461b-bf0b-748170327fd6",
+        "3fdd4b91-7c1b-4820-a37a-f63cf56303df",
+        "023fa86f-31dd-42b9-b05f-6e2e05235f4e",
+        "b4556147-6d4e-4da3-be50-0787722b91dc",
+        "ba444090-f920-484f-a406-f23172934220",
+        "19ec5f35-7295-4a6a-893b-a8dbd5bba0b4",
+        "78dabbbb-13c9-41ff-bf1a-149d5b57bae2",
+        "012125d5-ba57-4459-b8a2-a611235c75f5",
+        "75538955-8cef-4670-8819-8b6189f40c3d",
+        "a02735ea-1444-453c-abba-e48fcda07616",
+        "0bf0f6aa-e90b-49c8-a977-192f9a80c590",
+        "5dfb8e53-ea9e-40e3-87bb-2ecdbff81582",
+        "8b14f124-8f2c-42c6-9f39-1add937b121c",
+        "c80663e7-5b5f-407a-a960-1320a7d1a864",
+        "cbccadf9-2be5-43ed-931b-a6b81ff2665e",
+        "7b7d3d02-812b-44dc-a353-677f4a5e88c0",
+        "1a6661c1-6ee0-4bfa-98a0-d53a65b41b87",
+        "023fa86f-31dd-42b9-b05f-6e2e05235f4e",
+        "47228661-9c85-4cd2-821f-cd2ba18a749c",
+        "b4556147-6d4e-4da3-be50-0787722b91dc",
+        "ba444090-f920-484f-a406-f23172934220",
+        "baa0d364-1afc-471e-b642-0b2c26ae9ce4",
+        "64a8b9fe-d80b-4858-b078-90e205a44669",
+        "c8958a20-86ec-409c-93ef-040aec34d759",
+        "c7a52edd-86b9-403f-9865-57449a56ec32",
+        "2c981070-e0aa-42d7-9fb9-06710cfe2eb3",
+        "3da9f9af-606e-4bf3-95d5-f79bdd803cbb",
+        "19ec5f35-7295-4a6a-893b-a8dbd5bba0b4",
+        "78dabbbb-13c9-41ff-bf1a-149d5b57bae2",
+        "d69cf1ba-1df5-40f3-a1eb-eae1b557f231",
+        "542216d2-df36-4fbc-b749-1f51cb036df9",
+        "b6c8919e-003e-46d3-8bef-00b9beb1d1a3",
+        "d16b42a0-5058-4bcd-8689-76747277a71b",
+        "b0e392b1-197d-47c5-8bc3-cd9f08b222bd",
+        "ed3df9c6-4022-4152-8d17-7366b4f2dc30",
+        "1631bb8e-d06f-45fb-b07b-0ee9026cd078",
+        "c2670f23-1954-47f7-865e-4ced37db6ca4",
+        "d784fb96-be93-4175-9b2b-69cbc01edfc6",
+        "55C��.O��K���\u0016V�",
+        "�>\u0017�91N��{�����",
+        "\u001e�6<�HJ�\u0007�g\u0005oRi",
+        "��Ը�H;��i�U�7c",
+        "NFB�'�G9�\n�?[�\u001a\u0018"
+      ]
+    }
+  }
+}
