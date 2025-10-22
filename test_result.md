@@ -190,6 +190,18 @@ backend:
         agent: "testing"
         comment: "⚠️ BOUNDARY CONDITIONS ANALYSIS: No negative salary or high deduction scenarios found in current payroll data to test boundary conditions. System architecture appears to support handling edge cases but cannot verify without test data. Recommend creating test scenarios with high deductions (>100% of salary) to verify system behavior."
 
+  - task: "URGENT: Forensic Data Integrity Audit - Phase 2"
+    implemented: true
+    working: false
+    file: "server.py, attendance system, payroll system"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 CRITICAL DATA INTEGRITY ISSUES FOUND: Forensic audit reveals PRODUCTION BLOCKING issues: 1) ATTENDANCE CRISIS: 22 late calculation errors - employees arriving after 9:15 AM incorrectly marked as on-time (e.g., 18:27:42 check-in = 552 min late but recorded as 0), 15 incomplete records (check-in without check-out), 14 missing critical fields 2) PAYROLL LEDGER CORRUPTION: 2 summary-ledger mismatches with discrepancies up to 2953.0 AED between payroll summaries and actual ledger totals 3) ORPHANED DATA: 15 attendance records reference non-existent employees. SPECIFIC CRITICAL EXAMPLES: Employee 069b8d05-de76-4bce-a6e4-aedfbbac51bc check-in 18:27:42 (should be 552 minutes late) recorded as 0 late_minutes; Employee eed6d28b-7639-4d31-9386-4e99b9179d8f payroll summary 2066.38 vs ledger -886.62 (2953.0 discrepancy). EVIDENCE: Complete forensic report with all affected record IDs saved to forensic_audit_evidence_20251022_062513.json. PRODUCTION STATUS: BLOCKED - immediate fixes required for 9:15 AM late tracking, payroll ledger integrity, and data cleanup."
+
   - task: "Fix leave attachments display issue"
     implemented: true
     working: true
