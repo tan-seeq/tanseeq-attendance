@@ -2743,11 +2743,11 @@ async def calculate_monthly_deductions_endpoint(
         # ✅ Calculate 29→28 cycle dates for display
         if month_num == 1:
             # For January, previous month is December of previous year
-            start_date = date(year_int - 1, 12, 29)
+            cycle_start = date(year - 1, 12, 29)
         else:
-            start_date = date(year_int, month_int - 1, 29)
+            cycle_start = date(year, month_num - 1, 29)
         
-        end_date = date(year_int, month_int, 28)
+        cycle_end = date(year, month_num, 28)
         
         # Get all active employees
         employees = await db.users.find({"is_active": True}).to_list(None)
