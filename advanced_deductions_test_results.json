@@ -1,0 +1,50 @@
+[
+  {
+    "test": "Authentication",
+    "status": "PASS",
+    "details": "Super Admin authenticated successfully: Admin QA",
+    "timestamp": "2025-10-22T11:32:44.793468"
+  },
+  {
+    "test": "Monthly Calculation Oct 2025",
+    "status": "WARN",
+    "details": "Cycle window mismatch. Expected: 2025-09-29 to 2025-10-28, Got: None to None",
+    "timestamp": "2025-10-22T11:32:44.861769"
+  },
+  {
+    "test": "Monthly Calculation Oct 2025",
+    "status": "PASS",
+    "details": "Monthly calculation working correctly. Found 6 employees with daily breakdown",
+    "timestamp": "2025-10-22T11:32:44.861829"
+  },
+  {
+    "test": "Custom Period 2 Weeks",
+    "status": "FAIL",
+    "details": "Missing 'employees' field in response",
+    "timestamp": "2025-10-22T11:32:45.478927"
+  },
+  {
+    "test": "Custom Period >93 Days Validation",
+    "status": "PASS",
+    "details": "Validation working correctly: {\"detail\":\"Date range too large (120 days). Maximum is 93 days (3 months)\"}",
+    "timestamp": "2025-10-22T11:32:45.517261"
+  },
+  {
+    "test": "Apply Monthly Deductions Oct 2025",
+    "status": "FAIL",
+    "details": "Missing required response fields: ['employees_affected', 'total_deduction_amount']",
+    "timestamp": "2025-10-22T11:32:45.797902"
+  },
+  {
+    "test": "Deduction Business Rules",
+    "status": "FAIL",
+    "details": "Business rule violations found: 3 violations of 15-minute grace period rule",
+    "timestamp": "2025-10-22T11:32:45.834298"
+  },
+  {
+    "test": "Arabic Error Messages",
+    "status": "WARN",
+    "details": "Expected 400 for invalid month, got 500",
+    "timestamp": "2025-10-22T11:32:45.879760"
+  }
+]
