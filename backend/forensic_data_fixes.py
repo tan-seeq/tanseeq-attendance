@@ -178,7 +178,11 @@ class ForensicDataFixer:
         # Find incomplete records (has check_in but no check_out)
         incomplete_records = await self.db.attendance.find({
             "check_in": {"$exists": True, "$ne": None},
-            "check_out": {"$or": [{"$exists": False}, {"$eq": None}]}
+            "$or": [
+                {"check_out": {"$exists": False}},
+                {"check_out": None},
+                {"check_out": ""}
+            ]
         }).to_list(None)
         
         print(f"\n📊 Found {len(incomplete_records)} incomplete attendance records")
