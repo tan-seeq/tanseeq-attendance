@@ -2917,9 +2917,9 @@ async def calculate_custom_deductions(
     """
     حساب خصومات التأخير والغياب لفترة مخصصة
     Custom Period Calculation (Max 93 days)
-    ⚠️ Uses advanced_deductions_system for accurate calculations
     Returns: قائمة الموظفين مع الخصومات والتفاصيل اليومية
     """
+    print(f"🔵 Custom Period endpoint called! from_date={from_date}, to_date={to_date}")
     try:
         # Validate dates
         if not from_date or not to_date:
