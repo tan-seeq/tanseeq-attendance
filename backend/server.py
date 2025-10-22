@@ -2875,23 +2875,30 @@ async def calculate_monthly_deductions(
                 results.append({
                     "employee_id": employee_id,
                     "employee_name": employee_name,
+                    "monthly_salary": employee_salary,
                     "late_deduction": round(late_deduction, 2),
                     "absence_deduction": round(absence_deduction, 2),
-                    "advance_deduction": round(advance_deduction, 2),
                     "total_deduction": round(total_employee_deduction, 2),
                     "deduction_details": deduction_details,
                     "late_count": late_count,
-                    "absence_count": len(absence_records),
-                    "installment_count": len(due_installments)
+                    "absence_count": absence_count,
+                    "daily_breakdown": daily_breakdown  # ✅ Full daily details
                 })
                 total_deductions += total_employee_deduction
         
         return {
             "success": True,
+            "mode": "monthly",
             "month": month,
+            "cycle_window": {
+                "from": start_date.isoformat(),
+                "to": end_date.isoformat(),
+                "description": f"دورة شهرية: 29 {calendar.month_name[start_date.month]} إلى 28 {calendar.month_name[end_date.month]}"
+            },
             "employees": results,
             "total_deductions": round(total_deductions, 2),
-            "employee_count": len(results)
+            "employee_count": len(results),
+            "note": "Advanced Deductions = Late + Absence + Early Leave ONLY (NO Advances/Custody)"
         }
         
     except Exception as e:
