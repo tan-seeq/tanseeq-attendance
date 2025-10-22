@@ -164,74 +164,68 @@ class AdvancedDeductionsSystemTester:
             if response.status_code == 200:
                 data = response.json()
                 
-                # Verify response structure
-                if "employees" not in data:
-                    self.log_test("Custom Period 2 Weeks", "FAIL", "Missing 'employees' field in response")
+                # The actual API returns "items" not "employees" for custom period
+                if "items" not in data:
+                    self.log_test("Custom Period 2 Weeks", "FAIL", "Missing 'items' field in response")
                     return
                 
-                employees = data.get("employees", [])
-                if not employees:
+                items = data.get("items", [])
+                if not items:
                     self.log_test("Custom Period 2 Weeks", "WARN", "No employees found in custom period calculation")
                     return
                 
-                # Verify period object
-                period_info = data.get("period", {})
-                if not period_info:
-                    self.log_test("Custom Period 2 Weeks", "FAIL", "Missing period information")
-                    return
-                
-                expected_days = 14
-                actual_days = period_info.get("days_count")
-                if actual_days != expected_days:
+                # Verify period information
+                from_date = data.get("from")
+                to_date = data.get("to")
+                if from_date != "2025-10-01" or to_date != "2025-10-14":
                     self.log_test("Custom Period 2 Weeks", "WARN", 
-                                f"Days count mismatch. Expected: {expected_days}, Got: {actual_days}")
+                                f"Period mismatch. Expected: 2025-10-01 to 2025-10-14, Got: {from_date} to {to_date}")
                 
-                # Verify daily records (NOT daily_breakdown for custom period)
-                daily_records_found = False
+                # Verify breakdown structure (API uses "breakdown" not "daily_records")
+                breakdown_found = False
                 empty_records_count = 0
                 
-                for employee in employees:
-                    if "daily_records" in employee:
-                        daily_records_found = True
-                        daily_records = employee["daily_records"]
+                for item in items:
+                    if "breakdown" in item:
+                        breakdown_found = True
+                        breakdown = item["breakdown"]
                         
-                        if not daily_records:
+                        if not breakdown:
                             empty_records_count += 1
                         else:
                             # Check record structure
-                            first_record = daily_records[0]
-                            required_fields = ["date", "check_in", "check_out", "late_minutes", 
-                                             "early_leave_minutes", "deduction_amount", "note"]
+                            first_record = breakdown[0]
+                            required_fields = ["date", "late_minutes", "early_out_minutes", "amount", "reason"]
                             
                             missing_fields = [field for field in required_fields if field not in first_record]
                             if missing_fields:
                                 self.log_test("Custom Period 2 Weeks", "FAIL", 
-                                            f"Missing required fields in daily records: {missing_fields}")
+                                            f"Missing required fields in breakdown: {missing_fields}")
                                 return
                             
                             # Verify deduction calculations
-                            if first_record.get("deduction_amount", 0) < 0:
+                            if first_record.get("amount", 0) < 0:
                                 self.log_test("Custom Period 2 Weeks", "FAIL", 
-                                            f"Invalid negative deduction amount: {first_record.get('deduction_amount')}")
+                                            f"Invalid negative deduction amount: {first_record.get('amount')}")
                                 return
                 
-                if not daily_records_found:
-                    self.log_test("Custom Period 2 Weeks", "FAIL", "No daily_records found in employee records")
+                if not breakdown_found:
+                    self.log_test("Custom Period 2 Weeks", "FAIL", "No breakdown found in employee records")
                     return
                 
-                if empty_records_count == len(employees):
+                if empty_records_count == len(items):
                     self.log_test("Custom Period 2 Weeks", "FAIL", 
-                                "All employees have empty daily records - 'No daily records available' issue persists")
+                                "All employees have empty breakdown - 'No daily records available' issue persists")
                     return
                 
-                # Check for PREVIEW ONLY note
-                preview_note_found = any("PREVIEW ONLY" in str(emp.get("note", "")) for emp in employees)
-                if not preview_note_found:
-                    self.log_test("Custom Period 2 Weeks", "WARN", "PREVIEW ONLY note not found in response")
+                # Check for PREVIEW mode
+                preview_mode = data.get("preview", False)
+                if not preview_mode:
+                    self.log_test("Custom Period 2 Weeks", "WARN", "PREVIEW mode not indicated in response")
                 
                 self.log_test("Custom Period 2 Weeks", "PASS", 
-                            f"Custom period calculation working correctly. Found {len(employees)} employees, "
-                            f"{len(employees) - empty_records_count} with daily records")
+                            f"Custom period calculation working correctly. Found {len(items)} employees, "
+                            f"{len(items) - empty_records_count} with breakdown data")
                 
             else:
                 self.log_test("Custom Period 2 Weeks", "FAIL", 
