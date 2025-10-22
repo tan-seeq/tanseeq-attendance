@@ -2729,10 +2729,10 @@ async def calculate_monthly_deductions(
             )
         
         start_date = date(year_int, month_int, 1)
-        if int(month_num) == 12:
-            end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
+        if month_int == 12:
+            end_date = date(year_int + 1, 1, 1) - timedelta(days=1)
         else:
-            end_date = date(int(year), int(month_num) + 1, 1) - timedelta(days=1)
+            end_date = date(year_int, month_int + 1, 1) - timedelta(days=1)
         
         # Get all active employees
         employees = await db.users.find({"is_active": True}).to_list(None)
