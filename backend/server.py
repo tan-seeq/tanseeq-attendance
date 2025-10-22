@@ -12826,101 +12826,15 @@ async def calculate_deductions_flexible(
         raise HTTPException(status_code=500, detail=f"خطأ في الحساب: {str(e)}")
 
 
-# ❌ DEPRECATED - This endpoint is replaced by /api/deductions/calculate-monthly with YYYY-MM format
-# Keeping for backward compatibility but redirecting to new implementation
-@app.post("/api/deductions/calculate-monthly-old")
-async def calculate_advanced_deductions_deprecated(
-    month: int,
-    year: int,
-    payroll_cycle_id: Optional[str] = None,
-    current_user: User = Depends(get_super_admin_user)
-):
-    """
-    Calculate advanced attendance deductions for all employees
-    
-    🔒 RBAC: Super Admin Only
-    
-    Args:
-        month: Month number (1-12)
-        year: Year (e.g., 2025)
-        payroll_cycle_id: Optional payroll cycle ID to link
-        
-    Returns:
-        Summary of calculated deductions for all employees
-    """
-    try:
-        print(f"\n🧮 Calculating advanced deductions for {year}-{month:02d}")
-        
-        # Calculate deductions
-        summaries = await calculate_monthly_deductions(db, month, year, payroll_cycle_id)
-        
-        
-        # Format response
-        response_summaries = []
-        for summary in summaries:
-            # Transform daily_records to proper format
-            daily_records_formatted = []
-            if summary.daily_records:
-                for record in summary.daily_records:
-                    daily_records_formatted.append({
-                        "date": record.date,
-                        "check_in": record.check_in,
-                        "check_out": record.check_out,
-                        "is_working_day": record.is_working_day,
-                        "is_absent": record.is_absent,
-                        "late_minutes": record.late_minutes,
-                        "early_leave_minutes": record.early_leave_minutes,
-                        "total_work_minutes": record.total_work_minutes,
-                        "deficit_minutes": record.deficit_minutes,
-                        "deduction_amount": round(record.deduction_amount, 2)
-                    })
-            
-            response_summaries.append({
-                "employee_id": summary.employee_id,
-                "employee_name": summary.employee_name,
-                "basic_salary": summary.basic_salary,
-                "cycle_start": summary.cycle_start,
-                "cycle_end": summary.cycle_end,
-                "total_working_days": summary.total_working_days,
-                "days_present": summary.days_present,
-                "days_absent": summary.days_absent,
-                "late_count": getattr(summary, 'late_count', 0),
-                "absence_count": summary.days_absent,
-                "installment_count": getattr(summary, 'installment_count', 0),
-                "total_late_minutes": summary.total_late_minutes,
-                "total_early_leave_minutes": summary.total_early_leave_minutes,
-                "total_deficit_minutes": summary.total_deficit_minutes,
-                "late_deduction": getattr(summary, 'late_deduction', 0),
-                "absence_deduction": getattr(summary, 'absence_deduction', 0),
-                "advance_deduction": getattr(summary, 'advance_deduction', 0),
-                "total_deduction": round(summary.total_deduction_amount, 2),
-                "total_deduction_amount": round(summary.total_deduction_amount, 2),
-                "penalty_amount": round(summary.total_deduction_amount, 2),
-                "deduction_details": getattr(summary, 'deduction_details', []),
-                "details": getattr(summary, 'deduction_details', []),
-                "daily_records": daily_records_formatted
-            })
-        
-        return {
-            "success": True,
-            "message": f"تم حساب الخصومات لـ {len(summaries)} موظف",
-            "month": month,
-            "year": year,
-            "cycle_start": summaries[0].cycle_start if summaries else None,
-            "cycle_end": summaries[0].cycle_end if summaries else None,
-            "total_employees": len(summaries),
-            "employee_count": len(summaries),
-            "total_records_saved": records_saved,
-            "summaries": response_summaries,
-            "employees": response_summaries
-        }
-        
-    except Exception as e:
-        print(f"❌ Error calculating deductions: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
-
-
-
+# ================================================================
+# ❌ OLD DEPRECATED ENDPOINT - REMOVED
+# The new /api/deductions/calculate-monthly endpoint (line 2688) 
+# accepts YYYY-MM format and includes all fixes:
+# - 29→28 cycle
+# - Daily breakdown with full details
+# - No advances in advanced deductions
+# - Cycle window in response
+# ================================================================
 
 @app.post("/api/deductions/apply-monthly")
 async def apply_monthly_deductions(
