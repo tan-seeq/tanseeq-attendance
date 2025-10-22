@@ -358,19 +358,17 @@ class AdvancedDeductionsSystemTester:
             
             for employee in employees:
                 daily_breakdown = employee.get("daily_breakdown", [])
-                employee_total_deduction = 0
+                employee_total_deduction = employee.get("total_deduction", 0)
                 
                 for daily_record in daily_breakdown:
                     deduction_amount = daily_record.get("deduction_amount", 0)
                     late_minutes = daily_record.get("late_minutes", 0)
                     early_leave_minutes = daily_record.get("early_leave_minutes", 0)
+                    rule_applied = daily_record.get("rule_applied", "")
                     
-                    if deduction_amount > 0:
-                        employee_total_deduction += deduction_amount
-                        
-                        # Check 15-minute grace period rule
-                        if late_minutes > 0 and late_minutes <= 15 and deduction_amount > 0:
-                            grace_period_violations += 1
+                    # Check grace period rule - should be free for first 4 times within 15 minutes
+                    if "Grace period" in rule_applied and deduction_amount > 0:
+                        grace_period_violations += 1
                 
                 if employee_total_deduction > 0:
                     employees_with_deductions += 1
@@ -380,7 +378,7 @@ class AdvancedDeductionsSystemTester:
             issues = []
             
             if grace_period_violations > 0:
-                issues.append(f"{grace_period_violations} violations of 15-minute grace period rule")
+                issues.append(f"{grace_period_violations} violations of grace period rule (should be free)")
             
             if issues:
                 self.log_test("Deduction Business Rules", "FAIL", 
