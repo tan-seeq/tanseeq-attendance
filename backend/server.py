@@ -2728,11 +2728,15 @@ async def calculate_monthly_deductions(
                 detail=f"قيم الشهر غير صحيحة: {str(ve)}"
             )
         
-        start_date = date(year_int, month_int, 1)
-        if month_int == 12:
-            end_date = date(year_int + 1, 1, 1) - timedelta(days=1)
+        # ✅ CRITICAL: Use 29→28 cycle (29th of previous month to 28th of current month)
+        # This is the MANDATORY monthly cycle for payroll
+        if month_int == 1:
+            # For January, previous month is December of previous year
+            start_date = date(year_int - 1, 12, 29)
         else:
-            end_date = date(year_int, month_int + 1, 1) - timedelta(days=1)
+            start_date = date(year_int, month_int - 1, 29)
+        
+        end_date = date(year_int, month_int, 28)
         
         # Get all active employees
         employees = await db.users.find({"is_active": True}).to_list(None)
