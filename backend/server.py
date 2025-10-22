@@ -2974,10 +2974,10 @@ async def calculate_custom_deductions(
             employee_data = {
                 "employee_id": summary.employee_id,
                 "employee_name": summary.employee_name,
-                "monthly_salary": summary.monthly_salary,
+                "monthly_salary": summary.basic_salary,  # ✅ Fixed: use basic_salary
                 "late_deduction": round(summary.late_deduction, 2),
                 "absence_deduction": round(summary.absence_deduction, 2),
-                "total_deduction": round(summary.total_deduction, 2),
+                "total_deduction": round(summary.total_deduction_amount, 2),  # ✅ Fixed: use total_deduction_amount
                 "deduction_details": summary.deduction_details,
                 "late_count": summary.late_count,
                 "absence_count": summary.absence_count,
