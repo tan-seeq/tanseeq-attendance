@@ -1,0 +1,113 @@
+{
+  "summary": {
+    "total_tests": 14,
+    "passed_tests": 11,
+    "success_rate": 78.57142857142857,
+    "critical_issues_count": 2
+  },
+  "critical_issues": [
+    "Monthly Deductions Calculation: Incorrect cycle window: expected 2025-09-29 to 2025-10-28, got  to ",
+    "Custom Period Deductions: Invalid response: success=True, mode=custom, employees_count=0"
+  ],
+  "detailed_results": [
+    {
+      "test_name": "Health Check",
+      "status": "\u2705 PASS",
+      "details": "Health endpoint responding correctly",
+      "timestamp": "2025-10-22T11:57:40.967725",
+      "response_data": null
+    },
+    {
+      "test_name": "Readiness Check",
+      "status": "\u2705 PASS",
+      "details": "Readiness endpoint responding correctly",
+      "timestamp": "2025-10-22T11:57:41.007283",
+      "response_data": null
+    },
+    {
+      "test_name": "Authentication - super_admin",
+      "status": "\u2705 PASS",
+      "details": "Login successful for admin@tanseeq.com (Role: super_admin)",
+      "timestamp": "2025-10-22T11:57:42.414595",
+      "response_data": null
+    },
+    {
+      "test_name": "JWT Token Structure",
+      "status": "\u2705 PASS",
+      "details": "JWT token has correct structure",
+      "timestamp": "2025-10-22T11:57:42.414629",
+      "response_data": null
+    },
+    {
+      "test_name": "User Info Endpoint",
+      "status": "\u2705 PASS",
+      "details": "User info retrieved: Admin QA (super_admin)",
+      "timestamp": "2025-10-22T11:57:42.427367",
+      "response_data": null
+    },
+    {
+      "test_name": "Monthly Deductions Calculation",
+      "status": "\u274c FAIL",
+      "details": "Incorrect cycle window: expected 2025-09-29 to 2025-10-28, got  to ",
+      "timestamp": "2025-10-22T11:57:42.473809",
+      "response_data": null
+    },
+    {
+      "test_name": "Custom Period Deductions",
+      "status": "\u274c FAIL",
+      "details": "Invalid response: success=True, mode=custom, employees_count=0",
+      "timestamp": "2025-10-22T11:57:43.186968",
+      "response_data": null
+    },
+    {
+      "test_name": "Apply Monthly Deductions",
+      "status": "\u26a0\ufe0f PARTIAL",
+      "details": "Apply endpoint responded but format unclear: {'success': True, 'message': '\u062a\u0645 \u062a\u0637\u0628\u064a\u0642 \u0627\u0644\u062e\u0635\u0648\u0645\u0627\u062a \u0628\u0646\u062c\u0627\u062d \u0639\u0644\u0649 0 \u0645\u0648\u0638\u0641', 'cycle_id': '639a5d61-1113-41d7-9830-0993096cecfb', 'applied_count': 0, 'notifications_sent': 0}",
+      "timestamp": "2025-10-22T11:57:43.213863",
+      "response_data": null
+    },
+    {
+      "test_name": "Users List Retrieval",
+      "status": "\u2705 PASS",
+      "details": "Retrieved 10 users, key users found: ['admin@tanseeq.com']",
+      "timestamp": "2025-10-22T11:57:43.228939",
+      "response_data": null
+    },
+    {
+      "test_name": "User Data Structure",
+      "status": "\u2705 PASS",
+      "details": "Users have required fields: ['id', 'name', 'email', 'role']",
+      "timestamp": "2025-10-22T11:57:43.228970",
+      "response_data": null
+    },
+    {
+      "test_name": "Attendance Data Retrieval",
+      "status": "\u2705 PASS",
+      "details": "Retrieved 434 attendance records with required fields",
+      "timestamp": "2025-10-22T11:57:43.392323",
+      "response_data": null
+    },
+    {
+      "test_name": "Attendance Record Structure",
+      "status": "\u2705 PASS",
+      "details": "Records have check-in/check-out data",
+      "timestamp": "2025-10-22T11:57:43.392355",
+      "response_data": null
+    },
+    {
+      "test_name": "Payroll Cycles Retrieval",
+      "status": "\u2705 PASS",
+      "details": "Retrieved 3 payroll cycles",
+      "timestamp": "2025-10-22T11:57:43.407568",
+      "response_data": null
+    },
+    {
+      "test_name": "Payroll Cycle Structure",
+      "status": "\u2705 PASS",
+      "details": "Cycles have proper structure",
+      "timestamp": "2025-10-22T11:57:43.407602",
+      "response_data": null
+    }
+  ],
+  "timestamp": "2025-10-22T11:57:43.407855"
+}
