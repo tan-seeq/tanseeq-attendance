@@ -110,30 +110,25 @@ const MonthlyDeductionsCalculator = () => {
       
       let transformedData = null;
       
-      if (response.data.items) {
-        transformedData = {
-          success: true,
-          employee_count: response.data.employees_count || response.data.items.length,
-          total_deductions: response.data.items.reduce((sum, emp) => sum + (emp.amount || 0), 0),
-          employees: response.data.items.map(item => ({
-            employee_id: item.employee_id,
-            employee_name: item.employee_name,
-            late_count: 0,
-            absence_count: 0,
-            installment_count: 0,
-            late_deduction: 0,
-            absence_deduction: 0,
-            advance_deduction: 0,
-            total_deduction: item.amount || 0,
-            deduction_details: [`Total Deductions: ${(item.amount || 0).toFixed(2)} AED`]
-          }))
-        };
-      } else if (response.data.success && response.data.employees) {
+      // ✅ Handle response from new backend API
+      if (response.data.success && response.data.employees) {
+        // Calculate total if missing
         if (!response.data.total_deductions) {
           response.data.total_deductions = response.data.employees.reduce((sum, emp) => sum + (emp.total_deduction || 0), 0);
         }
-        transformedData = response.data;
+        
+        // Use response data directly - it already has the correct structure
+        transformedData = {
+          success: response.data.success,
+          employee_count: response.data.employee_count,
+          total_deductions: response.data.total_deductions,
+          employees: response.data.employees,
+          mode: response.data.mode,
+          cycle_window: response.data.cycle_window,
+          period: response.data.period
+        };
       } else {
+        // Fallback for empty or error responses
         transformedData = {
           success: true,
           employees: [],
