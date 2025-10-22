@@ -2753,7 +2753,7 @@ async def calculate_monthly_deductions_endpoint(
         results = []
         total_deductions = 0
         
-        for summary in deduction_summaries:
+        for emp in employees:
             employee_id = emp["id"]
             employee_name = emp["name"]
             employee_salary = emp.get("monthly_salary", 0)
@@ -2765,7 +2765,7 @@ async def calculate_monthly_deductions_endpoint(
             # Get ALL attendance records for the period (not just late/absent)
             all_attendance = await db.attendance.find({
                 "user_id": employee_id,
-                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}
+                "date": {"$gte": cycle_start.isoformat(), "$lte": cycle_end.isoformat()}
             }).sort("date", 1).to_list(None)
             
             # Build detailed daily breakdown
