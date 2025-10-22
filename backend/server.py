@@ -12807,8 +12807,9 @@ from payroll_integration import (
 )
 
 # ❌ DEPRECATED: Old endpoint - replaced by api_router version at line 2908
+# ❌ DELETED: Old deprecated endpoint - DO NOT USE
 # @app.post("/api/deductions/calculate")
-async def calculate_deductions_flexible_OLD_DEPRECATED(
+async def calculate_deductions_flexible_OLD_DEPRECATED_DISABLED(
     mode: str = "monthly",  # monthly or custom
     month: Optional[int] = None,
     year: Optional[int] = None,
