@@ -603,8 +603,15 @@ class ForensicAudit:
         print(f"📊 Data sources: {len(employees)} employees, {len(users)} users, {len(attendance_records)} attendance records")
         
         # Create lookups
-        employee_lookup = {emp.get("id"): emp for emp in employees}
-        user_lookup = {user.get("id"): user for user in users}
+        employee_lookup = {}
+        for emp in employees:
+            if isinstance(emp, dict) and emp.get("id"):
+                employee_lookup[emp.get("id")] = emp
+                
+        user_lookup = {}
+        for user in users:
+            if isinstance(user, dict) and user.get("id"):
+                user_lookup[user.get("id")] = user
         
         # Check employees vs users consistency
         for employee in employees:
