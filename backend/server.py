@@ -2985,23 +2985,31 @@ async def calculate_custom_deductions(
                 "daily_records": []  # Will populate below
             }
             
-            # Convert daily_records to daily_records format
+            # Convert daily_records (AdvancedDeduction objects) to response format
             for day in summary.daily_records:
+                # Determine status and rule
+                status = "absent" if day.is_absent else "present"
+                rule_applied = "غياب" if day.is_absent else "حضور"
+                deduction_type = "absence" if day.is_absent else "late" if day.late_minutes > 0 else "none"
+                
+                # Calculate working hours
+                working_hours = day.total_work_minutes / 60 if day.total_work_minutes > 0 else 0
+                
                 employee_data["daily_records"].append({
-                    "date": day.date.isoformat() if hasattr(day.date, 'isoformat') else day.date,
-                    "status": day.status,
-                    "check_in": day.check_in_time if day.check_in_time else "-",
-                    "check_out": day.check_out_time if day.check_out_time else "-",
+                    "date": day.date,
+                    "status": status,
+                    "check_in": day.check_in if day.check_in else "-",
+                    "check_out": day.check_out if day.check_out else "-",
                     "total_work_minutes": day.total_work_minutes,
                     "late_minutes": day.late_minutes,
                     "early_leave_minutes": day.early_leave_minutes,
                     "deficit_minutes": day.deficit_minutes,
-                    "working_hours": day.actual_working_hours,
-                    "rule_applied": day.rule_applied,
-                    "deduction_type": day.deduction_type,
+                    "working_hours": round(working_hours, 2),
+                    "rule_applied": rule_applied,
+                    "deduction_type": deduction_type,
                     "deduction_amount": round(day.deduction_amount, 2),
-                    "note": day.deduction_note,
-                    "is_absent": day.status == "absent"
+                    "note": f"تأخير {day.late_minutes} دقيقة" if day.late_minutes > 0 else "",
+                    "is_absent": day.is_absent
                 })
             
             results.append(employee_data)
