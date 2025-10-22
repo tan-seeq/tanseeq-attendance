@@ -4243,7 +4243,7 @@ async def restore_payroll_cycle(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"خطأ في استرجاع دورة الرواتب: {str(e)}")
 
-@app.get("/api/payroll/cycles/{cycle_id}/ledger")
+@api_router.get("/payroll/cycles/{cycle_id}/ledger")
 async def get_payroll_ledger_entries(
     cycle_id: str,
     employee_id: Optional[str] = None,
@@ -4252,6 +4252,8 @@ async def get_payroll_ledger_entries(
     """
     🆕 جلب القيود المحاسبية لدورة الرواتب
     يعرض جميع القيود (attendance, leave, manual, advance, custody)
+    
+    ✅ RBAC: All authenticated users can view ledger for transparency
     """
     try:
         from payroll_ledger_service import PayrollLedgerService
