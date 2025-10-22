@@ -2949,26 +2949,63 @@ async def calculate_custom_deductions(
                 detail=f"الفترة تتجاوز 93 يوم ({diff_days} يوم). الرجاء تقليل النطاق"
             )
         
-        # Get all active employees
-        employees = await db.users.find({"is_active": True}).to_list(None)
+        # ✅ Use advanced_deductions_system for accurate calculations
+        from advanced_deductions_system import calculate_monthly_deductions
+        
+        # Convert dates to the format expected by calculate_monthly_deductions
+        # Use the start date's month/year for reference
+        month = start_date.month
+        year = start_date.year
+        
+        # Call the advanced deductions system with custom date range
+        deduction_summaries = await calculate_monthly_deductions(
+            db=db,
+            year=year,
+            month=month,
+            custom_start_date=start_date,
+            custom_end_date=end_date
+        )
         
         results = []
         total_deductions = 0
         
-        for emp in employees:
-            employee_id = emp["id"]
-            employee_name = emp["name"]
-            employee_salary = emp.get("monthly_salary", 0)
+        for summary in deduction_summaries:
+            # Convert EmployeeDeductionSummary to response format
+            employee_data = {
+                "employee_id": summary.employee_id,
+                "employee_name": summary.employee_name,
+                "monthly_salary": summary.monthly_salary,
+                "late_deduction": round(summary.late_deduction, 2),
+                "absence_deduction": round(summary.absence_deduction, 2),
+                "total_deduction": round(summary.total_deduction, 2),
+                "deduction_details": summary.deduction_details,
+                "late_count": summary.late_count,
+                "absence_count": summary.absence_count,
+                "total_late_minutes": summary.total_late_minutes,
+                "daily_records": []  # Will populate below
+            }
             
-            # Skip if no salary defined
-            if employee_salary <= 0:
-                continue
+            # Convert daily_breakdown to daily_records format
+            for day in summary.daily_breakdown:
+                employee_data["daily_records"].append({
+                    "date": day.date.isoformat(),
+                    "status": day.status,
+                    "check_in": day.check_in if day.check_in else "-",
+                    "check_out": day.check_out if day.check_out else "-",
+                    "total_work_minutes": day.total_work_minutes,
+                    "late_minutes": day.late_minutes,
+                    "early_leave_minutes": day.early_leave_minutes,
+                    "deficit_minutes": day.late_minutes + day.early_leave_minutes,
+                    "working_hours": day.working_hours,
+                    "rule_applied": day.rule_applied,
+                    "deduction_type": day.deduction_type,
+                    "deduction_amount": round(day.deduction_amount, 2),
+                    "note": day.note,
+                    "is_absent": day.status == "absent"
+                })
             
-            # Get ALL attendance records for the custom period
-            all_attendance = await db.attendance.find({
-                "user_id": employee_id,
-                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}
-            }).sort("date", 1).to_list(None)
+            results.append(employee_data)
+            total_deductions += summary.total_deduction
             
             # Build detailed daily breakdown
             daily_breakdown = []
