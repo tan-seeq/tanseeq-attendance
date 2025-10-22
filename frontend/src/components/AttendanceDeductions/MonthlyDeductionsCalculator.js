@@ -99,7 +99,8 @@ const MonthlyDeductionsCalculator = () => {
           return;
         }
         
-        apiUrl = `${API}/deductions/calculate-monthly?month=${month}&year=${year}`;
+        // ✅ FIXED: Send month in YYYY-MM format as backend expects
+        apiUrl = `${API}/deductions/calculate-monthly?month=${selectedMonth}`;
         console.log('API URL:', apiUrl);
       } else {
         apiUrl = `${API}/deductions/calculate?mode=custom&from_date=${fromDate}&to_date=${toDate}`;
