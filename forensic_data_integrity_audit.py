@@ -318,14 +318,26 @@ class ForensicAudit:
             # Get ledger state after recalculation
             post_ledger_response = self.make_request("GET", f"/payroll/cycles/{cycle_id}/ledger")
             if post_ledger_response and post_ledger_response.status_code == 200:
-                post_ledger = post_ledger_response.json()
+                post_ledger_data = post_ledger_response.json()
+                
+                # Handle different response formats
+                if isinstance(post_ledger_data, list):
+                    post_ledger = post_ledger_data
+                elif isinstance(post_ledger_data, dict) and 'entries' in post_ledger_data:
+                    post_ledger = post_ledger_data['entries']
+                elif isinstance(post_ledger_data, dict) and 'ledger_entries' in post_ledger_data:
+                    post_ledger = post_ledger_data['ledger_entries']
+                else:
+                    post_ledger = []
+                    
                 print(f"📊 Post-recalc ledger entries: {len(post_ledger)}")
                 
                 # Check for new duplicates
                 post_signatures = []
                 for entry in post_ledger:
-                    signature = f"{entry.get('employee_id')}_{cycle_id}_{entry.get('source_type')}_{entry.get('source_id', 'none')}"
-                    post_signatures.append(signature)
+                    if isinstance(entry, dict):
+                        signature = f"{entry.get('employee_id')}_{cycle_id}_{entry.get('source_type')}_{entry.get('source_id', 'none')}"
+                        post_signatures.append(signature)
                 
                 post_signature_counts = Counter(post_signatures)
                 for signature, count in post_signature_counts.items():
