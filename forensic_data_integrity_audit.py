@@ -376,9 +376,11 @@ class ForensicAudit:
             if initial_ledger:
                 ledger_totals = defaultdict(float)
                 for entry in initial_ledger:
-                    employee_id = entry.get("employee_id")
-                    amount = entry.get("amount", 0)
-                    ledger_totals[employee_id] += amount
+                    if isinstance(entry, dict):
+                        employee_id = entry.get("employee_id")
+                        amount = entry.get("amount", 0)
+                        if employee_id and isinstance(amount, (int, float)):
+                            ledger_totals[employee_id] += amount
                 
                 # Check if summary matches ledger
                 for employee_summary in summary_data.get("employee_summaries", []):
