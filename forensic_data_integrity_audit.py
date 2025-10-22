@@ -276,14 +276,26 @@ class ForensicAudit:
         # Get initial ledger state
         ledger_response = self.make_request("GET", f"/payroll/cycles/{cycle_id}/ledger")
         if ledger_response and ledger_response.status_code == 200:
-            initial_ledger = ledger_response.json()
+            ledger_data = ledger_response.json()
+            
+            # Handle different response formats
+            if isinstance(ledger_data, list):
+                initial_ledger = ledger_data
+            elif isinstance(ledger_data, dict) and 'entries' in ledger_data:
+                initial_ledger = ledger_data['entries']
+            elif isinstance(ledger_data, dict) and 'ledger_entries' in ledger_data:
+                initial_ledger = ledger_data['ledger_entries']
+            else:
+                initial_ledger = []
+                
             print(f"📊 Initial ledger entries: {len(initial_ledger)}")
             
             # Create a signature for each ledger entry to detect duplicates
             initial_signatures = []
             for entry in initial_ledger:
-                signature = f"{entry.get('employee_id')}_{cycle_id}_{entry.get('source_type')}_{entry.get('source_id', 'none')}"
-                initial_signatures.append(signature)
+                if isinstance(entry, dict):
+                    signature = f"{entry.get('employee_id')}_{cycle_id}_{entry.get('source_type')}_{entry.get('source_id', 'none')}"
+                    initial_signatures.append(signature)
             
             # Count duplicates in initial state
             signature_counts = Counter(initial_signatures)
