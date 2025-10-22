@@ -215,21 +215,34 @@ class ForensicAudit:
                 
                 for i in range(len(checkins) - 1):
                     try:
-                        time1 = datetime.strptime(checkins[i]["check_in"], "%H:%M:%S")
-                        time2 = datetime.strptime(checkins[i+1]["check_in"], "%H:%M:%S")
+                        # Parse times with multiple format support
+                        time1_str = checkins[i]["check_in"].strip()
+                        time2_str = checkins[i+1]["check_in"].strip()
                         
-                        time_diff = abs((time2 - time1).total_seconds() / 60)
+                        time_formats = ["%H:%M:%S", "%H:%M"]
+                        time1 = time2 = None
                         
-                        if time_diff <= 10:
-                            findings["duplicate_checkins"].append({
-                                "employee_id": employee_id,
-                                "date": date,
-                                "record1_id": checkins[i]["record_id"],
-                                "record2_id": checkins[i+1]["record_id"],
-                                "check_in1": checkins[i]["check_in"],
-                                "check_in2": checkins[i+1]["check_in"],
-                                "time_difference_minutes": time_diff
-                            })
+                        for fmt in time_formats:
+                            try:
+                                time1 = datetime.strptime(time1_str, fmt)
+                                time2 = datetime.strptime(time2_str, fmt)
+                                break
+                            except ValueError:
+                                continue
+                        
+                        if time1 and time2:
+                            time_diff = abs((time2 - time1).total_seconds() / 60)
+                            
+                            if time_diff <= 10:
+                                findings["duplicate_checkins"].append({
+                                    "employee_id": employee_id,
+                                    "date": date,
+                                    "record1_id": checkins[i]["record_id"],
+                                    "record2_id": checkins[i+1]["record_id"],
+                                    "check_in1": checkins[i]["check_in"],
+                                    "check_in2": checkins[i+1]["check_in"],
+                                    "time_difference_minutes": time_diff
+                                })
                     except Exception as e:
                         print(f"⚠️ Error comparing check-in times: {e}")
         
