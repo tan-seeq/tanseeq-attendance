@@ -2730,16 +2730,6 @@ async def calculate_monthly_deductions_endpoint(
                 detail=f"قيم الشهر غير صحيحة: {str(ve)}"
             )
         
-        # ✅ Use advanced_deductions_system for accurate calculations
-        from advanced_deductions_system import calculate_monthly_deductions as calc_monthly
-        
-        # Call the advanced system
-        deduction_summaries = await calc_monthly(
-            db=db,
-            year=year,
-            month=month_num
-        )
-        
         # ✅ Calculate 29→28 cycle dates for display
         if month_num == 1:
             # For January, previous month is December of previous year
