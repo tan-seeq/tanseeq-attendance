@@ -186,10 +186,15 @@ const MonthlyDeductionsCalculator = () => {
       }
       
       setApplying(true);
-      const apiUrl = `${API}/deductions/apply-monthly?month=${month}&year=${year}`;
-      console.log('Apply API URL:', apiUrl);
+      // ✅ FIXED: Send request body with month and employees data
+      const requestBody = {
+        month: selectedMonth,  // YYYY-MM format
+        employees: calculatedData.employees || [],
+        notes: `Applied via Advanced Deductions System on ${new Date().toISOString()}`
+      };
+      console.log('Apply API Request:', requestBody);
       
-      const response = await axios.post(apiUrl);
+      const response = await axios.post(`${API}/deductions/apply-monthly`, requestBody);
       
       alert(`Deductions applied successfully!\nEmployees: ${response.data.employees_affected || 0}\nTotal: ${response.data.total_deduction_amount || 0} AED`);
       handleCalculate();
