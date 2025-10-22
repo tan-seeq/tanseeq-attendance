@@ -2753,69 +2753,116 @@ async def calculate_monthly_deductions(
             if employee_salary <= 0:
                 continue
             
-            deduction_details = []
+            # Get ALL attendance records for the period (not just late/absent)
+            all_attendance = await db.attendance.find({
+                "user_id": employee_id,
+                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}
+            }).sort("date", 1).to_list(None)
+            
+            # Build detailed daily breakdown
+            daily_breakdown = []
             late_deduction = 0
             absence_deduction = 0
-            advance_deduction = 0
+            late_count = 0
+            total_late_minutes = 0
             
-            # 1. Calculate Late Deductions (التأخير)
-            # ✅ Fixed: attendance table uses 'user_id' not 'employee_id'
-            attendance_records = await db.attendance.find({
-                "user_id": employee_id,
-                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
-                "status": "late"
-            }).to_list(None)
-            
-            # Count late incidents and total late minutes
-            late_count = len(attendance_records)
-            total_late_minutes = sum(r.get("late_minutes", 0) for r in attendance_records)
-            
-            # Apply late deduction rules
-            if late_count > 0:
-                # First 15 minutes x 4 times = free
-                free_minutes = 15 * 4
+            for record in all_attendance:
+                day_date = record.get("date")
+                status = record.get("status", "present")
+                check_in = record.get("check_in")
+                check_out = record.get("check_out")
+                late_minutes = record.get("late_minutes", 0)
+                early_leave_minutes = record.get("early_departure_minutes", 0)
+                working_hours = record.get("working_hours", 0)
                 
-                if late_count <= 4:
-                    # First 4 times with less than 15 min each = free
-                    if all(r.get("late_minutes", 0) <= 15 for r in attendance_records):
-                        deduction_details.append(f"تأخير {late_count} مرات (مجاناً - أقل من 15 دقيقة)")
-                    else:
-                        # Some late > 15 minutes
-                        billable_minutes = sum(
-                            max(0, r.get("late_minutes", 0) - 15) 
-                            for r in attendance_records
-                        )
-        
-                        if billable_minutes > 0:
-                            hourly_rate = employee_salary / 30 / 8  # Per hour
-                            late_deduction = (billable_minutes / 60) * hourly_rate
-                            deduction_details.append(
-                                f"تأخير {late_count} مرات - {billable_minutes} دقيقة قابلة للخصم"
-                            )
-        
-                else:
-                    # More than 4 times: accumulate all minutes
-                    billable_minutes = max(0, total_late_minutes - free_minutes)
-                    if billable_minutes > 0:
+                # Determine rule applied and deduction
+                rule_applied = "No deduction"
+                day_deduction = 0
+                deduction_type = "none"
+                note = ""
+                
+                if status == "absent":
+                    rule_applied = "Full-day deduction (غياب)"
+                    daily_rate = employee_salary / 30
+                    day_deduction = daily_rate
+                    absence_deduction += day_deduction
+                    deduction_type = "absence"
+                    note = "غياب بدون مبرر"
+                    
+                elif status == "late":
+                    late_count += 1
+                    total_late_minutes += late_minutes
+                    
+                    if late_minutes <= 15:
+                        if late_count <= 4:
+                            rule_applied = f"Grace period (15 min × {late_count}/4 free)"
+                            note = "داخل حد الجريس المجاني"
+                        else:
+                            # After 4 times, even <15 min counts
+                            rule_applied = "Accumulated after grace period"
+                            hourly_rate = employee_salary / 30 / 8
+                            day_deduction = (late_minutes / 60) * hourly_rate
+                            late_deduction += day_deduction
+                            deduction_type = "late"
+                            note = f"تأخير {late_minutes} دقيقة (بعد انتهاء الجريس)"
+                    elif late_minutes <= 20:
+                        rule_applied = "Exact time deduction (16-20 min)"
                         hourly_rate = employee_salary / 30 / 8
-                        late_deduction = (billable_minutes / 60) * hourly_rate
-                        deduction_details.append(
-                            f"تأخير {late_count} مرات - {billable_minutes} دقيقة (بعد خصم المجاني)"
-                        )
-        
+                        day_deduction = (late_minutes / 60) * hourly_rate
+                        late_deduction += day_deduction
+                        deduction_type = "late"
+                        note = f"تأخير {late_minutes} دقيقة - خصم دقيق"
+                    elif late_minutes <= 120:
+                        rule_applied = "Half-day deduction (20-120 min)"
+                        day_deduction = (employee_salary / 30) / 2
+                        late_deduction += day_deduction
+                        deduction_type = "late_half_day"
+                        note = "تأخير أكثر من 20 دقيقة - نصف يوم"
+                    else:
+                        rule_applied = "Full-day deduction (>120 min)"
+                        day_deduction = employee_salary / 30
+                        late_deduction += day_deduction
+                        deduction_type = "late_full_day"
+                        note = "تأخير أكثر من ساعتين - يوم كامل"
+                
+                elif status == "weekend":
+                    rule_applied = "Weekend (excluded)"
+                    note = "عطلة نهاية أسبوع"
+                    
+                elif status == "holiday":
+                    rule_applied = "Public holiday (excluded)"
+                    note = "عطلة رسمية"
+                    
+                elif status == "on_leave":
+                    rule_applied = "Approved leave (excluded)"
+                    note = "إجازة معتمدة"
+                    
+                elif status == "present":
+                    rule_applied = "Normal attendance"
+                    note = "حضور وانصراف طبيعي"
+                
+                # Add to daily breakdown
+                daily_breakdown.append({
+                    "date": day_date,
+                    "status": status,
+                    "check_in": check_in,
+                    "check_out": check_out,
+                    "late_minutes": late_minutes,
+                    "early_leave_minutes": early_leave_minutes,
+                    "working_hours": working_hours,
+                    "rule_applied": rule_applied,
+                    "deduction_type": deduction_type,
+                    "deduction_amount": round(day_deduction, 2),
+                    "note": note
+                })
             
-            # 2. Calculate Absence Deductions (الغياب)
-            # ✅ Fixed: attendance table uses 'user_id' not 'employee_id'
-            absence_records = await db.attendance.find({
-                "user_id": employee_id,
-                "date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()},
-                "status": "absent"
-            }).to_list(None)
+            deduction_details = []
+            if late_count > 0:
+                deduction_details.append(f"تأخير {late_count} مرات - إجمالي {total_late_minutes} دقيقة")
             
-            if len(absence_records) > 0:
-                daily_rate = employee_salary / 30
-                absence_deduction = len(absence_records) * daily_rate
-                deduction_details.append(f"غياب {len(absence_records)} يوم")
+            absence_count = len([d for d in daily_breakdown if d["status"] == "absent"])
+            if absence_count > 0:
+                deduction_details.append(f"غياب {absence_count} يوم")
             
             # 3. Calculate Due Advance Installments (أقساط السلف المستحقة)
             due_installments = await db.individual_installments.find({
