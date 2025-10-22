@@ -1,0 +1,393 @@
+{
+  "test_run": {
+    "timestamp": "2025-10-22T07:02:19.515904",
+    "backend_url": "https://hr-tanseeq-app.preview.emergentagent.com/api",
+    "total_tests": 35,
+    "passed_tests": 33,
+    "failed_tests": 2,
+    "success_rate": 94.28571428571428
+  },
+  "test_results": [
+    {
+      "test": "Login super_admin",
+      "success": true,
+      "details": "Successfully logged in as super_admin (admin@tanseeq.com)",
+      "timestamp": "2025-10-22T07:02:17.959727",
+      "response_data": {
+        "user_id": "admin_001",
+        "role": "super_admin"
+      }
+    },
+    {
+      "test": "Auth/me super_admin",
+      "success": true,
+      "details": "Successfully retrieved user info for super_admin",
+      "timestamp": "2025-10-22T07:02:17.984927",
+      "response_data": {
+        "id": "admin_001",
+        "name": "مدير النظام",
+        "email": "admin@tanseeq.com",
+        "role": "super_admin",
+        "position": "مدير",
+        "is_active": true
+      }
+    },
+    {
+      "test": "Login admin",
+      "success": true,
+      "details": "Successfully logged in as admin (mahmoud@tanseeq.com)",
+      "timestamp": "2025-10-22T07:02:18.286333",
+      "response_data": {
+        "user_id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+        "role": "admin"
+      }
+    },
+    {
+      "test": "Auth/me admin",
+      "success": true,
+      "details": "Successfully retrieved user info for admin",
+      "timestamp": "2025-10-22T07:02:18.310728",
+      "response_data": {
+        "id": "3d3f42df-e01a-46b6-be41-eeee52ea0ec7",
+        "name": "Mahmoud",
+        "email": "mahmoud@tanseeq.com",
+        "role": "admin",
+        "position": "Operations Manager",
+        "is_active": true
+      }
+    },
+    {
+      "test": "Login user",
+      "success": true,
+      "details": "Successfully logged in as user (jihad@tanseeq.com)",
+      "timestamp": "2025-10-22T07:02:18.585984",
+      "response_data": {
+        "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "role": "user"
+      }
+    },
+    {
+      "test": "Auth/me user",
+      "success": true,
+      "details": "Successfully retrieved user info for user",
+      "timestamp": "2025-10-22T07:02:18.648076",
+      "response_data": {
+        "id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "name": "Jihad",
+        "email": "jihad@tanseeq.com",
+        "role": "user",
+        "position": "Tax Consultant",
+        "is_active": true
+      }
+    },
+    {
+      "test": "Invalid credentials test",
+      "success": true,
+      "details": "Correctly rejected invalid credentials",
+      "timestamp": "2025-10-22T07:02:18.668297",
+      "response_data": null
+    },
+    {
+      "test": "User check-in",
+      "success": true,
+      "details": "Check-in response: 200",
+      "timestamp": "2025-10-22T07:02:18.706604",
+      "response_data": {
+        "message": "تم تسجيل الحضور بنجاح ✅",
+        "time": "11:02:18",
+        "status": "متأخر",
+        "is_late": true,
+        "late_minutes": 2,
+        "schedule_type": "flexible"
+      }
+    },
+    {
+      "test": "User attendance records",
+      "success": true,
+      "details": "Retrieved 10 attendance records",
+      "timestamp": "2025-10-22T07:02:18.730210",
+      "response_data": {
+        "count": 10,
+        "sample": [
+          {
+            "id": "9d994d78-b407-4c5f-8fa6-7ce0e320a4b3",
+            "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+            "user_name": "Jihad",
+            "date": "2025-01-27",
+            "check_in": "08:30:00",
+            "check_out": "16:45:00",
+            "working_hours": 8.25,
+            "status": "present",
+            "is_late": false,
+            "late_minutes": 0,
+            "early_departure_minutes": 0,
+            "deducted_hours": 0.0,
+            "field_exit": null,
+            "created_at": "2025-08-20T11:21:30.221000+04:00",
+            "updated_at": null
+          },
+          {
+            "id": "1a6661c1-6ee0-4bfa-98a0-d53a65b41b87",
+            "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+            "user_name": "Jihad",
+            "date": "2025-07-16",
+            "check_in": "09:21:18",
+            "check_out": "06:22:52",
+            "working_hours": 21.03,
+            "status": "Late",
+            "is_late": false,
+            "late_minutes": 0,
+            "early_departure_minutes": 0,
+            "deducted_hours": 0.0,
+            "field_exit": {
+              "field_exit_id": "5abdceea-0ba2-4f9e-9d58-820acd3edf0a",
+              "visit_type": "client_visit",
+              "client_name": "Test Client",
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "report": "Test field exit report"
+            },
+            "created_at": "2025-07-16T05:21:18.191000+04:00",
+            "updated_at": null
+          }
+        ]
+      }
+    },
+    {
+      "test": "Super Admin all attendance",
+      "success": true,
+      "details": "Retrieved 57 total attendance records",
+      "timestamp": "2025-10-22T07:02:18.769538",
+      "response_data": {
+        "count": 57
+      }
+    },
+    {
+      "test": "9:15 AM late tracking verification",
+      "success": true,
+      "details": "Found 10 records with late_minutes > 0",
+      "timestamp": "2025-10-22T07:02:18.769591",
+      "response_data": {
+        "late_records_count": 10
+      }
+    },
+    {
+      "test": "Monthly deductions calculation",
+      "success": true,
+      "details": "Successfully calculated monthly deductions for 2025-10",
+      "timestamp": "2025-10-22T07:02:18.866848",
+      "response_data": {
+        "employee_count": "N/A"
+      }
+    },
+    {
+      "test": "Custom date range deductions",
+      "success": false,
+      "details": "Failed custom calculation: 400",
+      "timestamp": "2025-10-22T07:02:18.885965",
+      "response_data": "{\"detail\":\"month and year are required for monthly mode\"}"
+    },
+    {
+      "test": "Apply monthly deductions",
+      "success": false,
+      "details": "Failed to apply deductions: 422",
+      "timestamp": "2025-10-22T07:02:18.905233",
+      "response_data": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\"],\"msg\":\"Field required\",\"input\":null,\"url\":\"https://errors.pydantic.dev/2.11/v/missing\"}]}"
+    },
+    {
+      "test": "Payroll cycles list",
+      "success": true,
+      "details": "Retrieved 6 payroll cycles",
+      "timestamp": "2025-10-22T07:02:18.923885",
+      "response_data": {
+        "cycles_count": 6
+      }
+    },
+    {
+      "test": "Payroll cycle details",
+      "success": true,
+      "details": "Retrieved details for cycle 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "timestamp": "2025-10-22T07:02:18.950073",
+      "response_data": null
+    },
+    {
+      "test": "Payroll cycle summary",
+      "success": true,
+      "details": "Retrieved summary for cycle 026ce2ba-4471-482c-ac03-dbb8353ac13f",
+      "timestamp": "2025-10-22T07:02:18.983614",
+      "response_data": null
+    },
+    {
+      "test": "Payroll ledger (FIXED)",
+      "success": true,
+      "details": "Successfully retrieved ledger entries",
+      "timestamp": "2025-10-22T07:02:19.007133",
+      "response_data": {
+        "entries_count": "N/A"
+      }
+    },
+    {
+      "test": "User balance retrieval",
+      "success": true,
+      "details": "Retrieved balance: 9080.0 AED",
+      "timestamp": "2025-10-22T07:02:19.027092",
+      "response_data": {
+        "employee_name": "Jihad",
+        "total_advances": 8125.0,
+        "total_custody": 1300.0,
+        "total_expenses": 345.0,
+        "remaining_advance": 8125.0,
+        "remaining_custody": 955.0,
+        "total_available": 9080.0,
+        "last_transaction_date": "2025-10-20T11:25:03.869216+04:00"
+      }
+    },
+    {
+      "test": "User transactions retrieval",
+      "success": true,
+      "details": "Retrieved 34 transactions",
+      "timestamp": "2025-10-22T07:02:19.051660",
+      "response_data": {
+        "transactions_count": 34
+      }
+    },
+    {
+      "test": "Admin all balances",
+      "success": true,
+      "details": "Retrieved balances for 5 employees",
+      "timestamp": "2025-10-22T07:02:19.085420",
+      "response_data": {
+        "employees_count": 5
+      }
+    },
+    {
+      "test": "Admin pending approvals",
+      "success": true,
+      "details": "Retrieved 2 pending transactions",
+      "timestamp": "2025-10-22T07:02:19.111103",
+      "response_data": {
+        "pending_count": 2
+      }
+    },
+    {
+      "test": "Admin all transactions",
+      "success": true,
+      "details": "Retrieved 49 total transactions",
+      "timestamp": "2025-10-22T07:02:19.135835",
+      "response_data": {
+        "total_transactions": 49
+      }
+    },
+    {
+      "test": "User leave requests",
+      "success": true,
+      "details": "Retrieved 4 leave requests",
+      "timestamp": "2025-10-22T07:02:19.159966",
+      "response_data": {
+        "leaves_count": 4
+      }
+    },
+    {
+      "test": "Admin all leave requests",
+      "success": true,
+      "details": "Retrieved 26 total leave requests",
+      "timestamp": "2025-10-22T07:02:19.183844",
+      "response_data": {
+        "total_leaves": 26
+      }
+    },
+    {
+      "test": "Work reports clients",
+      "success": true,
+      "details": "Retrieved 10 clients",
+      "timestamp": "2025-10-22T07:02:19.222041",
+      "response_data": {
+        "clients_count": 10
+      }
+    },
+    {
+      "test": "Work reports logs",
+      "success": true,
+      "details": "Retrieved work logs successfully",
+      "timestamp": "2025-10-22T07:02:19.284888",
+      "response_data": {
+        "response_type": "dict"
+      }
+    },
+    {
+      "test": "User notifications",
+      "success": true,
+      "details": "Retrieved 1 notifications",
+      "timestamp": "2025-10-22T07:02:19.314635",
+      "response_data": {
+        "notifications_count": 1
+      }
+    },
+    {
+      "test": "Unread mandatory notifications",
+      "success": true,
+      "details": "Retrieved unread mandatory notifications",
+      "timestamp": "2025-10-22T07:02:19.341938",
+      "response_data": {
+        "unread_count": "N/A"
+      }
+    },
+    {
+      "test": "Admin all notifications",
+      "success": true,
+      "details": "Retrieved 178 total notifications",
+      "timestamp": "2025-10-22T07:02:19.373166",
+      "response_data": {
+        "total_notifications": 178
+      }
+    },
+    {
+      "test": "Marketing visits active",
+      "success": true,
+      "details": "Retrieved active visit status",
+      "timestamp": "2025-10-22T07:02:19.395290",
+      "response_data": {
+        "active_visit": {
+          "id": "a60704c1-9193-48b5-81c2-e7c97dc1cf37",
+          "client_name": "شركة الإمارات للتجارة",
+          "location_name": "مكتب دبي الرئيسي",
+          "area": "دبي",
+          "purpose": "new_client",
+          "purpose_ar": "عميل جديد",
+          "start_time": "2025-10-20T07:25:03.478861+00:00",
+          "elapsed_minutes": 2857,
+          "can_complete": true
+        }
+      }
+    },
+    {
+      "test": "Health check",
+      "success": true,
+      "details": "Health endpoint responding correctly",
+      "timestamp": "2025-10-22T07:02:19.411148",
+      "response_data": null
+    },
+    {
+      "test": "Readiness check",
+      "success": true,
+      "details": "Readiness endpoint responding correctly",
+      "timestamp": "2025-10-22T07:02:19.473065",
+      "response_data": null
+    },
+    {
+      "test": "Root endpoint",
+      "success": true,
+      "details": "Root endpoint responding correctly",
+      "timestamp": "2025-10-22T07:02:19.496116",
+      "response_data": null
+    },
+    {
+      "test": "RBAC enforcement",
+      "success": true,
+      "details": "User correctly denied access to admin endpoint (403)",
+      "timestamp": "2025-10-22T07:02:19.515478",
+      "response_data": null
+    }
+  ],
+  "evidence": {}
+}
