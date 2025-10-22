@@ -162,6 +162,42 @@ class PayrollLedgerService:
         await self.ledger_collection.insert_one(reversal_entry)
         return reversal_entry
     
+    async def delete_entries_for_employee_cycle(
+        self,
+        employee_id: str,
+        cycle_id: str,
+        source_types: List[str] = None
+    ) -> int:
+        """
+        حذف القيود لموظف ودورة معينة (لمنع التكرار عند إعادة التطبيق)
+        Delete ledger entries for specific employee/cycle to prevent duplication
+        
+        Args:
+            employee_id: ID of employee
+            cycle_id: ID of payroll cycle
+            source_types: List of source types to delete (e.g., ["ATTENDANCE_DEDUCTION"])
+                         If None, deletes all types (DANGEROUS!)
+        
+        Returns:
+            Number of entries deleted
+        """
+        query = {
+            "employee_id": employee_id,
+            "cycle_id": cycle_id,
+            "is_reversed": {"$ne": True}  # Don't delete reversed entries
+        }
+        
+        if source_types:
+            query["source_type"] = {"$in": source_types}
+        
+        result = await self.ledger_collection.delete_many(query)
+        deleted_count = result.deleted_count
+        
+        if deleted_count > 0:
+            logger.info(f"Deleted {deleted_count} ledger entries for employee {employee_id} in cycle {cycle_id} (types: {source_types})")
+        
+        return deleted_count
+    
     async def get_entries_for_cycle(
         self,
         cycle_id: str,
