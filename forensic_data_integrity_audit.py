@@ -454,7 +454,16 @@ class ForensicAudit:
             print(f"❌ Failed to get employees: {response.status_code if response else 'No response'}")
             return
             
-        employees = response.json()
+        employees_data = response.json()
+        
+        # Handle different response formats
+        if isinstance(employees_data, list):
+            employees = employees_data
+        elif isinstance(employees_data, dict) and 'employees' in employees_data:
+            employees = employees_data['employees']
+        else:
+            employees = []
+            
         print(f"📊 Found {len(employees)} employees")
         
         # Get payroll cycles
