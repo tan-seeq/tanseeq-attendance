@@ -1054,11 +1054,8 @@ const Dashboard = () => {
     
     setPenaltyLoading(true);
     try {
-      // Parse month string (YYYY-MM) to separate values
-      const [year, month] = selectedMonth.split('-').map(Number);
-      
-      // Use new advanced deductions API with proper parameters
-      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${month}&year=${year}`);
+      // ✅ FIXED: Send month in YYYY-MM format as backend expects
+      const response = await axios.post(`${API}/deductions/calculate-monthly?month=${selectedMonth}`);
       
       if (response.data.success && response.data.employees) {
         // Transform to old penalty format for display with daily records
