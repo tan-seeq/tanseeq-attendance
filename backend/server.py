@@ -2985,22 +2985,22 @@ async def calculate_custom_deductions(
                 "daily_records": []  # Will populate below
             }
             
-            # Convert daily_breakdown to daily_records format
-            for day in summary.daily_breakdown:
+            # Convert daily_records to daily_records format
+            for day in summary.daily_records:
                 employee_data["daily_records"].append({
-                    "date": day.date.isoformat(),
+                    "date": day.date.isoformat() if hasattr(day.date, 'isoformat') else day.date,
                     "status": day.status,
-                    "check_in": day.check_in if day.check_in else "-",
-                    "check_out": day.check_out if day.check_out else "-",
+                    "check_in": day.check_in_time if day.check_in_time else "-",
+                    "check_out": day.check_out_time if day.check_out_time else "-",
                     "total_work_minutes": day.total_work_minutes,
                     "late_minutes": day.late_minutes,
                     "early_leave_minutes": day.early_leave_minutes,
-                    "deficit_minutes": day.late_minutes + day.early_leave_minutes,
-                    "working_hours": day.working_hours,
+                    "deficit_minutes": day.deficit_minutes,
+                    "working_hours": day.actual_working_hours,
                     "rule_applied": day.rule_applied,
                     "deduction_type": day.deduction_type,
                     "deduction_amount": round(day.deduction_amount, 2),
-                    "note": day.note,
+                    "note": day.deduction_note,
                     "is_absent": day.status == "absent"
                 })
             
