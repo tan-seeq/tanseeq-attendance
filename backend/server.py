@@ -3033,6 +3033,9 @@ async def calculate_custom_deductions(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"❌ Custom Period Error: {str(e)}")
+        print(f"❌ Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
 
 class ApplyDeductionsRequest(BaseModel):
