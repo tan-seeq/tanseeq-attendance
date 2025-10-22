@@ -2686,13 +2686,15 @@ async def get_all_deductions_admin(
     return {"deductions": deductions}
 
 @api_router.post("/deductions/calculate-monthly")
-async def calculate_monthly_deductions(
+async def calculate_monthly_deductions_endpoint(
     month: str = Query(..., description="Month in YYYY-MM format"),
     current_user: User = Depends(get_super_admin_user)
 ):
     """
-    حساب خصومات التأخير والغياب والسلف المستحقة لشهر معين
-    Returns: قائمة الموظفين مع الخصومات المحسوبة (لم يتم تطبيقها بعد)
+    حساب خصومات التأخير والغياب لشهر معين باستخدام النظام المتقدم
+    ✅ Uses advanced_deductions_system for accurate calculations
+    ✅ Returns detailed daily breakdown for each employee
+    Returns: قائمة الموظفين مع الخصومات والتفاصيل اليومية
     """
     try:
         # ✅ Validate and parse month (format: YYYY-MM)
@@ -2709,17 +2711,17 @@ async def calculate_monthly_deductions(
                 detail="تنسيق الشهر غير صحيح. يجب أن يكون بصيغة YYYY-MM مثل 2025-10"
             )
         
-        year, month_num = parts
+        year_str, month_str = parts
         
         # Validate year and month values
         try:
-            year_int = int(year)
-            month_int = int(month_num)
+            year = int(year_str)
+            month_num = int(month_str)
             
-            if year_int < 2020 or year_int > 2100:
+            if year < 2020 or year > 2100:
                 raise ValueError("السنة خارج النطاق المقبول")
             
-            if month_int < 1 or month_int > 12:
+            if month_num < 1 or month_num > 12:
                 raise ValueError("الشهر يجب أن يكون بين 1 و 12")
                 
         except ValueError as ve:
