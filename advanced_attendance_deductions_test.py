@@ -95,15 +95,18 @@ class AdvancedDeductionsSystemTester:
                     self.log_test("Monthly Calculation Oct 2025", "WARN", "No employees found in calculation")
                     return
                 
-                # Verify cycle window
-                cycle_info = data.get("cycle", {})
+                # Verify cycle window (actual API uses cycle_window not cycle)
+                cycle_info = data.get("cycle_window", {})
                 expected_start = "2025-09-29"
                 expected_end = "2025-10-28"
                 
-                if cycle_info.get("start_date") != expected_start or cycle_info.get("end_date") != expected_end:
+                actual_start = cycle_info.get("from")
+                actual_end = cycle_info.get("to")
+                
+                if actual_start != expected_start or actual_end != expected_end:
                     self.log_test("Monthly Calculation Oct 2025", "WARN", 
                                 f"Cycle window mismatch. Expected: {expected_start} to {expected_end}, "
-                                f"Got: {cycle_info.get('start_date')} to {cycle_info.get('end_date')}")
+                                f"Got: {actual_start} to {actual_end}")
                 
                 # Verify daily breakdown structure
                 daily_breakdown_found = False
