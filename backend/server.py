@@ -2695,9 +2695,40 @@ async def calculate_monthly_deductions(
     Returns: قائمة الموظفين مع الخصومات المحسوبة (لم يتم تطبيقها بعد)
     """
     try:
-        # Parse month (format: YYYY-MM)
-        year, month_num = month.split('-')
-        start_date = date(int(year), int(month_num), 1)
+        # ✅ Validate and parse month (format: YYYY-MM)
+        if not month or '-' not in month:
+            raise HTTPException(
+                status_code=400,
+                detail="تنسيق الشهر غير صحيح. يجب أن يكون بصيغة YYYY-MM مثل 2025-10"
+            )
+        
+        parts = month.split('-')
+        if len(parts) != 2:
+            raise HTTPException(
+                status_code=400,
+                detail="تنسيق الشهر غير صحيح. يجب أن يكون بصيغة YYYY-MM مثل 2025-10"
+            )
+        
+        year, month_num = parts
+        
+        # Validate year and month values
+        try:
+            year_int = int(year)
+            month_int = int(month_num)
+            
+            if year_int < 2020 or year_int > 2100:
+                raise ValueError("السنة خارج النطاق المقبول")
+            
+            if month_int < 1 or month_int > 12:
+                raise ValueError("الشهر يجب أن يكون بين 1 و 12")
+                
+        except ValueError as ve:
+            raise HTTPException(
+                status_code=400,
+                detail=f"قيم الشهر غير صحيحة: {str(ve)}"
+            )
+        
+        start_date = date(year_int, month_int, 1)
         if int(month_num) == 12:
             end_date = date(int(year) + 1, 1, 1) - timedelta(days=1)
         else:
