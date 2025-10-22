@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://hr-tanseeq-app.preview.emergentagent.com/api"
+BACKEND_URL = "https://tanseeq-attendance.preview.emergentagent.com/api"
 
 # Test Credentials
 TEST_CREDENTIALS = {

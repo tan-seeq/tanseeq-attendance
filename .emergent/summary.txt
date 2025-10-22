@@ -1,21 +1,20 @@
 <analysis>
-The trajectory details an AI engineer's work on the TANSEEQ HR application, focusing on the Advanced Attendance Deduction System. The work started with clarifying the detailed requirements for daily breakdown and export functionality for both the dedicated advanced deductions page and the main dashboard button. The AI initially believed this feature was fully implemented in  and . However, subsequent user queries led to debugging the monthly deduction cycle calculation, revealing it was correctly implemented despite initial confusion. The session then heavily focused on resolving numerous s and s in , which were preventing successful deployment to Kubernetes. These errors stemmed from incorrectly duplicated code snippets and misplaced import statements. The AI systematically identified and corrected over 30 such issues, along with a hardcoded database name. The trajectory concludes with a comprehensive report detailing these deployment fixes.
+The trajectory details an AI engineer's work on the TANSEEQ HR application's Advanced Attendance Deduction System. Initially, the AI debugged and fixed numerous s and s in  that were preventing Kubernetes deployment, and addressed monthly deduction cycle logic. The user then escalated with a request for a forensic-level deep audit, highlighting critical issues like incorrect monthly deduction calculations (500/400 errors), Ledger duplication, and missing daily deduction details. The AI systematically addressed these, correcting API routes, implementing Idempotency logic for payroll, and refining deduction calculation responses. However, repeated user complaints of unchanged issues led to the discovery of a critical deployment misconfiguration: the frontend was consistently pointing to an outdated preview environment URL. This environment variable () was corrected, signifying that most code fixes were in place, but not visible to the user due to deployment failure.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application requires an Advanced Attendance Deduction System to automate late arrival, early departure, and under-hours deductions. It must include exclusion rules for specific employees (Hatem, Tariq), weekends (Fridays/Saturdays), public holidays, and approved leaves, with official working hours 9 AM - 6 PM. The system needs two calculation modes: monthly (29th previous month to 28th current month) and custom date-range ( to ). Reporting should generate  reports. Initially, custom date-range calculations were preview-only, but the user later requested the Apply button to be visible and functional for custom ranges. The UI requires a / mode toggle, dynamic date input, summary cards, a detailed employee table with daily breakdown, and CSV/Excel export, with clear Arabic (and later English) validation messages. Deductions should only apply late/absence rules, not advances/loans. Detailed daily breakdown of deductions, along with export options, is crucial for both the advanced deductions page and the main dashboard button. The monthly deduction cycle was confirmed to be 29th of the previous month to 28th of the current month.
+The TANSEEQ HR application requires an Advanced Attendance Deduction System to automate late arrival, early departure, and under-hours deductions. It must include exclusion rules for specific employees (Hatem, Tariq), weekends (Fridays/Saturdays), public holidays, and approved leaves, with official working hours 9 AM - 6 PM (8 hours net with 1-hour break). The system needs two calculation modes: monthly (29th previous month to 28th current month) and custom date-range ( to ). Custom ranges are preview-only, with a maximum of 93 days. Deductions should only apply late/absence rules, not advances/loans. The UI needs a Monthly/Custom toggle, dynamic date input, summary cards, a detailed employee table with daily breakdown (showing date, status, check-in/out, late/early minutes, rule applied, type, amount, note), and CSV/Excel export (with Arabic RTL). Grace rules for late deductions include 4 free 15-minute instances, then cumulative deduction, half-day for 1-2 hours, full-day for >2 hours. Critical issues include fixing 500/400 errors for monthly deductions, a 405 for Payroll Ledger, preventing automatic notification sends, ensuring Health Checks pass, confirming RBAC roles, and fixing export button visibility. Ledger entries must be idempotent upon recalculation.
 </product_requirements>
 
 <key_technical_concepts>
-- **Backend:** FastAPI, MongoDB (Motor), Pydantic, , .
-- **Frontend:** React.js, Axios, Tailwind CSS,  for PDF export.
+- **Backend:** FastAPI, MongoDB (Motor), Pydantic, , , Idempotency, JWT, RBAC.
+- **Frontend:** React.js, Axios, Tailwind CSS,  for PDF export, environment variables.
 - **Database:** MongoDB, UUIDs for IDs, environment variables for  and .
-- **Deployment:** Kubernetes, backend                          RUNNING   pid 33, uptime 0:00:07
-code-server                      RUNNING   pid 34, uptime 0:00:07
-frontend                         STOPPED   Oct 21 11:57 AM
-mongodb                          RUNNING   pid 36, uptime 0:00:07
-supervisor> , Yarn, React Fast Refresh.
-- **Deduction Logic:** Holiday/leave exemptions, specific working hours, flexible date ranges, idempotency.
+- **Deployment:** Kubernetes, backend                          RUNNING   pid 33, uptime 0:00:08
+code-server                      RUNNING   pid 34, uptime 0:00:08
+frontend                         RUNNING   pid 35, uptime 0:00:08
+mongodb                          RUNNING   pid 36, uptime 0:00:08
+supervisor> , Yarn, React Fast Refresh, Environment Variable Management.
 </key_technical_concepts>
 
 <code_architecture>
@@ -25,36 +24,46 @@ The application uses a monorepo structure with a React frontend and a FastAPI ba
 
 -   ****: The core FastAPI application, handling all API endpoints.
     -   **Importance**: Central routing and logic.
-    -   **Changes Made**: Initial s (incomplete  blocks, duplicated endpoints) were fixed.  was added. Modified  and  to return  and detailed counts. Most recently, numerous s, s, and logic errors due to malformed, duplicated code snippets (e.g., ) were systematically removed or corrected across various endpoints (Advances, Auth, Payroll, Messages, Work Reports, Deductions). A hardcoded database name  was replaced with .
--   ****: Contains the core logic for calculating advanced deductions.
-    -   **Importance**: Implements business rules for late/absence/under-hours deductions, including holiday/leave exclusions. It needed to return granular data. The  function was confirmed to correctly calculate the monthly cycle (29th previous to 28th current month).
-    -   **Changes Made**: Updated  model to include , , , , and  (list of daily records). Modified  to populate these new fields.
--   ****: Main React application file, handling routing and global components, including the dashboard's Calculate Deductions button.
-    -   **Importance**: Defines application layout and integrates components.
-    -   **Changes Made**: Numerous JSX syntax error fixes. Updated  and  to use new API endpoints. Implemented expandable rows for daily deduction details and added Excel/PDF export buttons per employee in the main dashboard's deduction report. Data parsing logic updated for .
--   ****: Frontend component for the Advanced Attendance Deductions page.
-    -   **Importance**: Provides UI for configuring and viewing deductions.
-    -   **Changes Made**: Introduced state for , , . Implemented UI with radio buttons and dynamic date inputs. Modified API calls to  with appropriate parameters. Made the Apply Deductions button functional for custom ranges. Added detailed error handling. Integrated expandable rows for daily deduction details and per-employee Excel/PDF export.  added as dependency.
--   ****: Intended for advanced deductions reports, but functionality moved.
-    -   **Importance**: Less critical as core logic was shifted.
-    -   **Changes Made**: Initial UI modifications were made but functionality was transferred to  and .
+    -   **Changes Made**: Extensive fixes for s, s, and logic errors from duplicated code (over 30 instances). Hardcoded  DB name replaced.  modified to return detailed daily records, use 29th-28th cycle, and remove advance/loan deductions. Corrected validation message for month format. Fixed  endpoint from  to . Consolidated duplicate  endpoints. Added user creation/fixing logic for  and  to  and  collections.
+-   ****: Contains core deduction logic.
+    -   **Importance**: Implements business rules for late/absence/under-hours deductions. Updated  model for granular details.  was modified to populate daily records.
+-   ****: Manages payroll ledger entries.
+    -   **Importance**: Handles creation and idempotency of payroll ledger.
+    -   **Changes Made**: Added  to ensure idempotency for ledger entries upon recalculation.
+-   ****: Script for database integrity checks.
+    -   **Importance**: Created for ad-hoc database fixes.
+    -   **Changes Made**: Initially contained a faulty query that was corrected.
+-   ****: Script to set up production user roles.
+    -   **Importance**: Ensures correct user roles for testing and production.
+    -   **Changes Made**: Created to initialize users with specific roles (Super Admin, Admins, Users).
+-   ****: Script for historical data cleaning.
+    -   **Importance**: Created to address potential issues with old attendance records.
+-   ****: Main React application file, routing and dashboard.
+    -   **Importance**: Defines application layout, integrates components, handles dashboard deduction button.
+    -   **Changes Made**: Updated for new API endpoints, expandable rows for daily details, and export options.
+-   ****: Advanced Attendance Deductions UI.
+    -   **Importance**: UI for configuring/viewing deductions.
+    -   **Changes Made**: UI for modes, dynamic date inputs, API calls, error handling, detailed daily breakdown, export.
 -   ****: Frontend environment variables.
     -   **Importance**: Configures .
-    -   **Changes Made**: Added .
--   ****: Frontend dependency management.
-    -   **Importance**: Manages libraries.
-    -   **Changes Made**:  added.
+    -   **Changes Made**:  was changed from  to  to point to the correct production environment.
 </code_architecture>
 
 <pending_tasks>
-- Refine the display of daily deduction details for the main dashboard button report in  to match the user's specific formatting requirements (daily values and calculated deductions).
-- Ensure the export functionality (Excel/PDF) for the main dashboard button report also provides the detailed, daily breakdown for each employee as requested by the user.
+- Ensure frontend reflects the fixed backend logic for Advanced Deductions (daily details, 29-28 cycle, no advances/loans).
+- Confirm Health Checks (, ) pass consistently after deployment.
+- Verify notifications are only sent via explicit action.
+- Validate Idempotency for payroll ledger merge.
+- Confirm RBAC roles are correctly enforced for all users.
+- Verify export functionality (PDF/Excel) includes detailed, daily breakdowns.
 </pending_tasks>
 
 <current_work>
-Immediately prior to this summary, the AI engineer was addressing deployment failures to Kubernetes. The deployment was failing with s (Status 520) originating from . These errors were caused by numerous incorrectly placed and duplicated code snippets, such as , and misplaced import statements like . The AI systematically identified and corrected over 30 such errors across various sections of  (including Advances, Auth, Payroll, Messages, Work Reports, and Deductions endpoints). Additionally, a hardcoded database name  was replaced with an environment variable  to ensure compatibility with dedicated MongoDB Atlas in production. After these extensive fixes, the backend server was successfully restarted, and local health checks passed. The AI then generated a comprehensive report detailing the problem and the applied solutions, confirming the application is now ready for re-deployment.
+Immediately prior to this summary, the AI engineer was addressing the user's report that previous fixes were not visible and the application was still exhibiting the same errors (e.g., 400 for monthly calculation, incorrect daily details). Through repeated troubleshooting and calls to specialized agents, the root cause was identified: the frontend application was configured to connect to an outdated preview environment URL () instead of the active production URL ().
+
+The AI had already implemented numerous code fixes in the backend, including correcting the month format validation, ensuring the 29th-to-28th monthly deduction cycle, enriching the daily deduction details in the API response, removing advance/loan deductions from the advanced system, and fixing API routing issues (). The frontend's  in  was updated to point to the correct production URL. The backend server and frontend processes were restarted, and local health checks passed. The current state is that the code is believed to be correct and fully functional, but the user needs to initiate a new deployment to see these changes reflected in their accessible production environment.
 </current_work>
 
 <optional_next_step>
-Verify and complete the refinement of the main dashboard's deduction display and export functionality as outlined in the pending tasks.
+Instruct the user to trigger a new deployment from the Emergent platform and clear their browser cache.
 </optional_next_step>

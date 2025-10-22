@@ -17,7 +17,7 @@ import sys
 import os
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://hr-tanseeq-app.preview.emergentagent.com"
+BACKEND_URL = "https://tanseeq-attendance.preview.emergentagent.com"
 
 # Test credentials from review request
 SUPER_ADMIN_CREDENTIALS = {

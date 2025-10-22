@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://hr-tanseeq-app.preview.emergentagent.com
-    - **Backend URL**: https://hr-tanseeq-app.preview.emergentagent.com/api
+    - **Frontend URL**: https://tanseeq-attendance.preview.emergentagent.com
+    - **Backend URL**: https://tanseeq-attendance.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 

@@ -67,7 +67,7 @@ def test_backup_create_download(token, base_url):
         return False, None
 
 if __name__ == "__main__":
-    backend_url = "https://hr-tanseeq-app.preview.emergentagent.com"
+    backend_url = "https://tanseeq-attendance.preview.emergentagent.com"
     
     print("🔍 Testing super_admin credentials...")
     print("=" * 50)

@@ -129,7 +129,7 @@ DB_NAME="tanseeq_hr"
 
 ### Frontend (.env)
 ```
-REACT_APP_BACKEND_URL=https://hr-tanseeq-app.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://tanseeq-attendance.preview.emergentagent.com
 ```
 
 **النتيجة**: ✅ **OK**
