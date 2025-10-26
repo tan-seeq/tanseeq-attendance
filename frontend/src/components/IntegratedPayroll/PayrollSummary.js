@@ -626,7 +626,7 @@ const PayrollSummary = () => {
                 <tr>
                   <td className="px-4 py-4 text-sm font-bold text-gray-900" colSpan="3">الإجمالي:</td>
                   <td className="px-4 py-4 text-sm font-bold text-green-600">{totals.gross.toFixed(2)}</td>
-                  <td className="px-4 py-4 text-sm" colSpan="3"></td>
+                  <td className="px-4 py-4 text-sm" colSpan="6"></td>
                   <td className="px-4 py-4 text-sm font-bold text-red-600">{totals.deductions.toFixed(2)}</td>
                   <td className="px-4 py-4 text-sm font-bold text-blue-600">{totals.net.toFixed(2)}</td>
                   <td className="px-4 py-4 text-sm"></td>
