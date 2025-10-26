@@ -22,13 +22,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # MongoDB connection
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/tanseeq_hr')
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+DB_NAME = os.environ.get('DB_NAME', 'tanseeq_hr')
 
 async def populate_attendance():
     """Populate October 2025 attendance data"""
     
     client = AsyncIOMotorClient(MONGO_URL)
-    db = client.get_database()
+    db = client[DB_NAME]
     
     print("🔄 Populating October 2025 attendance data...")
     
