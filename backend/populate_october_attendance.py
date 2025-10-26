@@ -121,7 +121,7 @@ async def populate_attendance():
                     })
                     day_count += 1
         
-        elif "محمد" in emp_name and "مصطفى" in emp_name:
+        elif "mohamed" in emp_name.lower() and "mostafa" in emp_name.lower():
             # Mohamed Mostafa: Target 297.74 AED with 2 absences and 154 late minutes (14 times)
             print(f"   🎯 Target: 297.74 AED with 2 absences + 154 late minutes (14 times)")
             
