@@ -149,6 +149,17 @@ frontend:
         comment: "🚨 RE-TEST AUTHENTICATION RESULTS - CREDENTIALS NOT FIXED: Conducted comprehensive re-testing of authentication as requested in review. CRITICAL FINDINGS: 1) ❌ ADMIN CREDENTIALS FAILED: mahmoud@tanseeq.com / mahmoud123 returns 401 Unauthorized with 'Invalid credentials' error 2) ❌ USER CREDENTIALS FAILED: jihad@tanseeq.com / jihad123 returns 401 Unauthorized with 'Invalid credentials' error 3) ✅ SUPER ADMIN WORKING: admin@tanseeq.com / ADMIN successfully logs in with full access to 15 menu items 4) ✅ SUPER ADMIN RBAC VERIFIED: Can access all advanced features (/advanced-deductions, /payroll-cycles, /attendance-management, /leave-management, /employees) 5) ✅ ARABIC INTERFACE: Perfect RTL support, Arabic greeting 'صباح الخير Admin QA', comprehensive dashboard with notifications 6) ✅ EMPLOYEE DATA VISIBLE: Found 10 employees in system including roles (Manager, Employee, Administrator, QA Super Admin) 7) ✅ SYSTEM FUNCTIONALITY: All core features operational - dashboard stats, notifications, employee management, reports accessible. CONCLUSION: The credentials mentioned in review request are NOT working. Only Super Admin credentials functional. Main agent must fix Admin/User authentication before RBAC testing can be completed as requested."
 
 backend:
+  - task: "URGENT UNIFIED DEDUCTIONS ENGINE VERIFICATION - October 2025"
+    implemented: true
+    working: false
+    file: "deductions_engine.py, server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 CRITICAL DATA MISMATCH IN UNIFIED DEDUCTIONS ENGINE TESTING: Successfully tested the unified deductions engine for October 2025 with mixed results. TECHNICAL VERIFICATION (✅ PASS): 1) ✅ AUTHENTICATION: admin@tanseeq.com/ADMIN working correctly 2) ✅ API ENDPOINT: POST /api/deductions/calculate-monthly?month=2025-10 operational (200 OK) 3) ✅ ENGINE VERSION: unified_v1.0 confirmed in response 4) ✅ FORMULA DOCUMENTATION: Note correctly mentions 'UNIFIED deductions engine with formula: (DailyRate/540) × deductible_minutes' 5) ✅ CYCLE WINDOW: Correct October 2025 cycle (2025-09-29 to 2025-10-28) 6) ✅ DAILY BREAKDOWN: Proper structure with required fields (date, check_in, check_out, late_minutes, early_leave_minutes, deduction_amount, grace_applied, rule_applied) 7) ✅ HATEM EXEMPT: Correctly shows 0 AED (exempt employee) 8) ✅ TARIQ RULE: Special rule (no late before 08:00 AM) applied correctly. CRITICAL DATA ISSUES (❌ FAIL): 1) ❌ HESHAM DEDUCTION: Found 2500.0 AED (22 days absent) vs Expected 39.17 AED - MASSIVE DISCREPANCY 2) ❌ MOHAMED MOSTAFA: Found 3500.0 AED (22 days absent) vs Expected 297.74 AED with 2 absences and 154 late minutes - COMPLETE MISMATCH 3) ❌ ATTENDANCE DATA GAP: Only 17 attendance records for entire October 2025 cycle across all employees, Hesham has only 1 record (absent 2025-10-07), Mohamed has only 1 record (absent 2025-10-07). ROOT CAUSE: The expected values in review request (Hesham: 39.17 AED, Mohamed: 297.74 AED with specific attendance patterns) do not match the actual attendance data in the system for October 2025. The unified engine is working correctly but calculating based on mostly absent employees. RECOMMENDATION: Either populate proper attendance data for October 2025 testing or verify expected values against actual data. Engine functionality is verified but data validation failed."
   - task: "Comprehensive Health Check - Pre-Deployment Validation"
     implemented: true
     working: true
