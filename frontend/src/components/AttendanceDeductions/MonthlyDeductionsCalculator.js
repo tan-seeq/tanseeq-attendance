@@ -730,59 +730,94 @@ const MonthlyDeductionsCalculator = () => {
                             {/* Daily Details Table */}
                             <div className="overflow-x-auto">
                               <table className="min-w-full border border-gray-300">
-                                <thead className="bg-blue-100">
+                                <thead className="bg-gradient-to-r from-blue-100 to-indigo-100">
                                   <tr>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Date</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Check-In</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Check-Out</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Working Hours</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Late (min)</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Early Leave (min)</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Deficit (min)</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Deduction (AED)</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-sm">Status</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Date</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Status</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Check-In</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Check-Out</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Working Hours</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Late (min)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Early (min)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Deficit (min)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Deduction (AED)</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-sm font-bold text-gray-800">Note</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {emp.daily_records && emp.daily_records.length > 0 ? (
-                                    emp.daily_records.map((record, idx) => (
-                                      <tr key={idx} className={record.is_absent ? 'bg-red-50' : idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">{record.date}</td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
-                                          {record.check_in || '-'}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
-                                          {record.check_out || '-'}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
-                                          {record.total_work_minutes ? `${Math.floor(record.total_work_minutes / 60)}:${(record.total_work_minutes % 60).toString().padStart(2, '0')}` : '-'}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-orange-600 font-medium">
-                                          {record.late_minutes || 0}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-orange-600 font-medium">
-                                          {record.early_leave_minutes || 0}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-red-600 font-medium">
-                                          {record.deficit_minutes || 0}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center text-red-700 font-bold">
-                                          {(record.deduction_amount || 0).toFixed(2)}
-                                        </td>
-                                        <td className="border border-gray-300 px-3 py-2 text-sm text-center">
-                                          {record.is_absent ? (
-                                            <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">Absent</span>
-                                          ) : record.deficit_minutes > 0 ? (
-                                            <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-semibold">Deducted</span>
-                                          ) : (
-                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">Complete</span>
-                                          )}
-                                        </td>
-                                      </tr>
-                                    ))
+                                    emp.daily_records.map((record, idx) => {
+                                      // Determine row background color based on status
+                                      let rowClass = idx % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                                      if (record.is_absent || record.status === 'absent') {
+                                        rowClass = 'bg-red-50 border-l-4 border-red-400';
+                                      } else if ((record.deduction_amount || 0) > 0) {
+                                        rowClass = 'bg-orange-50 border-l-2 border-orange-300';
+                                      } else if (record.grace_applied) {
+                                        rowClass = 'bg-green-50 border-l-2 border-green-300';
+                                      }
+                                      
+                                      return (
+                                        <tr key={idx} className={rowClass}>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center font-medium">{record.date}</td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                            {record.is_absent || record.status === 'absent' ? (
+                                              <span className="bg-red-200 text-red-900 px-2 py-1 rounded text-xs font-bold">Absent</span>
+                                            ) : record.status === 'on_leave' ? (
+                                              <span className="bg-blue-200 text-blue-900 px-2 py-1 rounded text-xs font-bold">Leave</span>
+                                            ) : record.status === 'holiday' ? (
+                                              <span className="bg-purple-200 text-purple-900 px-2 py-1 rounded text-xs font-bold">Holiday</span>
+                                            ) : record.grace_applied ? (
+                                              <span className="bg-green-200 text-green-900 px-2 py-1 rounded text-xs font-bold">Grace</span>
+                                            ) : (record.deduction_amount || 0) > 0 ? (
+                                              <span className="bg-orange-200 text-orange-900 px-2 py-1 rounded text-xs font-bold">Deducted</span>
+                                            ) : (
+                                              <span className="bg-gray-200 text-gray-900 px-2 py-1 rounded text-xs font-bold">Present</span>
+                                            )}
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center font-mono">
+                                            {record.check_in || '-'}
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center font-mono">
+                                            {record.check_out || '-'}
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                            {record.working_hours ? 
+                                              `${record.working_hours.toFixed(2)} hrs` : 
+                                              record.total_work_minutes ? 
+                                                `${Math.floor(record.total_work_minutes / 60)}:${(record.total_work_minutes % 60).toString().padStart(2, '0')}` : 
+                                                '-'
+                                            }
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                            <span className={`font-bold ${(record.late_minutes || 0) > 0 ? 'text-orange-700' : 'text-gray-400'}`}>
+                                              {record.late_minutes || 0}
+                                            </span>
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                            <span className={`font-bold ${(record.early_leave_minutes || 0) > 0 ? 'text-orange-700' : 'text-gray-400'}`}>
+                                              {record.early_leave_minutes || 0}
+                                            </span>
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                            <span className={`font-bold ${(record.deficit_minutes || record.under_hours_minutes || 0) > 0 ? 'text-red-700' : 'text-gray-400'}`}>
+                                              {record.deficit_minutes || record.under_hours_minutes || 0}
+                                            </span>
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-sm text-center">
+                                            <span className={`font-bold ${(record.deduction_amount || 0) > 0 ? 'text-red-800' : 'text-gray-400'}`}>
+                                              {(record.deduction_amount || 0).toFixed(2)}
+                                            </span>
+                                          </td>
+                                          <td className="border border-gray-300 px-3 py-2 text-xs text-gray-600">
+                                            {record.note || record.rule_applied || '-'}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })
                                   ) : (
                                     <tr>
-                                      <td colSpan="9" className="border border-gray-300 px-3 py-4 text-center text-gray-500">
+                                      <td colSpan="10" className="border border-gray-300 px-3 py-4 text-center text-gray-500">
                                         No daily records available. Please try Monthly Calculation mode for detailed breakdown.
                                       </td>
                                     </tr>
