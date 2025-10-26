@@ -2691,12 +2691,15 @@ async def calculate_monthly_deductions_endpoint(
     current_user: User = Depends(get_super_admin_user)
 ):
     """
-    حساب خصومات التأخير والغياب لشهر معين باستخدام النظام المتقدم
-    ✅ Uses advanced_deductions_system for accurate calculations
+    حساب خصومات التأخير والغياب لشهر معين باستخدام المحرك الموحد
+    ✅ Uses UNIFIED deductions_engine for consistent calculations across all pages
     ✅ Returns detailed daily breakdown for each employee
+    ✅ Formula: (DailyRate / 540) * deductible_minutes (after 5-minute grace)
     Returns: قائمة الموظفين مع الخصومات والتفاصيل اليومية
     """
     try:
+        from deductions_engine import calculate_monthly_deductions
+        
         # ✅ Validate and parse month (format: YYYY-MM)
         if not month or '-' not in month:
             raise HTTPException(
@@ -2730,180 +2733,78 @@ async def calculate_monthly_deductions_endpoint(
                 detail=f"قيم الشهر غير صحيحة: {str(ve)}"
             )
         
-        # ✅ Calculate 29→28 cycle dates for display
-        if month_num == 1:
-            # For January, previous month is December of previous year
-            cycle_start = date(year - 1, 12, 29)
-        else:
-            cycle_start = date(year, month_num - 1, 29)
+        print(f"🔄 [UNIFIED ENGINE] Calculating deductions for {month} using unified engine")
         
-        cycle_end = date(year, month_num, 28)
+        # ✅ USE UNIFIED DEDUCTIONS ENGINE
+        summaries = await calculate_monthly_deductions(db, month_num, year)
         
-        # Get all active employees
-        employees = await db.users.find({"is_active": True}).to_list(None)
-        
-        # ✅ Calculate deductions for each employee
+        # Convert to API response format
         results = []
         total_deductions = 0
         
-        for emp in employees:
-            employee_id = emp["id"]
-            employee_name = emp["name"]
-            employee_salary = emp.get("monthly_salary", 0)
-            
-            # Skip if no salary defined
-            if employee_salary <= 0:
-                continue
-            
-            # Get ALL attendance records for the period (not just late/absent)
-            all_attendance = await db.attendance.find({
-                "user_id": employee_id,
-                "date": {"$gte": cycle_start.isoformat(), "$lte": cycle_end.isoformat()}
-            }).sort("date", 1).to_list(None)
-            
-            # Build detailed daily breakdown
+        for summary in summaries:
+            # Convert daily records to API format
             daily_breakdown = []
-            late_deduction = 0
-            absence_deduction = 0
-            late_count = 0
-            total_late_minutes = 0
-            
-            for record in all_attendance:
-                day_date = record.get("date")
-                status = record.get("status", "present")
-                check_in = record.get("check_in")
-                check_out = record.get("check_out")
-                late_minutes = record.get("late_minutes", 0)
-                early_leave_minutes = record.get("early_departure_minutes", 0)
-                working_hours = record.get("working_hours", 0)
-                
-                # Determine rule applied and deduction
-                rule_applied = "No deduction"
-                day_deduction = 0
-                deduction_type = "none"
-                note = ""
-                
-                if status == "absent":
-                    rule_applied = "Full-day deduction (غياب)"
-                    daily_rate = employee_salary / 30
-                    day_deduction = daily_rate
-                    absence_deduction += day_deduction
-                    deduction_type = "absence"
-                    note = "غياب بدون مبرر"
-                    
-                elif status == "late":
-                    late_count += 1
-                    total_late_minutes += late_minutes
-                    
-                    if late_minutes <= 15:
-                        if late_count <= 4:
-                            rule_applied = f"Grace period (15 min × {late_count}/4 free)"
-                            note = "داخل حد الجريس المجاني"
-                        else:
-                            # After 4 times, even <15 min counts
-                            rule_applied = "Accumulated after grace period"
-                            hourly_rate = employee_salary / 30 / 8
-                            day_deduction = (late_minutes / 60) * hourly_rate
-                            late_deduction += day_deduction
-                            deduction_type = "late"
-                            note = f"تأخير {late_minutes} دقيقة (بعد انتهاء الجريس)"
-                    elif late_minutes <= 20:
-                        rule_applied = "Exact time deduction (16-20 min)"
-                        hourly_rate = employee_salary / 30 / 8
-                        day_deduction = (late_minutes / 60) * hourly_rate
-                        late_deduction += day_deduction
-                        deduction_type = "late"
-                        note = f"تأخير {late_minutes} دقيقة - خصم دقيق"
-                    elif late_minutes <= 120:
-                        rule_applied = "Half-day deduction (20-120 min)"
-                        day_deduction = (employee_salary / 30) / 2
-                        late_deduction += day_deduction
-                        deduction_type = "late_half_day"
-                        note = "تأخير أكثر من 20 دقيقة - نصف يوم"
-                    else:
-                        rule_applied = "Full-day deduction (>120 min)"
-                        day_deduction = employee_salary / 30
-                        late_deduction += day_deduction
-                        deduction_type = "late_full_day"
-                        note = "تأخير أكثر من ساعتين - يوم كامل"
-                
-                elif status == "weekend":
-                    rule_applied = "Weekend (excluded)"
-                    note = "عطلة نهاية أسبوع"
-                    
-                elif status == "holiday":
-                    rule_applied = "Public holiday (excluded)"
-                    note = "عطلة رسمية"
-                    
-                elif status == "on_leave":
-                    rule_applied = "Approved leave (excluded)"
-                    note = "إجازة معتمدة"
-                    
-                elif status == "present":
-                    rule_applied = "Normal attendance"
-                    note = "حضور وانصراف طبيعي"
-                
-                # Add to daily breakdown
+            for daily in summary.daily_records:
                 daily_breakdown.append({
-                    "date": day_date,
-                    "status": status,
-                    "check_in": check_in,
-                    "check_out": check_out,
-                    "late_minutes": late_minutes,
-                    "early_leave_minutes": early_leave_minutes,
-                    "working_hours": working_hours,
-                    "rule_applied": rule_applied,
-                    "deduction_type": deduction_type,
-                    "deduction_amount": round(day_deduction, 2),
-                    "note": note
+                    "date": daily.date,
+                    "status": "absent" if daily.is_absent else ("on_leave" if daily.is_on_leave else ("holiday" if daily.is_public_holiday else "present")),
+                    "check_in": daily.check_in,
+                    "check_out": daily.check_out,
+                    "late_minutes": daily.late_minutes,
+                    "early_leave_minutes": daily.early_leave_minutes,
+                    "working_hours": round(daily.total_work_minutes / 60, 2),
+                    "under_hours_minutes": daily.under_hours_minutes,
+                    "deductible_minutes": daily.deductible_minutes,
+                    "grace_applied": daily.grace_applied,
+                    "rule_applied": daily.rule_applied,
+                    "deduction_amount": daily.deduction_amount,
+                    "note": daily.note
                 })
             
-            deduction_details = []
-            if late_count > 0:
-                deduction_details.append(f"تأخير {late_count} مرات - إجمالي {total_late_minutes} دقيقة")
-            
-            absence_count = len([d for d in daily_breakdown if d["status"] == "absent"])
-            if absence_count > 0:
-                deduction_details.append(f"غياب {absence_count} يوم")
-            
-            # ❌ NO ADVANCES IN ADVANCED DEDUCTIONS SYSTEM
-            # Advances are handled separately in payroll cycle settlement
-            # Advanced Deductions = Late + Absence + Early Leave ONLY
-            
-            # Calculate totals
-            total_employee_deduction = late_deduction + absence_deduction
-            
-            if total_employee_deduction > 0 or len(daily_breakdown) > 0:
-                results.append({
-                    "employee_id": employee_id,
-                    "employee_name": employee_name,
-                    "monthly_salary": employee_salary,
-                    "late_deduction": round(late_deduction, 2),
-                    "absence_deduction": round(absence_deduction, 2),
-                    "total_deduction": round(total_employee_deduction, 2),
-                    "deduction_details": deduction_details,
-                    "late_count": late_count,
-                    "absence_count": absence_count,
-                    "daily_breakdown": daily_breakdown  # ✅ Full daily details
-                })
-                total_deductions += total_employee_deduction
+            results.append({
+                "employee_id": summary.employee_id,
+                "employee_name": summary.employee_name,
+                "monthly_salary": summary.basic_salary,
+                "late_deduction": summary.late_deduction,
+                "absence_deduction": summary.absence_deduction,
+                "total_deduction": summary.total_deduction,
+                "deduction_details": summary.deduction_details,
+                "late_count": summary.days_late,
+                "absence_count": summary.days_absent,
+                "days_present": summary.days_present,
+                "total_late_minutes": summary.total_late_minutes,
+                "total_early_leave_minutes": summary.total_early_leave_minutes,
+                "daily_breakdown": daily_breakdown
+            })
+            total_deductions += summary.total_deduction
+        
+        # Get cycle dates for display
+        from deductions_engine import get_cycle_dates
+        cycle_start, cycle_end = get_cycle_dates(month_num, year)
+        
+        print(f"✅ [UNIFIED ENGINE] Calculated deductions for {len(results)} employees")
+        print(f"💰 [UNIFIED ENGINE] Total deductions: {total_deductions:.2f} AED")
         
         return {
             "success": True,
             "mode": "monthly",
             "month": month,
             "cycle_window": {
-                "from": start_date.isoformat(),
-                "to": end_date.isoformat(),
-                "description": f"دورة شهرية: 29 {calendar.month_name[start_date.month]} إلى 28 {calendar.month_name[end_date.month]}"
+                "from": cycle_start.isoformat(),
+                "to": cycle_end.isoformat(),
+                "description": f"دورة شهرية: 29 {calendar.month_name[cycle_start.month]} إلى 28 {calendar.month_name[cycle_end.month]}"
             },
             "employees": results,
             "total_deductions": round(total_deductions, 2),
             "employee_count": len(results),
-            "note": "Advanced Deductions = Late + Absence + Early Leave ONLY (NO Advances/Custody)"
+            "note": "✅ Calculated using UNIFIED deductions engine with formula: (DailyRate/540) × deductible_minutes",
+            "engine_version": "unified_v1.0"
         }
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"خطأ في حساب الخصومات: {str(e)}")
 
 
