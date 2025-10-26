@@ -597,6 +597,22 @@ const MonthlyDeductionsCalculator = () => {
       {/* Results */}
       {calculatedData && calculatedData.employees && calculatedData.employees.length > 0 && (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {/* Engine Status Badge */}
+          {calculatedData.engine_version && (
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚙️</span>
+                <div>
+                  <p className="font-bold text-lg">Unified Deductions Engine Active</p>
+                  <p className="text-sm text-green-100">Version: {calculatedData.engine_version} • Formula: (DailyRate/540) × Minutes</p>
+                </div>
+              </div>
+              <div className="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                <p className="text-xs text-green-100">CONSISTENT CALCULATIONS</p>
+              </div>
+            </div>
+          )}
+          
           {/* Summary */}
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b flex justify-between items-center">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 flex-1">
