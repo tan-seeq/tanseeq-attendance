@@ -130,8 +130,9 @@ class UnifiedDeductionsEngineValidator:
                     self.log_test("Engine Version", "FAIL", f"Wrong engine version", "unified_v1.0", engine_version)
                 
                 # Verify cycle window
-                cycle_start = data.get("cycle_start")
-                cycle_end = data.get("cycle_end")
+                cycle_window = data.get("cycle_window", {})
+                cycle_start = cycle_window.get("from")
+                cycle_end = cycle_window.get("to")
                 expected_start = "2025-09-29"
                 expected_end = "2025-10-28"
                 
