@@ -444,7 +444,22 @@ const PayrollSummary = () => {
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">البدلات</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجمالي الراتب</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">خصم يدوي</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">خصم حضور</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="خصم الحضور والتأخير">
+                    خصم حضور
+                    <div className="text-xs font-normal text-gray-400 mt-1">(غياب + تأخير)</div>
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="تفاصيل الغياب">
+                    🔴 أيام غياب
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="مبلغ خصم الغياب">
+                    مبلغ غياب
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="دقائق التأخير">
+                    🟠 دقائق تأخير
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="مبلغ خصم التأخير">
+                    مبلغ تأخير
+                  </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">خصم سلف</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجمالي الخصومات</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase font-bold">صافي الراتب</th>
