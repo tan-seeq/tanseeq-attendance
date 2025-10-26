@@ -4970,12 +4970,30 @@ async def get_payroll_cycle_summary(
     cycle_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """جلب ملخص دورة الراتب مع aggregation من Payroll Ledger"""
+    """جلب ملخص دورة الراتب مع aggregation من Payroll Ledger + تفاصيل الخصومات من المحرك الموحد"""
     try:
+        from deductions_engine import calculate_monthly_deductions, get_cycle_dates
+        
         # جلب دورة الراتب
         cycle = await db.payroll_cycles.find_one({"id": cycle_id})
         if not cycle:
             raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
+        
+        # Parse month from cycle (format: YYYY-MM)
+        cycle_month = cycle.get("month")  # e.g., "2025-10"
+        if not cycle_month or '-' not in cycle_month:
+            raise HTTPException(status_code=400, detail="صيغة شهر الدورة غير صحيحة")
+        
+        year, month = map(int, cycle_month.split('-'))
+        
+        # Get deduction details from unified engine
+        deduction_summaries = await calculate_monthly_deductions(db, month, year)
+        
+        # Create a map of employee_id -> deduction details
+        deduction_map = {
+            summary.employee_id: summary 
+            for summary in deduction_summaries
+        }
         
         # جلب ملخصات الموظفين الأساسية
         summaries = await db.employee_payroll_summaries.find({
@@ -4993,6 +5011,9 @@ async def get_payroll_cycle_summary(
             # جلب ملخص القيود من Payroll Ledger
             ledger_summary = await ledger_service.get_employee_summary(cycle_id, employee_id)
             
+            # Get detailed deduction info from unified engine
+            deduction_detail = deduction_map.get(employee_id)
+            
             # دمج البيانات - استخدام البيانات من Ledger للخصومات
             enhanced_summary = {
                 "_id": str(summary["_id"]),
@@ -5009,6 +5030,14 @@ async def get_payroll_cycle_summary(
                 "advance_deductions": ledger_summary["advance_installments"],
                 "leave_adjustments": ledger_summary["leave_adjustments"],
                 "custody_adjustments": ledger_summary["custody_adjustments"],
+                
+                # ✅ NEW: Add detailed deduction breakdown from unified engine
+                "absent_days": deduction_detail.days_absent if deduction_detail else 0,
+                "absence_amount": deduction_detail.absence_deduction if deduction_detail else 0.0,
+                "late_days": deduction_detail.days_late if deduction_detail else 0,
+                "late_minutes": deduction_detail.total_late_minutes if deduction_detail else 0,
+                "late_amount": deduction_detail.late_deduction if deduction_detail else 0.0,
+                "total_deduction_unified": deduction_detail.total_deduction if deduction_detail else 0.0,
                 
                 # حساب الإجماليات
                 "total_deductions": (
@@ -5038,10 +5067,13 @@ async def get_payroll_cycle_summary(
         return {
             "cycle": cycle,
             "employee_summaries": enhanced_summaries,
-            "total_employees": len(enhanced_summaries)
+            "total_employees": len(enhanced_summaries),
+            "unified_engine_active": True  # Flag to indicate unified engine data is included
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
 
 # Disabled legacy salary letter endpoint in favor of router-based implementation
