@@ -1,0 +1,145 @@
+{
+  "summary": {
+    "total_tests": 20,
+    "passed": 12,
+    "failed": 3,
+    "warnings": 2,
+    "success_rate": 60.0,
+    "critical_validations": {
+      "Engine Version": true,
+      "Hesham Total Deduction": false,
+      "Mohamed Mostafa Total Deduction": false,
+      "Hatem Exemption": true,
+      "Formula Verification": true
+    }
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication",
+      "status": "PASS",
+      "details": "Successfully authenticated as admin@tanseeq.com",
+      "timestamp": "2025-10-26T08:02:42.661631"
+    },
+    {
+      "test": "Employee Data Retrieval",
+      "status": "PASS",
+      "details": "Retrieved 14 employees, mapped 4 target employees",
+      "timestamp": "2025-10-26T08:02:42.674133"
+    },
+    {
+      "test": "Engine Version",
+      "status": "PASS",
+      "details": "Confirmed engine version: unified_v1.0",
+      "timestamp": "2025-10-26T08:02:43.156857"
+    },
+    {
+      "test": "Cycle Window",
+      "status": "FAIL",
+      "details": "Wrong cycle window",
+      "timestamp": "2025-10-26T08:02:43.156896",
+      "expected": "2025-09-29 to 2025-10-28",
+      "actual": "None to None"
+    },
+    {
+      "test": "Attendance Records Count",
+      "status": "WARN",
+      "details": "Found 0 attendance records (<280 expected)",
+      "timestamp": "2025-10-26T08:02:43.156907"
+    },
+    {
+      "test": "Hesham Total Deduction",
+      "status": "FAIL",
+      "details": "Deduction outside expected range",
+      "timestamp": "2025-10-26T08:02:43.156999",
+      "expected": "(35, 45) AED",
+      "actual": "33.7 AED"
+    },
+    {
+      "test": "Hesham Late Count",
+      "status": "PASS",
+      "details": "Found expected 10 late days",
+      "timestamp": "2025-10-26T08:02:43.157014"
+    },
+    {
+      "test": "Hesham Late Minutes",
+      "status": "PASS",
+      "details": "Late minutes 210 close to expected 210",
+      "timestamp": "2025-10-26T08:02:43.157022"
+    },
+    {
+      "test": "Mohamed Mostafa Total Deduction",
+      "status": "FAIL",
+      "details": "Deduction outside expected range",
+      "timestamp": "2025-10-26T08:02:43.157036",
+      "expected": "(290, 305) AED",
+      "actual": "342.96 AED"
+    },
+    {
+      "test": "Mohamed Mostafa Absence Count",
+      "status": "PASS",
+      "details": "Found expected 2 absences",
+      "timestamp": "2025-10-26T08:02:43.157047"
+    },
+    {
+      "test": "Mohamed Mostafa Late Count",
+      "status": "PASS",
+      "details": "Found expected 14 late days",
+      "timestamp": "2025-10-26T08:02:43.157053"
+    },
+    {
+      "test": "Mohamed Mostafa Late Minutes",
+      "status": "PASS",
+      "details": "Late minutes 154 close to expected 154",
+      "timestamp": "2025-10-26T08:02:43.157058"
+    },
+    {
+      "test": "Mohamed Mostafa Breakdown",
+      "status": "INFO",
+      "details": "Absence: 318.18 AED, Late: 24.78 AED, Total: 342.96 AED",
+      "timestamp": "2025-10-26T08:02:43.157066"
+    },
+    {
+      "test": "Hatem Exemption",
+      "status": "PASS",
+      "details": "Hatem correctly shows 0 AED deduction (exempt employee)",
+      "timestamp": "2025-10-26T08:02:43.157073"
+    },
+    {
+      "test": "Tariq Special Rule",
+      "status": "INFO",
+      "details": "No early arrivals found to test special rule",
+      "timestamp": "2025-10-26T08:02:43.157090"
+    },
+    {
+      "test": "Formula Verification",
+      "status": "PASS",
+      "details": "Formula calculation correct: 3.37 AED (expected: 3.37)",
+      "timestamp": "2025-10-26T08:02:43.157106"
+    },
+    {
+      "test": "Formula Details",
+      "status": "INFO",
+      "details": "Daily Rate: 113.64, Late: 21min, Grace: 5min, Deductible: 16min",
+      "timestamp": "2025-10-26T08:02:43.157114"
+    },
+    {
+      "test": "Data Quality - Records Count",
+      "status": "WARN",
+      "details": "Found 0 attendance records (<286 expected)",
+      "timestamp": "2025-10-26T08:02:43.157120"
+    },
+    {
+      "test": "Data Quality - Employee Coverage",
+      "status": "PASS",
+      "details": "Found 13 employees (\u226513 expected)",
+      "timestamp": "2025-10-26T08:02:43.157127"
+    },
+    {
+      "test": "Data Quality - Daily Breakdown",
+      "status": "PASS",
+      "details": "10 employees have daily breakdown data",
+      "timestamp": "2025-10-26T08:02:43.157136"
+    }
+  ],
+  "timestamp": "2025-10-26T08:02:43.157446"
+}
