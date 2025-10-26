@@ -25,7 +25,7 @@ def get_backend_url():
                     return line.split('=')[1].strip()
     except:
         pass
-    return "https://tanseeq-attendance.preview.emergentagent.com"
+    return "https://hr-unification.preview.emergentagent.com"
 
 BASE_URL = f"{get_backend_url()}/api"
 

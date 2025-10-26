@@ -27,7 +27,7 @@ import uuid
 from pathlib import Path
 
 # Test Configuration
-BACKEND_URL = "https://tanseeq-attendance.preview.emergentagent.com"
+BACKEND_URL = "https://hr-unification.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test Accounts

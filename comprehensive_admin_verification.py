@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://tanseeq-attendance.preview.emergentagent.com/api"
+BACKEND_URL = "https://hr-unification.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_CREDENTIALS = {
