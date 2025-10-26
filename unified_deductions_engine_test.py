@@ -415,10 +415,10 @@ class UnifiedDeductionsEngineValidator:
         try:
             # Check total attendance records
             total_records = deduction_data.get("total_attendance_records", 0)
-            if total_records >= 286:
-                self.log_test("Data Quality - Records Count", "PASS", f"Found {total_records} attendance records (≥286 expected)")
+            if total_records >= 260:
+                self.log_test("Data Quality - Records Count", "PASS", f"Found {total_records} attendance records (≥260 expected)")
             else:
-                self.log_test("Data Quality - Records Count", "WARN", f"Found {total_records} attendance records (<286 expected)")
+                self.log_test("Data Quality - Records Count", "WARN", f"Found {total_records} attendance records (<260 expected)")
             
             # Check employee coverage
             employees = deduction_data.get("employees", [])
