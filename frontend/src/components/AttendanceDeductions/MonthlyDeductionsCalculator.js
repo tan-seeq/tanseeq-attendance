@@ -411,16 +411,37 @@ const MonthlyDeductionsCalculator = () => {
         </div>
       </div>
 
-      {/* Rules */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-lg">
-        <h3 className="font-bold text-blue-900 mb-2">📋 Deduction Rules:</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• First 15 minutes late × 4 times = <strong>Free</strong></li>
-          <li>• More than 4 times: Minutes accumulated and deducted from salary</li>
-          <li>• More than 20 minutes: Actual time deduction</li>
-          <li>• 1 to 2 hours: <strong>Half day</strong> deduction</li>
-          <li>• More than 2 hours: <strong>Full day</strong> deduction</li>
-          <li>• Absence: Full day deduction</li>
+      {/* Rules - UNIFIED ENGINE */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 p-5 mb-6 rounded-lg shadow-md">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-2xl">⚙️</span>
+          <h3 className="font-bold text-blue-900 text-lg">Unified Deductions Engine v1.0</h3>
+        </div>
+        <ul className="text-sm text-blue-800 space-y-2 font-medium">
+          <li className="flex items-start gap-2">
+            <span className="text-green-600 font-bold">✓</span>
+            <span><strong>Grace Period:</strong> First 5 minutes are free (per day)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 font-bold">⏰</span>
+            <span><strong>Working Hours:</strong> 09:00 - 18:00 (540 minutes total)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-orange-600 font-bold">📐</span>
+            <span><strong>Formula:</strong> Deduction = (DailyRate / 540) × Deductible Minutes</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-600 font-bold">🚫</span>
+            <span><strong>Absence:</strong> Full daily rate deduction</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-purple-600 font-bold">👥</span>
+            <span><strong>Exempt:</strong> Hatem, Tariq (no late before 08:00)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-indigo-600 font-bold">📅</span>
+            <span><strong>Cycle:</strong> 29th previous month → 28th current month</span>
+          </li>
         </ul>
       </div>
 
