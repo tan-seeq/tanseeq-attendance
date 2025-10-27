@@ -134,13 +134,35 @@ async def main(url: str):
     header_cells = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=1, max_row=1))[0:sheet.max_column]]
     print("🧭 Headers:", header_cells)
 
-    # Build column index map
+    # Build column index map (case-insensitive, Arabic-aware)
     col_idx = {}
     for i, hdr in enumerate(header_cells):
         hnorm = normalize_str(hdr)
         for key, aliases in HEADERS_MAP.items():
             if hnorm in aliases and key not in col_idx:
                 col_idx[key] = i
+    # Fallback matching for Arabic headers if normalization missed
+    if "employee" not in col_idx:
+        for i, hdr in enumerate(header_cells):
+            if hdr.strip() == "الموظف":
+                col_idx["employee"] = i
+                break
+    if "date" not in col_idx:
+        for i, hdr in enumerate(header_cells):
+            if hdr.strip() == "التاريخ":
+                col_idx["date"] = i
+                break
+    # Not strictly required: check_in/check_out may be absent in user file
+    if "check_in" not in col_idx:
+        for i, hdr in enumerate(header_cells):
+            if hdr.strip() == "الحضور":
+                col_idx["check_in"] = i
+                break
+    if "check_out" not in col_idx:
+        for i, hdr in enumerate(header_cells):
+            if hdr.strip() == "الانصراف":
+                col_idx["check_out"] = i
+                break
     required = ["employee", "date"]
     for r in required:
         if r not in col_idx:
