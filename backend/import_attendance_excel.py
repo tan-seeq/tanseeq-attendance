@@ -130,6 +130,24 @@ async def main(url: str):
     sheet = wb[wb.sheetnames[0]]
     print("📄 Using sheet:", sheet.title)
 
+    # Try to locate header row within first 5 rows if row 1 fails
+    def find_header_row(max_scan: int = 5):
+        for r in range(1, max_scan + 1):
+            row_cells = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=r, max_row=r))]
+            if not any(row_cells):
+                continue
+            # heuristic: contains at least الموظف and التاريخ
+            if ("الموظف" in row_cells) and ("التاريخ" in row_cells):
+                return r, row_cells
+        # default to row 1
+        return 1, [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=1, max_row=1))]
+
+    header_row_idx, header_cells = find_header_row(max_scan=5)
+    print(f"🧭 Detected header row at index {header_row_idx}:", header_cells)
+
+    # Reset iterator after scanning
+    # (openpyxl generators are stateless for iter_rows; we will use values_only later)
+
     # Read header row
     header_cells = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=1, max_row=1))[0:sheet.max_column]]
     print("🧭 Headers:", header_cells)
