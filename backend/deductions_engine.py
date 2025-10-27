@@ -395,9 +395,9 @@ async def calculate_employee_deductions(
     """
     from public_holidays import is_public_holiday, is_employee_on_approved_leave
     
-    # Check if employee is excluded
-    if is_employee_excluded(employee_name):
-        # Return zero deductions for excluded employees
+    # Check if employee is fully exempt (Hatem)
+    if is_fully_exempt(employee_name):
+        # Return zero deductions for fully exempt employees
         return EmployeeDeductionSummary(
             employee_id=employee_id,
             employee_name=employee_name,
@@ -405,7 +405,7 @@ async def calculate_employee_deductions(
             cycle_start=cycle_start.strftime("%Y-%m-%d"),
             cycle_end=cycle_end.strftime("%Y-%m-%d"),
             total_working_days=0,
-            deduction_details=["موظف معفى من الخصومات"]
+            deduction_details=["موظف معفى من جميع الخصومات (Hatem)"]
         )
     
     # Get working days in cycle
