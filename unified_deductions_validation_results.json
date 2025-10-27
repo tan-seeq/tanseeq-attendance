@@ -1,16 +1,16 @@
 {
   "summary": {
-    "total_tests": 20,
-    "passed": 17,
-    "failed": 0,
+    "total_tests": 19,
+    "passed": 13,
+    "failed": 4,
     "warnings": 0,
-    "success_rate": 85.0,
+    "success_rate": 68.42105263157895,
     "critical_validations": {
       "Engine Version": true,
-      "Hesham Total Deduction": true,
-      "Mohamed Mostafa Total Deduction": true,
+      "Hesham Total Deduction": false,
+      "Mohamed Mostafa Total Deduction": false,
       "Hatem Exemption": true,
-      "Formula Verification": true
+      "Formula Verification": false
     }
   },
   "detailed_results": [
@@ -18,122 +18,120 @@
       "test": "Authentication",
       "status": "PASS",
       "details": "Successfully authenticated as admin@tanseeq.com",
-      "timestamp": "2025-10-26T08:42:17.392371"
+      "timestamp": "2025-10-27T07:51:24.543240"
     },
     {
       "test": "Employee Data Retrieval",
       "status": "PASS",
       "details": "Retrieved 14 employees, mapped 4 target employees",
-      "timestamp": "2025-10-26T08:42:17.405728"
+      "timestamp": "2025-10-27T07:51:24.555064"
     },
     {
       "test": "Engine Version",
       "status": "PASS",
       "details": "Confirmed engine version: unified_v1.0",
-      "timestamp": "2025-10-26T08:42:17.858573"
+      "timestamp": "2025-10-27T07:51:25.040934"
     },
     {
       "test": "Cycle Window",
       "status": "PASS",
       "details": "Correct cycle window: 2025-09-29 to 2025-10-28",
-      "timestamp": "2025-10-26T08:42:17.858608"
+      "timestamp": "2025-10-27T07:51:25.040974"
     },
     {
       "test": "Employee Count",
       "status": "PASS",
       "details": "Found 13 employees processed (\u226510 expected)",
-      "timestamp": "2025-10-26T08:42:17.858616"
+      "timestamp": "2025-10-27T07:51:25.040982"
     },
     {
       "test": "Hesham Total Deduction",
-      "status": "PASS",
-      "details": "Deduction 33.7 AED within expected range (30, 40) (target: 33.7)",
-      "timestamp": "2025-10-26T08:42:17.858708"
+      "status": "FAIL",
+      "details": "Deduction outside expected range",
+      "timestamp": "2025-10-27T07:51:25.041066",
+      "expected": "(30, 40) AED",
+      "actual": "49.7 AED"
     },
     {
       "test": "Hesham Late Count",
       "status": "PASS",
       "details": "Found expected 10 late days",
-      "timestamp": "2025-10-26T08:42:17.858719"
+      "timestamp": "2025-10-27T07:51:25.041102"
     },
     {
       "test": "Hesham Late Minutes",
       "status": "PASS",
       "details": "Late minutes 210 close to expected 210",
-      "timestamp": "2025-10-26T08:42:17.858727"
+      "timestamp": "2025-10-27T07:51:25.041113"
     },
     {
       "test": "Mohamed Mostafa Total Deduction",
-      "status": "PASS",
-      "details": "Deduction 342.96 AED within expected range (330, 350) (target: 342.96)",
-      "timestamp": "2025-10-26T08:42:17.858741"
+      "status": "FAIL",
+      "details": "Deduction outside expected range",
+      "timestamp": "2025-10-27T07:51:25.041130",
+      "expected": "(330, 350) AED",
+      "actual": "354.68 AED"
     },
     {
       "test": "Mohamed Mostafa Absence Count",
       "status": "PASS",
       "details": "Found expected 2 absences",
-      "timestamp": "2025-10-26T08:42:17.858748"
+      "timestamp": "2025-10-27T07:51:25.041141"
     },
     {
       "test": "Mohamed Mostafa Late Count",
       "status": "PASS",
       "details": "Found expected 14 late days",
-      "timestamp": "2025-10-26T08:42:17.858752"
+      "timestamp": "2025-10-27T07:51:25.041146"
     },
     {
       "test": "Mohamed Mostafa Late Minutes",
       "status": "PASS",
       "details": "Late minutes 154 close to expected 154",
-      "timestamp": "2025-10-26T08:42:17.858757"
+      "timestamp": "2025-10-27T07:51:25.041152"
     },
     {
       "test": "Mohamed Mostafa Breakdown",
       "status": "INFO",
-      "details": "Absence: 318.18 AED, Late: 24.78 AED, Total: 342.96 AED",
-      "timestamp": "2025-10-26T08:42:17.858764"
+      "details": "Absence: 318.18 AED, Late: 36.5 AED, Total: 354.68 AED",
+      "timestamp": "2025-10-27T07:51:25.041158"
     },
     {
       "test": "Hatem Exemption",
       "status": "PASS",
       "details": "Hatem correctly shows 0 AED deduction (exempt employee)",
-      "timestamp": "2025-10-26T08:42:17.858772"
+      "timestamp": "2025-10-27T07:51:25.041165"
     },
     {
       "test": "Tariq Special Rule",
       "status": "INFO",
       "details": "No early arrivals found to test special rule",
-      "timestamp": "2025-10-26T08:42:17.858789"
+      "timestamp": "2025-10-27T07:51:25.041173"
     },
     {
       "test": "Formula Verification",
-      "status": "PASS",
-      "details": "Formula calculation correct: 3.37 AED (expected: 3.37)",
-      "timestamp": "2025-10-26T08:42:17.858805"
-    },
-    {
-      "test": "Formula Details",
-      "status": "INFO",
-      "details": "Daily Rate: 113.64, Late: 21min, Grace: 5min, Deductible: 16min",
-      "timestamp": "2025-10-26T08:42:17.858812"
+      "status": "FAIL",
+      "details": "No daily breakdown available for formula verification",
+      "timestamp": "2025-10-27T07:51:25.041183"
     },
     {
       "test": "Data Quality - Employee Count",
       "status": "PASS",
       "details": "Found 13 employees processed (\u226510 expected)",
-      "timestamp": "2025-10-26T08:42:17.858825"
+      "timestamp": "2025-10-27T07:51:25.041204"
     },
     {
       "test": "Data Quality - Employee Coverage",
       "status": "PASS",
       "details": "Found 13 employees (\u226513 expected)",
-      "timestamp": "2025-10-26T08:42:17.858833"
+      "timestamp": "2025-10-27T07:51:25.041214"
     },
     {
       "test": "Data Quality - Daily Breakdown",
-      "status": "PASS",
-      "details": "10 employees have daily breakdown data",
-      "timestamp": "2025-10-26T08:42:17.858842"
+      "status": "FAIL",
+      "details": "No employees have daily breakdown data",
+      "timestamp": "2025-10-27T07:51:25.041222"
     }
   ],
-  "timestamp": "2025-10-26T08:42:17.859067"
+  "timestamp": "2025-10-27T07:51:25.041474"
 }
