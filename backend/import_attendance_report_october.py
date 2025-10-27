@@ -131,15 +131,35 @@ async def main(url: str):
     for r in range(1, 8):
         row = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=r, max_row=r))]
         lowers = [norm(x) for x in row]
-        if set(HEADERS).intersection(set(lowers)):
+        # fuzzy detection for 'employee name'
+        emp_candidates = [i for i, v in enumerate(lowers) if v in ("employee name", "employee", "employee name,", "employee name ")]
+        date_candidates = [i for i, v in enumerate(lowers) if v in ("date", "date,")]
+        if emp_candidates and date_candidates:
             header_row_idx = r
             header_map = {norm(v): i for i, v in enumerate(row)}
+            # normalize keys if missing exact ones
+            if "employee name" not in header_map and emp_candidates:
+                header_map["employee name"] = emp_candidates[0]
+            if "date" not in header_map and date_candidates:
+                header_map["date"] = date_candidates[0]
+            # optional keys
+            for key, aliases in {
+                "check in": ("check in", "checkin", "in"),
+                "check out": ("check out", "checkout", "out"),
+                "working hours/duration": ("working hours/duration", "working hours", "duration", "working hours " ),
+                "status/notes": ("status/notes", "status", "notes", "status / notes"),
+            }.items():
+                if key not in header_map:
+                    for i, v in enumerate(lowers):
+                        if v in aliases:
+                            header_map[key] = i
+                            break
             break
     # ensure required
     required = ["employee name", "date"]
     for req in required:
         if req not in header_map:
-            raise RuntimeError(f"Missing header: {req}")
+            raise RuntimeError(f"Missing header: {req} -> found keys: {list(header_map.keys())}")
 
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
