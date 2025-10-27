@@ -243,6 +243,22 @@ def calculate_daily_deduction(
         detail.note = "لا يوجد خصم - عطلة رسمية" if is_public_holiday else "لا يوجد خصم - إجازة معتمدة"
         return detail
 
+    # Support fallback when only working hours are provided (no times)
+    if (not check_in or not check_out) and working_hours is not None:
+        # Company rule: normal day is 9 hours. Deduct deficit minutes if under 9 hours
+        deficit_minutes = max(0, int((9.0 - working_hours) * 60))
+        detail.total_work_minutes = int(working_hours * 60)
+        if deficit_minutes > 0:
+            hourly_rate = daily_rate / 8
+            detail.deduction_amount = round((deficit_minutes / 60) * hourly_rate, 2)
+            detail.rule_applied = "Under-hours Deduction (hours-only record)"
+            detail.note = f"نقص ساعات: {deficit_minutes} دقيقة"
+            detail.deductible_minutes = deficit_minutes
+        else:
+            detail.rule_applied = "On Time (hours-only record)"
+            detail.note = "ساعات العمل مكتملة"
+        return detail
+
     # No check-in → Absent (full daily rate deduction)
     if not check_in:
         detail.is_absent = True
