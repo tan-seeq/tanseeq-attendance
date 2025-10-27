@@ -12644,15 +12644,7 @@ async def root():
 # ============================================
 # Advanced Deductions System
 # ============================================
-
-from advanced_deductions_system import (
-    calculate_monthly_deductions,
-    save_deductions_to_db,
-    get_employee_deduction_summary,
-    get_cycle_dates,
-    EXCLUDED_EMPLOYEES,
-    is_employee_excluded
-)
+# ❌ REMOVED: Conflicting imports - now using deductions_engine.py exclusively
 
 from public_holidays import (
     seed_public_holidays,
