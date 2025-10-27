@@ -55,12 +55,12 @@ NAME_MAPPING = {
 
 # Column headers (Arabic/English)
 HEADERS_MAP = {
-    "employee": {"الموظف", "employee", "اسم الموظف"},
+    "employee": {"الموظف", "employee", "اسم الموظف", "employee name"},
     "date": {"التاريخ", "date"},
     "check_in": {"الحضور", "check in", "check-in", "time in", "in"},
     "check_out": {"الانصراف", "check out", "check-out", "time out", "out"},
-    "status": {"الحالة", "status"},
-    "work_hours": {"ساعات العمل", "work hours"},
+    "status": {"الحالة", "status", "status/notes"},
+    "work_hours": {"ساعات العمل", "work hours", "working hours", "working hours/duration"},
 }
 
 
