@@ -271,7 +271,7 @@ const PayrollSummary = () => {
   }), { gross: 0, deductions: 0, net: 0 });
 
   return (
-    <div className="max-w-7xl mx-auto p-6" dir="rtl">
+    <div className="max-w-[95%] mx-auto p-6" dir="rtl"> {/* ✅ FIXED: Increased from max-w-7xl to 95% for wider display */}
       {/* Header Card */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
