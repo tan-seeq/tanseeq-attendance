@@ -105,7 +105,8 @@ const MonthlyDeductionsCalculator = () => {
       } else {
         // ✅ FIXED: Use correct endpoint for custom period
         apiUrl = `${API}/deductions/calculate-custom?mode=custom&from_date=${fromDate}&to_date=${toDate}`;
-        console.log('Custom Period API URL:', apiUrl);
+        console.log('🔵 CUSTOM PERIOD API URL:', apiUrl);
+        console.log('🔵 Frontend using calculate-custom endpoint (v2.0)');
       }
       
       const response = await axios.post(apiUrl, {});
