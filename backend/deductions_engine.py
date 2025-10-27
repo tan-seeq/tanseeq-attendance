@@ -419,13 +419,36 @@ async def calculate_employee_deductions(
     cycle_start_str = cycle_start.strftime("%Y-%m-%d")
     cycle_end_str = cycle_end.strftime("%Y-%m-%d")
     
-    attendance_records = await db.attendance.find({
-        "user_id": employee_id,
-        "date": {
-            "$gte": cycle_start_str,
-            "$lte": cycle_end_str
+    # ✅ FIX: Use aggregation to get LATEST record per date (handles duplicates)
+    # This prevents counting duplicate records multiple times
+    attendance_pipeline = [
+        {
+            "$match": {
+                "user_id": employee_id,
+                "date": {
+                    "$gte": cycle_start_str,
+                    "$lte": cycle_end_str
+                }
+            }
+        },
+        {
+            "$sort": {"date": 1, "created_at": -1}  # Sort by date, then by creation time (latest first)
+        },
+        {
+            "$group": {
+                "_id": "$date",  # Group by date to eliminate duplicates
+                "record": {"$first": "$$ROOT"}  # Take the first (latest) record for each date
+            }
+        },
+        {
+            "$replaceRoot": {"newRoot": "$record"}  # Flatten back to original structure
+        },
+        {
+            "$sort": {"date": 1}  # Sort by date for processing
         }
-    }).to_list(None)
+    ]
+    
+    attendance_records = await db.attendance.aggregate(attendance_pipeline).to_list(None)
     
     # Create attendance map for quick lookup
     attendance_map = {rec["date"]: rec for rec in attendance_records}
