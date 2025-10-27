@@ -130,7 +130,7 @@ async def main(url: str):
     header_map = {}
     csv_mode = False
     csv_col_idx = None
-    for r in range(1, 8):
+    for r in range(1, 31):
         row_cells = list(next(sheet.iter_rows(min_row=r, max_row=r)))[0:sheet.max_column]
         row = [str(c.value or "").strip() for c in row_cells]
         lowers = [norm(x) for x in row]
