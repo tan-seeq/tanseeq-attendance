@@ -129,38 +129,31 @@ class EmployeeDeductionSummary(BaseModel):
 # Helper Functions
 # ============================================
 
-def is_employee_excluded(employee_name: str) -> bool:
-    """
-    Check if employee is excluded from deductions.
-    
-    Excluded employees:
-    - Hatem Mohamed Ahmed
-    - Tareq/Tariq Abdel Moneim Alwazzan
-    """
+def is_fully_exempt(employee_name: str) -> bool:
+    """Check if employee is fully exempt from ALL deductions (Hatem)"""
     if not employee_name:
         return False
     
     name_lower = employee_name.lower().strip()
     
-    for excluded in EXCLUDED_EMPLOYEES:
-        excluded_lower = excluded.lower().strip()
-        if excluded_lower in name_lower or name_lower in excluded_lower:
+    for exempt in FULLY_EXEMPT_EMPLOYEES:
+        exempt_lower = exempt.lower().strip()
+        if exempt_lower in name_lower or name_lower in exempt_lower:
             return True
     
     return False
 
 
-def is_tariq_special_rule(employee_name: str) -> bool:
-    """
-    Check if Tariq's special rule applies (no late before 08:00).
-    """
+def is_flexible_schedule(employee_name: str) -> bool:
+    """Check if employee has flexible schedule (Tarek)"""
     if not employee_name:
         return False
     
     name_lower = employee_name.lower().strip()
     
-    for tariq_name in TARIQ_NAMES:
-        if tariq_name.lower() in name_lower:
+    for flex in FLEXIBLE_SCHEDULE_EMPLOYEES:
+        flex_lower = flex.lower().strip()
+        if flex_lower in name_lower or name_lower in flex_lower:
             return True
     
     return False
