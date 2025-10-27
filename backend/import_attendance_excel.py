@@ -26,6 +26,7 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 from openpyxl import load_workbook
 from openpyxl.utils.datetime import from_excel
+import re
 
 # Ensure backend env
 ROOT = Path(__file__).parent
