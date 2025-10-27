@@ -200,7 +200,6 @@ async def main(url: str):
 
     # Insert new rows
     inserted = 0
-    skipped = 0
     unknown_employees: set[str] = set()
 
     for row in sheet.iter_rows(min_row=header_row_idx + 1, values_only=True):
