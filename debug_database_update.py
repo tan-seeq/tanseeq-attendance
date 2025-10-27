@@ -10,7 +10,7 @@ import asyncio
 import os
 
 # Configuration
-BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
+BACKEND_URL = "https://deduction-logic.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

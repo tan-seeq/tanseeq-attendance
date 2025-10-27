@@ -22,7 +22,7 @@ import time
 class ComprehensiveE2EBackendTester:
     def __init__(self):
         # Get backend URL from environment
-        self.backend_url = "https://hr-attendance-system.preview.emergentagent.com"
+        self.backend_url = "https://deduction-logic.preview.emergentagent.com"
         self.api_base = f"{self.backend_url}/api"
         
         # Test credentials

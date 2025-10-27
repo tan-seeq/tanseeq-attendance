@@ -378,7 +378,7 @@
       "response_data": null
     }
   ],
-  "backend_url": "https://hr-attendance-system.preview.emergentagent.com",
+  "backend_url": "https://deduction-logic.preview.emergentagent.com",
   "test_accounts": [
     "super_admin",
     "user"

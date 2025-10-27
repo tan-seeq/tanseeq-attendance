@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import sys
 
 # Get backend URL from environment
-BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
+BACKEND_URL = "https://deduction-logic.preview.emergentagent.com/api"
 
 class CriticalFixesTester:
     def __init__(self):

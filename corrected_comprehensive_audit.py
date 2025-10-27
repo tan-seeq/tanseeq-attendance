@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hr-attendance-system.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://deduction-logic.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 # Test accounts

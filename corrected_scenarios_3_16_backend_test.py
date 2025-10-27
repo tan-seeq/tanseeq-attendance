@@ -15,7 +15,7 @@ import uuid
 from pathlib import Path
 
 # Test Configuration
-BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com"
+BACKEND_URL = "https://deduction-logic.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test Accounts

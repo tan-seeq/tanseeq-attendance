@@ -37,7 +37,7 @@ def test_login(email, password, base_url):
         return False, None
 
 if __name__ == "__main__":
-    backend_url = "https://hr-attendance-system.preview.emergentagent.com"
+    backend_url = "https://deduction-logic.preview.emergentagent.com"
     
     print("🔍 Testing different login credentials...")
     print("=" * 50)

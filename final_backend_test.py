@@ -10,7 +10,7 @@ import json
 import re
 from datetime import datetime
 
-BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
+BACKEND_URL = "https://deduction-logic.preview.emergentagent.com/api"
 CREDENTIALS = {
     "super_admin": {"email": "hatem@tan-seeq.co", "password": "hatem123"},
     "admin": {"email": "admin@tanseeq.com", "password": "ADMIN"},

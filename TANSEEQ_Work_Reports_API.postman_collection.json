@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://hr-attendance-system.preview.emergentagent.com",
+			"value": "https://deduction-logic.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

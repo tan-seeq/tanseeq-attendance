@@ -2,7 +2,7 @@
   "audit_metadata": {
     "timestamp": "20251022_062513",
     "audit_type": "FORENSIC_DATA_INTEGRITY_AUDIT_PHASE_2",
-    "base_url": "https://hr-attendance-system.preview.emergentagent.com/api",
+    "base_url": "https://deduction-logic.preview.emergentagent.com/api",
     "total_issues_found": 70,
     "critical_categories_affected": 4,
     "affected_employees_count": 26,
