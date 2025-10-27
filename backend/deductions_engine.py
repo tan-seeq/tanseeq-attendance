@@ -426,6 +426,11 @@ async def calculate_employee_deductions(
         attendance = attendance_map.get(date_str)
         check_in = attendance.get("check_in") if attendance else None
         check_out = attendance.get("check_out") if attendance else None
+        work_hours_val = attendance.get("working_hours") if attendance else None
+        try:
+            working_hours = float(work_hours_val) if work_hours_val is not None else None
+        except Exception:
+            working_hours = None
 
         if is_flex_schedule:
             # Only absence is deducted
