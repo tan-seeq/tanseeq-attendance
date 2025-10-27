@@ -46,7 +46,12 @@ HEADERS = [
 
 
 def norm(s: str) -> str:
-    return (s or "").strip().lower()
+    if s is None:
+        return ""
+    # normalize NBSP and multiple spaces
+    x = str(s).replace("\xa0", " ")
+    x = " ".join(x.split())
+    return x.strip().lower()
 
 
 def parse_excel_time(value, wb):
