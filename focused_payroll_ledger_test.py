@@ -13,7 +13,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://hr-unification.preview.emergentagent.com"
+BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com"
 SUPER_ADMIN_EMAIL = "admin@tanseeq.com"
 SUPER_ADMIN_PASSWORD = "ADMIN"
 

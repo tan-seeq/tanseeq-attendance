@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
 # Backend URL from environment
-BACKEND_URL = "https://hr-unification.preview.emergentagent.com/api"
+BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_CREDENTIALS = {"email": "admin@tanseeq.com", "password": "ADMIN"}

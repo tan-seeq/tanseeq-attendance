@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://hr-unification.preview.emergentagent.com
-    - **Backend URL**: https://hr-unification.preview.emergentagent.com/api
+    - **Frontend URL**: https://hr-attendance-system.preview.emergentagent.com
+    - **Backend URL**: https://hr-attendance-system.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 

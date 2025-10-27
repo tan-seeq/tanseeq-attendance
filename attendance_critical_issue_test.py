@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timedelta
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hr-unification.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hr-attendance-system.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 class CriticalIssueAnalyzer:

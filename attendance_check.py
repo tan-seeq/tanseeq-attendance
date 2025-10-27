@@ -8,7 +8,7 @@ import aiohttp
 import json
 
 # Backend URL from environment
-BACKEND_URL = "https://hr-unification.preview.emergentagent.com/api"
+BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_CREDENTIALS = {"email": "admin@tanseeq.com", "password": "ADMIN"}

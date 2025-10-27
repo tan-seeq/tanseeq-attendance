@@ -20,7 +20,7 @@ import uuid
 import time
 
 # Configuration
-BACKEND_URL = "https://hr-unification.preview.emergentagent.com/api"
+BACKEND_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
 
 print(f"🔗 Testing Backend URL: {BACKEND_URL}")
 

@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://hr-unification.preview.emergentagent.com",
+			"value": "https://hr-attendance-system.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

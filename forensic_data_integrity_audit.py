@@ -25,7 +25,7 @@ from collections import defaultdict, Counter
 import os
 
 # Configuration
-BASE_URL = "https://hr-unification.preview.emergentagent.com/api"
+BASE_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
 
 # Test credentials
 SUPER_ADMIN_CREDS = {"email": "admin@tanseeq.com", "password": "ADMIN"}

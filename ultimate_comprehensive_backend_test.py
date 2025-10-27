@@ -29,7 +29,7 @@ import sys
 import os
 
 # Configuration
-BASE_URL = "https://hr-unification.preview.emergentagent.com/api"
+BASE_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
 TIMEOUT = 30
 
 # Test Credentials - ALL MUST WORK

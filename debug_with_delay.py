@@ -8,7 +8,7 @@ import json
 import time
 
 # Configuration
-BASE_URL = "https://hr-unification.preview.emergentagent.com/api"
+BASE_URL = "https://hr-attendance-system.preview.emergentagent.com/api"
 TEST_ACCOUNT = {"email": "admin@tanseeq.com", "password": "ADMIN"}
 
 def debug_with_delay():

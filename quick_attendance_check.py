@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hr-unification.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://hr-attendance-system.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 async def check_attendance_status():
