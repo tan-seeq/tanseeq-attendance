@@ -1,34 +1,31 @@
 """
-Unified Deductions Engine for TANSEEQ HR
-==========================================
+Advanced Attendance Deduction System for TANSEEQ HR
+====================================================
 Single source of truth for all attendance deduction calculations.
 
-This engine is used by:
-- Dashboard deduction calculations
-- Advanced Deductions page
-- Monthly deduction calculations
-- Custom period calculations
-- Payroll integration
+Business Rules (COMPANY ACTUAL RULES):
+---------------------------------------
+1. **Grace Period System**:
+   - First 15 minutes late × 4 times per month = FREE (مجاناً)
+   - After 4 times: Minutes are accumulated and deducted
 
-Business Rules (VERIFIED):
----------------------------
-1. Working Hours: 09:00-18:00 (540 minutes total)
-2. Grace Period: 5 minutes (first 5 minutes of late arrival are free)
-3. Excluded Employees:
-   - Hatem Mohamed Ahmed (حاتم محمد أحمد)
-   - Tareq Abdel Moneim Alwazzan (طارق عبد المنعم الوزان)
-4. Special Rules:
-   - Tariq: No late deduction before 08:00 AM
-5. Deduction Formula:
-   - DailyRate = basic_salary / total_working_days_in_cycle
-   - deduction_amount = (DailyRate / 540) * total_deduction_minutes
-   - Where total_deduction_minutes = late_minutes + early_leave_minutes + under_hours_minutes
-   - For absences: full DailyRate deduction
+2. **Late Arrival Rules**:
+   - ≤15 minutes (within 4 free times): No deduction
+   - >15 to 20 minutes: Deduct actual time (hourly rate)
+   - >20 to 60 minutes: Deduct actual time
+   - 60-120 minutes (1-2 hours): Half day deduction (نصف يوم)
+   - >120 minutes (>2 hours): Full day deduction (يوم كامل)
 
-Cycle Period:
--------------
-- From 29th of previous month to 28th of current month
-- Example: October 2025 → 2025-09-29 to 2025-10-28
+3. **Absence**: Full day deduction
+
+4. **Excluded Employees**:
+   - Hatem Mohamed Ahmed (حاتم محمد أحمد): Fully exempt from ALL deductions
+   - Tarek Wazzan (طارق عبد المنعم الوزان): Flexible schedule
+     - Exempt from late/early leave deductions
+     - Only absence is counted
+
+5. **Working Hours**: 09:00-18:00 (9 hours)
+6. **Cycle Period**: 29th previous month to 28th current month
 """
 
 from datetime import datetime, date, time, timedelta
@@ -44,13 +41,17 @@ import uuid
 
 WORKING_HOURS_START = time(9, 0)  # 09:00 AM
 WORKING_HOURS_END = time(18, 0)   # 18:00 PM (6:00 PM)
-TOTAL_WORKING_MINUTES = 540  # 9 hours total (including break time in calculation)
-GRACE_PERIOD_MINUTES = 5  # First 5 minutes are free
+GRACE_PERIOD_MINUTES = 15  # First 15 minutes
+MAX_FREE_LATES = 4  # 4 times per month
 
-EXCLUDED_EMPLOYEES = [
+# Excluded employees
+FULLY_EXEMPT_EMPLOYEES = [
     "حاتم محمد أحمد",
     "hatem mohamed ahmed",
     "Hatem Mohamed Ahmed",
+]
+
+FLEXIBLE_SCHEDULE_EMPLOYEES = [
     "طارق عبد المنعم الوزان",
     "tareq abdel moneim alwazzan",
     "Tareq Abdel Moneim Alwazzan",
@@ -58,16 +59,6 @@ EXCLUDED_EMPLOYEES = [
     "Tarek Abdel Moneim Alwazzan",
     "tarek wazzan",
     "Tarek Wazzan",
-]
-
-# Special rule for Tariq: no late before 08:00
-TARIQ_SPECIAL_RULE_TIME = time(8, 0)  # 08:00 AM
-TARIQ_NAMES = [
-    "طارق",
-    "tariq",
-    "tareq",
-    "Tariq",
-    "Tareq",
 ]
 
 
