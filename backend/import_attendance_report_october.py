@@ -181,11 +181,8 @@ async def main(url: str):
                 break
         if csv_mode:
             break
-    # ensure required
-    required = ["employee name", "date"]
-    for req in required:
-        if req not in header_map or header_map[req] is None:
-            raise RuntimeError(f"Missing header: {req} -> csv_mode={csv_mode} keys={list(header_map.keys())}")
+    # If header not found, we will switch to heuristic row parsing mode
+    header_found = ("employee name" in header_map and header_map.get("employee name") is not None and "date" in header_map and header_map.get("date") is not None)
 
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
@@ -195,23 +192,45 @@ async def main(url: str):
     name_to_id = {norm(u.get("name", "")): u["id"] for u in users}
 
     upserts = 0
-    skipped = 0
     unknown = set()
 
-    for r in range(header_row_idx + 1, sheet.max_row + 1):
-        if csv_mode:
-            raw = str(sheet.cell(row=r, column=(csv_col_idx or 1)).value or "").strip()
-            if not raw:
-                continue
-            parts = [x.strip() for x in raw.split(",")]
-            # pad
-            while len(parts) < 6:
-                parts.append("")
-            row = parts
+    def tokens_from_row(r: int) -> list[str]:
+        # Join first 10 columns into a CSV-like string, then split
+        cells = [str(x or "").strip() for x in [c.value for c in list(next(sheet.iter_rows(min_row=r, max_row=r)))[0:10]]]
+        combo = ",".join([c for c in cells if c])
+        combo = combo.replace("\xa0", " ").replace("،", ",")
+        parts = [p.strip() for p in combo.split(",") if p.strip()]
+        return parts
+
+    for r in range(1, sheet.max_row + 1):
+        if header_found and r <= header_row_idx:
+            continue
+        row_vals = None
+        if header_found:
+            if csv_mode:
+                raw = str(sheet.cell(row=r, column=(csv_col_idx or 1)).value or "").strip()
+                if not raw:
+                    continue
+                parts = [x.strip() for x in raw.split(",")]
+                while len(parts) < 6:
+                    parts.append("")
+                row_vals = parts
+                emp_raw = row_vals[header_map["employee name"]]
+                dt_raw = row_vals[header_map["date"]]
+            else:
+                row_vals = [c for c in next(sheet.iter_rows(min_row=r, max_row=r, values_only=True))]
+                emp_raw = row_vals[header_map["employee name"]]
+                dt_raw = row_vals[header_map["date"]]
         else:
-            row = [c for c in next(sheet.iter_rows(min_row=r, max_row=r, values_only=True))]
-        emp_raw = row[header_map["employee name"]]
-        dt_raw = row[header_map["date"]]
+            parts = tokens_from_row(r)
+            # Skip header-like row
+            if len(parts) >= 2 and norm(parts[0]) == "employee name" and norm(parts[1]) == "date":
+                continue
+            if len(parts) < 2:
+                continue
+            emp_raw = parts[0]
+            dt_raw = parts[1]
+            row_vals = parts
         if not emp_raw:
             continue
         excel_name = str(emp_raw).strip()
