@@ -55,6 +55,9 @@ EXCLUDED_EMPLOYEES = [
     "tareq abdel moneim alwazzan",
     "Tareq Abdel Moneim Alwazzan",
     "Tariq Abdel Moneim Alwazzan",
+    "Tarek Abdel Moneim Alwazzan",
+    "tarek wazzan",
+    "Tarek Wazzan",
 ]
 
 # Special rule for Tariq: no late before 08:00
