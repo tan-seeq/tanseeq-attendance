@@ -1,0 +1,131 @@
+🔗 Using backend URL: https://hr-attendance-system.preview.emergentagent.com
+🚀 Starting TANSEEQ HR Backend API Tests
+📍 Testing against: https://hr-attendance-system.preview.emergentagent.com
+============================================================
+✅ Root endpoint
+
+🔐 Testing USER role:
+------------------------------
+✅ Login as user
+✅ Dashboard stats (user)
+✅ Attendance check-in (user)
+✅ Get attendance records (user)
+✅ Get leaves (user)
+✅ Get field exits (user)
+✅ Get all attendance (user)
+✅ Get all leaves (user)
+✅ Get all field exits (user)
+✅ Get attendance report (user)
+✅ Get leaves report (user)
+✅ Get field-exits report (user)
+✅ Get attendance report with custom dates (user)
+✅ Get leaves report with custom dates (user)
+✅ Get field-exits report with custom dates (user)
+✅ Get activity logs with date filter (user)
+
+📊 Testing Enhanced Reporting System (USER):
+✅ Export attendance Excel (user)
+✅ Export leaves Excel (user)
+✅ Export field-exits Excel (user)
+✅ Export attendance PDF (user)
+✅ Export leaves PDF (user)
+✅ Export field-exits PDF (user)
+✅ Reports company branding (user)
+✅ All reports no strange symbols (user)
+
+💰 Testing Payroll Reporting System (USER):
+✅ Payroll Excel export (user)
+✅ Payroll PDF export (user)
+✅ Get users (user)
+✅ Get activity logs (user)
+✅ Payroll calculation (user)
+✅ Password change (user)
+
+🚶 Testing Enhanced Field Exit Management (USER):
+✅ Field exit creation with expected times (user)
+✅ Field exit start tracking (user)
+✅ Field exit end tracking (user)
+✅ Field exit approve with notes (user)
+✅ Field exit reject with notes (user)
+✅ Field exits all with approved_by and admin_notes (user)
+
+🏖️ Testing Enhanced Leave Management (USER):
+❌ Leave approve with notes setup (user) - No leaves found
+❌ Leave reject with notes setup (user) - Could not create leave for rejection test
+✅ Leaves all with approved_by and admin_notes (user)
+✅ Weekend/attendance check (user)
+✅ Logout (user)
+
+🔐 Testing ADMIN role:
+------------------------------
+✅ Login as admin
+✅ Dashboard stats (admin)
+✅ Attendance check-in (admin)
+✅ Get attendance records (admin)
+✅ Get leaves (admin)
+✅ Get field exits (admin)
+✅ Get all attendance (admin)
+✅ Get all leaves (admin)
+✅ Get all field exits (admin)
+✅ Get attendance report (admin)
+✅ Get leaves report (admin)
+✅ Get field-exits report (admin)
+✅ Get attendance report with custom dates (admin)
+✅ Get leaves report with custom dates (admin)
+✅ Get field-exits report with custom dates (admin)
+✅ Get activity logs with date filter (admin)
+
+📊 Testing Enhanced Reporting System (ADMIN):
+✅ Export attendance Excel (admin)
+✅ Export leaves Excel (admin)
+✅ Export field-exits Excel (admin)
+✅ Export attendance PDF (admin)
+✅ Export leaves PDF (admin)
+✅ Export field-exits PDF (admin)
+❌ PDF report company branding (admin) - Valid PDF: True, TANSEEQ in content: False, Has content: True, No symbols: True
+✅ attendance excel clean report (admin)
+❌ attendance pdf clean report (admin) - No symbols: True, Company name: False
+✅ leaves excel clean report (admin)
+❌ leaves pdf clean report (admin) - No symbols: True, Company name: False
+✅ field-exits excel clean report (admin)
+❌ field-exits pdf clean report (admin) - No symbols: True, Company name: False
+
+💰 Testing Payroll Reporting System (ADMIN):
+✅ Payroll Excel export (admin)
+❌ Payroll PDF export (admin) - PDF: True, Valid: True, TANSEEQ: False, Content: True, No symbols: True
+✅ Get users (admin)
+✅ Get activity logs (admin)
+✅ Payroll calculation (admin)
+✅ Password change (admin)
+
+🚶 Testing Enhanced Field Exit Management (ADMIN):
+✅ Field exit creation with expected times (admin)
+✅ Field exit start tracking (admin)
+✅ Field exit end tracking (admin)
+✅ Field exit approve with notes (admin)
+✅ Field exit reject with notes (admin)
+✅ Field exits all with approved_by and admin_notes (admin)
+
+🏖️ Testing Enhanced Leave Management (ADMIN):
+❌ Leave approve with notes setup (admin) - No leaves found
+❌ Leave reject with notes setup (admin) - Could not create leave for rejection test
+✅ Leaves all with approved_by and admin_notes (admin)
+✅ Weekend/attendance check (admin)
+✅ Logout (admin)
+
+🔐 Testing SUPER_ADMIN role:
+------------------------------
+✅ Login as super_admin
+✅ Super admin login successful!
+✅ Update attendance status (super_admin)
+✅ Export attendance Excel (super_admin)
+✅ Export leaves Excel (super_admin)
+✅ Export field-exits Excel (super_admin)
+✅ Export attendance PDF (super_admin)
+✅ Export leaves PDF (super_admin)
+✅ Export field-exits PDF (super_admin)
+✅ Logout (super_admin)
+
+============================================================
+📊 Test Summary: 88/97 tests passed
+⚠️  9 tests failed
