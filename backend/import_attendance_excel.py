@@ -256,6 +256,23 @@ async def main(url: str):
                     early_departure_minutes = int((datetime.combine(d, time(18, 0)) - datetime.combine(d, co_t)).total_seconds() / 60)
             except Exception:
                 pass
+        # Optional: try to parse working hours like '8.9 ساعة' -> 8.9
+        working_hours = None
+        if col_idx.get("work_hours") is not None:
+            raw_wh = row[col_idx["work_hours"]]
+            if raw_wh is not None:
+                s = str(raw_wh)
+                m = re.search(r"(\d+(?:[\.,]\d+)?)", s)
+                if m:
+                    try:
+                        working_hours = float(m.group(1).replace(",", "."))
+                    except Exception:
+                        working_hours = None
+
+        # Set working hours into record if we have it
+        if working_hours is not None and not ci and not co:
+            record["working_hours"] = working_hours
+
 
         record = {
             "id": str(uuid.uuid4()),
