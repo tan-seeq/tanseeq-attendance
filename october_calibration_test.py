@@ -143,36 +143,30 @@ class OctoberCalibrationValidator:
         summaries = []
         
         for employee in employees:
-            # Calculate absence days and amount
-            daily_records = employee.get("daily_records", [])
-            absence_days = sum(1 for record in daily_records if record.get("status") == "absent")
-            
-            # Calculate absence amount using salary/30 rule
-            monthly_salary = employee.get("monthly_salary", 0)
-            absence_amount = (monthly_salary / 30) * absence_days if monthly_salary > 0 else 0
-            
-            # Calculate late minutes and amount
-            total_late_minutes = sum(record.get("late_minutes", 0) for record in daily_records)
-            daily_rate = employee.get("daily_rate", 0)
-            late_amount = (daily_rate / 540) * total_late_minutes if daily_rate > 0 else 0
-            
-            # Get scheduled advances (if present)
-            scheduled_advances = employee.get("scheduled_advances", 0)
-            
-            # Total deduction
+            # Use the actual API response structure
+            absence_deduction = employee.get("absence_deduction", 0)
+            late_deduction = employee.get("late_deduction", 0)
             total_deduction = employee.get("total_deduction", 0)
+            
+            # Calculate absence days from daily records
+            daily_records = employee.get("daily_records", [])
+            absence_days = employee.get("absence_count", 0)
+            total_late_minutes = employee.get("total_late_minutes", 0)
+            
+            # Get scheduled advances (check if present in API response)
+            scheduled_advances = employee.get("scheduled_advances", 0)
             
             summary = {
                 "employee_name": employee.get("employee_name", ""),
                 "absence_days": absence_days,
-                "absence_amount": round(absence_amount, 2),
+                "absence_amount": round(absence_deduction, 2),
                 "late_minutes": total_late_minutes,
-                "late_amount": round(late_amount, 2),
+                "late_amount": round(late_deduction, 2),
                 "scheduled_advances": scheduled_advances,
                 "total_deduction": total_deduction,
                 # Additional fields for analysis
-                "monthly_salary": monthly_salary,
-                "daily_rate": daily_rate,
+                "monthly_salary": employee.get("monthly_salary", 0),
+                "daily_rate": employee.get("daily_rate", 0),
                 "employee_id": employee.get("employee_id", "")
             }
             
