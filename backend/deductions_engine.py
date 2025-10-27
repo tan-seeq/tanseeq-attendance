@@ -466,7 +466,7 @@ async def calculate_employee_deductions(
     # Check if employee has flexible schedule (Tarek)
     is_flex_schedule = is_flexible_schedule(employee_name)
     
-    # Track late count for grace period calculation
+    # Track late count for grace period calculation (count ALL late instances ≤15 min)
     late_count_so_far = 0
     
     # Process each working day
@@ -507,8 +507,20 @@ async def calculate_employee_deductions(
                 daily_detail.note = "غياب - خصم يوم كامل (ساعات مرنة)"
             else:
                 # Present - no deduction for flexible schedule
+                # But still track if they were late for reporting purposes
+                if check_in:
+                    try:
+                        check_in_time = datetime.strptime(check_in, "%H:%M:%S").time()
+                        if check_in_time > WORKING_HOURS_START:
+                            check_in_dt = datetime.combine(work_date, check_in_time)
+                            standard_dt = datetime.combine(work_date, WORKING_HOURS_START)
+                            daily_detail.late_minutes = int((check_in_dt - standard_dt).total_seconds() / 60)
+                    except:
+                        pass
+                
                 daily_detail.rule_applied = "Flexible Schedule (No Late Deduction)"
                 daily_detail.note = "ساعات مرنة - لا يوجد خصم تأخير"
+                daily_detail.deduction_amount = 0
         else:
             # Normal employee - apply full company rules
             # Calculate daily deduction
@@ -523,8 +535,9 @@ async def calculate_employee_deductions(
                 is_public_holiday=is_holiday
             )
             
-            # Update late count for next iteration
-            if daily_detail.late_minutes > 0 and daily_detail.late_minutes <= GRACE_PERIOD_MINUTES:
+            # Update late count for next iteration (count ALL late instances ≤15 min)
+            # This is the grace period tracker
+            if daily_detail.late_minutes > 0 and daily_detail.late_minutes <= GRACE_PERIOD_MINUTES and daily_detail.grace_applied:
                 late_count_so_far += 1
         
         summary.daily_records.append(daily_detail)
