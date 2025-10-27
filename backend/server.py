@@ -12677,7 +12677,7 @@ async def apply_monthly_deductions(
         print(f"{'='*60}\n")
         
         # First calculate deductions to get the data
-        from advanced_deductions_system import calculate_monthly_deductions
+        from deductions_engine import calculate_monthly_deductions
         
         summaries = await calculate_monthly_deductions(db, 
             month=month,
