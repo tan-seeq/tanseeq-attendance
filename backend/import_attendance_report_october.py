@@ -130,6 +130,7 @@ async def main(url: str):
     header_map = {}
     csv_mode = False
     csv_col_idx = None
+    # Scan first 30 rows and up to 50 columns for header either as multi-column or single-cell CSV
     for r in range(1, 31):
         row_cells = list(next(sheet.iter_rows(min_row=r, max_row=r)))[0:sheet.max_column]
         row = [str(c.value or "").strip() for c in row_cells]
@@ -157,24 +158,27 @@ async def main(url: str):
                             header_map[key] = i
                             break
             break
-        # 2) Single-cell CSV header detection
+        # 2) Single-cell CSV header detection anywhere in row
         for idx, cell in enumerate(row):
-            if "," in cell:
-                parts = [norm(x) for x in cell.split(",")]
-                # Check minimal set
-                if len(parts) >= 2 and parts[0] == "employee name" and parts[1] == "date":
-                    header_row_idx = r
-                    csv_mode = True
-                    csv_col_idx = idx
-                    header_map = {
-                        "employee name": 0,
-                        "date": 1,
-                        "check in": 2 if len(parts) > 2 else None,
-                        "check out": 3 if len(parts) > 3 else None,
-                        "working hours/duration": 4 if len(parts) > 4 else None,
-                        "status/notes": 5 if len(parts) > 5 else None,
-                    }
-                    break
+            raw = norm(cell)
+            if not raw:
+                continue
+            # Replace Arabic commas with English commas and collapse spaces
+            normalized = raw.replace("،", ",")
+            parts = [p.strip() for p in normalized.split(",") if p.strip()]
+            if len(parts) >= 2 and parts[0] == "employee name" and parts[1] == "date":
+                header_row_idx = r
+                csv_mode = True
+                csv_col_idx = idx
+                header_map = {
+                    "employee name": 0,
+                    "date": 1,
+                    "check in": 2 if len(parts) > 2 else None,
+                    "check out": 3 if len(parts) > 3 else None,
+                    "working hours/duration": 4 if len(parts) > 4 else None,
+                    "status/notes": 5 if len(parts) > 5 else None,
+                }
+                break
         if csv_mode:
             break
     # ensure required
