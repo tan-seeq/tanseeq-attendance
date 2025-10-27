@@ -239,11 +239,17 @@ async def calculate_employee_deductions(
     total_working_days = len(work_days)
 
     # Rates
-    # Hourly for lateness uses daily based on 8 hours (company convention)
     daily_workingdays = basic_salary / total_working_days if total_working_days > 0 else 0.0
-    hourly_rate = (daily_workingdays / 8.0) if daily_workingdays > 0 else 0.0
-    # Absence per-30 calibration
+    # Absence per-30 calibration for October
     absence_daily_rate = (basic_salary / 30.0) if CALIBRATION_OCTOBER else daily_workingdays
+    # Lateness/under-hours rate per minute
+    if CALIBRATION_OCTOBER:
+        # Calibration: (DailyRate/540) per minute with DailyRate = salary/30
+        lateness_rate_per_min = (basic_salary / 30.0) / 540.0 if basic_salary > 0 else 0.0
+        hourly_rate = lateness_rate_per_min * 60.0
+    else:
+        # Company convention (outside calibration): daily_workingdays/8 hours
+        hourly_rate = (daily_workingdays / 8.0) if daily_workingdays > 0 else 0.0
 
     # Attendance map (latest record per date)
     cs, ce = cycle_start.isoformat(), cycle_end.isoformat()
