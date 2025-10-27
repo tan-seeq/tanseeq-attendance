@@ -463,6 +463,12 @@ async def calculate_employee_deductions(
         total_working_days=total_working_days
     )
     
+    # Check if employee has flexible schedule (Tarek)
+    is_flex_schedule = is_flexible_schedule(employee_name)
+    
+    # Track late count for grace period calculation
+    late_count_so_far = 0
+    
     # Process each working day
     for work_date in working_days_list:
         date_str = work_date.strftime("%Y-%m-%d")
@@ -478,16 +484,48 @@ async def calculate_employee_deductions(
         check_in = attendance.get("check_in") if attendance else None
         check_out = attendance.get("check_out") if attendance else None
         
-        # Calculate daily deduction
-        daily_detail = calculate_daily_deduction(
-            check_in=check_in,
-            check_out=check_out,
-            daily_rate=daily_rate,
-            employee_name=employee_name,
-            work_date=work_date,
-            is_on_leave=is_on_leave,
-            is_public_holiday=is_holiday
-        )
+        # Special handling for flexible schedule employees (Tarek)
+        # They are only deducted for absences, not for late/early leave
+        if is_flex_schedule:
+            # For Tarek: Only deduct for absence, not for late/early
+            daily_detail = DailyDeductionDetail(
+                date=date_str,
+                check_in=check_in,
+                check_out=check_out
+            )
+            
+            if is_holiday or is_on_leave:
+                daily_detail.is_public_holiday = is_holiday
+                daily_detail.is_on_leave = is_on_leave
+                daily_detail.rule_applied = "Public Holiday" if is_holiday else "Approved Leave"
+                daily_detail.note = "لا يوجد خصم - عطلة رسمية" if is_holiday else "لا يوجد خصم - إجازة معتمدة"
+            elif not check_in:
+                # Absent - deduct full day
+                daily_detail.is_absent = True
+                daily_detail.deduction_amount = daily_rate
+                daily_detail.rule_applied = "Full Day Absence (Flexible Schedule)"
+                daily_detail.note = "غياب - خصم يوم كامل (ساعات مرنة)"
+            else:
+                # Present - no deduction for flexible schedule
+                daily_detail.rule_applied = "Flexible Schedule (No Late Deduction)"
+                daily_detail.note = "ساعات مرنة - لا يوجد خصم تأخير"
+        else:
+            # Normal employee - apply full company rules
+            # Calculate daily deduction
+            daily_detail = calculate_daily_deduction(
+                check_in=check_in,
+                check_out=check_out,
+                daily_rate=daily_rate,
+                employee_name=employee_name,
+                work_date=work_date,
+                late_count_so_far=late_count_so_far,
+                is_on_leave=is_on_leave,
+                is_public_holiday=is_holiday
+            )
+            
+            # Update late count for next iteration
+            if daily_detail.late_minutes > 0 and daily_detail.late_minutes <= GRACE_PERIOD_MINUTES:
+                late_count_so_far += 1
         
         summary.daily_records.append(daily_detail)
         
