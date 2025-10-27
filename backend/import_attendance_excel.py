@@ -148,10 +148,6 @@ async def main(url: str):
     # Reset iterator after scanning
     # (openpyxl generators are stateless for iter_rows; we will use values_only later)
 
-    # Read header row
-    header_cells = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=1, max_row=1))[0:sheet.max_column]]
-    print("🧭 Headers:", header_cells)
-
     # Build column index map (case-insensitive, Arabic-aware)
     col_idx = {}
     for i, hdr in enumerate(header_cells):
