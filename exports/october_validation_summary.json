@@ -1,0 +1,151 @@
+{
+  "validation_timestamp": "2025-10-27T11:40:09.536871",
+  "test_results": {
+    "authentication": {
+      "status": "PASS",
+      "user": "مدير النظام",
+      "role": "super_admin"
+    },
+    "monthly_calculation": {
+      "status": "PASS",
+      "employee_count": 13,
+      "total_deductions": 69558.24
+    },
+    "engine_metadata": {
+      "engine_version_check": "PASS",
+      "cycle_window_check": "PASS",
+      "actual_engine_version": "unified_v1.0",
+      "actual_cycle_window": {
+        "from": "2025-09-29",
+        "to": "2025-10-28",
+        "description": "دورة شهرية: 29 September إلى 28 October"
+      }
+    },
+    "target_employees": {
+      "hatem": {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "total_deduction": 1000.0,
+        "absence_deduction": 1000.0,
+        "late_deduction": 0.0,
+        "assertion_pass": true
+      },
+      "tarek": {
+        "employee_name": "Tarek Wazzan",
+        "total_deduction": 363.64,
+        "absence_deduction": 363.64,
+        "late_deduction": 0.0,
+        "assertion_pass": true
+      }
+    },
+    "sampled_employees": {
+      "employee_1": {
+        "employee_name": "Mahmoud",
+        "daily_records_count": 22,
+        "required_keys_validation": {
+          "date": true,
+          "check_in": true,
+          "check_out": true,
+          "late_minutes": true,
+          "grace_applied": true,
+          "rule_applied": true,
+          "deduction_amount": true
+        },
+        "all_keys_present": true,
+        "sample_record": {
+          "date": "2025-09-29",
+          "status": "absent",
+          "check_in": null,
+          "check_out": null,
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "working_hours": 0.0,
+          "under_hours_minutes": 0,
+          "deductible_minutes": 540,
+          "grace_applied": false,
+          "rule_applied": "Full Day Absence",
+          "deduction_amount": 227.27,
+          "note": "غياب - خصم يوم كامل"
+        }
+      },
+      "employee_2": {
+        "employee_name": "Hesham",
+        "daily_records_count": 22,
+        "required_keys_validation": {
+          "date": true,
+          "check_in": true,
+          "check_out": true,
+          "late_minutes": true,
+          "grace_applied": true,
+          "rule_applied": true,
+          "deduction_amount": true
+        },
+        "all_keys_present": true,
+        "sample_record": {
+          "date": "2025-09-29",
+          "status": "present",
+          "check_in": "09:28:20",
+          "check_out": "18:46:02",
+          "late_minutes": 28,
+          "early_leave_minutes": 0,
+          "working_hours": 9.28,
+          "under_hours_minutes": 0,
+          "deductible_minutes": 28,
+          "grace_applied": false,
+          "rule_applied": "Exact Time Deduction (>15 min)",
+          "deduction_amount": 6.63,
+          "note": "تأخير 28 دقيقة - خصم بالوقت الفعلي"
+        }
+      },
+      "employee_3": {
+        "employee_name": "مدير النظام",
+        "daily_records_count": 22,
+        "required_keys_validation": {
+          "date": true,
+          "check_in": true,
+          "check_out": true,
+          "late_minutes": true,
+          "grace_applied": true,
+          "rule_applied": true,
+          "deduction_amount": true
+        },
+        "all_keys_present": true,
+        "sample_record": {
+          "date": "2025-09-29",
+          "status": "absent",
+          "check_in": null,
+          "check_out": null,
+          "late_minutes": 0,
+          "early_leave_minutes": 0,
+          "working_hours": 0.0,
+          "under_hours_minutes": 0,
+          "deductible_minutes": 540,
+          "grace_applied": false,
+          "rule_applied": "Full Day Absence",
+          "deduction_amount": 681.82,
+          "note": "غياب - خصم يوم كامل"
+        }
+      }
+    }
+  },
+  "summary": {
+    "total_deductions_aed": 69558.24,
+    "total_employees": 13,
+    "employees_with_deductions": 13,
+    "total_daily_records": 286,
+    "average_deduction_per_employee": 5350.63
+  },
+  "specific_line_items": {
+    "hatem_mohamed_ahmed": {
+      "employee_name": "Hatem Mohamed Ahmed",
+      "total_deduction": 1000.0,
+      "absence_deduction": 1000.0,
+      "late_deduction": 0.0
+    },
+    "tarek_wazzan": {
+      "employee_name": "Tarek Wazzan",
+      "total_deduction": 363.64,
+      "absence_deduction": 363.64,
+      "late_deduction": 0.0
+    }
+  }
+}
