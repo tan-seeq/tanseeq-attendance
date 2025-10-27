@@ -439,31 +439,31 @@ const PayrollSummary = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموظف</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الراتب الأساسي</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">البدلات</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجمالي الراتب</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">خصم يدوي</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="خصم الحضور والتأخير">
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">الموظف</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">الراتب الأساسي</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">البدلات</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">إجمالي الراتب</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم يدوي</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="خصم الحضور والتأخير">
                     خصم حضور
-                    <div className="text-xs font-normal text-gray-400 mt-1">(غياب + تأخير)</div>
+                    <div className="text-xs font-normal text-gray-500 mt-1">(غياب + تأخير)</div>
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="تفاصيل الغياب">
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="تفاصيل الغياب">
                     🔴 أيام غياب
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="مبلغ خصم الغياب">
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="مبلغ خصم الغياب">
                     مبلغ غياب
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="دقائق التأخير">
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="دقائق التأخير">
                     🟠 دقائق تأخير
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase" title="مبلغ خصم التأخير">
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="مبلغ خصم التأخير">
                     مبلغ تأخير
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">خصم سلف</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجمالي الخصومات</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase font-bold">صافي الراتب</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">رسالة الراتب</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم سلف</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">إجمالي الخصومات</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase bg-blue-50">صافي الراتب</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">رسالة الراتب</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
