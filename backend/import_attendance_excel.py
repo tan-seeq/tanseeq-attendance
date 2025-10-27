@@ -203,7 +203,7 @@ async def main(url: str):
     skipped = 0
     unknown_employees: set[str] = set()
 
-    for row in sheet.iter_rows(min_row=2, values_only=True):
+    for row in sheet.iter_rows(min_row=header_row_idx + 1, values_only=True):
         emp_raw = (row[col_idx["employee"]] if col_idx.get("employee") is not None else "")
         dt_raw = (row[col_idx["date"]] if col_idx.get("date") is not None else None)
         if not emp_raw:
