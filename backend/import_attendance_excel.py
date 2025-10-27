@@ -132,16 +132,30 @@ async def main(url: str):
     print("📄 Using sheet:", sheet.title)
 
     # Try to locate header row within first 5 rows if row 1 fails
-    def find_header_row(max_scan: int = 5):
+    def find_header_row(max_scan: int = 7):
+        best_row = 1
+        best_cells = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=1, max_row=1))]
+        best_match = 0
         for r in range(1, max_scan + 1):
             row_cells = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=r, max_row=r))]
             if not any(row_cells):
                 continue
-            # heuristic: contains at least الموظف and التاريخ
-            if ("الموظف" in row_cells) and ("التاريخ" in row_cells):
+            # score row by how many known header aliases it contains
+            keys_found = set()
+            for idx, cell in enumerate(row_cells):
+                hnorm = normalize_str(cell)
+                for key, aliases in HEADERS_MAP.items():
+                    if hnorm in aliases:
+                        keys_found.add(key)
+            score = len(keys_found)
+            if score > best_match or (score == best_match and ("employee" in keys_found and "date" in keys_found)):
+                best_match = score
+                best_row = r
+                best_cells = row_cells
+            # early accept if both employee and date present
+            if "employee" in keys_found and "date" in keys_found:
                 return r, row_cells
-        # default to row 1
-        return 1, [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=1, max_row=1))]
+        return best_row, best_cells
 
     header_row_idx, header_cells = find_header_row(max_scan=5)
     print(f"🧭 Detected header row at index {header_row_idx}:", header_cells)
