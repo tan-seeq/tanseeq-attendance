@@ -496,10 +496,10 @@ const PayrollSummary = () => {
                             step="0.01"
                             value={baseSalary}
                             onChange={(e) => handleFieldChange(emp.employee_id, 'base_salary', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         ) : (
-                          baseSalary.toFixed(2)
+                          <span className="text-base font-medium">{baseSalary.toFixed(2)}</span>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
@@ -509,14 +509,14 @@ const PayrollSummary = () => {
                             step="0.01"
                             value={allowances}
                             onChange={(e) => handleFieldChange(emp.employee_id, 'allowances', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         ) : (
-                          allowances.toFixed(2)
+                          <span className="text-base font-medium">{allowances.toFixed(2)}</span>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                        {grossSalary.toFixed(2)}
+                        <span className="text-base">{grossSalary.toFixed(2)}</span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {editMode ? (
@@ -525,10 +525,10 @@ const PayrollSummary = () => {
                             step="0.01"
                             value={manualDed}
                             onChange={(e) => handleFieldChange(emp.employee_id, 'manual_deductions', e.target.value)}
-                            className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
                           />
                         ) : (
-                          <span className="text-red-600">{manualDed.toFixed(2)}</span>
+                          <span className="text-red-600 text-base font-medium">{manualDed.toFixed(2)}</span>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
@@ -538,10 +538,10 @@ const PayrollSummary = () => {
                             step="0.01"
                             value={attendDed}
                             onChange={(e) => handleFieldChange(emp.employee_id, 'attendance_deductions', e.target.value)}
-                            className="w-full px-2 py-1 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            className="w-28 px-3 py-2 text-base border border-orange-300 rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                           />
                         ) : (
-                          <span className="text-red-600 font-semibold">{attendDed.toFixed(2)}</span>
+                          <span className="text-red-600 font-semibold text-base">{attendDed.toFixed(2)}</span>
                         )}
                       </td>
                       
