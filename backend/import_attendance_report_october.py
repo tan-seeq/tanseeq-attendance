@@ -194,7 +194,18 @@ async def main(url: str):
     skipped = 0
     unknown = set()
 
-    for row in sheet.iter_rows(min_row=header_row_idx + 1, values_only=True):
+    for r in range(header_row_idx + 1, sheet.max_row + 1):
+        if csv_mode:
+            raw = str(sheet.cell(row=r, column=(csv_col_idx or 1)).value or "").strip()
+            if not raw:
+                continue
+            parts = [x.strip() for x in raw.split(",")]
+            # pad
+            while len(parts) < 6:
+                parts.append("")
+            row = parts
+        else:
+            row = [c for c in next(sheet.iter_rows(min_row=r, max_row=r, values_only=True))]
         emp_raw = row[header_map["employee name"]]
         dt_raw = row[header_map["date"]]
         if not emp_raw:
