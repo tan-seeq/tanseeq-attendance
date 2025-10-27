@@ -220,32 +220,35 @@ def calculate_daily_deduction(
     daily_rate: float,
     employee_name: str,
     work_date: date,
+    late_count_so_far: int,  # Number of times late this month (before this day)
     is_on_leave: bool = False,
     is_public_holiday: bool = False
 ) -> DailyDeductionDetail:
     """
-    Calculate deduction for a single day using unified formula.
+    Calculate deduction for a single day using COMPANY ACTUAL RULES.
     
-    Formula:
-    --------
-    deduction_amount = (DailyRate / 540) * deductible_minutes
-    
-    Where:
-    - DailyRate = basic_salary / total_working_days_in_cycle
-    - deductible_minutes = late_minutes + early_leave_minutes + under_hours_minutes (after grace)
-    - Grace period: First 5 minutes of late are free
+    Rules:
+    ------
+    1. Grace Period: First 15 minutes late × 4 times per month = FREE
+    2. Late >20 minutes or after 4 free times: Deduct by time
+       - Hourly rate = daily_rate / 8
+       - Deduction = (late_minutes / 60) * hourly_rate
+    3. Late 60-120 minutes (1-2 hours): Half day deduction
+    4. Late >120 minutes (>2 hours): Full day deduction
+    5. Absence: Full day deduction
     
     Args:
-        check_in: Check-in time string "HH:MM:SS" or None
-        check_out: Check-out time string "HH:MM:SS" or None
+        check_in: Check-in time "HH:MM:SS"
+        check_out: Check-out time "HH:MM:SS"
         daily_rate: Daily rate (basic_salary / working_days)
-        employee_name: Employee name (for special rules)
+        employee_name: Employee name
         work_date: Date of work
-        is_on_leave: Whether employee is on approved leave
-        is_public_holiday: Whether day is a public holiday
+        late_count_so_far: How many times employee was late this month before this day
+        is_on_leave: Whether on approved leave
+        is_public_holiday: Whether public holiday
         
     Returns:
-        DailyDeductionDetail object with all calculations
+        DailyDeductionDetail with all calculations
     """
     detail = DailyDeductionDetail(
         date=work_date.strftime("%Y-%m-%d"),
@@ -292,18 +295,13 @@ def calculate_daily_deduction(
     # Calculate late minutes (after 09:00 AM)
     late_minutes = 0
     if check_in_time > WORKING_HOURS_START:
-        # Special rule for Tariq: no late before 08:00
-        if is_tariq_special_rule(employee_name) and check_in_time < TARIQ_SPECIAL_RULE_TIME:
-            late_minutes = 0
-            detail.note = "قاعدة خاصة: لا يوجد تأخير قبل 08:00"
-        else:
-            check_in_dt = datetime.combine(work_date, check_in_time)
-            standard_dt = datetime.combine(work_date, WORKING_HOURS_START)
-            late_minutes = int((check_in_dt - standard_dt).total_seconds() / 60)
+        check_in_dt = datetime.combine(work_date, check_in_time)
+        standard_dt = datetime.combine(work_date, WORKING_HOURS_START)
+        late_minutes = int((check_in_dt - standard_dt).total_seconds() / 60)
     
     detail.late_minutes = late_minutes
     
-    # Calculate early leave minutes (before 18:00 PM)
+    # Calculate early leave (if before 18:00 PM)
     early_leave_minutes = 0
     if check_out_time < WORKING_HOURS_END:
         check_out_dt = datetime.combine(work_date, check_out_time)
@@ -316,38 +314,53 @@ def calculate_daily_deduction(
     check_in_dt = datetime.combine(work_date, check_in_time)
     check_out_dt = datetime.combine(work_date, check_out_time)
     
-    # Handle next-day checkout (rare but possible)
     if check_out_time < check_in_time:
         check_out_dt += timedelta(days=1)
     
     total_minutes_worked = int((check_out_dt - check_in_dt).total_seconds() / 60)
     detail.total_work_minutes = total_minutes_worked
     
-    # Calculate under-hours minutes (if worked less than 540 minutes)
-    under_hours_minutes = max(0, TOTAL_WORKING_MINUTES - total_minutes_worked)
-    detail.under_hours_minutes = under_hours_minutes
+    # Now apply COMPANY RULES for deduction
+    if late_minutes == 0:
+        # No late - no deduction
+        detail.rule_applied = "On Time"
+        detail.note = "حضور في الموعد"
+        return detail
     
-    # Calculate total deductible minutes
-    total_deduction_minutes = late_minutes + early_leave_minutes
+    # COMPANY RULES for late arrival
+    hourly_rate = daily_rate / 8  # 8 working hours per day
     
-    # Apply grace period (first 5 minutes are free)
-    if total_deduction_minutes > 0 and total_deduction_minutes <= GRACE_PERIOD_MINUTES:
+    if late_minutes > 120:
+        # >2 hours late: Full day deduction
+        detail.deduction_amount = daily_rate
+        detail.rule_applied = "Full Day Deduction (>2 hours late)"
+        detail.note = f"تأخير أكثر من ساعتين ({late_minutes} دقيقة) - خصم يوم كامل"
+    
+    elif late_minutes >= 60:
+        # 1-2 hours late: Half day deduction
+        detail.deduction_amount = daily_rate / 2
+        detail.rule_applied = "Half Day Deduction (1-2 hours late)"
+        detail.note = f"تأخير من ساعة إلى ساعتين ({late_minutes} دقيقة) - خصم نصف يوم"
+    
+    elif late_minutes <= GRACE_PERIOD_MINUTES and late_count_so_far < MAX_FREE_LATES:
+        # Within grace period (≤15 minutes) and within free times (first 4 times)
         detail.grace_applied = True
-        detail.deductible_minutes = 0
-        detail.rule_applied = "Grace Period Applied"
-        detail.note = f"داخل حد الجريس ({total_deduction_minutes} دقيقة ≤ {GRACE_PERIOD_MINUTES} دقائق مجانية)"
+        detail.deduction_amount = 0
+        detail.rule_applied = f"Grace Period Applied ({late_count_so_far + 1}/{MAX_FREE_LATES} free)"
+        detail.note = f"داخل حد الجريس: {late_minutes} دقيقة (مرة {late_count_so_far + 1} من {MAX_FREE_LATES} مجانية)"
+    
     else:
-        # Deduct grace period from total
-        deductible_minutes = max(0, total_deduction_minutes - GRACE_PERIOD_MINUTES)
-        detail.deductible_minutes = deductible_minutes
-        
-        # Calculate deduction using unified formula
-        # deduction_amount = (DailyRate / 540) * deductible_minutes
-        minute_rate = daily_rate / TOTAL_WORKING_MINUTES
-        detail.deduction_amount = round(minute_rate * deductible_minutes, 2)
-        
-        detail.rule_applied = "Proportional Deduction"
-        detail.note = f"خصم متناسب: {deductible_minutes} دقيقة (بعد خصم {GRACE_PERIOD_MINUTES} دقائق جريس)"
+        # Deduct actual time (hourly rate)
+        detail.deduction_amount = (late_minutes / 60) * hourly_rate
+        if late_count_so_far >= MAX_FREE_LATES:
+            detail.rule_applied = "Accumulated After Grace Period"
+            detail.note = f"تأخير {late_minutes} دقيقة (بعد انتهاء الجريس المجاني)"
+        else:
+            detail.rule_applied = "Exact Time Deduction (>15 min)"
+            detail.note = f"تأخير {late_minutes} دقيقة - خصم بالوقت الفعلي"
+    
+    # Round to 2 decimal places
+    detail.deduction_amount = round(detail.deduction_amount, 2)
     
     return detail
 
