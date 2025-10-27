@@ -2189,15 +2189,18 @@ backend:
         comment: "🎉 ALL 3 CRITICAL FIXES VERIFIED SUCCESSFULLY: 1) ✅ /api/users Endpoint (Fix #1): Status 200 OK (not 500), 14 users returned with complete data, proper UUID format, no MongoDB ObjectId errors 2) ✅ Timezone +04:00 Consistency (Fix #2): All 55 attendance records include +04:00 timezone in ISO 8601 format, consistent across all datetime fields 3) ✅ General System Health (Fix #3): 5/5 critical endpoints healthy (100% success rate), backend service stable, authentication working perfectly. Technical fixes applied: UserResponse model validation with required field defaults, attendance endpoint response format corrected, timezone normalization verified. System ready for production use with excellent reliability."
   - task: "Unified Deductions Engine Production Validation"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/deductions_engine.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "testing"
         comment: "🎉 URGENT UNIFIED DEDUCTIONS ENGINE VALIDATION COMPLETED - 100% SUCCESS RATE: Successfully validated all 7 critical requirements for Advanced Deductions on production-bound code. VERIFIED: 1) ✅ Super Admin authentication (admin@tanseeq.com/ADMIN) working 2) ✅ Engine version unified_v1.0 confirmed in API response 3) ✅ Employees array with 13 active employees present 4) ✅ Tarek Wazzan exemption verified (total_deduction = 0.0) 5) ✅ Hatem Mohamed Ahmed exemption verified (total_deduction = 0.0) 6) ✅ Grace policy operational (≤15 min late up to 4 times with grace_applied=true) 7) ✅ Daily records fields complete (286/286 records with deductible_minutes, late_minutes, early_leave_minutes, rule_applied) 8) ✅ Custom calculation consistency (Monthly=482.21 AED matches Custom=482.21 AED for 2025-09-29 to 2025-10-28) 9) ✅ Attendance records validation (286 records in cycle window with 99.3% having check_in/check_out). System is production-ready with perfect compliance to all specified requirements."
+      - working: false
+        agent: "testing"
+        comment: "🚨 CRITICAL UNIFIED DEDUCTIONS ENGINE ISSUES FOUND AFTER EXCEL IMPORT - POST-VALIDATION FAILURE: Conducted comprehensive re-validation of unified deductions engine for October 2025 after Excel attendance import (110 records) as requested in review. CRITICAL FINDINGS: 1) ✅ TECHNICAL VERIFICATION: Engine version unified_v1.0 confirmed, API endpoint POST /api/deductions/calculate-monthly?month=2025-10 operational, correct cycle window (2025-09-29 to 2025-10-28), 13 employees processed 2) ❌ HATEM EXEMPTION BROKEN: Found 2 Hatem employees with deductions instead of 0 - Hatem Mohamed Ahmed: 1000.0 AED (4 absences), Hatem Mohamed: 15000.04 AED (22 absences) - SHOULD BE 0 except for complete absence days 3) ❌ TAREK EXEMPTION BROKEN: Found 2 Tarek employees with deductions instead of 0 - Tarek Wazzan: 363.64 AED (2 absences), Tarek Hegazy: 4999.94 AED (22 absences) - SHOULD BE 0 except for complete absence days 4) ⚠️ ATTENDANCE DATA GAP: Found only 98 October 2025 records (expected ≥110 after Excel import) 5) ✅ GRACE PERIOD WORKING: 13 grace applications with proper ≤15 minute rule enforcement 6) ✅ DAILY RECORDS PRESENT: All 3 sampled employees have records in cycle range with check-in/check-out times 7) ❌ MASSIVE ANOMALIES: Total deductions 69,558.24 AED with 3 employees having >15,000 AED deductions each. ROOT CAUSE: Exemption rules for Hatem and Tarek are not working correctly - they should have total_deduction = 0 except for days with complete absence (no check-in/out). Current engine is applying deductions to exempt employees. URGENT ACTION REQUIRED: Fix exemption logic in deductions engine before production deployment."
 
 frontend: []
 
