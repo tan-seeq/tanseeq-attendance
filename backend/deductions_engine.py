@@ -471,6 +471,7 @@ async def calculate_employee_deductions(
                 late_count_so_far=late_count_so_far,
                 is_on_leave=is_on_leave,
                 is_public_holiday=is_holiday,
+                working_hours=working_hours,
             )
             # Update late count for grace tracking
             if (
