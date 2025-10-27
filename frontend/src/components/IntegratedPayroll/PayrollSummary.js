@@ -588,17 +588,17 @@ const PayrollSummary = () => {
                             step="0.01"
                             value={advanceDed}
                             onChange={(e) => handleFieldChange(emp.employee_id, 'advance_deductions', e.target.value)}
-                            className="w-full px-2 py-1 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            className="w-28 px-3 py-2 text-base border border-purple-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                           />
                         ) : (
-                          <span className="text-red-600">{advanceDed.toFixed(2)}</span>
+                          <span className="text-red-600 text-base font-medium">{advanceDed.toFixed(2)}</span>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-red-600">
-                        {totalDed.toFixed(2)}
+                        <span className="text-base">{totalDed.toFixed(2)}</span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
-                        {netSalary.toFixed(2)}
+                        <span className="text-lg">{netSalary.toFixed(2)}</span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
                         <div className="flex flex-col gap-2">
