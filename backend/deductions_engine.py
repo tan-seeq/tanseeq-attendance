@@ -215,7 +215,8 @@ def calculate_daily_deduction(
     work_date: date,
     late_count_so_far: int,  # Number of times late this month (before this day)
     is_on_leave: bool = False,
-    is_public_holiday: bool = False
+    is_public_holiday: bool = False,
+    working_hours: Optional[float] = None,
 ) -> DailyDeductionDetail:
     """
     Calculate deduction for a single day using COMPANY ACTUAL RULES.
