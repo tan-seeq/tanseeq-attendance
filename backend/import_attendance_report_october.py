@@ -128,16 +128,18 @@ async def main(url: str):
     # detect header row
     header_row_idx = 1
     header_map = {}
+    csv_mode = False
+    csv_col_idx = None
     for r in range(1, 8):
-        row = [str(c.value or "").strip() for c in next(sheet.iter_rows(min_row=r, max_row=r))]
+        row_cells = list(next(sheet.iter_rows(min_row=r, max_row=r)))[0:sheet.max_column]
+        row = [str(c.value or "").strip() for c in row_cells]
         lowers = [norm(x) for x in row]
-        # fuzzy detection for 'employee name'
+        # 1) Normal multi-column header detection
         emp_candidates = [i for i, v in enumerate(lowers) if v in ("employee name", "employee", "employee name,", "employee name ")]
         date_candidates = [i for i, v in enumerate(lowers) if v in ("date", "date,")]
         if emp_candidates and date_candidates:
             header_row_idx = r
             header_map = {norm(v): i for i, v in enumerate(row)}
-            # normalize keys if missing exact ones
             if "employee name" not in header_map and emp_candidates:
                 header_map["employee name"] = emp_candidates[0]
             if "date" not in header_map and date_candidates:
@@ -146,7 +148,7 @@ async def main(url: str):
             for key, aliases in {
                 "check in": ("check in", "checkin", "in"),
                 "check out": ("check out", "checkout", "out"),
-                "working hours/duration": ("working hours/duration", "working hours", "duration", "working hours " ),
+                "working hours/duration": ("working hours/duration", "working hours", "duration", "working hours "),
                 "status/notes": ("status/notes", "status", "notes", "status / notes"),
             }.items():
                 if key not in header_map:
@@ -155,11 +157,31 @@ async def main(url: str):
                             header_map[key] = i
                             break
             break
+        # 2) Single-cell CSV header detection
+        for idx, cell in enumerate(row):
+            if "," in cell:
+                parts = [norm(x) for x in cell.split(",")]
+                # Check minimal set
+                if len(parts) >= 2 and parts[0] == "employee name" and parts[1] == "date":
+                    header_row_idx = r
+                    csv_mode = True
+                    csv_col_idx = idx
+                    header_map = {
+                        "employee name": 0,
+                        "date": 1,
+                        "check in": 2 if len(parts) > 2 else None,
+                        "check out": 3 if len(parts) > 3 else None,
+                        "working hours/duration": 4 if len(parts) > 4 else None,
+                        "status/notes": 5 if len(parts) > 5 else None,
+                    }
+                    break
+        if csv_mode:
+            break
     # ensure required
     required = ["employee name", "date"]
     for req in required:
-        if req not in header_map:
-            raise RuntimeError(f"Missing header: {req} -> found keys: {list(header_map.keys())}")
+        if req not in header_map or header_map[req] is None:
+            raise RuntimeError(f"Missing header: {req} -> csv_mode={csv_mode} keys={list(header_map.keys())}")
 
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
