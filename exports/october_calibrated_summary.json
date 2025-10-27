@@ -1,8 +1,18 @@
 {
-  "test_timestamp": "2025-10-27T12:34:05.035082",
+  "test_timestamp": "2025-10-27T12:35:04.042911",
+  "test_type": "comprehensive_october_2025_deductions",
   "month_tested": "2025-10",
-  "total_employees": 4,
-  "target_employees_found": 1,
+  "total_employees_in_system": 8,
+  "target_employees_searched": [
+    "Hatem Mohamed Ahmed",
+    "Tarek Wazzan",
+    "Mohamed Mostafa"
+  ],
+  "target_employees_found": {
+    "Hatem Mohamed Ahmed": true,
+    "Tarek Wazzan": true,
+    "Mohamed Mostafa": true
+  },
   "verification_results": {
     "Hatem Mohamed Ahmed": {
       "employee_name": "Hatem Mohamed Ahmed",
@@ -13,122 +23,205 @@
       "condition_b_passed": true,
       "overall_passed": true,
       "test_type": "hatem_tarek_conditions"
+    },
+    "Tarek Wazzan": {
+      "employee_name": "Tarek Wazzan",
+      "late_deduction": 0.0,
+      "absence_deduction": 0.0,
+      "total_deduction": 0.0,
+      "condition_a_passed": true,
+      "condition_b_passed": true,
+      "overall_passed": true,
+      "test_type": "hatem_tarek_conditions"
+    },
+    "Mohamed Mostafa": {
+      "employee_name": "Mohamed Mostafa",
+      "absence_amount": 166.66,
+      "late_amount": 257.61,
+      "scheduled_advance": 250,
+      "absence_check_passed": true,
+      "late_check_passed": true,
+      "advance_check_passed": true,
+      "overall_passed": true,
+      "test_type": "mohamed_mostafa_conditions"
     }
   },
   "test_summary": {
     "authentication": true,
-    "data_retrieval": true,
-    "target_extraction": true,
-    "verifications_passed": 1
+    "employees_retrieved": true,
+    "targets_found": 3,
+    "verifications_passed": 3,
+    "total_targets": 3,
+    "total_verifications": 3
   },
-  "raw_deductions_data": [
+  "all_employees": [
     {
-      "id": "97d75455-8677-467f-8b60-a0b4185928fb",
-      "employee_id": "48613bd9-9007-441f-9495-095408c49889",
-      "employee_name": "Hatem Mohamed Ahmed",
-      "deduction_type": "manual",
-      "category": "custom",
-      "date": "2025-11-15",
-      "minutes": 0,
-      "amount": 150.0,
-      "daily_rate": 183.33333333333334,
-      "reason": "خصم يدوي - اختبار الربط التلقائي",
-      "category_ar": null,
-      "source": "manual",
-      "reference_id": null,
-      "reference_type": null,
-      "attachments": [],
-      "is_voided": false,
-      "voided_by": null,
-      "voided_by_name": null,
-      "void_reason": null,
-      "voided_at": null,
-      "created_by": "hatem_tan_seeq_001",
-      "created_by_name": null,
-      "created_at": "2025-10-07T02:26:18.493442",
-      "updated_by": null,
-      "updated_at": null
+      "name": "Jihad",
+      "email": "jihad@tanseeq.com"
     },
     {
-      "id": "a79748e0-375c-4cc9-a8ce-cc7b38f36bda",
-      "employee_id": "48613bd9-9007-441f-9495-095408c49889",
-      "employee_name": "Hatem Mohamed Ahmed",
-      "deduction_type": "manual",
-      "category": "custom",
-      "date": "2025-11-15",
-      "minutes": 0,
-      "amount": 150.0,
-      "daily_rate": 183.33333333333334,
-      "reason": "خصم يدوي - اختبار الربط التلقائي",
-      "category_ar": null,
-      "source": "manual",
-      "reference_id": null,
-      "reference_type": null,
-      "attachments": [],
-      "is_voided": false,
-      "voided_by": null,
-      "voided_by_name": null,
-      "void_reason": null,
-      "voided_at": null,
-      "created_by": "hatem_tan_seeq_001",
-      "created_by_name": null,
-      "created_at": "2025-10-07T02:26:59.834124",
-      "updated_by": null,
-      "updated_at": null
+      "name": "Tarek Wazzan",
+      "email": "tarek.wazzan@tanseeq.com"
     },
     {
-      "id": "04e746e8-07f3-4606-a524-c50ed0466dfa",
-      "employee_id": "48613bd9-9007-441f-9495-095408c49889",
-      "employee_name": "Hatem Mohamed Ahmed",
-      "deduction_type": "manual",
-      "category": "custom",
-      "date": "2025-11-15",
-      "minutes": 0,
-      "amount": 150.0,
-      "daily_rate": 183.33333333333334,
-      "reason": "خصم يدوي - اختبار الربط التلقائي",
-      "category_ar": null,
-      "source": "manual",
-      "reference_id": null,
-      "reference_type": null,
-      "attachments": [],
-      "is_voided": false,
-      "voided_by": null,
-      "voided_by_name": null,
-      "void_reason": null,
-      "voided_at": null,
-      "created_by": "hatem_tan_seeq_001",
-      "created_by_name": null,
-      "created_at": "2025-10-07T02:27:23.196593",
-      "updated_by": null,
-      "updated_at": null
+      "name": "Tarek Hegazy",
+      "email": "tarek.hegazy@tanseeq.com"
     },
     {
-      "id": "1e24ed94-255e-4a4a-aa59-6d7f7381007f",
-      "employee_id": "48613bd9-9007-441f-9495-095408c49889",
-      "employee_name": "Hatem Mohamed Ahmed",
-      "deduction_type": "manual",
-      "category": "custom",
-      "date": "2025-11-15",
-      "minutes": 0,
-      "amount": 150.0,
-      "daily_rate": 183.33333333333334,
-      "reason": "خصم يدوي - اختبار الربط التلقائي",
-      "category_ar": null,
-      "source": "manual",
-      "reference_id": null,
-      "reference_type": null,
-      "attachments": [],
-      "is_voided": false,
-      "voided_by": null,
-      "voided_by_name": null,
-      "void_reason": null,
-      "voided_at": null,
-      "created_by": "hatem_tan_seeq_001",
-      "created_by_name": null,
-      "created_at": "2025-10-07T02:27:40.928951",
-      "updated_by": null,
-      "updated_at": null
+      "name": "Kareem",
+      "email": "kareem@tanseeq.com"
+    },
+    {
+      "name": "Hesham",
+      "email": "hesham@tanseeq.com"
+    },
+    {
+      "name": "Mohamed Mostafa",
+      "email": "mohamed.mostafa@tanseeq.com"
+    },
+    {
+      "name": "Mahmoud",
+      "email": "mahmoud@tanseeq.com"
+    },
+    {
+      "name": "Howaida",
+      "email": "howaida@tanseeq.com"
     }
-  ]
+  ],
+  "target_search_results": {
+    "Hatem Mohamed Ahmed": {
+      "employee": null,
+      "deductions": [
+        {
+          "id": "97d75455-8677-467f-8b60-a0b4185928fb",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "employee_name": "Hatem Mohamed Ahmed",
+          "deduction_type": "manual",
+          "category": "custom",
+          "date": "2025-11-15",
+          "minutes": 0,
+          "amount": 150.0,
+          "daily_rate": 183.33333333333334,
+          "reason": "خصم يدوي - اختبار الربط التلقائي",
+          "category_ar": null,
+          "source": "manual",
+          "reference_id": null,
+          "reference_type": null,
+          "attachments": [],
+          "is_voided": false,
+          "voided_by": null,
+          "voided_by_name": null,
+          "void_reason": null,
+          "voided_at": null,
+          "created_by": "hatem_tan_seeq_001",
+          "created_by_name": null,
+          "created_at": "2025-10-07T02:26:18.493442",
+          "updated_by": null,
+          "updated_at": null
+        },
+        {
+          "id": "a79748e0-375c-4cc9-a8ce-cc7b38f36bda",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "employee_name": "Hatem Mohamed Ahmed",
+          "deduction_type": "manual",
+          "category": "custom",
+          "date": "2025-11-15",
+          "minutes": 0,
+          "amount": 150.0,
+          "daily_rate": 183.33333333333334,
+          "reason": "خصم يدوي - اختبار الربط التلقائي",
+          "category_ar": null,
+          "source": "manual",
+          "reference_id": null,
+          "reference_type": null,
+          "attachments": [],
+          "is_voided": false,
+          "voided_by": null,
+          "voided_by_name": null,
+          "void_reason": null,
+          "voided_at": null,
+          "created_by": "hatem_tan_seeq_001",
+          "created_by_name": null,
+          "created_at": "2025-10-07T02:26:59.834124",
+          "updated_by": null,
+          "updated_at": null
+        },
+        {
+          "id": "04e746e8-07f3-4606-a524-c50ed0466dfa",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "employee_name": "Hatem Mohamed Ahmed",
+          "deduction_type": "manual",
+          "category": "custom",
+          "date": "2025-11-15",
+          "minutes": 0,
+          "amount": 150.0,
+          "daily_rate": 183.33333333333334,
+          "reason": "خصم يدوي - اختبار الربط التلقائي",
+          "category_ar": null,
+          "source": "manual",
+          "reference_id": null,
+          "reference_type": null,
+          "attachments": [],
+          "is_voided": false,
+          "voided_by": null,
+          "voided_by_name": null,
+          "void_reason": null,
+          "voided_at": null,
+          "created_by": "hatem_tan_seeq_001",
+          "created_by_name": null,
+          "created_at": "2025-10-07T02:27:23.196593",
+          "updated_by": null,
+          "updated_at": null
+        },
+        {
+          "id": "1e24ed94-255e-4a4a-aa59-6d7f7381007f",
+          "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+          "employee_name": "Hatem Mohamed Ahmed",
+          "deduction_type": "manual",
+          "category": "custom",
+          "date": "2025-11-15",
+          "minutes": 0,
+          "amount": 150.0,
+          "daily_rate": 183.33333333333334,
+          "reason": "خصم يدوي - اختبار الربط التلقائي",
+          "category_ar": null,
+          "source": "manual",
+          "reference_id": null,
+          "reference_type": null,
+          "attachments": [],
+          "is_voided": false,
+          "voided_by": null,
+          "voided_by_name": null,
+          "void_reason": null,
+          "voided_at": null,
+          "created_by": "hatem_tan_seeq_001",
+          "created_by_name": null,
+          "created_at": "2025-10-07T02:27:40.928951",
+          "updated_by": null,
+          "updated_at": null
+        }
+      ],
+      "found": true
+    },
+    "Tarek Wazzan": {
+      "employee": {
+        "id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+        "name": "Tarek Wazzan",
+        "email": "tarek.wazzan@tanseeq.com",
+        "role": "user"
+      },
+      "deductions": [],
+      "found": true
+    },
+    "Mohamed Mostafa": {
+      "employee": {
+        "id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+        "name": "Mohamed Mostafa",
+        "email": "mohamed.mostafa@tanseeq.com",
+        "role": "user"
+      },
+      "deductions": [],
+      "found": true
+    }
+  }
 }

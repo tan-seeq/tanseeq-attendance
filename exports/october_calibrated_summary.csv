@@ -1,2 +1,4 @@
-Employee Name,Late Deduction,Absence Deduction,Total Deduction,Absence Amount,Late Amount,Scheduled Advance,Verification Status,Test Type
-Hatem Mohamed Ahmed,0.0,0.0,0.0,N/A,N/A,N/A,PASS,hatem_tarek_conditions
+Target Employee,Found in System,Employee Name,Late Deduction,Absence Deduction,Total Deduction,Absence Amount,Late Amount,Scheduled Advance,Verification Status,Test Type
+Hatem Mohamed Ahmed,YES,Hatem Mohamed Ahmed,0.0,0.0,0.0,N/A,N/A,N/A,PASS,hatem_tarek_conditions
+Tarek Wazzan,YES,Tarek Wazzan,0.0,0.0,0.0,N/A,N/A,N/A,PASS,hatem_tarek_conditions
+Mohamed Mostafa,YES,Mohamed Mostafa,N/A,N/A,N/A,166.66,257.61,250,PASS,mohamed_mostafa_conditions
