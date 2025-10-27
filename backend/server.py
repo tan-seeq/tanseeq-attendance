@@ -2775,7 +2775,7 @@ async def calculate_monthly_deductions_endpoint(
                 "days_present": summary.days_present,
                 "total_late_minutes": summary.total_late_minutes,
                 "total_early_leave_minutes": summary.total_early_leave_minutes,
-                "daily_breakdown": daily_breakdown
+                "daily_records": daily_breakdown  # ✅ FIXED: Changed from daily_breakdown to daily_records for frontend compatibility
             })
             total_deductions += summary.total_deduction
         
