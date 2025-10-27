@@ -152,6 +152,16 @@ ATTENDANCE_DATA = [
     ("Hatem Mohamed Ahmed", "2025-09-29", "08:24:14", "17:30:00", "present"),
 ]
 
+# Name mapping from Excel to Database
+NAME_MAPPING = {
+    "TAREK ABDELMONEM ZAKI ALWAZAN": "Tarek Wazzan",
+    "KARIM MOHAMED MOUSTAFA ABDELMEGEUID": "Kareem",
+    "GEHAD MOHAMED KAMAL AHMED": "Jihad",
+    "HESHAM AHMED MOHAMED MOSTAFA": "Hesham",
+    "Mohamed AHMED MOHAMED MOSTAFA": "Mohamed Mostafa",
+    "Hatem Mohamed Ahmed": "Hatem Mohamed Ahmed"
+}
+
 async def import_attendance():
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
@@ -161,14 +171,7 @@ async def import_attendance():
     
     # Get employee ID mapping
     employees = await db.users.find({"is_active": True}).to_list(None)
-    name_to_id = {}
-    for emp in employees:
-        # Try exact match and partial match
-        name = emp["name"]
-        name_to_id[name] = emp["id"]
-        # Also add variations
-        name_to_id[name.upper()] = emp["id"]
-        name_to_id[name.lower()] = emp["id"]
+    name_to_id = {emp["name"]: emp["id"] for emp in employees}
     
     print(f"📋 Found {len(employees)} active employees in database")
     
@@ -176,15 +179,12 @@ async def import_attendance():
     skipped = 0
     
     for emp_name, date_str, check_in, check_out, status in ATTENDANCE_DATA:
-        # Find employee ID
-        emp_id = None
-        for db_name, db_id in name_to_id.items():
-            if emp_name.lower() in db_name.lower() or db_name.lower() in emp_name.lower():
-                emp_id = db_id
-                break
+        # Map name from Excel to Database
+        db_name = NAME_MAPPING.get(emp_name, emp_name)
+        emp_id = name_to_id.get(db_name)
         
         if not emp_id:
-            print(f"⚠️  Could not find employee: {emp_name}")
+            print(f"⚠️  Could not find employee: {emp_name} → {db_name}")
             skipped += 1
             continue
         
