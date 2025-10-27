@@ -103,6 +103,23 @@ const MonthlyDeductionsCalculator = () => {
         apiUrl = `${API}/deductions/calculate-monthly?month=${selectedMonth}`;
         console.log('API URL:', apiUrl);
       } else {
+        // Custom Period - validate dates first
+        if (!fromDate || !toDate) {
+          setError('Please select both From and To dates');
+          setCalculating(false);
+          return;
+        }
+        
+        // Validate date order
+        const fromDateObj = new Date(fromDate);
+        const toDateObj = new Date(toDate);
+        
+        if (fromDateObj > toDateObj) {
+          setError('⚠️ "From" date must be before "To" date. Please correct the dates.');
+          setCalculating(false);
+          return;
+        }
+        
         // ✅ FIXED: Use correct endpoint for custom period
         apiUrl = `${API}/deductions/calculate-custom?mode=custom&from_date=${fromDate}&to_date=${toDate}`;
         console.log('🔵 CUSTOM PERIOD API URL:', apiUrl);
