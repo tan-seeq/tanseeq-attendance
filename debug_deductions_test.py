@@ -44,9 +44,12 @@ class DeductionsDebugger:
         response = self.session.get(f"{BACKEND_URL}/employees/list", timeout=30)
         if response.status_code == 200:
             employees = response.json()
-            print(f"✅ Found {len(employees)} employees:")
-            for emp in employees[:10]:  # Show first 10
-                print(f"  - {emp.get('name', 'N/A')} (ID: {emp.get('id', 'N/A')})")
+            if isinstance(employees, list):
+                print(f"✅ Found {len(employees)} employees:")
+                for emp in employees[:10]:  # Show first 10
+                    print(f"  - {emp.get('name', 'N/A')} (ID: {emp.get('id', 'N/A')})")
+            else:
+                print(f"✅ Employees response: {employees}")
             return employees
         else:
             print(f"❌ Failed to get employees: {response.status_code}")
