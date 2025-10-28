@@ -5178,16 +5178,6 @@ async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html
 
 # Include the router in the main app
 app.include_router(api_router)
-        
-        # تنسيق بيانات الدورة
-        cycle["_id"] = str(cycle["_id"])
-        
-        return {
-            "cycle": cycle,
-            "employee_summaries": enhanced_summaries,
-            "total_employees": len(enhanced_summaries),
-            "unified_engine_active": True  # Flag to indicate unified engine data is included
-        }
 
     except Exception as e:
         import traceback
