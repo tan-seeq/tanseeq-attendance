@@ -247,6 +247,13 @@ async def calculate_employee_deductions(
         # If any day in cycle within window
         if not (cycle_end < CALIB_FROM or cycle_start > CALIB_TO):
             calibration_active = True
+        # Auto-off and audit when beyond window
+        if cycle_start > CALIB_TO:
+            from audit_service import ensure_calibration_off_logged
+            try:
+                await ensure_calibration_off_logged(db, f"{cycle_start.isoformat()}_{cycle_end.isoformat()}", CALIB_FROM.isoformat(), CALIB_TO.isoformat())
+            except Exception:
+                pass
 
     # Rates
     # Absence per-30 during calibration, otherwise per-working-days
