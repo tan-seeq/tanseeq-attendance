@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const AdvancedDeductionsReport = () => {
   const [loading, setLoading] = useState(false);
