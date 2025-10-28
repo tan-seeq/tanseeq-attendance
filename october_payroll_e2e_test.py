@@ -295,7 +295,7 @@ class OctoberPayrollE2ETest:
             employee_id = first_employee.get("employee_id")
             
             override_data = {
-                "employee_updates": [
+                "employees": [
                     {
                         "employee_id": employee_id,
                         "manual_deductions": first_employee.get("manual_deductions", 0) + 100,  # Add 100 AED override
