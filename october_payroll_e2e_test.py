@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://deduction-logic.preview.emergentagent.com/api"
+BASE_URL = "http://localhost:8001/api"
 ADMIN_EMAIL = "admin@tanseeq.com"
 ADMIN_PASSWORD = "ADMIN"
 
