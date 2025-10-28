@@ -98,6 +98,57 @@ const PayrollSummary = () => {
       alert('حدث خطأ في تحميل رسالة الراتب');
     }
   };
+  const renderSalaryLetterHtml = (employee, cycleData) => {
+    const base = (employee.base_salary || 0);
+    const allow = (employee.allowances || employee.total_allowances || 0);
+    const gross = (employee.gross_salary || (base + allow));
+    const admin = (employee.manual_deductions || 0);
+    const attend = (employee.attendance_deductions || 0);
+    const adv = (employee.advance_deductions || 0);
+    const total = admin + attend + adv;
+    const net = gross - total;
+
+    return `
+      <html lang='ar' dir='rtl'>
+      <head>
+        <meta charset='utf-8' />
+        <style>
+          body { font-family: Tahoma, Arial, sans-serif; color:#111; }
+          .container { max-width: 820px; margin: 24px auto; padding: 16px; border:1px solid #ddd; border-radius: 8px; }
+          h1 { font-size: 20px; margin-bottom: 8px; }
+          h2 { font-size: 16px; margin-top: 0; color:#555; }
+          table { width:100%; border-collapse: collapse; margin-top: 16px; }
+          th, td { border:1px solid #e5e7eb; padding: 10px 12px; text-align: right; }
+          th { background:#f9fafb; font-weight:700; }
+          .total { font-weight:700; }
+          .green { color:#16a34a; }
+          .red { color:#dc2626; }
+          .blue { color:#2563eb; }
+        </style>
+      </head>
+      <body>
+        <div class='container'>
+          <h1>رسالة الراتب</h1>
+          <h2>الموظف: ${employee.employee_name}</h2>
+          <p>الدورة: ${cycleData?.display_name || ''}</p>
+          <table>
+            <tbody>
+              <tr><th>الراتب الأساسي</th><td>${base.toFixed(2)}</td></tr>
+              <tr><th>البدلات</th><td>${allow.toFixed(2)}</td></tr>
+              <tr><th>إجمالي الراتب</th><td class='green total'>${gross.toFixed(2)}</td></tr>
+              <tr><th>خصم إداري</th><td class='red'>${admin.toFixed(2)}</td></tr>
+              <tr><th>خصم حضور (غياب + تأخير)</th><td class='red'>${attend.toFixed(2)}</td></tr>
+              <tr><th>خصم سلف</th><td class='red'>${adv.toFixed(2)}</td></tr>
+              <tr><th>إجمالي الخصومات</th><td class='red total'>${total.toFixed(2)}</td></tr>
+              <tr><th>صافي الراتب بعد الخصم</th><td class='blue total'>${net.toFixed(2)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
 
   const handleExportCycle = async (format) => {
     try {
