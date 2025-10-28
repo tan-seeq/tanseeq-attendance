@@ -5179,11 +5179,6 @@ async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html
 # Include the router in the main app
 app.include_router(api_router)
 
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
-
 # Disabled legacy salary letter endpoint in favor of router-based implementation
 @app.get("/__disabled__/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
 async def generate_salary_letter(
