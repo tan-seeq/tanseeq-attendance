@@ -518,6 +518,73 @@ const PayrollSummary = () => {
                           <input
                             type="number"
                             step="0.01"
+                      {/* Manual override inputs */}
+                      {editMode && (
+                        <>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <input
+                              type="number"
+                              step="1"
+                              value={emp.manual_override?.absent_days ?? ''}
+                              onChange={(e) => handleFieldChange(emp.employee_id, 'manual_override', {
+                                ...(emp.manual_override || {}),
+                                absent_days: e.target.value === '' ? null : parseInt(e.target.value, 10)
+                              })}
+                              className="w-24 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                              placeholder="—"
+                            />
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={emp.manual_override?.absence_amount ?? ''}
+                              onChange={(e) => handleFieldChange(emp.employee_id, 'manual_override', {
+                                ...(emp.manual_override || {}),
+                                absence_amount: e.target.value === '' ? null : parseFloat(e.target.value)
+                              })}
+                              className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                              placeholder="—"
+                            />
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <input
+                              type="number"
+                              step="1"
+                              value={emp.manual_override?.late_minutes ?? ''}
+                              onChange={(e) => handleFieldChange(emp.employee_id, 'manual_override', {
+                                ...(emp.manual_override || {}),
+                                late_minutes: e.target.value === '' ? null : parseInt(e.target.value, 10)
+                              })}
+                              className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                              placeholder="—"
+                            />
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={emp.manual_override?.late_amount ?? ''}
+                              onChange={(e) => handleFieldChange(emp.employee_id, 'manual_override', {
+                                ...(emp.manual_override || {}),
+                                late_amount: e.target.value === '' ? null : parseFloat(e.target.value)
+                              })}
+                              className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                              placeholder="—"
+                            />
+                          </td>
+                        </>
+                      )}
+
+                      {!editMode && (
+                        <>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{absentDays > 0 ? absentDays : <span className="text-gray-400">-</span>}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{absenceAmount > 0 ? absenceAmount.toFixed(2) : <span className="text-gray-400">0.00</span>}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{lateMinutes > 0 ? `${lateMinutes}` : <span className="text-gray-400">-</span>}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{lateAmount > 0 ? lateAmount.toFixed(2) : <span className="text-gray-400">0.00</span>}</td>
+                        </>
+                      )}
+
                             value={manualDed}
                             onChange={(e) => handleFieldChange(emp.employee_id, 'manual_deductions', e.target.value)}
                             className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
