@@ -168,7 +168,6 @@ const PayrollSummary = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-import html2pdf from 'html2pdf.js';
 
     } catch (error) {
       console.error('Error exporting cycle:', error);
