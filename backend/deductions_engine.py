@@ -173,11 +173,10 @@ def calculate_daily_deduction(
         d.note = "غياب - لا يوجد انصراف"
         return d
 
-    # Parse times
-    try:
-        ci_t = datetime.strptime(check_in, "%H:%M:%S").time()
-        co_t = datetime.strptime(check_out, "%H:%M:%S").time()
-    except Exception:
+    # Parse times (support HH:MM and HH:MM:SS)
+    ci_t = _parse_time_safe(check_in)
+    co_t = _parse_time_safe(check_out)
+    if not ci_t or not co_t:
         d.is_absent = True
         d.deductible_minutes = 540
         d.deduction_amount = round(absence_daily_rate, 2)
