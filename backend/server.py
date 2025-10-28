@@ -4610,7 +4610,8 @@ async def update_payroll_cycle_employees(
             
             # Extract new values
             new_manual_ded = emp_data.get("manual_deductions", 0)
-            old_manual_ded = current_summary.get("manual_deductions", 0)
+            # Optional manual overrides for attendance breakdown (for audit and UI)
+            manual_override = emp_data.get("manual_override", {}) or {}
             
             # Update employee summary
             update_fields = {
@@ -4619,6 +4620,13 @@ async def update_payroll_cycle_employees(
                 "manual_deductions": new_manual_ded,
                 "attendance_deductions": emp_data.get("attendance_deductions", 0),
                 "advance_deductions": emp_data.get("advance_deductions", 0),
+                "manual_override": {
+                    "absent_days": manual_override.get("absent_days"),
+                    "absence_amount": manual_override.get("absence_amount"),
+                    "late_minutes": manual_override.get("late_minutes"),
+                    "late_amount": manual_override.get("late_amount"),
+                    "note": manual_override.get("note")
+                },
                 "updated_at": to_iso_string_uae()  # ✅ UAE timezone
             }
             
