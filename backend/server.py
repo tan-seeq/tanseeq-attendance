@@ -5066,6 +5066,11 @@ async def get_payroll_cycle_summary(
                 ),
                 
                 "ledger_entries_count": ledger_summary["entries_count"]
+            }
+        
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error retrieving payroll ledger: {str(e)}")
+
 @api_router.get("/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
 async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html", current_user: User = Depends(get_super_admin_user)):
     """
