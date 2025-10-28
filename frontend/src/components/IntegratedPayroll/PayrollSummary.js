@@ -70,25 +70,20 @@ const PayrollSummary = () => {
     }
   };
 
-  const handleDownloadSalaryLetter = async (employeeId, format) => {
+  const handleDownloadSalaryLetter = async (employeeId) => {
     try {
-      const response = await axios.get(
-        `${API}/payroll/cycles/${id}/employees/${employeeId}/letter?format=${format}`,
-        { responseType: 'blob' }
-      );
-      
-      // Create download link
-      const blob = new Blob([response.data], { 
-        type: format === 'pdf' ? 'application/pdf' : 'text/html' 
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `salary_letter_${employeeId.slice(0, 8)}_${id.slice(0, 8)}.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const emp = (editMode ? editedData : employeeSummaries).find(e => e.employee_id === employeeId);
+      if (!emp) return alert('الموظف غير موجود في هذه الدورة');
+      const html = renderSalaryLetterHtml(emp, cycle);
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `salary_letter_${emp.employee_name.replace(/\s+/g,'_')}_${(cycle?.month || '').replace(/\s+/g,'_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      await html2pdf().from(html).set(opt).save();
     } catch (error) {
       console.error('Error downloading salary letter:', error);
       alert('حدث خطأ في تحميل رسالة الراتب');
