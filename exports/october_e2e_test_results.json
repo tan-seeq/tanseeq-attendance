@@ -5,56 +5,70 @@
       "status": "PASS",
       "details": "Authenticated as مدير النظام (super_admin)",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.379023"
+      "timestamp": "2025-10-28T08:44:59.938528"
     },
     {
       "test_name": "October Cycle Retrieval",
       "status": "PASS",
       "details": "Found existing October cycle: e70625f9-f78e-4be3-b02e-1c51cdf5385e",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.425382"
+      "timestamp": "2025-10-28T08:44:59.984453"
     },
     {
       "test_name": "Employee Summaries Recalculation",
       "status": "PASS",
       "details": "Recalculated summaries for cycle e70625f9-f78e-4be3-b02e-1c51cdf5385e",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.520297"
+      "timestamp": "2025-10-28T08:45:00.046282"
     },
     {
       "test_name": "Employee Verification - Kareem",
       "status": "PASS",
       "details": "All required fields present",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.835461"
+      "timestamp": "2025-10-28T08:45:00.335478"
     },
     {
       "test_name": "Employee Verification - Hesham",
       "status": "PASS",
       "details": "All required fields present",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.835509"
+      "timestamp": "2025-10-28T08:45:00.335520"
     },
     {
       "test_name": "Employee Verification - Mohamed Mostafa",
       "status": "PASS",
       "details": "All required fields present",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.835516"
+      "timestamp": "2025-10-28T08:45:00.335528"
     },
     {
       "test_name": "Target Employees Verification",
       "status": "PASS",
       "details": "Verified 3 target employees with all required fields",
       "error": null,
-      "timestamp": "2025-10-28T08:44:32.835525"
+      "timestamp": "2025-10-28T08:45:00.335536"
     },
     {
       "test_name": "Employee Updates with Overrides",
-      "status": "FAIL",
-      "details": "HTTP 400",
-      "error": "{\"detail\":\"لا توجد بيانات موظفين للتحديث\"}",
-      "timestamp": "2025-10-28T08:44:32.882263"
+      "status": "PASS",
+      "details": "Successfully updated employee Kareem with overrides",
+      "error": null,
+      "timestamp": "2025-10-28T08:45:00.404297"
+    },
+    {
+      "test_name": "Salary Letter HTML Generation",
+      "status": "PASS",
+      "details": "Generated HTML letter with Arabic fields: ['الراتب', 'الموظف', 'الخصومات']",
+      "error": null,
+      "timestamp": "2025-10-28T08:45:00.450327"
+    },
+    {
+      "test_name": "CSV Summary Generation",
+      "status": "PASS",
+      "details": "Saved CSV summary to /app/exports/october_cycle_validation.csv with 3 employees",
+      "error": null,
+      "timestamp": "2025-10-28T08:45:00.450726"
     }
   ],
   "employee_summaries": [
@@ -139,11 +153,11 @@
     "cutoff_date": "2025-11-05",
     "status": "open",
     "is_locked": false,
-    "total_employees": 10,
-    "total_gross_salary": 50200.0,
+    "total_employees": 6,
+    "total_gross_salary": 19200.0,
     "total_allowances": 0.0,
-    "total_deductions": 0,
-    "total_net_salary": 47621.88,
+    "total_deductions": 2560.33,
+    "total_net_salary": 16639.67,
     "default_deduction_ceiling_type": "percentage",
     "default_deduction_ceiling_value": 0.33,
     "created_by": "admin_001",
@@ -157,12 +171,12 @@
     "finalized_by_name": null,
     "finalized_at": null,
     "notes": "",
-    "recalculated_at": "2025-10-21T08:20:02.785342+00:00",
+    "recalculated_at": "2025-10-28T08:44:32.478526+00:00",
     "recalculated_by": "admin_001",
     "updated_at": "2025-10-21T12:22:55.754544+04:00",
     "absence_deductions": 0,
     "late_deductions": 0
   },
-  "overall_success": false,
-  "timestamp": "2025-10-28T08:44:32.882606"
+  "overall_success": true,
+  "timestamp": "2025-10-28T08:45:00.450977"
 }

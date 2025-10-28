@@ -1,0 +1,4 @@
+employee_name,employee_id,base_salary,total_allowances,gross_salary,manual_deductions,attendance_deductions,advance_deductions,total_deductions,net_salary
+Kareem,41a2f63a-a584-4a65-ae84-d7f0a98f5981,2500.0,0,2500.0,0,83.33,0,83.33,2416.67
+Hesham,16d4a924-ff1f-401c-b95e-9b57db963d42,2500.0,0,2500.0,0,83.33,0,83.33,2416.67
+Mohamed Mostafa,33d2d833-f414-4b0c-920d-35e3ca4f853c,2500.0,0,2500.0,0,218.67000000000002,0,218.67000000000002,2281.33
