@@ -3,7 +3,7 @@ import os
 from motor.motor_asyncio import AsyncIOMotorClient
 
 _MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
-_DB_NAME   = os.getenv("DB_NAME", "tanseeq-hr")
+_DB_NAME   = os.getenv("DB_NAME", "tanseeq_hr")
 
 _client = None
 _db = None
