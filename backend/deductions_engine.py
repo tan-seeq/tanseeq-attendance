@@ -210,6 +210,7 @@ def calculate_daily_deduction(
         d.note = "حضور في الموعد"
         return d
 
+    # Lateness thresholds take precedence
     if late > 120:
         d.is_absent = True
         d.deductible_minutes = 540
@@ -222,18 +223,23 @@ def calculate_daily_deduction(
         d.rule_applied = "1-2h Late → Half Day"
         return d
 
-    # Grace
+    # Grace for lateness only (does not cover early leave)
+    effective_late = late
     if late <= GRACE_MIN and late_count_so_far < MAX_FREE_LATES:
         d.grace_applied = True
-        d.rule_applied = f"Grace ({late_count_so_far + 1}/{MAX_FREE_LATES})"
+        effective_late = 0
+
+    # Exact time deduction (>15 min or after grace) using late + early
+    exact_minutes = effective_late + early
+    if exact_minutes == 0:
+        # Either fully on-time or lateness covered by grace and no early leave
+        d.rule_applied = "On Time (grace if late)"
+        d.note = "حضور في الموعد (تطبيق سماح على التأخير إن وجد)"
         return d
 
-    # Exact time deduction (>15 min or exceeded grace)
-    # Company formula: (DailyRate/540) × (late + early + deficit)
-    exact_minutes = late + early
     d.deductible_minutes = exact_minutes
     d.deduction_amount = round((exact_minutes / 60) * hourly_rate, 2)
-    d.rule_applied = "Exact Time Deduction (late+early)"
+    d.rule_applied = "Exact Time Deduction (late+early with grace)" if d.grace_applied else "Exact Time Deduction (late+early)"
     return d
 
 # Main per-employee calculation
