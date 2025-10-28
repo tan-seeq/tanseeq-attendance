@@ -76,14 +76,22 @@ const PayrollSummary = () => {
       if (!emp) return alert('الموظف غير موجود في هذه الدورة');
       const html = renderSalaryLetterHtml(emp, cycle);
 
+      // Dynamic import to satisfy Kaniko/CRA top-level import rule
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+
+      const cycleIdSafe = (cycle?.id || '').replace(/[^A-Za-z0-9_-]/g,'');
+      const empCodeSafe = (emp.employee_code || emp.employee_id || '').toString().replace(/[^A-Za-z0-9_-]/g,'').slice(0,16);
+
       const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `salary_letter_${emp.employee_name.replace(/\s+/g,'_')}_${(cycle?.month || '').replace(/\s+/g,'_')}.pdf`,
+        margin: 15,
+        filename: `payroll_${cycleIdSafe}_${empCodeSafe}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css','legacy'] }
       };
-      await html2pdf().from(html).set(opt).save();
+      await html2pdf().set(opt).from(html).save();
     } catch (error) {
       console.error('Error downloading salary letter:', error);
       alert('حدث خطأ في تحميل رسالة الراتب');
