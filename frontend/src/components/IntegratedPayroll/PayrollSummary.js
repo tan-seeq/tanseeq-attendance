@@ -610,51 +610,6 @@ const PayrollSummary = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{lateAmount > 0 ? lateAmount.toFixed(2) : <span className="text-gray-400">0.00</span>}</td>
                         </>
                       )}
-                      {/* Manual override inputs */}
-                      {editMode && (
-                        <>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <input
-                              type="number"
-                              step="1"
-                              value={(emp.manual_override && emp.manual_override.absent_days !== undefined && emp.manual_override.absent_days !== null) ? emp.manual_override.absent_days : ''}
-                              onChange={(e) => updateManualOverride(emp.employee_id, 'absent_days', e.target.value === '' ? null : parseInt(e.target.value, 10))}
-                              className="w-24 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                              placeholder="—"
-                            />
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={(emp.manual_override && emp.manual_override.absence_amount !== undefined && emp.manual_override.absence_amount !== null) ? emp.manual_override.absence_amount : ''}
-                              onChange={(e) => updateManualOverride(emp.employee_id, 'absence_amount', e.target.value === '' ? null : parseFloat(e.target.value))}
-                              className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                              placeholder="—"
-                            />
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <input
-                              type="number"
-                              step="1"
-                              value={(emp.manual_override && emp.manual_override.late_minutes !== undefined && emp.manual_override.late_minutes !== null) ? emp.manual_override.late_minutes : ''}
-                              onChange={(e) => updateManualOverride(emp.employee_id, 'late_minutes', e.target.value === '' ? null : parseInt(e.target.value, 10))}
-                              className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                              placeholder="—"
-                            />
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={(emp.manual_override && emp.manual_override.late_amount !== undefined && emp.manual_override.late_amount !== null) ? emp.manual_override.late_amount : ''}
-                              onChange={(e) => updateManualOverride(emp.employee_id, 'late_amount', e.target.value === '' ? null : parseFloat(e.target.value))}
-                              className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                              placeholder="—"
-                            />
-                          </td>
-                        </>
-                      )}
 
                       {!editMode && (
                         <>
