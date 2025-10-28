@@ -358,7 +358,7 @@ async def calculate_employee_deductions(
             summary.daily_records.append(detail)
             continue
 
-        # Non-flex: full rules
+        # Non-flex: full rules or partial-flex (lateness only)
         detail = calculate_daily_deduction(
             check_in=check_in,
             check_out=check_out,
@@ -370,6 +370,28 @@ async def calculate_employee_deductions(
             is_on_leave=await is_employee_on_approved_leave(db, employee_id, wd),
             is_public_holiday=await is_public_holiday(db, wd),
         )
+        
+        if is_partial_flex(employee_name):
+            # Zero-out early leave and under-hours and recalc deduction if exact-time rule was applied
+            if not detail.is_absent and not detail.is_public_holiday and not detail.is_on_leave:
+                # Recompute exact-time to include lateness only
+                late_only_minutes = detail.late_minutes
+                # Apply grace if applicable
+                if late_only_minutes <= GRACE_MIN and late_count < MAX_FREE_LATES and late_only_minutes > 0:
+                    detail.grace_applied = True
+                    effective_late = 0
+                else:
+                    effective_late = late_only_minutes
+                exact_minutes = effective_late
+                detail.early_leave_minutes = 0
+                detail.under_hours_minutes = 0
+                if detail.rule_applied.startswith("1-2h Late") or detail.rule_applied.startswith(">2h Late"):
+                    # Keep half/full-day rules if lateness thresholds hit
+                    pass
+                else:
+                    detail.deductible_minutes = exact_minutes
+                    detail.deduction_amount = round((exact_minutes / 60) * hourly_rate, 2)
+                    detail.rule_applied = "Partial-Flex: Lateness Only"
 
         # grace tracker
         if detail.late_minutes > 0 and detail.late_minutes <= GRACE_MIN and detail.grace_applied:
