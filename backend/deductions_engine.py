@@ -25,6 +25,7 @@ WORKING_HOURS_END = time(18, 0)
 GRACE_MIN = 15
 MAX_FREE_LATES = 4
 
+# Flexible employees: no late/early deductions, absence only
 FLEXIBLE_EMPLOYEES = [
     # Tarek variants
     "طارق عبد المنعم الوزان", "tareq abdel moneim alwazzan", "Tareq Abdel Moneim Alwazzan",
