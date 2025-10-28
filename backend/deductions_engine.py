@@ -204,8 +204,8 @@ def calculate_daily_deduction(
         co_dt += timedelta(days=1)
     d.total_work_minutes = int((co_dt - ci_dt).total_seconds() / 60)
 
-    # Apply late rules
-    if late == 0:
+    # Apply late/early rules
+    if late == 0 and early == 0:
         d.rule_applied = "On Time"
         d.note = "حضور في الموعد"
         return d
