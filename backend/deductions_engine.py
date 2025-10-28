@@ -229,9 +229,11 @@ def calculate_daily_deduction(
         return d
 
     # Exact time deduction (>15 min or exceeded grace)
-    d.deductible_minutes = late
-    d.deduction_amount = round((late / 60) * hourly_rate, 2)
-    d.rule_applied = "Exact Time Deduction"
+    # Company formula: (DailyRate/540) × (late + early + deficit)
+    exact_minutes = late + early
+    d.deductible_minutes = exact_minutes
+    d.deduction_amount = round((exact_minutes / 60) * hourly_rate, 2)
+    d.rule_applied = "Exact Time Deduction (late+early)"
     return d
 
 # Main per-employee calculation
