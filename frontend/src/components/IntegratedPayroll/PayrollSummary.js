@@ -166,36 +166,14 @@ const PayrollSummary = () => {
       advance_deductions: emp.advance_deductions || 0,
       gross_salary: emp.gross_salary || 0,
       total_deductions: emp.total_deductions || 0,
-      net_salary: emp.net_salary || 0
+      net_salary: emp.net_salary || 0,
+      manual_override: emp.manual_override || null,
     }));
-    // Support setting nested manual_override in editedData
-    if (field === 'manual_override') {
-      setEditedData(prev => prev.map(emp => {
-        if (emp.employee_id === employeeId) {
-          const newEmp = { ...emp, manual_override: value };
-          // Optionally recompute attendance_deductions based on manual overrides if provided
-          const hasAbsenceAmt = value && value.absence_amount !== undefined && value.absence_amount !== null;
-          const hasLateAmt = value && value.late_amount !== undefined && value.late_amount !== null;
-          if (hasAbsenceAmt || hasLateAmt) {
-            const attendance = (hasAbsenceAmt ? parseFloat(value.absence_amount) || 0 : (emp.attendance_deductions || 0))
-              + (hasLateAmt ? parseFloat(value.late_amount) || 0 : 0);
-            newEmp.attendance_deductions = attendance;
-            const gross = (newEmp.base_salary || 0) + (newEmp.allowances || 0);
-            const total = (newEmp.manual_deductions || 0) + (newEmp.attendance_deductions || 0) + (newEmp.advance_deductions || 0);
-            newEmp.gross_salary = gross;
-            newEmp.total_deductions = total;
-            newEmp.net_salary = gross - total;
-          }
-          return newEmp;
-        }
-        return emp;
-      }));
-      return;
-    }
 
     setEditedData(initialData);
     setEditMode(true);
   };
+
 
   const handleCancelEdit = () => {
     setEditMode(false);
