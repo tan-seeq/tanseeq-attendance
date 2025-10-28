@@ -25,12 +25,13 @@ async def healthz():
 
 @app.get("/api/readyz")
 async def readyz():
-    """Readiness check - tests DB connectivity"""
+    """Readiness check - tests DB connectivity (Atlas or local) with short timeout"""
     try:
-        from db_client import get_db
-        _db = get_db()
-        await _db.command("ping")  # يفشل بسرعة لو Atlas مش جاهز
-        return {"status": "ready"}
+        from db_client import ping as db_ping
+        ok, err = await db_ping()
+        if ok:
+            return {"status": "ready"}
+        return JSONResponse({"status": "not_ready", "error": err}, status_code=503)
     except Exception as e:
         return JSONResponse({"status": "not_ready", "error": str(e)}, status_code=503)
 
