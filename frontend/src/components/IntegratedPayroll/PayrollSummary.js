@@ -213,7 +213,9 @@ const PayrollSummary = () => {
           allowances: emp.allowances,
           manual_deductions: emp.manual_deductions,
           attendance_deductions: emp.attendance_deductions,
-          advance_deductions: emp.advance_deductions
+          advance_deductions: emp.advance_deductions,
+          // Optional manual overrides for detailed breakdown
+          manual_override: emp.manual_override || null,
         })),
         notes: `تم التعديل بواسطة Super Admin في ${new Date().toLocaleString('ar-AE')}`
       };
