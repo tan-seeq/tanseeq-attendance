@@ -221,6 +221,30 @@ const PayrollSummary = () => {
     });
   };
 
+  // Helper: update manual_override safely and recompute totals
+  const updateManualOverride = (employeeId, key, rawValue) => {
+    setEditedData(prev => prev.map(emp => {
+      if (emp.employee_id !== employeeId) return emp;
+      const value = (rawValue === '' || rawValue === undefined || rawValue === null) ? null : rawValue;
+      const currentMO = emp.manual_override ? { ...emp.manual_override } : {};
+      currentMO[key] = value;
+      const newEmp = { ...emp, manual_override: currentMO };
+      // If amounts provided, recompute attendance_deductions and totals
+      const absAmt = (currentMO.absence_amount !== undefined && currentMO.absence_amount !== null) ? parseFloat(currentMO.absence_amount) || 0 : null;
+      const lateAmt = (currentMO.late_amount !== undefined && currentMO.late_amount !== null) ? parseFloat(currentMO.late_amount) || 0 : null;
+      if (absAmt !== null || lateAmt !== null) {
+        const attendance = (absAmt !== null ? absAmt : (newEmp.attendance_deductions || 0)) + (lateAmt !== null ? lateAmt : 0);
+        newEmp.attendance_deductions = attendance;
+      }
+      const gross = (newEmp.base_salary || 0) + (newEmp.allowances || 0);
+      const total = (newEmp.manual_deductions || 0) + (newEmp.attendance_deductions || 0) + (newEmp.advance_deductions || 0);
+      newEmp.gross_salary = gross;
+      newEmp.total_deductions = total;
+      newEmp.net_salary = gross - total;
+      return newEmp;
+    }));
+  };
+
   const handleSaveChanges = async () => {
     if (!editedData || editedData.length === 0) {
       alert('لا توجد بيانات للحفظ');
