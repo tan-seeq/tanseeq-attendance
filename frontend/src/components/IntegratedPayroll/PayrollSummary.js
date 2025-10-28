@@ -691,15 +691,6 @@ const PayrollSummary = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{lateAmount > 0 ? lateAmount.toFixed(2) : <span className="text-gray-400">0.00</span>}</td>
                         </>
                       )}
-
-                            value={manualDed}
-                            onChange={(e) => handleFieldChange(emp.employee_id, 'manual_deductions', e.target.value)}
-                            className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                          />
-                        ) : (
-                          <span className="text-red-600 text-base font-medium">{manualDed.toFixed(2)}</span>
-                        )}
-                      </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {editMode ? (
                           <input
