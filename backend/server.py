@@ -5067,9 +5067,32 @@ async def get_payroll_cycle_summary(
                 
                 "ledger_entries_count": ledger_summary["entries_count"]
             }
+            
+            enhanced_summaries.append(enhanced_summary)
         
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error retrieving payroll ledger: {str(e)}")
+        # تنسيق بيانات الدورة
+        cycle_data = {
+            "id": cycle["id"],
+            "period": cycle.get("period", ""),
+            "month": cycle.get("month", ""),
+            "status": cycle.get("status", "active"),
+            "created_at": cycle.get("created_at", ""),
+            "employee_count": len(enhanced_summaries)
+        }
+        
+        return {
+            "cycle": cycle_data,
+            "employee_summaries": enhanced_summaries,
+            "summary_stats": {
+                "total_employees": len(enhanced_summaries),
+                "total_gross_salary": sum(s.get("gross_salary", 0) for s in enhanced_summaries),
+                "total_deductions": sum(s.get("total_deductions", 0) for s in enhanced_summaries),
+                "total_net_salary": sum(s.get("net_salary", 0) for s in enhanced_summaries)
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving payroll cycle summary: {str(e)}")
 
 @api_router.get("/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
 async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html", current_user: User = Depends(get_super_admin_user)):
