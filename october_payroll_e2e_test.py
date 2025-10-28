@@ -106,7 +106,9 @@ class OctoberPayrollE2ETest:
                 # Look for October 2025 cycle
                 october_cycle = None
                 for cycle in cycles:
-                    if "2025-10" in cycle.get("period", "") or "October" in cycle.get("period", ""):
+                    if ("2025-10" in cycle.get("period", "") or 
+                        "2025-10" in cycle.get("month", "") or 
+                        "October" in cycle.get("period", "")):
                         october_cycle = cycle
                         break
                 
