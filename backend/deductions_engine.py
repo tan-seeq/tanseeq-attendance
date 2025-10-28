@@ -29,6 +29,8 @@ FLEXIBLE_EMPLOYEES = [
     # Tarek variants
     "طارق عبد المنعم الوزان", "tareq abdel moneim alwazzan", "Tareq Abdel Moneim Alwazzan",
     "Tariq Abdel Moneim Alwazzan", "Tarek Abdel Moneim Alwazzan", "tarek wazzan", "Tarek Wazzan",
+    # Additional variants seen in reports
+    "TAREK ABDELMONEM ZAKI ALWAZAN", "tarek abdelmonem zaki alwazan", "tarek alwazan", "tareq alwazan",
     # Hatem variants
     "حاتم محمد أحمد", "hatem mohamed ahmed", "Hatem Mohamed Ahmed",
 ]
