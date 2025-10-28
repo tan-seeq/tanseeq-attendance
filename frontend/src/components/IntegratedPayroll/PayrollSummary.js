@@ -477,12 +477,7 @@ const PayrollSummary = () => {
                     خصم حضور
                     <div className="text-xs font-normal text-gray-500 mt-1">(غياب + تأخير)</div>
                   </th>
-                  {/* Manual overrides editable columns */}
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="أيام الغياب (تعديل يدوي)">🔴 أيام غياب (يدوي)</th>
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="مبلغ خصم الغياب (تعديل يدوي)">مبلغ غياب (يدوي)</th>
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="دقائق التأخير (تعديل يدوي)">🟠 دقائق تأخير (يدوي)</th>
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase" title="مبلغ خصم التأخير (تعديل يدوي)">مبلغ تأخير (يدوي)</th>
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم سلف</th>
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم سلف</th>
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">إجمالي الخصومات</th>
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase bg-blue-50">صافي الراتب</th>
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">رسالة الراتب</th>
