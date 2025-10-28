@@ -138,6 +138,7 @@ class OctoberPayrollE2ETest:
         """Create new October payroll cycle"""
         try:
             cycle_data = {
+                "month": "2025-10",
                 "period": "2025-10",
                 "start_date": "2025-10-01",
                 "end_date": "2025-10-31",
