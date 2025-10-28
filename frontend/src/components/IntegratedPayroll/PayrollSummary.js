@@ -112,7 +112,7 @@ const PayrollSummary = () => {
       <head>
         <meta charset='utf-8' />
         <style>
-          body { font-family: Tahoma, Arial, sans-serif; color:#111; }
+          body { font-family: Arial, Tahoma, 'Noto Naskh Arabic', sans-serif; color:#111; }
           .container { max-width: 820px; margin: 24px auto; padding: 16px; border:1px solid #ddd; border-radius: 8px; }
           h1 { font-size: 20px; margin-bottom: 8px; }
           h2 { font-size: 16px; margin-top: 0; color:#555; }
