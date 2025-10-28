@@ -82,6 +82,18 @@ class EmployeeDeductionSummary(BaseModel):
 def _lower(s: str) -> str:
     return (s or "").strip().lower()
 
+
+def _parse_time_safe(ts: Optional[str]) -> Optional[time]:
+    if not ts:
+        return None
+    s = ts.strip()
+    for fmt in ("%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(s, fmt).time()
+        except Exception:
+            continue
+    return None
+
 def is_flexible_schedule(employee_name: str) -> bool:
     name_lower = _lower(employee_name)
     for v in FLEXIBLE_EMPLOYEES:
