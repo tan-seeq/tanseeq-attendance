@@ -643,24 +643,6 @@ const PayrollSummary = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
                         <span className="text-lg">{netSalary.toFixed(2)}</span>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm">
-                        <div className="flex flex-col gap-2">
-                          <button
-                            onClick={() => handleViewSalaryLetter(emp.employee_id, 'html')}
-                            className="inline-flex items-center justify-center px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors text-xs"
-                          >
-                            <DocumentArrowDownIcon className="h-4 w-4 ml-1" />
-                            عرض الرسالة
-                          </button>
-                          <button
-                            onClick={() => handleDownloadSalaryLetter(emp.employee_id, 'pdf')}
-                            className="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-xs"
-                          >
-                            <DocumentArrowDownIcon className="h-4 w-4 ml-1" />
-                            تحميل PDF
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   );
                 })}
