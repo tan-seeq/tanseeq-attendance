@@ -168,6 +168,19 @@ const PayrollSummary = () => {
       total_deductions: emp.total_deductions || 0,
       net_salary: emp.net_salary || 0
     }));
+    // Support setting nested manual_override in editedData
+    if (field === 'manual_override') {
+      setEditedData(prev => prev.map(emp => {
+        if (emp.employee_id === employeeId) {
+          const newEmp = { ...emp, manual_override: value };
+          // recompute totals based on manual override impact if you want to include it directly in totals
+          return newEmp;
+        }
+        return emp;
+      }));
+      return;
+    }
+
     setEditedData(initialData);
     setEditMode(true);
   };
