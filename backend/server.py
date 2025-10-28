@@ -5153,9 +5153,8 @@ async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate salary letter: {str(e)}")
 
-            }
-            
-            enhanced_summaries.append(enhanced_summary)
+# Include the router in the main app
+app.include_router(api_router)
         
         # تنسيق بيانات الدورة
         cycle["_id"] = str(cycle["_id"])
