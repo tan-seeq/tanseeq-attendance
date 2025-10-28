@@ -36,6 +36,22 @@ FLEXIBLE_EMPLOYEES = [
     "حاتم محمد أحمد", "hatem mohamed ahmed", "Hatem Mohamed Ahmed",
 ]
 
+PARTIAL_FLEX_EMPLOYEES = [
+    # Employees with lateness-only deductions (no early-leave or under-hours)
+    # Karim variants
+    "KARIM MOHAMED MOUSTAFA ABDELMEGEUID", "Karim Mohamed Moustafa Abdelmegeuid", "Karim", "Kareem",
+    "كريم",
+    # Hesham variants
+    "HESHAM AHMED MOHAMED MOSTAFA", "Hesham", "هشام",
+]
+
+def is_partial_flex(employee_name: str) -> bool:
+    name_lower = _lower(employee_name)
+    for v in PARTIAL_FLEX_EMPLOYEES:
+        if _lower(v) in name_lower or name_lower in _lower(v):
+            return True
+    return False
+
 class DailyDeductionDetail(BaseModel):
     date: str
     check_in: Optional[str] = None
