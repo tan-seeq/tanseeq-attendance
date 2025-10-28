@@ -57,17 +57,13 @@ const PayrollSummary = () => {
 
   const handleViewSalaryLetter = async (employeeId, format) => {
     try {
-      const response = await axios.get(
-        `${API}/payroll/cycles/${id}/employees/${employeeId}/letter?format=${format}`,
-        { responseType: format === 'pdf' ? 'blob' : 'text' }
-      );
-      
-      if (format === 'html') {
-        // Open HTML in new window
-        const newWindow = window.open('', '_blank');
-        newWindow.document.write(response.data);
-        newWindow.document.close();
-      }
+      // Find employee summary in current view
+      const emp = (editMode ? editedData : employeeSummaries).find(e => e.employee_id === employeeId);
+      if (!emp) return alert('الموظف غير موجود في هذه الدورة');
+      const html = renderSalaryLetterHtml(emp, cycle);
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(html);
+      newWindow.document.close();
     } catch (error) {
       console.error('Error viewing salary letter:', error);
       alert('حدث خطأ في عرض رسالة الراتب');
