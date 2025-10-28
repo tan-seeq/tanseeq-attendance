@@ -26,3 +26,12 @@ def get_db():
     if _db is None:
         _db = get_client()[_DB_NAME]
     return _db
+
+
+async def ping():
+    try:
+        db = get_db()
+        await db.command("ping")
+        return True, None
+    except Exception as e:
+        return False, str(e)
