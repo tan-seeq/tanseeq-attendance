@@ -13078,4 +13078,5 @@ async def merge_advanced_deductions(
         print(f"❌ Error merging deductions: {str(e)}")
         raise HTTPException(status_code=500, detail=f"خطأ في دمج الخصومات: {str(e)}")
 
-    return {"message": "TANSEEQ HR System API"}
+# Include the router in the main app
+app.include_router(api_router)
