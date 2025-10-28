@@ -473,11 +473,11 @@ const PayrollSummary = () => {
                   const netSalary = editMode ? emp.net_salary : (emp.net_salary || grossSalary - totalDed);
                   
                   // ✅ NEW: Get detailed deduction breakdown from unified engine
-                  const absentDays = emp.absent_days || 0;
-                  const absenceAmount = emp.absence_amount || 0;
-                  const lateDays = emp.late_days || 0;
-                  const lateMinutes = emp.late_minutes || 0;
-                  const lateAmount = emp.late_amount || 0;
+                  const absentDays = (emp.manual_override?.absent_days ?? emp.absent_days) || 0;
+                  const absenceAmount = (emp.manual_override?.absence_amount ?? emp.absence_amount) || 0;
+                  const lateDays = emp.late_days || 0; // not overridden
+                  const lateMinutes = (emp.manual_override?.late_minutes ?? emp.late_minutes) || 0;
+                  const lateAmount = (emp.manual_override?.late_amount ?? emp.late_amount) || 0;
 
                   return (
                     <tr key={emp.employee_id} className={editMode ? 'hover:bg-blue-50' : 'hover:bg-gray-50'}>
