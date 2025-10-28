@@ -477,10 +477,9 @@ const PayrollSummary = () => {
                     خصم حضور
                     <div className="text-xs font-normal text-gray-500 mt-1">(غياب + تأخير)</div>
                   </th>
-                                    <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم سلف</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم سلف</th>
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">إجمالي الخصومات</th>
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase bg-blue-50">صافي الراتب</th>
-                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">رسالة الراتب</th>
+                  <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase bg-blue-50">صافي الراتب بعد الخصم</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
