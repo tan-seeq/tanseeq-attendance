@@ -602,11 +602,8 @@ const PayrollSummary = () => {
                             <input
                               type="number"
                               step="1"
-                              value={emp.manual_override?.late_minutes ?? ''}
-                              onChange={(e) => handleFieldChange(emp.employee_id, 'manual_override', {
-                                ...(emp.manual_override || {}),
-                                late_minutes: e.target.value === '' ? null : parseInt(e.target.value, 10)
-                              })}
+                              value={(emp.manual_override && emp.manual_override.late_minutes !== undefined && emp.manual_override.late_minutes !== null) ? emp.manual_override.late_minutes : ''}
+                              onChange={(e) => updateManualOverride(emp.employee_id, 'late_minutes', e.target.value === '' ? null : parseInt(e.target.value, 10))}
                               className="w-28 px-3 py-2 text-base border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                               placeholder="—"
                             />
