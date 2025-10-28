@@ -610,14 +610,6 @@ const PayrollSummary = () => {
                         </>
                       )}
 
-                      {!editMode && (
-                        <>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{absentDays > 0 ? absentDays : <span className="text-gray-400">-</span>}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{absenceAmount > 0 ? absenceAmount.toFixed(2) : <span className="text-gray-400">0.00</span>}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{lateMinutes > 0 ? `${lateMinutes}` : <span className="text-gray-400">-</span>}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-center">{lateAmount > 0 ? lateAmount.toFixed(2) : <span className="text-gray-400">0.00</span>}</td>
-                        </>
-                      )}
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {editMode ? (
                           <input
