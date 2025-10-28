@@ -624,43 +624,7 @@ const PayrollSummary = () => {
                         )}
                       </td>
                       
-                      {/* ✅ NEW: Detailed absence breakdown */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
-                        {absentDays > 0 ? (
-                          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">
-                            🔴 {absentDays}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
-                        {absenceAmount > 0 ? (
-                          <span className="text-red-700 font-semibold">{absenceAmount.toFixed(2)}</span>
-                        ) : (
-                          <span className="text-gray-400">0.00</span>
-                        )}
-                      </td>
-                      
-                      {/* ✅ NEW: Detailed late breakdown */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
-                        {lateMinutes > 0 ? (
-                          <span className="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-bold">
-                            🟠 {lateMinutes} min ({lateDays} days)
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
-                        {lateAmount > 0 ? (
-                          <span className="text-orange-700 font-semibold">{lateAmount.toFixed(2)}</span>
-                        ) : (
-                          <span className="text-gray-400">0.00</span>
-                        )}
-                      </td>
-                      
-                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm">
                         {editMode ? (
                           <input
                             type="number"
