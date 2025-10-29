@@ -52,7 +52,7 @@ class CorrectedAdvancedDeductionsTest:
                 data = response.json()
                 self.token = data.get("access_token")
                 self.session.headers.update({
-                    "Authorization": f"Bearer {token}"
+                    "Authorization": f"Bearer {self.token}"
                 })
                 self.log_result(
                     "Authentication", 
