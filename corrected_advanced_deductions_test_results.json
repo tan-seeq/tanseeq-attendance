@@ -1,0 +1,101 @@
+{
+  "summary": {
+    "total_tests": 15,
+    "passed_tests": 15,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "timestamp": "2025-10-29T08:29:33.587650"
+  },
+  "test_results": [
+    {
+      "test": "Authentication",
+      "success": true,
+      "details": "Successfully logged in as admin@tanseeq.com",
+      "timestamp": "2025-10-29T08:29:33.300323"
+    },
+    {
+      "test": "Monthly Deductions API Call",
+      "success": true,
+      "details": "API returned 200 OK",
+      "timestamp": "2025-10-29T08:29:33.584435"
+    },
+    {
+      "test": "Response JSON Parsing",
+      "success": true,
+      "details": "Successfully parsed JSON response",
+      "timestamp": "2025-10-29T08:29:33.587130"
+    },
+    {
+      "test": "Response Structure - Required Keys",
+      "success": true,
+      "details": "All required keys present: ['summaries', 'employees', 'success']",
+      "timestamp": "2025-10-29T08:29:33.587188"
+    },
+    {
+      "test": "Response Structure - Success Field",
+      "success": true,
+      "details": "Success field is True",
+      "timestamp": "2025-10-29T08:29:33.587196"
+    },
+    {
+      "test": "Response Structure - Summaries Array",
+      "success": true,
+      "details": "Summaries array exists with 13 items",
+      "timestamp": "2025-10-29T08:29:33.587203"
+    },
+    {
+      "test": "Response Structure - Employees Array",
+      "success": true,
+      "details": "Employees array exists with 13 items",
+      "timestamp": "2025-10-29T08:29:33.587208"
+    },
+    {
+      "test": "Employee Count Verification",
+      "success": true,
+      "details": "Correct employee count: 13",
+      "timestamp": "2025-10-29T08:29:33.587218"
+    },
+    {
+      "test": "Total Deductions Verification",
+      "success": true,
+      "details": "Total deductions: 10730.32 AED",
+      "timestamp": "2025-10-29T08:29:33.587247"
+    },
+    {
+      "test": "Employee 1 Structure",
+      "success": true,
+      "details": "All required fields present: Hatem Mohamed Ahmed",
+      "timestamp": "2025-10-29T08:29:33.587268"
+    },
+    {
+      "test": "Employee 2 Structure",
+      "success": true,
+      "details": "All required fields present: Jihad",
+      "timestamp": "2025-10-29T08:29:33.587276"
+    },
+    {
+      "test": "Employee 3 Structure",
+      "success": true,
+      "details": "All required fields present: Tarek Wazzan",
+      "timestamp": "2025-10-29T08:29:33.587281"
+    },
+    {
+      "test": "Expected Employee - Hatem Mohamed Ahmed",
+      "success": true,
+      "details": "\u2705 Found Hatem Mohamed Ahmed with deduction 2933.28 AED (16 absent days) - matches expected ~2933 AED (16 days)",
+      "timestamp": "2025-10-29T08:29:33.587341"
+    },
+    {
+      "test": "Expected Employee - Jihad",
+      "success": true,
+      "details": "\u2705 Found Jihad with deduction 630.17 AED (7 absent days) - matches expected ~630 AED (7 days)",
+      "timestamp": "2025-10-29T08:29:33.587360"
+    },
+    {
+      "test": "Expected Employee - Tarek Wazzan",
+      "success": true,
+      "details": "\u2705 Found Tarek Wazzan with deduction 2399.94 AED (18 absent days) - matches expected ~2400 AED (18 days)",
+      "timestamp": "2025-10-29T08:29:33.587379"
+    }
+  ]
+}
