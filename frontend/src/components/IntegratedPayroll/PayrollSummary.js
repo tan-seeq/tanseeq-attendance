@@ -531,6 +531,9 @@ const PayrollSummary = () => {
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">خصم سلف</th>
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">إجمالي الخصومات</th>
                   <th className="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase bg-blue-50">صافي الراتب بعد الخصم</th>
+                  {!editMode && (
+                    <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase">الإجراءات</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
