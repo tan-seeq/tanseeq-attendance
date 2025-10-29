@@ -5097,80 +5097,57 @@ async def get_payroll_cycle_summary(
 @api_router.get("/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
 async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html", current_user: User = Depends(get_super_admin_user)):
     """
-    Generate salary letter for an employee within a payroll cycle.
-    Returns HTML (default) suitable for viewing/printing. PDF not implemented in this build.
+    Generate professional salary letter for an employee within a payroll cycle.
+    Returns HTML suitable for viewing/printing and PDF conversion.
     """
     try:
+        from salary_letter_generator import generate_salary_letter_html
+        
         # Fetch cycle and employee summary
         cycle = await db.payroll_cycles.find_one({"id": cycle_id})
         if not cycle:
-            raise HTTPException(status_code=404, detail="دورة الراتب غير موجودة")
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        
         summary = await db.employee_payroll_summaries.find_one({
             "payroll_cycle_id": cycle_id,
             "employee_id": employee_id,
         })
         if not summary:
-            raise HTTPException(status_code=404, detail="ملخص الموظف غير موجود في هذه الدورة")
+            raise HTTPException(status_code=404, detail="Employee summary not found in this cycle")
+        
+        # Get employee details
         employee = await db.users.find_one({"id": employee_id})
         employee_name = employee.get("name") if employee else summary.get("employee_name", "")
-
-        # Fields
-        base_salary = float(summary.get("base_salary", 0) or 0)
-        allowances = float(summary.get("total_allowances", 0) or 0)
-        gross_salary = float(summary.get("gross_salary", base_salary + allowances) or 0)
-        admin_deduction = float(summary.get("manual_deductions", 0) or 0)
-        attendance_deduction = float(summary.get("attendance_deductions", 0) or 0)
-        advance_deduction = float(summary.get("advance_deductions", 0) or 0)
-        total_deductions = float(summary.get("total_deductions", admin_deduction + attendance_deduction + advance_deduction) or 0)
-        net_salary = float(summary.get("net_salary", gross_salary - total_deductions) or 0)
-
-        # Build HTML letter
-        html = f"""
-        <html lang='ar' dir='rtl'>
-        <head>
-          <meta charset='utf-8' />
-          <title>رسالة الراتب - {employee_name}</title>
-          <style>
-            body {{ font-family: Tahoma, Arial, sans-serif; color:#111; }}
-            .container {{ max-width: 820px; margin: 24px auto; padding: 16px; border:1px solid #ddd; border-radius: 8px; }}
-            h1 {{ font-size: 20px; margin-bottom: 8px; }}
-            h2 {{ font-size: 16px; margin-top: 0; color:#555; }}
-            table {{ width:100%; border-collapse: collapse; margin-top: 16px; }}
-            th, td {{ border:1px solid #e5e7eb; padding: 10px 12px; text-align: right; }}
-            th {{ background:#f9fafb; font-weight:700; }}
-            .total {{ font-weight:700; }}
-            .green {{ color:#16a34a; }}
-            .red {{ color:#dc2626; }}
-            .blue {{ color:#2563eb; }}
-          </style>
-        </head>
-        <body>
-          <div class='container'>
-            <h1>رسالة الراتب</h1>
-            <h2>الموظف: {employee_name}</h2>
-            <p>الدورة: {cycle.get('month','')} | عدد الموظفين: {cycle.get('total_employees', 0)}</p>
-            <table>
-              <tbody>
-                <tr><th>الراتب الأساسي</th><td>{base_salary:.2f}</td></tr>
-                <tr><th>البدلات</th><td>{allowances:.2f}</td></tr>
-                <tr><th>إجمالي الراتب</th><td class='green total'>{gross_salary:.2f}</td></tr>
-                <tr><th>خصم إداري</th><td class='red'>{admin_deduction:.2f}</td></tr>
-                <tr><th>خصم حضور (غياب + تأخير)</th><td class='red'>{attendance_deduction:.2f}</td></tr>
-                <tr><th>خصم سلف</th><td class='red'>{advance_deduction:.2f}</td></tr>
-                <tr><th>إجمالي الخصومات</th><td class='red total'>{total_deductions:.2f}</td></tr>
-                <tr><th>صافي الراتب بعد الخصم</th><td class='blue total'>{net_salary:.2f}</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </body>
-        </html>
-        """
-
+        employee_code = employee.get("employee_code") if employee else employee_id
+        
+        # Prepare employee data
+        employee_data = {
+            "name": employee_name,
+            "employee_id": employee_id,
+            "employee_code": employee_code,
+            "base_salary": float(summary.get("base_salary", 0) or 0),
+            "allowances": float(summary.get("total_allowances", 0) or 0),
+            "gross_salary": float(summary.get("gross_salary", 0) or 0),
+            "manual_deductions": float(summary.get("manual_deductions", 0) or 0),
+            "attendance_deductions": float(summary.get("attendance_deductions", 0) or 0),
+            "advance_deductions": float(summary.get("advance_deductions", 0) or 0),
+        }
+        
+        # Prepare cycle data
+        cycle_data = {
+            "id": cycle_id,
+            "month": cycle.get("month", "N/A"),
+            "period": cycle.get("month", "N/A"),
+        }
+        
+        # Generate professional HTML
+        html = generate_salary_letter_html(employee_data, cycle_data)
+        
         if format and format.lower() == "html":
             return Response(content=html, media_type="text/html; charset=utf-8")
         else:
-            # For now, only HTML is implemented; return HTML as default
             return Response(content=html, media_type="text/html; charset=utf-8")
+            
     except HTTPException:
         raise
     except Exception as e:
