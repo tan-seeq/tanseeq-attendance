@@ -6223,9 +6223,9 @@ async def delete_user(user_id: str, current_user: User = Depends(get_admin_user)
 
 @api_router.post("/users/{user_id}/change-password")
 async def change_user_password(user_id: str, password_data: dict, current_user: User = Depends(get_current_user)):
-    """Change user password (Hatem only)"""
-    if current_user.name != "Hatem Mohamed Ahmed":
-        raise HTTPException(status_code=403, detail="Only Hatem can change user passwords")
+    """Change user password (Super Admin only)"""
+    if current_user.role != "super_admin":
+        raise HTTPException(status_code=403, detail="Only Super Admin can change user passwords")
     
     user = await db.users.find_one({"id": user_id})
     if not user:
