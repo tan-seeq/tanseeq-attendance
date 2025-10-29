@@ -645,6 +645,24 @@ const PayrollSummary = () => {
                   <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> تصدير Excel
                 </button>
                 
+                {/* NEW: Export All Salary Letters */}
+                <button 
+                  onClick={handleExportAllPDFs}
+                  className="px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 inline-flex items-center shadow-md"
+                  title="تصدير جميع رسائل الرواتب كملفات PDF في ملف مضغوط"
+                >
+                  <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> Export All Letters (ZIP)
+                </button>
+                
+                {/* NEW: Export Comprehensive Excel */}
+                <button 
+                  onClick={handleExportExcel}
+                  className="px-3 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 inline-flex items-center shadow-md"
+                  title="تصدير ملخص شامل Excel مع جميع التفاصيل"
+                >
+                  <DocumentArrowDownIcon className="w-5 h-5 ml-2" /> Export Excel (Detailed)
+                </button>
+                
                 <button 
                   onClick={handleLock} 
                   className="px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 inline-flex items-center"
