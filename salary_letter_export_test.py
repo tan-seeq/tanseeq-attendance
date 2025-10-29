@@ -105,8 +105,9 @@ class SalaryLetterExportTester:
                         self.cycle_id = target_cycle["id"]
                         print(f"✅ Selected cycle: {target_cycle['month']} (ID: {self.cycle_id})")
                         
-                        # Get employee summaries for this cycle
-                        async with self.session.get(f"{API_BASE}/payroll/cycles/{self.cycle_id}/summary", headers=self.get_auth_headers()) as summary_response:
+                        # Get employee summaries for this cycle - try both endpoints
+                        summary_url = f"{BACKEND_URL}/api/payroll/cycles/{self.cycle_id}/summary"
+                        async with self.session.get(summary_url, headers=self.get_auth_headers()) as summary_response:
                             if summary_response.status == 200:
                                 summary_data = await summary_response.json()
                                 employees = summary_data.get("employees", [])
