@@ -265,45 +265,9 @@ def generate_salary_letter_html(employee_data: dict, cycle_data: dict) -> str:
             </div>
         </div>
         
-        <!-- Section 1: Basic Salary Information -->
+        <!-- Section 1: Deductions Breakdown -->
         <div class="section">
-            <div class="section-header">1) BASIC SALARY INFORMATION</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Amount (AED)</th>
-                        <th>Calculation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Gross Monthly Salary</td>
-                        <td class="amount">{gross_salary:,.2f}</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Daily Rate</td>
-                        <td class="amount">{daily_rate:,.2f}</td>
-                        <td class="formula">(Gross Salary ÷ 30)</td>
-                    </tr>
-                    <tr>
-                        <td>Hourly Rate</td>
-                        <td class="amount">{hourly_rate:,.2f}</td>
-                        <td class="formula">(Daily Rate ÷ 8)</td>
-                    </tr>
-                    <tr>
-                        <td>Per Minute Rate</td>
-                        <td class="amount">{per_minute_rate:,.4f}</td>
-                        <td class="formula">(Hourly Rate ÷ 60)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Section 2: Deductions Breakdown -->
-        <div class="section">
-            <div class="section-header">2) DEDUCTIONS BREAKDOWN</div>
+            <div class="section-header">1) DEDUCTIONS BREAKDOWN</div>
             <table>
                 <thead>
                     <tr>
