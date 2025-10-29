@@ -97,6 +97,90 @@ const PayrollSummary = () => {
       alert('حدث خطأ في تحميل رسالة الراتب');
     }
   };
+
+  const handleExportAllPDFs = async () => {
+    try {
+      setLoading(true);
+      alert('جاري تحضير ملفات PDF... قد يستغرق هذا بضع ثوانٍ حسب عدد الموظفين.');
+      
+      // Dynamic import
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+      
+      const JSZipModule = await import('jszip');
+      const JSZip = JSZipModule.default || JSZipModule;
+      
+      const FileSaverModule = await import('file-saver');
+      const saveAs = FileSaverModule.saveAs || FileSaverModule.default?.saveAs;
+      
+      const zip = new JSZip();
+      const cycleIdSafe = (cycle?.id || '').replace(/[^A-Za-z0-9_-]/g,'').slice(0, 8);
+      
+      // Generate PDF for each employee
+      for (let i = 0; i < employeeSummaries.length; i++) {
+        const emp = employeeSummaries[i];
+        const html = renderSalaryLetterHtml(emp, cycle);
+        
+        const empCodeSafe = (emp.employee_code || emp.employee_id || '').toString().replace(/[^A-Za-z0-9_-]/g,'').slice(0,16);
+        const filename = `payroll_${cycleIdSafe}_${empCodeSafe}.pdf`;
+        
+        // Generate PDF as blob
+        const opt = {
+          margin: 15,
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        const pdfBlob = await html2pdf().set(opt).from(html).output('blob');
+        zip.file(filename, pdfBlob);
+      }
+      
+      // Generate ZIP file
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipFilename = `salary_letters_${cycle?.month?.replace(/-/g, '_')}_${cycleIdSafe}.zip`;
+      saveAs(zipBlob, zipFilename);
+      
+      alert(`تم تصدير ${employeeSummaries.length} رسالة راتب بنجاح!`);
+    } catch (error) {
+      console.error('Error exporting all PDFs:', error);
+      alert('حدث خطأ في تصدير الملفات: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await axios.get(
+        `${API}/payroll/cycles/${id}/export-excel`,
+        { responseType: 'blob' }
+      );
+      
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const cycleMonth = cycle?.month?.replace(/-/g, '_') || 'unknown';
+      const cycleIdShort = cycle?.id?.slice(0, 8) || 'unknown';
+      link.download = `payroll_summary_${cycleMonth}_${cycleIdShort}.xlsx`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      alert('تم تصدير ملف Excel بنجاح!');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      alert('حدث خطأ في تصدير ملف Excel');
+    }
+  };
+
   const renderSalaryLetterHtml = (employee, cycleData) => {
     const empName = employee.employee_name || 'N/A';
     const empId = employee.employee_code || employee.employee_id || 'N/A';
