@@ -98,53 +98,176 @@ const PayrollSummary = () => {
     }
   };
   const renderSalaryLetterHtml = (employee, cycleData) => {
-    const base = (employee.base_salary || 0);
-    const allow = (employee.allowances || employee.total_allowances || 0);
-    const gross = (employee.gross_salary || (base + allow));
-    const admin = (employee.manual_deductions || 0);
-    const attend = (employee.attendance_deductions || 0);
-    const adv = (employee.advance_deductions || 0);
-    const total = admin + attend + adv;
-    const net = gross - total;
+    const empName = employee.employee_name || 'N/A';
+    const empId = employee.employee_code || employee.employee_id || 'N/A';
+    
+    const baseSalary = parseFloat(employee.base_salary || 0);
+    const allowances = parseFloat(employee.allowances || employee.total_allowances || 0);
+    const grossSalary = parseFloat(employee.gross_salary || (baseSalary + allowances));
+    
+    const adminDeduction = parseFloat(employee.manual_deductions || 0);
+    const attendanceDeduction = parseFloat(employee.attendance_deductions || 0);
+    const advanceDeduction = parseFloat(employee.advance_deductions || 0);
+    const totalDeductions = adminDeduction + attendanceDeduction + advanceDeduction;
+    
+    const netPayable = grossSalary - totalDeductions;
+    
+    const dailyRate = baseSalary / 30;
+    const hourlyRate = dailyRate / 8;
+    const perMinuteRate = hourlyRate / 60;
+    
+    const cycleId = cycleData?.id || 'N/A';
+    const period = cycleData?.month || cycleData?.display_name || 'N/A';
+    const currentDate = new Date().toISOString().split('T')[0];
 
     return `
-      <html lang='ar' dir='rtl'>
-      <head>
-        <meta charset='utf-8' />
-        <style>
-          body { font-family: Arial, Tahoma, 'Noto Naskh Arabic', sans-serif; color:#111; }
-          .container { max-width: 820px; margin: 24px auto; padding: 16px; border:1px solid #ddd; border-radius: 8px; }
-          h1 { font-size: 20px; margin-bottom: 8px; }
-          h2 { font-size: 16px; margin-top: 0; color:#555; }
-          table { width:100%; border-collapse: collapse; margin-top: 16px; }
-          th, td { border:1px solid #e5e7eb; padding: 10px 12px; text-align: right; }
-          th { background:#f9fafb; font-weight:700; }
-          .total { font-weight:700; }
-          .green { color:#16a34a; }
-          .red { color:#dc2626; }
-          .blue { color:#2563eb; }
-        </style>
-      </head>
-      <body>
-        <div class='container'>
-          <h1>رسالة الراتب</h1>
-          <h2>الموظف: ${employee.employee_name}</h2>
-          <p>الدورة: ${cycleData?.display_name || ''}</p>
-          <table>
-            <tbody>
-              <tr><th>الراتب الأساسي</th><td>${base.toFixed(2)}</td></tr>
-              <tr><th>البدلات</th><td>${allow.toFixed(2)}</td></tr>
-              <tr><th>إجمالي الراتب</th><td class='green total'>${gross.toFixed(2)}</td></tr>
-              <tr><th>خصم إداري</th><td class='red'>${admin.toFixed(2)}</td></tr>
-              <tr><th>خصم حضور (غياب + تأخير)</th><td class='red'>${attend.toFixed(2)}</td></tr>
-              <tr><th>خصم سلف</th><td class='red'>${adv.toFixed(2)}</td></tr>
-              <tr><th>إجمالي الخصومات</th><td class='red total'>${total.toFixed(2)}</td></tr>
-              <tr><th>صافي الراتب بعد الخصم</th><td class='blue total'>${net.toFixed(2)}</td></tr>
-            </tbody>
-          </table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Statement - ${empName}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', 'Helvetica', sans-serif; color: #1a1a1a; line-height: 1.6; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border: 2px solid #e5e7eb; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #003366; padding-bottom: 20px; }
+        .company-name { font-size: 28px; font-weight: bold; color: #003366; margin-bottom: 5px; letter-spacing: 1px; }
+        .document-title { font-size: 20px; color: #555; font-weight: 600; }
+        .employee-info { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 25px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .employee-info .info-item { margin: 5px 10px; font-size: 14px; }
+        .employee-info .label { font-weight: 600; color: #555; }
+        .employee-info .value { color: #1a1a1a; }
+        .section { margin-bottom: 25px; }
+        .section-header { background: #003366; color: white; padding: 10px 15px; font-size: 16px; font-weight: bold; border-radius: 4px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        table th, table td { padding: 12px; text-align: left; border: 1px solid #e5e7eb; }
+        table th { background: #f3f4f6; font-weight: 600; color: #374151; font-size: 14px; }
+        table td { font-size: 14px; }
+        .amount { font-weight: 600; color: #059669; }
+        .deduction { color: #dc2626; }
+        .summary { background: #f0f9ff; border: 2px solid #0284c7; border-radius: 6px; padding: 20px; margin-top: 20px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; }
+        .summary-row.total { border-top: 2px solid #0284c7; margin-top: 10px; padding-top: 15px; font-weight: bold; font-size: 18px; color: #059669; }
+        .formula { color: #6b7280; font-size: 13px; font-style: italic; }
+        .signatures { margin-top: 50px; display: flex; justify-content: space-between; }
+        .signature-block { width: 45%; border-top: 2px solid #d1d5db; padding-top: 10px; }
+        .signature-label { font-weight: 600; color: #374151; margin-bottom: 20px; }
+        .signature-line { border-bottom: 1px solid #9ca3af; margin-bottom: 5px; height: 30px; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px; }
+        .cycle-id { font-weight: 600; color: #374151; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-name">TANSEEQ TAX CONSULTANCY</div>
+            <div class="document-title">Salary Statement</div>
         </div>
-      </body>
-      </html>
+        
+        <div class="employee-info">
+            <div class="info-item"><span class="label">Date:</span> <span class="value">${currentDate}</span></div>
+            <div class="info-item"><span class="label">Employee Name:</span> <span class="value">${empName}</span></div>
+            <div class="info-item"><span class="label">Employee ID:</span> <span class="value">${empId}</span></div>
+            <div class="info-item"><span class="label">Period:</span> <span class="value">${period}</span></div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">1) BASIC SALARY INFORMATION</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount (AED)</th>
+                        <th>Calculation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Gross Monthly Salary</td>
+                        <td class="amount">${grossSalary.toFixed(2)}</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Daily Rate</td>
+                        <td class="amount">${dailyRate.toFixed(2)}</td>
+                        <td class="formula">(Gross Salary ÷ 30)</td>
+                    </tr>
+                    <tr>
+                        <td>Hourly Rate</td>
+                        <td class="amount">${hourlyRate.toFixed(2)}</td>
+                        <td class="formula">(Daily Rate ÷ 8)</td>
+                    </tr>
+                    <tr>
+                        <td>Per Minute Rate</td>
+                        <td class="amount">${perMinuteRate.toFixed(4)}</td>
+                        <td class="formula">(Hourly Rate ÷ 60)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">2) DEDUCTIONS BREAKDOWN</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Amount (AED)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${adminDeduction > 0 ? `<tr><td>Administrative</td><td>Manual Administrative Deduction</td><td class="deduction">${adminDeduction.toFixed(2)}</td></tr>` : ''}
+                    ${attendanceDeduction > 0 ? `<tr><td>Attendance</td><td>Late Arrivals, Early Departures & Absences</td><td class="deduction">${attendanceDeduction.toFixed(2)}</td></tr>` : ''}
+                    ${advanceDeduction > 0 ? `<tr><td>Advance</td><td>Salary Advance Deduction</td><td class="deduction">${advanceDeduction.toFixed(2)}</td></tr>` : ''}
+                    ${totalDeductions === 0 ? '<tr><td colspan="3" style="text-align: center; color: #059669; font-weight: 600;">No Deductions for this Period</td></tr>' : ''}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">3) NET SALARY SUMMARY</div>
+            <div class="summary">
+                <div class="summary-row">
+                    <span>Gross Salary:</span>
+                    <span class="amount">AED ${grossSalary.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Total Deductions:</span>
+                    <span class="deduction">- AED ${totalDeductions.toFixed(2)}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>NET PAYABLE:</span>
+                    <span>AED ${netPayable.toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="signatures">
+            <div class="signature-block">
+                <div class="signature-label">HR Signature:</div>
+                <div class="signature-line"></div>
+                <div style="margin-top: 10px;"><strong>Name:</strong> __________________</div>
+                <div style="margin-top: 5px;"><strong>Date:</strong> ____/____/________</div>
+            </div>
+            
+            <div class="signature-block">
+                <div class="signature-label">Employee Signature:</div>
+                <div class="signature-line"></div>
+                <div style="margin-top: 10px;"><strong>Name:</strong> __________________</div>
+                <div style="margin-top: 5px;"><strong>Date:</strong> ____/____/________</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This salary statement has been auto-generated from the Payroll Ledger system</p>
+            <p>in accordance with company policies.</p>
+            <p class="cycle-id">Payroll Cycle ID: ${cycleId}</p>
+        </div>
+    </div>
+</body>
+</html>
     `;
   };
 
