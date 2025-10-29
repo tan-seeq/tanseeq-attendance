@@ -196,10 +196,6 @@ const PayrollSummary = () => {
     
     const netPayable = grossSalary - totalDeductions;
     
-    const dailyRate = baseSalary / 30;
-    const hourlyRate = dailyRate / 8;
-    const perMinuteRate = hourlyRate / 60;
-    
     const cycleId = cycleData?.id || 'N/A';
     const period = cycleData?.month || cycleData?.display_name || 'N/A';
     const currentDate = new Date().toISOString().split('T')[0];
