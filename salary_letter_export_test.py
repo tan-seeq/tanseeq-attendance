@@ -85,7 +85,11 @@ class SalaryLetterExportTester:
             async with self.session.get(f"{API_BASE}/payroll/cycles", headers=self.get_auth_headers()) as response:
                 if response.status == 200:
                     cycles_data = await response.json()
-                    cycles = cycles_data.get("cycles", [])
+                    # Handle both list and dict responses
+                    if isinstance(cycles_data, list):
+                        cycles = cycles_data
+                    else:
+                        cycles = cycles_data.get("cycles", [])
                     print(f"📊 Found {len(cycles)} payroll cycles")
                     
                     # Look for 2025 cycles (preferably October)
