@@ -140,12 +140,27 @@ class SalaryLetterExportTester:
         """Test GET /api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter"""
         print("\n🧾 Testing Salary Letter Endpoint...")
         
-        if not self.employee_ids:
-            print("❌ No employee IDs available for testing")
+        # First get actual employees from export-all-letters to find valid employee IDs
+        try:
+            async with self.session.get(
+                f"{API_BASE}/payroll/cycles/{self.cycle_id}/export-all-letters",
+                headers=self.get_auth_headers()
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    letters = data.get("letters", [])
+                    if letters:
+                        test_employee_id = letters[0].get("employee_id")
+                        print(f"📝 Testing salary letter for employee: {test_employee_id} (from export data)")
+                    else:
+                        print("❌ No employees found in export data")
+                        return False
+                else:
+                    print("❌ Could not get export data to find valid employee")
+                    return False
+        except Exception as e:
+            print(f"❌ Error getting employee from export: {str(e)}")
             return False
-            
-        test_employee_id = self.employee_ids[0]
-        print(f"📝 Testing salary letter for employee: {test_employee_id}")
         
         try:
             # Test HTML format
