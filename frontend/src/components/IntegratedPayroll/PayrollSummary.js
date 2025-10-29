@@ -644,6 +644,18 @@ const PayrollSummary = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
                         <span className="text-lg">{netSalary.toFixed(2)}</span>
                       </td>
+                      {!editMode && (
+                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleDownloadSalaryLetter(emp.employee_id)}
+                            className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
+                            title="تحميل رسالة الراتب - Salary Letter"
+                          >
+                            <DocumentArrowDownIcon className="w-4 h-4 ml-1" />
+                            Salary Letter
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
