@@ -186,12 +186,24 @@ const MonthlyDeductionsCalculator = () => {
           to: response.data.to
         };
       } else {
-        // Fallback for empty or error responses
+        // Check if this is an authentication error
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Authentication failed. Please log in again.');
+        }
+        
+        // Check if response indicates no data (not an error)
+        if (response.data.success === false) {
+          throw new Error(response.data.message || 'Calculation failed');
+        }
+        
+        // Fallback for truly empty responses (no employees found)
+        console.warn('Empty response received - no employees found for selected period');
         transformedData = {
           success: true,
           employees: [],
           employee_count: 0,
-          total_deductions: 0
+          total_deductions: 0,
+          message: 'No employees found for the selected period'
         };
       }
       
