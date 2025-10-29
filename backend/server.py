@@ -4996,7 +4996,7 @@ async def get_payroll_cycle_summary(
         year, month = map(int, cycle_month.split('-'))
         
         # Get deduction details from unified engine
-        deduction_summaries = await calculate_monthly_deductions(db, month, year)
+        deduction_summaries = await calculate_monthly_deductions(_ensure_db(), month, year)
         
         # Create a map of employee_id -> deduction details
         deduction_map = {
