@@ -257,42 +257,7 @@ const PayrollSummary = () => {
         </div>
         
         <div class="section">
-            <div class="section-header">1) BASIC SALARY INFORMATION</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Amount (AED)</th>
-                        <th>Calculation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Gross Monthly Salary</td>
-                        <td class="amount">${grossSalary.toFixed(2)}</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Daily Rate</td>
-                        <td class="amount">${dailyRate.toFixed(2)}</td>
-                        <td class="formula">(Gross Salary ÷ 30)</td>
-                    </tr>
-                    <tr>
-                        <td>Hourly Rate</td>
-                        <td class="amount">${hourlyRate.toFixed(2)}</td>
-                        <td class="formula">(Daily Rate ÷ 8)</td>
-                    </tr>
-                    <tr>
-                        <td>Per Minute Rate</td>
-                        <td class="amount">${perMinuteRate.toFixed(4)}</td>
-                        <td class="formula">(Hourly Rate ÷ 60)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="section">
-            <div class="section-header">2) DEDUCTIONS BREAKDOWN</div>
+            <div class="section-header">1) DEDUCTIONS BREAKDOWN</div>
             <table>
                 <thead>
                     <tr>
