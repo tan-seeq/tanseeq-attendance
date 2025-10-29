@@ -127,12 +127,6 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
         spaceAfter=2  # Reduced from 6
     )
     
-    bold_style = ParagraphStyle(
-        'Bold',
-        parent=normal_style,
-        fontName='Helvetica-Bold'
-    )
-    
     # Build document
     story = []
     
