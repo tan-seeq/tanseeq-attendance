@@ -131,17 +131,19 @@ const MonthlyDeductionsCalculator = () => {
       let transformedData = null;
       
       // ✅ Handle response from backend API - support both old and new formats
-      if (response.data.success && response.data.employees) {
-        // NEW FORMAT: employees array
-        if (!response.data.total_deductions) {
-          response.data.total_deductions = response.data.employees.reduce((sum, emp) => sum + (emp.total_deduction || 0), 0);
+      if (response.data.success && (response.data.employees || response.data.summaries)) {
+        // NEW FORMAT: employees or summaries array
+        const employeesData = response.data.employees || response.data.summaries;
+        
+        if (!response.data.total_deductions && employeesData) {
+          response.data.total_deductions = employeesData.reduce((sum, emp) => sum + (emp.total_deduction || 0), 0);
         }
         
         transformedData = {
           success: response.data.success,
-          employee_count: response.data.employee_count,
-          total_deductions: response.data.total_deductions,
-          employees: response.data.employees,
+          employee_count: employeesData?.length || 0,
+          total_deductions: response.data.total_deductions || 0,
+          employees: employeesData,
           mode: response.data.mode,
           cycle_window: response.data.cycle_window,
           period: response.data.period
