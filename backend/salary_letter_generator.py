@@ -321,9 +321,9 @@ def generate_salary_letter_html(employee_data: dict, cycle_data: dict) -> str:
             </table>
         </div>
         
-        <!-- Section 3: Net Salary Summary -->
+        <!-- Section 2: Net Salary Summary -->
         <div class="section">
-            <div class="section-header">3) NET SALARY SUMMARY</div>
+            <div class="section-header">2) NET SALARY SUMMARY</div>
             <div class="summary">
                 <div class="summary-row">
                     <span>Gross Salary:</span>
