@@ -196,9 +196,44 @@ class SalaryLetterExportTester:
                     else:
                         print("✅ All required elements found in salary letter")
                     
-                    # Check for salary calculations
+                    # Check for salary calculations and verify formulas
                     if "Daily Rate" in html_content and "Hourly Rate" in html_content:
                         print("✅ Salary rate calculations present")
+                        
+                        # Try to extract and verify calculation formulas
+                        import re
+                        
+                        # Look for salary amounts in the HTML
+                        gross_match = re.search(r'Gross.*?(\d+(?:,\d+)*(?:\.\d+)?)', html_content)
+                        daily_match = re.search(r'Daily Rate.*?(\d+(?:,\d+)*(?:\.\d+)?)', html_content)
+                        hourly_match = re.search(r'Hourly Rate.*?(\d+(?:,\d+)*(?:\.\d+)?)', html_content)
+                        minute_match = re.search(r'Per Minute Rate.*?(\d+(?:,\d+)*(?:\.\d+)?)', html_content)
+                        
+                        if gross_match and daily_match and hourly_match and minute_match:
+                            try:
+                                gross = float(gross_match.group(1).replace(',', ''))
+                                daily = float(daily_match.group(1).replace(',', ''))
+                                hourly = float(hourly_match.group(1).replace(',', ''))
+                                minute = float(minute_match.group(1).replace(',', ''))
+                                
+                                # Verify calculations: Daily = Gross/30, Hourly = Daily/8, Per Minute = Hourly/60
+                                expected_daily = gross / 30
+                                expected_hourly = daily / 8
+                                expected_minute = hourly / 60
+                                
+                                daily_ok = abs(daily - expected_daily) < 0.01
+                                hourly_ok = abs(hourly - expected_hourly) < 0.01
+                                minute_ok = abs(minute - expected_minute) < 0.01
+                                
+                                if daily_ok and hourly_ok and minute_ok:
+                                    print("✅ Salary calculation formulas verified correctly")
+                                else:
+                                    print(f"⚠️ Calculation verification: Daily={daily_ok}, Hourly={hourly_ok}, Minute={minute_ok}")
+                                    
+                            except (ValueError, ZeroDivisionError) as e:
+                                print(f"⚠️ Could not verify calculations: {e}")
+                        else:
+                            print("⚠️ Could not extract salary amounts for verification")
                     
                     self.test_results.append({
                         "test": "salary_letter_html",
