@@ -3056,7 +3056,7 @@ async def apply_monthly_deductions(
             
             # 🆕 CREATE AUTOMATIC LEDGER ENTRIES using PayrollLedgerService
             from payroll_ledger_service import PayrollLedgerService
-            ledger_service = PayrollLedgerService(db)
+            ledger_service = PayrollLedgerService(_ensure_db())
             
             # ✅ CRITICAL FIX: Delete old attendance deduction entries before creating new ones (Idempotency)
             # This prevents ledger duplication when recalculating/reapplying deductions
@@ -4320,7 +4320,7 @@ async def get_payroll_ledger_entries(
     try:
         from payroll_ledger_service import PayrollLedgerService
         
-        ledger_service = PayrollLedgerService(db)
+        ledger_service = PayrollLedgerService(_ensure_db())
         
         entries = await ledger_service.get_entries_for_cycle(
             cycle_id=cycle_id,
@@ -4377,7 +4377,7 @@ async def recalculate_payroll_cycle_from_ledger(
         if cycle.get("is_locked", False):
             raise HTTPException(status_code=400, detail="لا يمكن إعادة حساب دورة مقفولة")
         
-        ledger_service = PayrollLedgerService(db)
+        ledger_service = PayrollLedgerService(_ensure_db())
         
         # جلب جميع الموظفين النشطين
         employees = await db.users.find({"role": "user", "is_active": True}).to_list(None)
@@ -4592,7 +4592,7 @@ async def update_payroll_cycle_employees(
         
         # Update each employee's summary AND create ledger entries
         from payroll_ledger_service import PayrollLedgerService
-        ledger_service = PayrollLedgerService(db)
+        ledger_service = PayrollLedgerService(_ensure_db())
         
         updated_count = 0
         for emp_data in employees:
@@ -5011,7 +5011,7 @@ async def get_payroll_cycle_summary(
         
         # تحديث كل ملخص موظف بالخصومات من Payroll Ledger
         from payroll_ledger_service import PayrollLedgerService
-        ledger_service = PayrollLedgerService(db)
+        ledger_service = PayrollLedgerService(_ensure_db())
         
         enhanced_summaries = []
         for summary in summaries:
