@@ -145,37 +145,8 @@ def generate_english_salary_letter_pdf(letter_data, attendance_deductions, manua
     story.append(Paragraph(header_info, normal_style))
     story.append(Spacer(1, 0.3*cm))
     
-    # Section 1: Basic Salary Information
-    story.append(Paragraph("1) BASIC SALARY INFORMATION", heading_style))
-    
-    basic_data = [
-        ["Description", "Amount (AED)"],
-        ["Basic Salary", letter_data['base_salary']],
-        ["Daily Rate", f"{letter_data['daily_rate']} (= {letter_data['base_salary']} ÷ 30)"],
-        ["Hourly Rate", f"{letter_data['hourly_rate']} (= Daily ÷ 8)"],
-        ["Per Minute Rate", f"{letter_data['minute_rate']} (= Hourly ÷ 60)"]
-    ]
-    
-    basic_table = Table(basic_data, colWidths=[10*cm, 6*cm])
-    basic_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f9ff')),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),  # Reduced
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # Reduced
-    ]))
-    story.append(basic_table)
-    story.append(Spacer(1, 0.2*cm))
-    
-    # Section 2: Deductions
-    story.append(Paragraph("2) DEDUCTIONS BREAKDOWN", heading_style))
+    # Section 1: Deductions
+    story.append(Paragraph("1) DEDUCTIONS BREAKDOWN", heading_style))
     
     deductions_data = [
         ["Type", "Description", "Amount (AED)"]
