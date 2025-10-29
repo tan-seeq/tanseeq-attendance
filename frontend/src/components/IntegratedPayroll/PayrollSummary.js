@@ -209,32 +209,32 @@ const PayrollSummary = () => {
     <title>Salary Statement - ${empName}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', 'Helvetica', sans-serif; color: #1a1a1a; line-height: 1.6; padding: 40px 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border: 2px solid #e5e7eb; border-radius: 8px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #003366; padding-bottom: 20px; }
-        .company-name { font-size: 28px; font-weight: bold; color: #003366; margin-bottom: 5px; letter-spacing: 1px; }
-        .document-title { font-size: 20px; color: #555; font-weight: 600; }
-        .employee-info { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 25px; display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .employee-info .info-item { margin: 5px 10px; font-size: 14px; }
+        body { font-family: 'Arial', 'Helvetica', sans-serif; color: #1a1a1a; line-height: 1.3; padding: 20px 15px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border: 2px solid #e5e7eb; border-radius: 6px; }
+        .header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #003366; padding-bottom: 10px; }
+        .company-name { font-size: 22px; font-weight: bold; color: #003366; margin-bottom: 3px; letter-spacing: 0.5px; }
+        .document-title { font-size: 16px; color: #555; font-weight: 600; }
+        .employee-info { background: #f8f9fa; padding: 8px; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .employee-info .info-item { margin: 3px 8px; font-size: 12px; }
         .employee-info .label { font-weight: 600; color: #555; }
         .employee-info .value { color: #1a1a1a; }
-        .section { margin-bottom: 25px; }
-        .section-header { background: #003366; color: white; padding: 10px 15px; font-size: 16px; font-weight: bold; border-radius: 4px; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        table th, table td { padding: 12px; text-align: left; border: 1px solid #e5e7eb; }
-        table th { background: #f3f4f6; font-weight: 600; color: #374151; font-size: 14px; }
-        table td { font-size: 14px; }
+        .section { margin-bottom: 12px; }
+        .section-header { background: #003366; color: white; padding: 6px 10px; font-size: 13px; font-weight: bold; border-radius: 3px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        table th, table td { padding: 6px 8px; text-align: left; border: 1px solid #e5e7eb; }
+        table th { background: #f3f4f6; font-weight: 600; color: #374151; font-size: 11px; }
+        table td { font-size: 11px; }
         .amount { font-weight: 600; color: #059669; }
         .deduction { color: #dc2626; }
-        .summary { background: #f0f9ff; border: 2px solid #0284c7; border-radius: 6px; padding: 20px; margin-top: 20px; }
-        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; }
-        .summary-row.total { border-top: 2px solid #0284c7; margin-top: 10px; padding-top: 15px; font-weight: bold; font-size: 18px; color: #059669; }
-        .formula { color: #6b7280; font-size: 13px; font-style: italic; }
-        .signatures { margin-top: 50px; display: flex; justify-content: space-between; }
-        .signature-block { width: 45%; border-top: 2px solid #d1d5db; padding-top: 10px; }
-        .signature-label { font-weight: 600; color: #374151; margin-bottom: 20px; }
-        .signature-line { border-bottom: 1px solid #9ca3af; margin-bottom: 5px; height: 30px; }
-        .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px; }
+        .summary { background: #f0f9ff; border: 2px solid #0284c7; border-radius: 4px; padding: 10px; margin-top: 10px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+        .summary-row.total { border-top: 2px solid #0284c7; margin-top: 6px; padding-top: 8px; font-weight: bold; font-size: 14px; color: #059669; }
+        .formula { color: #6b7280; font-size: 10px; font-style: italic; }
+        .signatures { margin-top: 20px; display: flex; justify-content: space-between; }
+        .signature-block { width: 45%; border-top: 1px solid #d1d5db; padding-top: 6px; }
+        .signature-label { font-weight: 600; color: #374151; margin-bottom: 10px; font-size: 11px; }
+        .signature-line { border-bottom: 1px solid #9ca3af; margin-bottom: 3px; height: 20px; }
+        .footer { margin-top: 15px; padding-top: 10px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 9px; }
         .cycle-id { font-weight: 600; color: #374151; }
     </style>
 </head>
