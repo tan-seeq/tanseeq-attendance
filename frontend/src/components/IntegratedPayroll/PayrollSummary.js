@@ -276,7 +276,7 @@ const PayrollSummary = () => {
         </div>
         
         <div class="section">
-            <div class="section-header">3) NET SALARY SUMMARY</div>
+            <div class="section-header">2) NET SALARY SUMMARY</div>
             <div class="summary">
                 <div class="summary-row">
                     <span>Gross Salary:</span>
