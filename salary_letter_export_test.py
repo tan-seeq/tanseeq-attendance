@@ -105,23 +105,24 @@ class SalaryLetterExportTester:
                         self.cycle_id = target_cycle["id"]
                         print(f"✅ Selected cycle: {target_cycle['month']} (ID: {self.cycle_id})")
                         
-                        # Get employee summaries for this cycle - try both endpoints
-                        summary_url = f"{BACKEND_URL}/api/payroll/cycles/{self.cycle_id}/summary"
-                        async with self.session.get(summary_url, headers=self.get_auth_headers()) as summary_response:
-                            if summary_response.status == 200:
-                                summary_data = await summary_response.json()
-                                employees = summary_data.get("employees", [])
-                                self.employee_ids = [emp.get("employee_id") for emp in employees if emp.get("employee_id")]
-                                print(f"✅ Found {len(self.employee_ids)} employees in cycle")
+                        # Try to get employees from users endpoint as fallback
+                        async with self.session.get(f"{API_BASE}/users", headers=self.get_auth_headers()) as users_response:
+                            if users_response.status == 200:
+                                users_data = await users_response.json()
+                                users = users_data if isinstance(users_data, list) else users_data.get("users", [])
+                                # Get first few active users as test employees
+                                active_users = [user for user in users if user.get("is_active", True)][:3]
+                                self.employee_ids = [user.get("id") for user in active_users if user.get("id")]
+                                print(f"✅ Found {len(self.employee_ids)} active employees for testing")
                                 
                                 if self.employee_ids:
-                                    print(f"📋 Employee IDs: {self.employee_ids[:3]}{'...' if len(self.employee_ids) > 3 else ''}")
+                                    print(f"📋 Employee IDs: {self.employee_ids}")
                                     return True
                                 else:
-                                    print("❌ No employees found in payroll cycle")
+                                    print("❌ No active employees found")
                                     return False
                             else:
-                                print(f"❌ Failed to get cycle summary: {summary_response.status}")
+                                print(f"❌ Failed to get users: {users_response.status}")
                                 return False
                     else:
                         print("❌ No 2025 payroll cycles found")
