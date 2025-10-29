@@ -20,7 +20,7 @@ import sys
 import os
 
 # Configuration
-BASE_URL = "https://deduction-logic.preview.emergentagent.com/api"
+BASE_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
 TIMEOUT = 30
 
 # Test Credentials - Based on test_result.md working credentials

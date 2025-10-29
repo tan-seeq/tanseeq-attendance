@@ -58,8 +58,8 @@ Call log:
     - Accessible route screenshots
 
     ## Test Environment
-    - **Frontend URL**: https://deduction-logic.preview.emergentagent.com
-    - **Backend URL**: https://deduction-logic.preview.emergentagent.com/api
+    - **Frontend URL**: https://attendance-calc-4.preview.emergentagent.com
+    - **Backend URL**: https://attendance-calc-4.preview.emergentagent.com/api
     - **Test Execution**: Automated via Playwright
     - **Evidence Organization**: Per-route folders with subfolders
 

@@ -19,7 +19,7 @@ from pathlib import Path
 import time
 
 # Configuration
-BASE_URL = "https://deduction-logic.preview.emergentagent.com/api"
+BASE_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
 
 # Test accounts
 TEST_ACCOUNTS = {

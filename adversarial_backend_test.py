@@ -13,7 +13,7 @@ from typing import Dict, List, Any
 import uuid
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://deduction-logic.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://attendance-calc-4.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test credentials

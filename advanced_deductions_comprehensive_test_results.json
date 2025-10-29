@@ -3739,7 +3739,7 @@
   },
   "timestamp": "2025-10-27T07:52:50.846240",
   "test_context": {
-    "backend_url": "https://deduction-logic.preview.emergentagent.com",
+    "backend_url": "https://attendance-calc-4.preview.emergentagent.com",
     "admin_credentials": "admin@tanseeq.com/[PROTECTED]",
     "test_focus": "Advanced Deductions System with Company-Specific Rules"
   }

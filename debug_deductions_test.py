@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://deduction-logic.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@tanseeq.com"
 ADMIN_PASSWORD = "ADMIN"
 

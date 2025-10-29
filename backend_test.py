@@ -15,7 +15,7 @@ import uuid
 import re
 
 # Backend URL from environment
-BACKEND_URL = "https://deduction-logic.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
 
 # Test credentials
 CREDENTIALS = {

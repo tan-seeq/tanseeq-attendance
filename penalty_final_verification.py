@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 
 def test_penalty_system():
-    base_url = "https://deduction-logic.preview.emergentagent.com"
+    base_url = "https://attendance-calc-4.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     # Login as Hatem (super_admin)

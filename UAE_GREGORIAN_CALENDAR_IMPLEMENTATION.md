@@ -159,7 +159,7 @@ Created At: 2025-10-08T15:30:00+04:00 ✅
 
 ```bash
 # اختبار endpoint
-curl -X GET "https://deduction-logic.preview.emergentagent.com/api/payroll/cycles" \
+curl -X GET "https://attendance-calc-4.preview.emergentagent.com/api/payroll/cycles" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -376,7 +376,7 @@ python -m uae_datetime_utils
 
 ```bash
 # اختبار إنشاء دورة رواتب
-curl -X POST "https://deduction-logic.preview.emergentagent.com/api/deductions/apply-monthly" \
+curl -X POST "https://attendance-calc-4.preview.emergentagent.com/api/deductions/apply-monthly" \
   -H "Authorization: Bearer {token}" \
   -H "Content-Type: application/json" \
   -d '{
