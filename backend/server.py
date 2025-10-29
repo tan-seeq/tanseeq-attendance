@@ -2796,7 +2796,8 @@ async def calculate_monthly_deductions_endpoint(
                 "to": cycle_end.isoformat(),
                 "description": f"دورة شهرية: 29 {calendar.month_name[cycle_start.month]} إلى 28 {calendar.month_name[cycle_end.month]}"
             },
-            "employees": results,
+            "summaries": results,  # Changed from employees to summaries for frontend compatibility
+            "employees": results,  # Keep both for backward compatibility
             "total_deductions": round(total_deductions, 2),
             "employee_count": len(results),
             "note": "✅ Calculated using UNIFIED deductions engine with formula: (DailyRate/540) × deductible_minutes",
