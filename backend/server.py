@@ -5025,20 +5025,21 @@ async def get_payroll_cycle_summary(
             
             # دمج البيانات - استخدام البيانات من Ledger للخصومات
             enhanced_summary = {
-                "_id": str(summary["_id"]),
                 "employee_id": employee_id,
                 "employee_name": summary.get("employee_name", ""),
+                "employee_code": summary.get("employee_code", employee_id),
                 "payroll_cycle_id": cycle_id,
                 "base_salary": summary.get("base_salary", 0),
+                "allowances": summary.get("allowances", 0),
                 "total_allowances": summary.get("allowances", 0),
                 "gross_salary": summary.get("gross_salary", 0),
                 
                 # استخدام البيانات من Payroll Ledger
-                "attendance_deductions": ledger_summary["attendance_deductions"],
-                "manual_deductions": ledger_summary["manual_deductions"],
-                "advance_deductions": ledger_summary["advance_installments"],
-                "leave_adjustments": ledger_summary["leave_adjustments"],
-                "custody_adjustments": ledger_summary["custody_adjustments"],
+                "attendance_deductions": ledger_summary.get("attendance_deductions", 0),
+                "manual_deductions": ledger_summary.get("manual_deductions", 0),
+                "advance_deductions": ledger_summary.get("advance_installments", 0),
+                "leave_adjustments": ledger_summary.get("leave_adjustments", 0),
+                "custody_adjustments": ledger_summary.get("custody_adjustments", 0),
                 
                 # ✅ NEW: Add detailed deduction breakdown from unified engine
                 "absent_days": deduction_detail.days_absent if deduction_detail else 0,
@@ -5050,22 +5051,22 @@ async def get_payroll_cycle_summary(
                 
                 # حساب الإجماليات
                 "total_deductions": (
-                    ledger_summary["attendance_deductions"] +
-                    ledger_summary["manual_deductions"] +
-                    ledger_summary["advance_installments"]
+                    ledger_summary.get("attendance_deductions", 0) +
+                    ledger_summary.get("manual_deductions", 0) +
+                    ledger_summary.get("advance_installments", 0)
                 ),
                 
                 # حساب صافي الراتب
                 "net_salary": max(0, 
                     summary.get("gross_salary", 0) +
-                    ledger_summary["leave_adjustments"] +
-                    ledger_summary["custody_adjustments"] -
-                    (ledger_summary["attendance_deductions"] +
-                     ledger_summary["manual_deductions"] +
-                     ledger_summary["advance_installments"])
+                    ledger_summary.get("leave_adjustments", 0) +
+                    ledger_summary.get("custody_adjustments", 0) -
+                    (ledger_summary.get("attendance_deductions", 0) +
+                     ledger_summary.get("manual_deductions", 0) +
+                     ledger_summary.get("advance_installments", 0))
                 ),
                 
-                "ledger_entries_count": ledger_summary["entries_count"]
+                "ledger_entries_count": ledger_summary.get("entries_count", 0)
             }
             
             enhanced_summaries.append(enhanced_summary)
