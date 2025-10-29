@@ -2513,7 +2513,7 @@ const Employees = () => {
                       <div className="text-xs text-green-600">دوام مرن</div>
                     )}
                   </td>
-                  {user?.name === "Hatem Mohamed Ahmed" && (
+                  {user?.role === 'super_admin' && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
