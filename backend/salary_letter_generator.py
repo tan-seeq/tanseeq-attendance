@@ -33,11 +33,6 @@ def generate_salary_letter_html(employee_data: dict, cycle_data: dict) -> str:
     # Net salary
     net_payable = gross_salary - total_deductions
     
-    # Calculate rates
-    daily_rate = base_salary / 30
-    hourly_rate = daily_rate / 8
-    per_minute_rate = hourly_rate / 60
-    
     # Cycle info
     cycle_id = cycle_data.get('id', 'N/A')
     period = cycle_data.get('period', cycle_data.get('month', 'N/A'))
