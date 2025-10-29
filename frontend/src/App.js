@@ -2839,6 +2839,82 @@ const Employees = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
+
+                <div className="border-t pt-4 col-span-2">
+                  <label className="flex items-center space-x-2 mb-4">
+                    <input
+                      type="checkbox"
+                      checked={formData.has_flexible_schedule}
+                      onChange={(e) => setFormData({...formData, has_flexible_schedule: e.target.checked})}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">تفعيل الدوام المرن</span>
+                  </label>
+
+                  {formData.has_flexible_schedule && (
+                    <div className="space-y-4 bg-blue-50 p-4 rounded-md">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">ساعات العمل اليومية</label>
+                          <input
+                            type="number"
+                            value={formData.flexible_hours_per_day}
+                            onChange={(e) => setFormData({...formData, flexible_hours_per_day: parseInt(e.target.value)})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            min="1"
+                            max="12"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">أيام العمل الأسبوعية</label>
+                          <input
+                            type="number"
+                            value={formData.flexible_days_per_week}
+                            onChange={(e) => setFormData({...formData, flexible_days_per_week: parseInt(e.target.value)})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            min="1"
+                            max="7"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">نطاق بداية الدوام (مثال: 07:00-10:00)</label>
+                        <input
+                          type="text"
+                          value={formData.flexible_start_range}
+                          onChange={(e) => setFormData({...formData, flexible_start_range: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="07:00-10:00"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">نطاق نهاية الدوام (مثال: 16:00-19:00)</label>
+                        <input
+                          type="text"
+                          value={formData.flexible_end_range}
+                          onChange={(e) => setFormData({...formData, flexible_end_range: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="16:00-19:00"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ساعات الحضور الأساسية (مثال: 10:00-15:00)</label>
+                        <input
+                          type="text"
+                          value={formData.flexible_core_hours}
+                          onChange={(e) => setFormData({...formData, flexible_core_hours: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="10:00-15:00"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">الساعات التي يجب على الموظف التواجد فيها</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 </div>
 
                 <div>
