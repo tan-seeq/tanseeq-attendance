@@ -17,7 +17,8 @@ async def get_exception_type(db: AsyncIOMotorDatabase, user_id: str) -> Optional
     doc = await db[EXCEPTIONS_COLLECTION].find_one({"user_id": user_id})
     if not doc:
         return None
-    t = (doc.get("type") or "").strip().lower()
+    # Check both 'exception_type' (new format) and 'type' (legacy)
+    t = (doc.get("exception_type") or doc.get("type") or "").strip().lower()
     return t if t in ("flex", "partial-flex") else None
 
 async def get_import_name_mapping(db: AsyncIOMotorDatabase) -> Dict[str, str]:
