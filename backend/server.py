@@ -5153,6 +5153,175 @@ async def get_salary_letter(cycle_id: str, employee_id: str, format: str = "html
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate salary letter: {str(e)}")
 
+@api_router.get("/payroll/cycles/{cycle_id}/export-all-letters")
+async def export_all_salary_letters(cycle_id: str, current_user: User = Depends(get_super_admin_user)):
+    """
+    Export all salary letters for a payroll cycle as a ZIP file containing individual PDFs.
+    Note: This returns HTML files as PDF generation is done client-side.
+    """
+    try:
+        from salary_letter_generator import generate_salary_letter_html
+        import json
+        
+        # Fetch cycle
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        
+        # Fetch all employee summaries
+        summaries = await db.employee_payroll_summaries.find({
+            "payroll_cycle_id": cycle_id
+        }).to_list(1000)
+        
+        if not summaries:
+            raise HTTPException(status_code=404, detail="No employee summaries found for this cycle")
+        
+        # Generate HTML for each employee
+        letters = []
+        for summary in summaries:
+            employee = await db.users.find_one({"id": summary.get("employee_id")})
+            employee_name = employee.get("name") if employee else summary.get("employee_name", "")
+            employee_code = employee.get("employee_code") if employee else summary.get("employee_id")
+            
+            employee_data = {
+                "name": employee_name,
+                "employee_id": summary.get("employee_id"),
+                "employee_code": employee_code,
+                "base_salary": float(summary.get("base_salary", 0) or 0),
+                "allowances": float(summary.get("total_allowances", 0) or 0),
+                "gross_salary": float(summary.get("gross_salary", 0) or 0),
+                "manual_deductions": float(summary.get("manual_deductions", 0) or 0),
+                "attendance_deductions": float(summary.get("attendance_deductions", 0) or 0),
+                "advance_deductions": float(summary.get("advance_deductions", 0) or 0),
+            }
+            
+            cycle_data = {
+                "id": cycle_id,
+                "month": cycle.get("month", "N/A"),
+                "period": cycle.get("month", "N/A"),
+            }
+            
+            html = generate_salary_letter_html(employee_data, cycle_data)
+            
+            letters.append({
+                "employee_id": summary.get("employee_id"),
+                "employee_name": employee_name,
+                "employee_code": employee_code,
+                "html": html
+            })
+        
+        # Return as JSON for client-side processing
+        return {"letters": letters, "cycle_id": cycle_id, "cycle_month": cycle.get("month")}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to export salary letters: {str(e)}")
+
+@api_router.get("/payroll/cycles/{cycle_id}/export-excel")
+async def export_payroll_excel(cycle_id: str, current_user: User = Depends(get_super_admin_user)):
+    """
+    Export payroll cycle summary as Excel file.
+    """
+    try:
+        from io import BytesIO
+        import pandas as pd
+        from datetime import datetime
+        
+        # Fetch cycle
+        cycle = await db.payroll_cycles.find_one({"id": cycle_id})
+        if not cycle:
+            raise HTTPException(status_code=404, detail="Payroll cycle not found")
+        
+        # Fetch all employee summaries
+        summaries = await db.employee_payroll_summaries.find({
+            "payroll_cycle_id": cycle_id
+        }).to_list(1000)
+        
+        if not summaries:
+            raise HTTPException(status_code=404, detail="No employee summaries found")
+        
+        # Prepare data for Excel
+        excel_data = []
+        for summary in summaries:
+            employee = await db.users.find_one({"id": summary.get("employee_id")})
+            employee_code = employee.get("employee_code") if employee else summary.get("employee_id")
+            
+            base_salary = float(summary.get("base_salary", 0) or 0)
+            allowances = float(summary.get("total_allowances", 0) or 0)
+            gross_salary = float(summary.get("gross_salary", 0) or 0)
+            admin_ded = float(summary.get("manual_deductions", 0) or 0)
+            attendance_ded = float(summary.get("attendance_deductions", 0) or 0)
+            advance_ded = float(summary.get("advance_deductions", 0) or 0)
+            total_ded = admin_ded + attendance_ded + advance_ded
+            net_salary = gross_salary - total_ded
+            
+            excel_data.append({
+                "Employee Code": employee_code,
+                "Employee Name": summary.get("employee_name", ""),
+                "Base Salary (AED)": round(base_salary, 2),
+                "Allowances (AED)": round(allowances, 2),
+                "Gross Salary (AED)": round(gross_salary, 2),
+                "Administrative Deduction (AED)": round(admin_ded, 2),
+                "Attendance Deduction (AED)": round(attendance_ded, 2),
+                "Advance Deduction (AED)": round(advance_ded, 2),
+                "Total Deductions (AED)": round(total_ded, 2),
+                "Net Salary (AED)": round(net_salary, 2),
+            })
+        
+        # Create DataFrame
+        df = pd.DataFrame(excel_data)
+        
+        # Create Excel file in memory
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Payroll Summary', index=False)
+            
+            # Get workbook and worksheet
+            workbook = writer.book
+            worksheet = writer.sheets['Payroll Summary']
+            
+            # Add formats
+            header_format = workbook.add_format({
+                'bold': True,
+                'bg_color': '#003366',
+                'font_color': 'white',
+                'border': 1
+            })
+            
+            currency_format = workbook.add_format({'num_format': '#,##0.00'})
+            
+            # Write headers with format
+            for col_num, value in enumerate(df.columns.values):
+                worksheet.write(0, col_num, value, header_format)
+            
+            # Set column widths
+            worksheet.set_column('A:A', 15)  # Employee Code
+            worksheet.set_column('B:B', 25)  # Employee Name
+            worksheet.set_column('C:J', 18)  # All currency columns
+            
+            # Apply currency format to numeric columns
+            for row_num in range(1, len(df) + 1):
+                for col_num in range(2, 10):  # Columns C to J (salary columns)
+                    worksheet.write(row_num, col_num, df.iloc[row_num-1, col_num], currency_format)
+        
+        output.seek(0)
+        
+        # Generate filename
+        cycle_month = cycle.get("month", "").replace("-", "_")
+        filename = f"payroll_summary_{cycle_month}_{cycle_id[:8]}.xlsx"
+        
+        return Response(
+            content=output.read(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to export Excel: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
