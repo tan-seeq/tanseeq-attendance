@@ -2954,23 +2954,30 @@ const Employees = () => {
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3 text-center">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                Change Password - {selectedEmployee?.name}
+                تغيير كلمة المرور - {selectedEmployee?.name}
               </h3>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ ملاحظة: كلمات المرور مشفرة ولا يمكن عرضها. سيتم تعيين كلمة مرور جديدة.
+                </p>
+              </div>
               <div className="mt-2 px-7 py-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">كلمة المرور الجديدة</label>
                 <input
-                  type="password"
-                  placeholder="New Password"
+                  type="text"
+                  placeholder="أدخل كلمة المرور الجديدة"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                <p className="text-xs text-gray-500 mt-2 text-right">يرجى حفظ كلمة المرور ومشاركتها مع الموظف</p>
               </div>
               <div className="items-center px-4 py-3">
                 <button
                   onClick={handleChangePassword}
                   className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 >
-                  Change Password
+                  تأكيد تغيير كلمة المرور
                 </button>
                 <button
                   onClick={() => {
@@ -2980,7 +2987,7 @@ const Employees = () => {
                   }}
                   className="mt-3 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
-                  Cancel
+                  إلغاء
                 </button>
               </div>
             </div>
