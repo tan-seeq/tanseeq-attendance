@@ -2737,7 +2737,7 @@ async def calculate_monthly_deductions_endpoint(
         print(f"🔄 [UNIFIED ENGINE] Calculating deductions for {month} using unified engine")
         
         # ✅ USE UNIFIED DEDUCTIONS ENGINE
-        summaries = await calculate_monthly_deductions(db, month_num, year)
+        summaries = await calculate_monthly_deductions(_ensure_db(), month_num, year)
         
         # Convert to API response format
         results = []
@@ -2859,7 +2859,7 @@ async def calculate_custom_deductions(
         print(f"🔄 [UNIFIED ENGINE] Calculating custom period deductions using unified engine")
         
         # ✅ USE UNIFIED DEDUCTIONS ENGINE
-        summaries = await calculate_custom_period_deductions(db, start_date, end_date)
+        summaries = await calculate_custom_period_deductions(_ensure_db(), start_date, end_date)
         
         # Convert to API response format
         results = []
@@ -12929,7 +12929,7 @@ async def apply_monthly_deductions(
         # First calculate deductions to get the data
         from deductions_engine import calculate_monthly_deductions
         
-        summaries = await calculate_monthly_deductions(db, 
+        summaries = await calculate_monthly_deductions(_ensure_db(), 
             month=month,
             year=year,
         )
