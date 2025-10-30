@@ -1,18 +1,18 @@
 {
-  "timestamp": "2025-10-30T06:39:23.512723",
+  "timestamp": "2025-10-30T06:39:37.126624",
   "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
   "test_steps": [
     {
       "step": "Super Admin Authentication",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:23.854625",
+      "timestamp": "2025-10-30T06:39:37.412617",
       "details": {
         "user_name": "حاتم محمد",
         "user_role": "super_admin",
         "user_email": "hatem@tan-seeq.co"
       },
       "response_data": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoYXRlbV90YW5fc2VlcV8wMDEiLCJleHAiOjE3NjE4MDgxNjN9.Zaht0wsdHRYOi4jlRKTEB8cQ_tOwoIFbiAFU6qCQY50",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoYXRlbV90YW5fc2VlcV8wMDEiLCJleHAiOjE3NjE4MDgxNzd9.JOn4CFVJJ0_4lH25sz5fYQLXlxyJ15cLgg-6zykQU_o",
         "token_type": "bearer",
         "user": {
           "id": "hatem_tan_seeq_001",
@@ -40,13 +40,14 @@
     {
       "step": "User Mapping",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:23.867502",
+      "timestamp": "2025-10-30T06:39:37.427123",
       "details": {
         "total_users": 14,
-        "found_target_users": 3,
+        "found_target_users": 4,
         "mapped_users": [
           "Hatem",
           "Tarek",
+          "Karim",
           "Hesham"
         ]
       },
@@ -61,6 +62,11 @@
           "full_name": "Tarek Hegazy",
           "email": "tarek.hegazy@tanseeq.com"
         },
+        "Karim": {
+          "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+          "full_name": "Kareem",
+          "email": "kareem@tanseeq.com"
+        },
         "Hesham": {
           "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
           "full_name": "Hesham",
@@ -71,7 +77,7 @@
     {
       "step": "Set Exception - Hatem",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:23.882350",
+      "timestamp": "2025-10-30T06:39:37.443085",
       "details": {
         "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
         "full_name": "Hatem Mohamed",
@@ -85,7 +91,7 @@
     {
       "step": "Set Exception - Tarek",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:23.894867",
+      "timestamp": "2025-10-30T06:39:37.459001",
       "details": {
         "user_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
         "full_name": "Tarek Hegazy",
@@ -97,9 +103,23 @@
       }
     },
     {
+      "step": "Set Exception - Karim",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:39:37.512035",
+      "details": {
+        "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+        "full_name": "Kareem",
+        "exception_type": "partial-flex"
+      },
+      "response_data": {
+        "success": true,
+        "message": "Exception saved"
+      }
+    },
+    {
       "step": "Set Exception - Hesham",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:23.906896",
+      "timestamp": "2025-10-30T06:39:37.527206",
       "details": {
         "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
         "full_name": "Hesham",
@@ -113,10 +133,10 @@
     {
       "step": "Verify Exception Configurations",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:23.921215",
+      "timestamp": "2025-10-30T06:39:37.544412",
       "details": {
         "total_exceptions": 6,
-        "verified_users": 3,
+        "verified_users": 4,
         "all_match_expected": true
       },
       "response_data": {
@@ -132,6 +152,12 @@
           "actual_type": "flex",
           "matches": true
         },
+        "Karim": {
+          "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+          "expected_type": "partial-flex",
+          "actual_type": "partial-flex",
+          "matches": true
+        },
         "Hesham": {
           "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
           "expected_type": "partial-flex",
@@ -143,13 +169,14 @@
     {
       "step": "Monthly Recalculation October 2025",
       "status": "SUCCESS",
-      "timestamp": "2025-10-30T06:39:24.121026",
+      "timestamp": "2025-10-30T06:39:37.734041",
       "details": {
         "calculation_completed": true,
-        "users_found_in_results": 3,
+        "users_found_in_results": 4,
         "target_users": [
           "Hatem",
           "Tarek",
+          "Karim",
           "Hesham"
         ]
       },
@@ -866,6 +893,365 @@
             ]
           }
         },
+        "Karim": {
+          "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+          "full_name": "Kareem",
+          "total_deduction": 1585.58,
+          "late_deduction": 2.31,
+          "absence_deduction": 1583.27,
+          "days_absent": 0,
+          "days_late": 0,
+          "total_late_minutes": 15,
+          "raw_result": {
+            "employee_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+            "employee_name": "Kareem",
+            "monthly_salary": 2500.0,
+            "late_deduction": 2.31,
+            "absence_deduction": 1583.27,
+            "total_deduction": 1585.58,
+            "deduction_details": [
+              "• تأخير: 2 يوم - 15 دقيقة - 2.31 درهم",
+              "• غياب: 19 يوم - 1583.27 درهم"
+            ],
+            "late_count": 2,
+            "absence_count": 19,
+            "days_present": 3,
+            "total_late_minutes": 15,
+            "total_early_leave_minutes": 0,
+            "daily_records": [
+              {
+                "date": "2025-09-29",
+                "status": "present",
+                "check_in": "09:07:24",
+                "check_out": "17:52:54",
+                "late_minutes": 7,
+                "early_leave_minutes": 0,
+                "working_hours": 8.75,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 7,
+                "grace_applied": false,
+                "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+                "deduction_amount": 1.08,
+                "note": ""
+              },
+              {
+                "date": "2025-09-30",
+                "status": "present",
+                "check_in": "09:08:52",
+                "check_out": "17:33:13",
+                "late_minutes": 8,
+                "early_leave_minutes": 0,
+                "working_hours": 8.4,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 8,
+                "grace_applied": false,
+                "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+                "deduction_amount": 1.23,
+                "note": ""
+              },
+              {
+                "date": "2025-10-01",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-02",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-05",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-06",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-07",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-08",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-09",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-12",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-13",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-14",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-15",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-16",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-19",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-20",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-21",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-22",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-23",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-26",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-27",
+                "status": "absent",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 540,
+                "grace_applied": false,
+                "rule_applied": "Full Day Absence",
+                "deduction_amount": 83.33,
+                "note": "غياب يوم كامل"
+              },
+              {
+                "date": "2025-10-28",
+                "status": "present",
+                "check_in": null,
+                "check_out": null,
+                "late_minutes": 0,
+                "early_leave_minutes": 0,
+                "working_hours": 0.0,
+                "under_hours_minutes": 0,
+                "deductible_minutes": 0,
+                "grace_applied": false,
+                "rule_applied": "Calibration Safe (no data)",
+                "deduction_amount": 0.0,
+                "note": "لا خصم بسبب نقص البيانات"
+              }
+            ]
+          }
+        },
         "Hesham": {
           "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
           "full_name": "Hesham",
@@ -1230,12 +1616,12 @@
     {
       "step": "Business Logic Validation",
       "status": "FAILED",
-      "timestamp": "2025-10-30T06:39:24.121085",
+      "timestamp": "2025-10-30T06:39:37.734103",
       "details": {
         "overall_validation": "FAIL",
-        "users_validated": 3,
+        "users_validated": 4,
         "passed_validations": 2,
-        "failed_validations": 1
+        "failed_validations": 2
       },
       "response_data": {
         "Hatem": {
@@ -1273,6 +1659,27 @@
           "validation_status": "PASS",
           "issues": []
         },
+        "Karim": {
+          "user_key": "Karim",
+          "exception_type": "partial-flex",
+          "actual_values": {
+            "total_deduction": 1585.58,
+            "late_deduction": 2.31,
+            "absence_deduction": 1583.27,
+            "days_absent": 0,
+            "days_late": 0
+          },
+          "expectations": {
+            "lateness_rule": "Late deductions should apply",
+            "absence_rule": "Absence deduction only if days_absent>0",
+            "early_rule": "No early departure or under-hours impact",
+            "reason": "Partial-flex users have lateness penalties but flexible end times"
+          },
+          "validation_status": "FAIL",
+          "issues": [
+            "No absent days but absence_deduction=1583.27"
+          ]
+        },
         "Hesham": {
           "user_key": "Hesham",
           "exception_type": "partial-flex",
@@ -1308,6 +1715,11 @@
       "full_name": "Tarek Hegazy",
       "email": "tarek.hegazy@tanseeq.com"
     },
+    "Karim": {
+      "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+      "full_name": "Kareem",
+      "email": "kareem@tanseeq.com"
+    },
     "Hesham": {
       "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
       "full_name": "Hesham",
@@ -1325,6 +1737,12 @@
       "user_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
       "expected_type": "flex",
       "actual_type": "flex",
+      "matches": true
+    },
+    "Karim": {
+      "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+      "expected_type": "partial-flex",
+      "actual_type": "partial-flex",
       "matches": true
     },
     "Hesham": {
@@ -2047,6 +2465,365 @@
         ]
       }
     },
+    "Karim": {
+      "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+      "full_name": "Kareem",
+      "total_deduction": 1585.58,
+      "late_deduction": 2.31,
+      "absence_deduction": 1583.27,
+      "days_absent": 0,
+      "days_late": 0,
+      "total_late_minutes": 15,
+      "raw_result": {
+        "employee_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+        "employee_name": "Kareem",
+        "monthly_salary": 2500.0,
+        "late_deduction": 2.31,
+        "absence_deduction": 1583.27,
+        "total_deduction": 1585.58,
+        "deduction_details": [
+          "• تأخير: 2 يوم - 15 دقيقة - 2.31 درهم",
+          "• غياب: 19 يوم - 1583.27 درهم"
+        ],
+        "late_count": 2,
+        "absence_count": 19,
+        "days_present": 3,
+        "total_late_minutes": 15,
+        "total_early_leave_minutes": 0,
+        "daily_records": [
+          {
+            "date": "2025-09-29",
+            "status": "present",
+            "check_in": "09:07:24",
+            "check_out": "17:52:54",
+            "late_minutes": 7,
+            "early_leave_minutes": 0,
+            "working_hours": 8.75,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 7,
+            "grace_applied": false,
+            "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+            "deduction_amount": 1.08,
+            "note": ""
+          },
+          {
+            "date": "2025-09-30",
+            "status": "present",
+            "check_in": "09:08:52",
+            "check_out": "17:33:13",
+            "late_minutes": 8,
+            "early_leave_minutes": 0,
+            "working_hours": 8.4,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 8,
+            "grace_applied": false,
+            "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+            "deduction_amount": 1.23,
+            "note": ""
+          },
+          {
+            "date": "2025-10-01",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-02",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-05",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-06",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-07",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-08",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-09",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-12",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-13",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-14",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-15",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-16",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-19",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-20",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-21",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-22",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-23",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-26",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-27",
+            "status": "absent",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 540,
+            "grace_applied": false,
+            "rule_applied": "Full Day Absence",
+            "deduction_amount": 83.33,
+            "note": "غياب يوم كامل"
+          },
+          {
+            "date": "2025-10-28",
+            "status": "present",
+            "check_in": null,
+            "check_out": null,
+            "late_minutes": 0,
+            "early_leave_minutes": 0,
+            "working_hours": 0.0,
+            "under_hours_minutes": 0,
+            "deductible_minutes": 0,
+            "grace_applied": false,
+            "rule_applied": "Calibration Safe (no data)",
+            "deduction_amount": 0.0,
+            "note": "لا خصم بسبب نقص البيانات"
+          }
+        ]
+      }
+    },
     "Hesham": {
       "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
       "full_name": "Hesham",
@@ -2442,6 +3219,27 @@
       },
       "validation_status": "PASS",
       "issues": []
+    },
+    "Karim": {
+      "user_key": "Karim",
+      "exception_type": "partial-flex",
+      "actual_values": {
+        "total_deduction": 1585.58,
+        "late_deduction": 2.31,
+        "absence_deduction": 1583.27,
+        "days_absent": 0,
+        "days_late": 0
+      },
+      "expectations": {
+        "lateness_rule": "Late deductions should apply",
+        "absence_rule": "Absence deduction only if days_absent>0",
+        "early_rule": "No early departure or under-hours impact",
+        "reason": "Partial-flex users have lateness penalties but flexible end times"
+      },
+      "validation_status": "FAIL",
+      "issues": [
+        "No absent days but absence_deduction=1583.27"
+      ]
     },
     "Hesham": {
       "user_key": "Hesham",
