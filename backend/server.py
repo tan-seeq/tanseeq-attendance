@@ -3376,6 +3376,49 @@ async def create_system_notification(
 
 @api_router.get("/attendance/config")
 async def get_attendance_config(
+
+# ============ CONFIG EXCEPTIONS ADMIN (Mini) ============
+class ExceptionUpsertRequest(BaseModel):
+    exception_type: str  # 'exempt' | 'flex' | 'partial-flex'
+
+@api_router.get("/config/exceptions")
+async def list_exceptions(current_user: User = Depends(get_super_admin_user)):
+    """List configured exceptions with user details"""
+    docs = await db["config_exceptions"].find({}).to_list(None)
+    out = []
+    for d in docs:
+        uid = d.get("user_id")
+        user = await db.users.find_one({"id": uid})
+        out.append({
+            "user_id": uid,
+            "user_name": user.get("name") if user else None,
+            "exception_type": d.get("exception_type") or d.get("type")
+        })
+    return {"exceptions": out}
+
+@api_router.put("/config/exceptions/{user_id}")
+async def upsert_exception(user_id: str, req: ExceptionUpsertRequest, current_user: User = Depends(get_super_admin_user)):
+    """Create/Update exception record for a user_id"""
+    if req.exception_type not in ("exempt", "flex", "partial-flex"):
+        raise HTTPException(status_code=400, detail="Invalid exception_type")
+    await db["config_exceptions"].update_one(
+        {"user_id": user_id},
+        {"$set": {"user_id": user_id, "exception_type": req.exception_type, "updated_at": datetime.utcnow().isoformat()}},
+        upsert=True
+    )
+    try:
+        await db["config_audit"].insert_one({
+            "id": str(uuid.uuid4()),
+            "action": "upsert_exception",
+            "user_id": current_user.id,
+            "target_user_id": user_id,
+            "exception_type": req.exception_type,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+    except Exception:
+        pass
+    return {"success": True, "message": "Exception saved"}
+
     current_user: User = Depends(get_super_admin_user)
 ):
     """الحصول على إعدادات نظام الحضور"""
