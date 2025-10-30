@@ -19,7 +19,7 @@ async def get_exception_type(db: AsyncIOMotorDatabase, user_id: str) -> Optional
         return None
     # Check both 'exception_type' (new format) and 'type' (legacy)
     t = (doc.get("exception_type") or doc.get("type") or "").strip().lower()
-    return t if t in ("flex", "partial-flex") else None
+    return t if t in ("flex", "partial-flex", "exempt") else None
 
 async def get_import_name_mapping(db: AsyncIOMotorDatabase) -> Dict[str, str]:
     """Return a mapping of external names → canonical system names from DB config."""
