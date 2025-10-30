@@ -200,6 +200,26 @@ backend:
   - task: "URGENT UNIFIED DEDUCTIONS ENGINE VERIFICATION - October 2025"
     implemented: true
     working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Previous testing completed successfully"
+
+  - task: "Production Monthly Deductions Normalization Validation"
+    implemented: true
+    working: false
+    file: "server.py, deductions calculation engine"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 PRODUCTION MONTHLY DEDUCTIONS NORMALIZATION VALIDATION COMPLETED - CRITICAL BUSINESS LOGIC ISSUE FOUND: Successfully conducted comprehensive production testing of monthly deductions normalization rules for October 2025 as requested in review with 50% success rate (2/4 tests passed). AUTHENTICATION & USER MAPPING SUCCESS: ✅ Super Admin authentication working perfectly (hatem@tan-seeq.co/hatem123), ✅ Successfully mapped 4 target users: Hatem (حاتم محمد), Tarek Wazzan, Tarek Hegazy, Hesham - Karim not found in system, ✅ Monthly calculation API operational (13 employees, successful response). NORMALIZATION INVARIANTS VALIDATION RESULTS: ✅ Hatem (exempt): total_deduction=0.0 AED - PERFECT (meets expectation), ✅ Tarek (flex): total_deduction=0.0 AED, late_deduction=0.0 AED - PERFECT (meets expectation), ❌ Karim: NOT_FOUND in system (employee does not exist), 🚨 Hesham (partial-flex): CRITICAL FAILURE - total_deduction=1591.29 AED, absence_deduction=1583.27 AED with days_absent=0 - VIOLATES BUSINESS RULE. CRITICAL BUSINESS LOGIC BUG IDENTIFIED: Hesham shows 1583.27 AED absence deduction despite having 0 days_absent in the calculation results. This violates the core normalization rule that 'absence_deduction == 0 if days_absent==0'. The system is incorrectly applying absence penalties (19 absence days in deduction_details vs 0 days_absent in summary) indicating a data consistency issue in the deductions calculation engine. EVIDENCE COLLECTED: Complete test results saved to /app/evidence/production_after_normalization_oct.json (378KB) with raw API responses, user mappings, and detailed validation results. CONCLUSION: Exception configuration endpoints failing (405 Method Not Allowed), but core deductions calculation working. However, there's a critical bug where absence deductions are being applied inconsistently - the summary shows days_absent=0 but deduction_details shows 19 absence days. This affects payroll accuracy and needs immediate investigation and fix before production deployment."
     file: "deductions_engine.py, server.py"
     stuck_count: 0
     priority: "high"
