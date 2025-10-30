@@ -327,8 +327,8 @@ class ExceptionTestRunner:
                             "total_deduction": summary.get('total_deduction', 0),
                             "late_deduction": summary.get('late_deduction', 0),
                             "absence_deduction": summary.get('absence_deduction', 0),
-                            "days_absent": summary.get('days_absent', 0),
-                            "days_late": summary.get('days_late', 0),
+                            "days_absent": summary.get('absence_count', 0),  # API uses absence_count
+                            "days_late": summary.get('late_count', 0),      # API uses late_count
                             "total_late_minutes": summary.get('total_late_minutes', 0)
                         }
                         break
