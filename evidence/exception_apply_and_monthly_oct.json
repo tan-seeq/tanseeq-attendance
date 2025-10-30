@@ -1,12 +1,12 @@
 {
-  "test_timestamp": "2025-10-30T06:34:12.533201",
+  "test_timestamp": "2025-10-30T06:34:51.502261",
   "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
   "steps": [
     {
       "step": "Super Admin Authentication",
       "success": true,
       "details": "Successfully authenticated as حاتم محمد (super_admin)",
-      "timestamp": "2025-10-30T06:34:12.834017",
+      "timestamp": "2025-10-30T06:34:51.797965",
       "response_data": {
         "user_role": "super_admin",
         "user_name": "حاتم محمد"
@@ -16,7 +16,7 @@
       "step": "User Mapping",
       "success": true,
       "details": "Found 4 target users: ['Hatem', 'Tarek/Tariq', 'Karim', 'Hesham']",
-      "timestamp": "2025-10-30T06:34:12.848580",
+      "timestamp": "2025-10-30T06:34:51.815915",
       "response_data": {
         "Hatem": {
           "user_id": "48613bd9-9007-441f-9495-095408c49889",
@@ -48,31 +48,31 @@
       "step": "Exception Application - Hatem",
       "success": true,
       "details": "Applied exempt exception for Hatem Mohamed Ahmed (48613bd9-9007-441f-9495-095408c49889)",
-      "timestamp": "2025-10-30T06:34:12.862644"
+      "timestamp": "2025-10-30T06:34:51.828713"
     },
     {
       "step": "Exception Application - Tarek/Tariq",
       "success": true,
       "details": "Applied flex exception for Tarek Wazzan (83da4c33-c9c2-42cd-9b82-dea36ff1f05d)",
-      "timestamp": "2025-10-30T06:34:12.878051"
+      "timestamp": "2025-10-30T06:34:51.841912"
     },
     {
       "step": "Exception Application - Karim",
       "success": true,
       "details": "Applied partial-flex exception for Kareem (41a2f63a-a584-4a65-ae84-d7f0a98f5981)",
-      "timestamp": "2025-10-30T06:34:12.931080"
+      "timestamp": "2025-10-30T06:34:51.858054"
     },
     {
       "step": "Exception Application - Hesham",
       "success": true,
       "details": "Applied partial-flex exception for Hesham (16d4a924-ff1f-401c-b95e-9b57db963d42)",
-      "timestamp": "2025-10-30T06:34:12.943164"
+      "timestamp": "2025-10-30T06:34:51.869176"
     },
     {
       "step": "Exception Verification",
       "success": true,
       "details": "Found 4/4 target users with correct exception types",
-      "timestamp": "2025-10-30T06:34:12.960726",
+      "timestamp": "2025-10-30T06:34:51.883967",
       "response_data": {
         "Tarek/Tariq": {
           "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
@@ -103,18 +103,36 @@
     {
       "step": "Monthly Recalculation",
       "success": true,
-      "details": "Successfully calculated deductions for October 2025. Found results for 0 target employees",
-      "timestamp": "2025-10-30T06:34:13.151854",
+      "details": "Successfully calculated deductions for October 2025. Found results for 4 target employees",
+      "timestamp": "2025-10-30T06:34:52.079099",
       "response_data": {
         "total_employees": 13,
-        "target_employees_found": 0
+        "target_employees_found": 4
       }
     },
     {
-      "step": "Deduction Validation",
+      "step": "Deduction Validation - Hatem",
+      "success": true,
+      "details": "Exception type: exempt, Total deduction: 0.0, Validation: PASS",
+      "timestamp": "2025-10-30T06:34:52.079167"
+    },
+    {
+      "step": "Deduction Validation - Tarek/Tariq",
+      "success": true,
+      "details": "Exception type: flex, Total deduction: 2399.94, Validation: PASS",
+      "timestamp": "2025-10-30T06:34:52.079178"
+    },
+    {
+      "step": "Deduction Validation - Karim",
       "success": false,
-      "details": "No target employee results found for validation",
-      "timestamp": "2025-10-30T06:34:13.151909"
+      "details": "Exception type: partial-flex, Total deduction: 1585.58, Validation: FAIL",
+      "timestamp": "2025-10-30T06:34:52.079187"
+    },
+    {
+      "step": "Deduction Validation - Hesham",
+      "success": false,
+      "details": "Exception type: partial-flex, Total deduction: 1591.29, Validation: FAIL",
+      "timestamp": "2025-10-30T06:34:52.079193"
     }
   ],
   "user_mappings": {
@@ -9257,7 +9275,110 @@
       "all_correct": true,
       "total_exceptions": 6
     },
-    "target_employee_results": {}
+    "target_employee_results": {
+      "Hatem": {
+        "user_id": "48613bd9-9007-441f-9495-095408c49889",
+        "name": "Hatem Mohamed Ahmed",
+        "exception_type": "exempt",
+        "total_deduction": 0.0,
+        "late_deduction": 0.0,
+        "absence_deduction": 0.0,
+        "days_absent": 0,
+        "days_late": 0,
+        "total_late_minutes": 0
+      },
+      "Tarek/Tariq": {
+        "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+        "name": "Tarek Wazzan",
+        "exception_type": "flex",
+        "total_deduction": 2399.94,
+        "late_deduction": 0.0,
+        "absence_deduction": 2399.94,
+        "days_absent": 18,
+        "days_late": 0,
+        "total_late_minutes": 0
+      },
+      "Karim": {
+        "user_id": "41a2f63a-a584-4a65-ae84-d7f0a98f5981",
+        "name": "Kareem",
+        "exception_type": "partial-flex",
+        "total_deduction": 1585.58,
+        "late_deduction": 2.31,
+        "absence_deduction": 1583.27,
+        "days_absent": 19,
+        "days_late": 2,
+        "total_late_minutes": 15
+      },
+      "Hesham": {
+        "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+        "name": "Hesham",
+        "exception_type": "partial-flex",
+        "total_deduction": 1591.29,
+        "late_deduction": 8.02,
+        "absence_deduction": 1583.27,
+        "days_absent": 19,
+        "days_late": 2,
+        "total_late_minutes": 52
+      }
+    },
+    "deduction_expectations": {
+      "Hatem": {
+        "exception_type": "exempt",
+        "total_deduction": 0.0,
+        "late_deduction": 0.0,
+        "absence_deduction": 0.0,
+        "days_absent": 0,
+        "expectations": {
+          "total_deduction": 0
+        },
+        "results": {
+          "total_deduction_pass": true
+        },
+        "overall_pass": true
+      },
+      "Tarek/Tariq": {
+        "exception_type": "flex",
+        "total_deduction": 2399.94,
+        "late_deduction": 0.0,
+        "absence_deduction": 2399.94,
+        "days_absent": 18,
+        "expectations": {
+          "absence_only": "absence_deduction > 0 and late_deduction == 0"
+        },
+        "results": {
+          "absence_only_pass": true
+        },
+        "overall_pass": true
+      },
+      "Karim": {
+        "exception_type": "partial-flex",
+        "total_deduction": 1585.58,
+        "late_deduction": 2.31,
+        "absence_deduction": 1583.27,
+        "days_absent": 19,
+        "expectations": {
+          "lateness_only": "late_deduction may exist, absence_deduction should be 0"
+        },
+        "results": {
+          "lateness_only_pass": false
+        },
+        "overall_pass": false
+      },
+      "Hesham": {
+        "exception_type": "partial-flex",
+        "total_deduction": 1591.29,
+        "late_deduction": 8.02,
+        "absence_deduction": 1583.27,
+        "days_absent": 19,
+        "expectations": {
+          "lateness_only": "late_deduction may exist, absence_deduction should be 0"
+        },
+        "results": {
+          "lateness_only_pass": false
+        },
+        "overall_pass": false
+      }
+    }
   },
   "summary": {}
 }
