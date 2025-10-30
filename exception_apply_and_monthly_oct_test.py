@@ -317,9 +317,9 @@ class ExceptionTestRunner:
             for target_name, user_info in self.test_results["user_mappings"].items():
                 user_id = user_info["user_id"]
                 
-                # Find this employee in the summaries
+                # Find this employee in the summaries (API returns employee_id, not user_id)
                 for summary in summaries:
-                    if summary.get('user_id') == user_id:
+                    if summary.get('employee_id') == user_id or summary.get('user_id') == user_id:
                         target_employee_results[target_name] = {
                             "user_id": user_id,
                             "name": user_info["name"],
