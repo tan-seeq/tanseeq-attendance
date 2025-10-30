@@ -2194,6 +2194,17 @@ agent_communication:
 ---
 user_problem_statement: "Exception Application and Monthly Recalculation Testing for October 2025: Authenticate as Super Admin, find user IDs for Hatem/Tarek/Karim/Hesham, apply exceptions (exempt/flex/partial-flex), verify exceptions list, run monthly recalculation for October 2025, validate deduction expectations."
 backend:
+  - task: "Exception Application and Monthly Recalculation for October 2025"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🎯 EXCEPTION APPLICATION AND MONTHLY RECALCULATION TESTING COMPLETED - PARTIAL SUCCESS: Successfully conducted comprehensive testing of exception application and monthly recalculation workflow for October 2025. AUTHENTICATION & USER MAPPING: ✅ Super Admin authentication (hatem@tan-seeq.co/hatem123) working perfectly, ✅ Successfully found all 4 target users with fuzzy mapping (Hatem, Tarek/Tariq, Karim, Hesham), ✅ Applied exceptions correctly (exempt, flex, partial-flex, partial-flex), ✅ Exception verification confirmed all 4 users have correct exception types. MONTHLY RECALCULATION: ✅ POST /api/deductions/calculate-monthly?month=2025-10 working correctly, ✅ Found results for all 4 target employees with detailed daily breakdown. VALIDATION RESULTS: ✅ Hatem (exempt): PASS - Total deduction = 0.0 (as expected), ✅ Tarek (flex): PASS - Has 18 days absent, only absence deduction (2399.94), no late deduction (0.0), ❌ Karim (partial-flex): FAIL - Has both late deduction (2.31) AND absence deduction (1583.27), but partial-flex should only have late deductions, ❌ Hesham (partial-flex): FAIL - Same issue as Karim - has both late (8.02) and absence (1583.27) deductions. CRITICAL ISSUE: Partial-flex exception type is not working correctly - employees with partial-flex are getting absence deductions when they should only get late deductions according to business rules. Evidence saved to /app/evidence/exception_apply_and_monthly_oct.json with full test results and daily breakdown data."
   - task: "Installment schedules endpoints (create/get/list)"
     implemented: true
     working: "NA"
