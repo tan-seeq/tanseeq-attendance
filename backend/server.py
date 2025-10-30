@@ -3862,20 +3862,7 @@ async def update_deduction(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating deduction: {str(e)}")
 
-@app.post("/api/deductions/{deduction_id}/void")
-async def void_deduction(
-    deduction_id: str,
-    void_data: dict,
-    current_user: User = Depends(get_current_user)
-):
-    """Void/cancel a deduction (Super Admin only)"""
-    if current_user.role != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin access required")
-    
-    try:
-        # Find existing deduction
-        existing = await db.payroll_deductions.find_one({"id": deduction_id})
-        if not existing:
+# Removed broken void_deduction function
 
 @api_router.get("/attendance")
 async def list_my_attendance(current_user: User = Depends(get_current_user)):
