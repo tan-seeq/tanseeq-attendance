@@ -3374,8 +3374,8 @@ async def create_system_notification(
 # ATTENDANCE CONFIGURATION API
 # ====================
 
-# Removed duplicate get_attendance_config definition during merge
-# (actual definition is placed above with proper signature)
+@api_router.get("/attendance/config")
+async def get_attendance_config(
     current_user: User = Depends(get_super_admin_user)
 ):
     """الحصول على إعدادات نظام الحضور"""
