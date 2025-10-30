@@ -199,6 +199,18 @@ backend:
         agent: "testing"
         comment: "🎉 SALARY LETTER & EXPORT ENDPOINTS TESTING COMPLETED - 100% SUCCESS RATE: Successfully conducted comprehensive testing of the new Salary Letter and Export endpoints for TANSEEQ HR Payroll system with perfect results (4/4 tests passed). CRITICAL FINDINGS: 1) ✅ AUTHENTICATION: admin@tanseeq.com/ADMIN authentication working perfectly as Super Admin 2) ✅ TEST DATA DISCOVERY: Found October 2025 payroll cycle (ID: e70625f9-f78e-4be3-b02e-1c51cdf5385e) with 10 employees 3) ✅ SALARY LETTER ENDPOINT: GET /api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter working perfectly - generates 9,834 character HTML document with proper Arabic RTL structure, contains all required elements (TANSEEQ TAX CONSULTANCY, Salary Statement, employee name, salary details, deductions breakdown), includes Daily Rate, Hourly Rate, Per Minute Rate calculations, proper Content-Type: text/html; charset=utf-8 4) ✅ EXPORT ALL LETTERS ENDPOINT: GET /api/payroll/cycles/{cycle_id}/export-all-letters working correctly - returns JSON response with array of 10 letters, each letter contains required fields (employee_id, employee_name, employee_code, html), HTML content properly formatted for each employee 5) ✅ EXPORT EXCEL ENDPOINT: GET /api/payroll/cycles/{cycle_id}/export-excel working perfectly - generates valid Excel file (6,130 bytes), proper Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, Content-Disposition header contains filename (payroll_summary_2025_10_e70625f9.xlsx), file size indicates proper content 6) ✅ AUTHENTICATION REQUIREMENTS: All endpoints properly require Super Admin authentication - return 401/403 when unauthenticated as expected. CONCLUSION: All three new salary letter and export endpoints are fully operational and ready for production use with excellent Arabic support, proper authentication controls, and accurate data generation."
 
+  - task: "Partial-Flex Behavior Production Check for Hesham User"
+    implemented: true
+    working: true
+    file: "server.py, config_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "🎉 PARTIAL-FLEX BEHAVIOR RECHECK COMPLETED - ISSUE RESOLVED: Successfully conducted comprehensive production check for partial-flex behavior with Hesham user as specifically requested in review with 100% success rate (5/5 tests passed). CRITICAL VERIFICATION RESULTS: 1) ✅ SUPER ADMIN AUTHENTICATION: admin@tanseeq.com/ADMIN login working perfectly on production BASE_URL 2) ✅ HESHAM USER DISCOVERY: Found Hesham user (ID: 16d4a924-ff1f-401c-b95e-9b57db963d42) 3) ✅ PARTIAL-FLEX EXCEPTION SET: PUT /api/config/exceptions/{user_id} successful 4) ✅ MONTHLY DEDUCTIONS CALCULATION: POST /api/deductions/calculate-monthly?month=2025-10 successful, Hesham summary extracted correctly 5) ✅ BUSINESS RULE VALIDATION: Days Absent = 0, Absence Deduction = 0.0 AED (correct), Total Deduction = 8.02 AED (only late deduction), Daily records show 22 attendance records with proper 'Partial-Flex: Lateness Only (no grace)' rule_applied, No half/full day penalties found. CRITICAL SUCCESS: The previously reported issue where Hesham had 1583.27 AED absence deduction despite 0 days_absent has been RESOLVED. Current results show correct behavior: days_absent=0 → absence_deduction=0.0 AED. Evidence saved to /app/evidence/partial_flex_recheck_hesham.json (13,222 bytes). Partial-flex behavior is now working correctly."
+
   - task: "URGENT UNIFIED DEDUCTIONS ENGINE VERIFICATION - October 2025"
     implemented: true
     working: true
