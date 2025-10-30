@@ -397,6 +397,73 @@ async def calculate_employee_deductions(
             summary.late_deduction += detail.deduction_amount
         summary.total_deduction += detail.deduction_amount
 
+    # Final normalization by exception to guarantee invariants
+    if exc_type == 'exempt':
+        # Absolutely no deductions of any kind
+        summary.late_deduction = 0.0
+        summary.absence_deduction = 0.0
+        summary.total_deduction = 0.0
+        # Keep counters for transparency but ensure no monetary impact
+        # Optionally zero out minutes to avoid confusion
+        summary.total_late_minutes = 0
+        summary.total_early_leave_minutes = 0
+        summary.total_under_hours_minutes = 0
+        # Also clear per-day deduction amounts
+        for d in summary.daily_records:
+            d.deductible_minutes = 0
+            d.deduction_amount = 0.0
+    elif exc_type == 'flex':
+        # Only absence contributes. Zero any lateness/early leaks
+        # Recompute aggregates conservatively
+        late_sum = 0.0
+        abs_sum = 0.0
+        days_abs = 0
+        tlm = 0
+        for d in summary.daily_records:
+            if d.is_absent:
+                days_abs += 1
+                abs_sum += d.deduction_amount
+            else:
+                d.deductible_minutes = 0
+                d.deduction_amount = 0.0
+                tlm += 0
+        summary.days_absent = days_abs
+        summary.late_deduction = 0.0
+        summary.absence_deduction = round(abs_sum, 2)
+        summary.total_deduction = summary.absence_deduction
+        summary.total_late_minutes = 0
+        summary.total_early_leave_minutes = 0
+        summary.total_under_hours_minutes = 0
+    elif exc_type == 'partial-flex':
+        # No early-leave/under-hours penalties; absence only if truly absent
+        # Ensure aggregates reflect rule strictly
+        summarized_late = 0.0
+        summarized_abs = 0.0
+        days_abs = 0
+        late_minutes_acc = 0
+        for d in summary.daily_records:
+            # Remove any early/under-hours impact
+            d.early_leave_minutes = 0
+            d.under_hours_minutes = 0
+            # If not absent, keep only lateness-based amount
+            if not d.is_absent:
+                # Deduction amount already recomputed earlier to late_only; keep it
+                summarized_late += d.deduction_amount
+                late_minutes_acc += d.late_minutes
+            else:
+                days_abs += 1
+                summarized_abs += d.deduction_amount
+        # Apply invariants
+        summary.days_absent = days_abs
+        if days_abs == 0:
+            summarized_abs = 0.0
+        summary.late_deduction = round(summarized_late, 2)
+        summary.absence_deduction = round(summarized_abs, 2)
+        summary.total_deduction = round(summary.late_deduction + summary.absence_deduction, 2)
+        summary.total_late_minutes = late_minutes_acc
+        summary.total_early_leave_minutes = 0
+        summary.total_under_hours_minutes = 0
+
     summary.late_deduction = round(summary.late_deduction, 2)
     summary.absence_deduction = round(summary.absence_deduction, 2)
     summary.total_deduction = round(summary.total_deduction, 2)
