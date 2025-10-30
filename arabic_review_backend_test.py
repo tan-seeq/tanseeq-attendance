@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import os
 
 # Configuration
-BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
 
 # Test credentials
 SUPER_ADMIN_CREDENTIALS = {

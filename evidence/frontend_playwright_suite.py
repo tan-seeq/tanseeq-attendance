@@ -13,7 +13,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 # Configuration
-BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com"
+BACKEND_URL = "https://attendance-pro-43.preview.emergentagent.com"
 VIEWPORT = {"width": 1920, "height": 800}
 SCREENSHOT_QUALITY = 20
 

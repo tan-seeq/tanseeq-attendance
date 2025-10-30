@@ -21,7 +21,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 
 # Configuration
-BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
 SUPER_ADMIN_EMAIL = "admin@tanseeq.com"
 SUPER_ADMIN_PASSWORD = "ADMIN"
 

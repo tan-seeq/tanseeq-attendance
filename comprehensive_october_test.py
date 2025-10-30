@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@tanseeq.com"
 ADMIN_PASSWORD = "ADMIN"
 

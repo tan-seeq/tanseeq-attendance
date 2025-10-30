@@ -15,7 +15,7 @@ import uuid
 from pathlib import Path
 
 # Test Configuration
-BACKEND_URL = "https://attendance-calc-4.preview.emergentagent.com"
+BACKEND_URL = "https://attendance-pro-43.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test Accounts

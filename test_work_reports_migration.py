@@ -227,9 +227,9 @@ if __name__ == "__main__":
                     backend_url = line.split('=', 1)[1].strip()
                     break
         else:
-            backend_url = "https://attendance-calc-4.preview.emergentagent.com"
+            backend_url = "https://attendance-pro-43.preview.emergentagent.com"
     except:
-        backend_url = "https://attendance-calc-4.preview.emergentagent.com"
+        backend_url = "https://attendance-pro-43.preview.emergentagent.com"
     
     tester = WorkReportsMigrationTester(backend_url)
     success = tester.run_migration_tests()
