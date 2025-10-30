@@ -1,0 +1,207 @@
+{
+  "timestamp": "2025-10-30T06:38:47.384526",
+  "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
+  "test_steps": [
+    {
+      "step": "Super Admin Authentication",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.679990",
+      "details": {
+        "user_name": "حاتم محمد",
+        "user_role": "super_admin",
+        "user_email": "hatem@tan-seeq.co"
+      },
+      "response_data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoYXRlbV90YW5fc2VlcV8wMDEiLCJleHAiOjE3NjE4MDgxMjd9.ErxG5yXLL-jL3eLKitIep6IJZcUBP_RA52w9Z19YR1c",
+        "token_type": "bearer",
+        "user": {
+          "id": "hatem_tan_seeq_001",
+          "name": "حاتم محمد",
+          "email": "hatem@tan-seeq.co",
+          "role": "super_admin",
+          "position": "مدير عام",
+          "monthly_salary": 15000.0,
+          "daily_rate": 500.0,
+          "working_hours_start": "08:00",
+          "working_hours_end": "18:00",
+          "phone": "+971501234567",
+          "hire_date": null,
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": true,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-11:00",
+          "flexible_end_range": "16:00-20:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        }
+      }
+    },
+    {
+      "step": "User Mapping",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.695214",
+      "details": {
+        "total_users": 14,
+        "found_target_users": 3,
+        "mapped_users": [
+          "Hatem",
+          "Tarek",
+          "Hesham"
+        ]
+      },
+      "response_data": {
+        "Hatem": {
+          "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+          "full_name": "Hatem Mohamed",
+          "email": "hatemmo186@gmail.com"
+        },
+        "Tarek": {
+          "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "full_name": "Tarek Wazzan",
+          "email": "tarek.wazzan@tanseeq.com"
+        },
+        "Hesham": {
+          "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+          "full_name": "Hesham",
+          "email": "hesham@tanseeq.com"
+        }
+      }
+    },
+    {
+      "step": "Set Exception - Hatem",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.709009",
+      "details": {
+        "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+        "full_name": "Hatem Mohamed",
+        "exception_type": "exempt"
+      },
+      "response_data": {
+        "success": true,
+        "message": "Exception saved"
+      }
+    },
+    {
+      "step": "Set Exception - Tarek",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.725201",
+      "details": {
+        "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+        "full_name": "Tarek Wazzan",
+        "exception_type": "flex"
+      },
+      "response_data": {
+        "success": true,
+        "message": "Exception saved"
+      }
+    },
+    {
+      "step": "Set Exception - Hesham",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.741285",
+      "details": {
+        "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+        "full_name": "Hesham",
+        "exception_type": "partial-flex"
+      },
+      "response_data": {
+        "success": true,
+        "message": "Exception saved"
+      }
+    },
+    {
+      "step": "Verify Exception Configurations",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.759736",
+      "details": {
+        "total_exceptions": 6,
+        "verified_users": 3,
+        "all_match_expected": true
+      },
+      "response_data": {
+        "Hatem": {
+          "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+          "expected_type": "exempt",
+          "actual_type": "exempt",
+          "matches": true
+        },
+        "Tarek": {
+          "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+          "expected_type": "flex",
+          "actual_type": "flex",
+          "matches": true
+        },
+        "Hesham": {
+          "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+          "expected_type": "partial-flex",
+          "actual_type": "partial-flex",
+          "matches": true
+        }
+      }
+    },
+    {
+      "step": "Monthly Recalculation October 2025",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.977147",
+      "details": {
+        "calculation_completed": true,
+        "users_found_in_results": 0,
+        "target_users": []
+      },
+      "response_data": {}
+    },
+    {
+      "step": "Business Logic Validation",
+      "status": "SUCCESS",
+      "timestamp": "2025-10-30T06:38:47.977317",
+      "details": {
+        "overall_validation": "PASS",
+        "users_validated": 0,
+        "passed_validations": 0,
+        "failed_validations": 0
+      },
+      "response_data": {}
+    }
+  ],
+  "user_mappings": {
+    "Hatem": {
+      "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+      "full_name": "Hatem Mohamed",
+      "email": "hatemmo186@gmail.com"
+    },
+    "Tarek": {
+      "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+      "full_name": "Tarek Wazzan",
+      "email": "tarek.wazzan@tanseeq.com"
+    },
+    "Hesham": {
+      "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+      "full_name": "Hesham",
+      "email": "hesham@tanseeq.com"
+    }
+  },
+  "exception_configurations": {
+    "Hatem": {
+      "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+      "expected_type": "exempt",
+      "actual_type": "exempt",
+      "matches": true
+    },
+    "Tarek": {
+      "user_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+      "expected_type": "flex",
+      "actual_type": "flex",
+      "matches": true
+    },
+    "Hesham": {
+      "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+      "expected_type": "partial-flex",
+      "actual_type": "partial-flex",
+      "matches": true
+    }
+  },
+  "monthly_calculation_results": {},
+  "validation_results": {},
+  "overall_status": "PASS"
+}
