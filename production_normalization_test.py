@@ -109,7 +109,11 @@ class ProductionNormalizationTest:
             
             if response.status_code == 200:
                 users_data = response.json()
-                users = users_data.get("users", [])
+                # Handle both array and object response formats
+                if isinstance(users_data, list):
+                    users = users_data
+                else:
+                    users = users_data.get("users", [])
                 print(f"   Found {len(users)} total users")
                 
                 # Fuzzy matching for target employees
