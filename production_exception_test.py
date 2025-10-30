@@ -122,6 +122,11 @@ class ProductionExceptionTester:
             if response.status_code == 200:
                 users = response.json()
                 
+                # Debug: Print all users for analysis
+                print("DEBUG: All users in system:")
+                for user in users:
+                    print(f"  - {user.get('name', 'N/A')} (ID: {user.get('id', 'N/A')}, Email: {user.get('email', 'N/A')})")
+                
                 # Fuzzy name search for target users
                 found_users = {}
                 for user in users:
@@ -136,9 +141,8 @@ class ProductionExceptionTester:
                             "email": user.get("email")
                         }
                     
-                    # Check for Tarek/Tariq with Alwazan/Wazzan
-                    elif any(name in user_name for name in ["tarek", "tariq"]) and \
-                         any(surname in user_name for surname in ["alwazan", "wazzan"]):
+                    # Check for Tarek/Tariq (more flexible matching)
+                    elif any(name in user_name for name in ["tarek", "tariq"]):
                         key = "Tarek" if "tarek" in user_name else "Tariq"
                         found_users[key] = {
                             "user_id": user_id,
