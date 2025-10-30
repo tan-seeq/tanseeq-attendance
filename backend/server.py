@@ -3449,47 +3449,7 @@ async def upsert_exception(user_id: str, req: ExceptionUpsertRequest, current_us
         pass
     return {"success": True, "message": "Exception saved"}
 
-@api_router.put("/attendance/config")
-async def update_attendance_config(
-    config_data: dict,
-    current_user: User = Depends(get_super_admin_user)
-):
-    """تحديث إعدادات نظام الحضور"""
-    
-    # الحصول على الإعدادات الحالية أو إنشاء جديدة
-    existing_config = await db.attendance_config.find_one({})
-    
-    if existing_config:
-        config = AttendanceSystemConfig(**parse_from_mongo(existing_config))
-        # تحديث الحقول المتاحة
-        for field, value in config_data.items():
-            if hasattr(config, field):
-                setattr(config, field, value)
-    else:
-        config = AttendanceSystemConfig(**config_data)
-    
-    config.updated_by = current_user.id
-    config.updated_at = datetime.now(timezone.utc)
-    
-    # حفظ الإعدادات
-    config_dict = prepare_for_mongo(config.dict())
-    await db.attendance_config.replace_one({}, config_dict, upsert=True)
-    
-    # إعادة تحميل إعدادات المحرك
-    await attendance_engine._load_system_config()
-    
-    # تسجيل النشاط
-    await log_activity(
-        current_user.id,
-        "attendance_config_updated",
-        "تحديث إعدادات نظام الحضور"
-    )
-    
-    return {
-        "success": True,
-        "message": "تم تحديث إعدادات الحضور بنجاح",
-        "config": config.dict()
-    }
+# Removed duplicate update_attendance_config function
 
 # ====================
 # SCHEDULED TASKS API
