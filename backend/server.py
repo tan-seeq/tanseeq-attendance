@@ -3376,6 +3376,36 @@ async def create_system_notification(
 
 @api_router.get("/attendance/config")
 async def get_attendance_config(
+    current_user: User = Depends(get_super_admin_user)
+):
+    """الحصول على إعدادات نظام الحضور"""
+    config_doc = await db.attendance_config.find_one({})
+    if config_doc:
+        config = AttendanceSystemConfig(**parse_from_mongo(config_doc))
+        return {"config": config.dict()}
+    else:
+        default_config = AttendanceSystemConfig()
+        return {"config": default_config.dict()}
+
+@api_router.put("/attendance/config")
+async def update_attendance_config(
+    config_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تحديث إعدادات نظام الحضور"""
+    existing_config = await db.attendance_config.find_one({})
+    if existing_config:
+        config = AttendanceSystemConfig(**parse_from_mongo(existing_config))
+        for field, value in config_data.items():
+            if hasattr(config, field):
+                setattr(config, field, value)
+    else:
+        config = AttendanceSystemConfig(**config_data)
+    config.updated_by = current_user.id
+    config.updated_at = datetime.now(timezone.utc)
+    config_dict = prepare_for_mongo(config.dict())
+    await db.attendance_config.replace_one({}, config_dict, upsert=True)
+    return {"message": "تم تحديث الإعدادات بنجاح"}
 
 # ============ CONFIG EXCEPTIONS ADMIN (Mini) ============
 class ExceptionUpsertRequest(BaseModel):
