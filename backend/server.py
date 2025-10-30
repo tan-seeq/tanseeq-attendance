@@ -3449,19 +3449,6 @@ async def upsert_exception(user_id: str, req: ExceptionUpsertRequest, current_us
         pass
     return {"success": True, "message": "Exception saved"}
 
-    current_user: User = Depends(get_super_admin_user)
-):
-    """الحصول على إعدادات نظام الحضور"""
-    
-    config_doc = await db.attendance_config.find_one({})
-    if config_doc:
-        config = AttendanceSystemConfig(**parse_from_mongo(config_doc))
-        return {"config": config.dict()}
-    else:
-        # إرجاع الإعدادات الافتراضية
-        default_config = AttendanceSystemConfig()
-        return {"config": default_config.dict()}
-
 @api_router.put("/attendance/config")
 async def update_attendance_config(
     config_data: dict,
