@@ -1,0 +1,25 @@
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoYXRlbV90YW5fc2VlcV8wMDEiLCJleHAiOjE3NjE4MDU1Mjl9.VGYN5SYS74RenTQcwmTIM2Z0c1qdvZzUU-f0x-pRDKo",
+  "token_type": "bearer",
+  "user": {
+    "id": "hatem_tan_seeq_001",
+    "name": "\u062d\u0627\u062a\u0645 \u0645\u062d\u0645\u062f",
+    "email": "hatem@tan-seeq.co",
+    "role": "super_admin",
+    "position": "\u0645\u062f\u064a\u0631 \u0639\u0627\u0645",
+    "monthly_salary": 15000.0,
+    "daily_rate": 500.0,
+    "working_hours_start": "08:00",
+    "working_hours_end": "18:00",
+    "phone": "+971501234567",
+    "hire_date": null,
+    "is_active": true,
+    "has_custom_schedule": false,
+    "has_flexible_schedule": true,
+    "flexible_hours_per_day": 8.0,
+    "flexible_start_range": "07:00-11:00",
+    "flexible_end_range": "16:00-20:00",
+    "flexible_core_hours": "10:00-15:00",
+    "flexible_days_per_week": 5
+  }
+}
