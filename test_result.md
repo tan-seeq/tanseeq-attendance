@@ -2192,7 +2192,7 @@ agent_communication:
 
 
 ---
-user_problem_statement: "🚨 BASELINE BACKEND AUDIT: Validate Installment Schedules, Payroll Ledger idempotency/linking, Salary Letters parity, Timezone (Gregorian + Asia/Dubai). Capture defects before fixes."
+user_problem_statement: "Exception Application and Monthly Recalculation Testing for October 2025: Authenticate as Super Admin, find user IDs for Hatem/Tarek/Karim/Hesham, apply exceptions (exempt/flex/partial-flex), verify exceptions list, run monthly recalculation for October 2025, validate deduction expectations."
 backend:
   - task: "Installment schedules endpoints (create/get/list)"
     implemented: true
