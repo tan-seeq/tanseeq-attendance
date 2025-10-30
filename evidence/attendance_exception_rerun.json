@@ -1,0 +1,147 @@
+{
+  "test_execution": {
+    "timestamp": "2025-10-30T06:01:50.663341+00:00",
+    "test_type": "Attendance Exception Rerun Test",
+    "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
+    "super_admin": "hatem@tan-seeq.co"
+  },
+  "summary": {
+    "total_tests": 8,
+    "passed": 7,
+    "failed": 0,
+    "partial": 0,
+    "info": 1,
+    "success_rate": "87.5%"
+  },
+  "target_users": {
+    "Hatem": "exempt",
+    "Tarek": "flex",
+    "Karim": "partial-flex",
+    "Hesham": "partial-flex"
+  },
+  "user_mappings": {
+    "Hatem": {
+      "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+      "name": "Hatem Mohamed",
+      "email": "hatemmo186@gmail.com"
+    },
+    "Tarek": {
+      "user_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+      "name": "Tarek Hegazy",
+      "email": "tarek.hegazy@tanseeq.com"
+    },
+    "Hesham": {
+      "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+      "name": "Hesham",
+      "email": "hesham@tanseeq.com"
+    }
+  },
+  "detailed_results": [
+    {
+      "test": "super_admin_login",
+      "status": "PASS",
+      "details": "✅ Super Admin login successful - حاتم محمد (super_admin)",
+      "response_code": 200
+    },
+    {
+      "test": "get_target_users",
+      "status": "PASS",
+      "details": "✅ Found 3/4 target users: ['Hatem', 'Tarek', 'Hesham']",
+      "response_code": 200,
+      "data": {
+        "Hatem": {
+          "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+          "name": "Hatem Mohamed",
+          "email": "hatemmo186@gmail.com"
+        },
+        "Tarek": {
+          "user_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+          "name": "Tarek Hegazy",
+          "email": "tarek.hegazy@tanseeq.com"
+        },
+        "Hesham": {
+          "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+          "name": "Hesham",
+          "email": "hesham@tanseeq.com"
+        }
+      }
+    },
+    {
+      "test": "set_exception_Hatem",
+      "status": "PASS",
+      "details": "✅ Set Hatem exception to exempt",
+      "response_code": 200,
+      "user_id": "b9e6b469-af5a-4d82-a283-fc16ae2c9a2d",
+      "exception_type": "exempt"
+    },
+    {
+      "test": "set_exception_Tarek",
+      "status": "PASS",
+      "details": "✅ Set Tarek exception to flex",
+      "response_code": 200,
+      "user_id": "a8ffa08f-dd32-4f17-8fb0-4c1e351aa2d8",
+      "exception_type": "flex"
+    },
+    {
+      "test": "set_exception_Hesham",
+      "status": "PASS",
+      "details": "✅ Set Hesham exception to partial-flex",
+      "response_code": 200,
+      "user_id": "16d4a924-ff1f-401c-b95e-9b57db963d42",
+      "exception_type": "partial-flex"
+    },
+    {
+      "test": "checkin_Hatem",
+      "status": "PASS",
+      "details": "Check-in response validation: ✅ schedule_type: exempt; ✅ late_minutes: 0; ✅ is_late: False",
+      "response_code": 200,
+      "user_name": "Hatem",
+      "exception_type": "exempt",
+      "schedule_type": "exempt",
+      "late_minutes": 0,
+      "is_late": false,
+      "authentication_method": "user_token",
+      "response_data": {
+        "message": "تم تسجيل الحضور بنجاح ✅",
+        "time": "10:01:48",
+        "status": "في الوقت",
+        "is_late": false,
+        "late_minutes": 0,
+        "schedule_type": "exempt"
+      }
+    },
+    {
+      "test": "checkin_Tarek",
+      "status": "PASS",
+      "details": "Check-in response validation: ✅ schedule_type: flexible; ✅ late_minutes: 0; ✅ is_late: False",
+      "response_code": 200,
+      "user_name": "Tarek",
+      "exception_type": "flex",
+      "schedule_type": "flexible",
+      "late_minutes": 0,
+      "is_late": false,
+      "authentication_method": "admin_impersonation",
+      "response_data": {
+        "message": "تم تسجيل الحضور بنجاح ✅",
+        "time": "10:01:49",
+        "status": "في الوقت",
+        "is_late": false,
+        "late_minutes": 0,
+        "schedule_type": "flexible"
+      }
+    },
+    {
+      "test": "checkin_Hesham",
+      "status": "INFO",
+      "details": "ℹ️ Already checked in today: {\"detail\":\"تم تسجيل الحضور مسبقاً اليوم\"}",
+      "response_code": 400,
+      "user_name": "Hesham",
+      "exception_type": "partial-flex"
+    }
+  ],
+  "conclusions": [
+    "✅ All critical tests passed - attendance exception system working correctly",
+    "📍 Check-in functionality: 3/3 users successful",
+    "⚙️ Exception configuration: 3/3 users configured"
+  ]
+}
