@@ -1,0 +1,3 @@
+{
+  "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attendance-pro-43.preview.emergentagent.com/api/config/exceptions/16d4a924-ff1f-401c-b95e-9b57db963d42'"
+}

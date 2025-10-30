@@ -1,0 +1,25 @@
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJoYXRlbV90YW5fc2VlcV8wMDEiLCJleHAiOjE3NjE4MDU1ODd9.cmgU7E_ZBjIsc8VV3og6X4MX94nXzhoJM2PF06uEUcs",
+  "token_type": "bearer",
+  "user": {
+    "id": "hatem_tan_seeq_001",
+    "name": "حاتم محمد",
+    "email": "hatem@tan-seeq.co",
+    "role": "super_admin",
+    "position": "مدير عام",
+    "monthly_salary": 15000.0,
+    "daily_rate": 500.0,
+    "working_hours_start": "08:00",
+    "working_hours_end": "18:00",
+    "phone": "+971501234567",
+    "hire_date": null,
+    "is_active": true,
+    "has_custom_schedule": false,
+    "has_flexible_schedule": true,
+    "flexible_hours_per_day": 8.0,
+    "flexible_start_range": "07:00-11:00",
+    "flexible_end_range": "16:00-20:00",
+    "flexible_core_hours": "10:00-15:00",
+    "flexible_days_per_week": 5
+  }
+}
