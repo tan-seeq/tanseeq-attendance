@@ -3859,6 +3859,23 @@ async def void_deduction(
         # Find existing deduction
         existing = await db.payroll_deductions.find_one({"id": deduction_id})
         if not existing:
+
+@api_router.get("/attendance")
+async def list_my_attendance(current_user: User = Depends(get_current_user)):
+    """Return current user's attendance records (last 60 days)"""
+    try:
+        end = get_uae_time().date()
+        start = end - timedelta(days=60)
+        docs = await db.attendance.find({
+            "user_id": current_user.id,
+            "date": {"$gte": start.isoformat(), "$lte": end.isoformat()}
+        }).sort("date", -1).to_list(200)
+        for d in docs:
+            d.pop("_id", None)
+        return docs
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
             raise HTTPException(status_code=404, detail="Deduction not found")
         
         if existing.get("is_voided", False):
