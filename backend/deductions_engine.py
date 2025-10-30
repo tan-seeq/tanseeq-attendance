@@ -312,6 +312,16 @@ async def calculate_employee_deductions(
         except Exception:
             working_hours = None
 
+        # Fully exempt employee: absolutely no deductions of any kind
+        if exc_type == 'exempt':
+            detail = DailyDeductionDetail(date=ds, check_in=check_in, check_out=check_out)
+            detail.rule_applied = "Exempt (no deductions)"
+            detail.note = "معفي من جميع الخصومات"
+            # treat holidays/leaves as normal present for counters
+            summary.days_present += 1
+            summary.daily_records.append(detail)
+            continue
+
         # Flexible employees: only absence is deducted
         if exc_type == 'flex':
             detail = DailyDeductionDetail(date=ds, check_in=check_in, check_out=check_out)
