@@ -255,7 +255,15 @@ class ProductionExceptionTester:
             response = self.session.get(f"{BASE_URL}/config/exceptions", timeout=30)
             
             if response.status_code == 200:
-                exceptions = response.json()
+                exceptions_data = response.json()
+                
+                # Handle different response formats
+                if isinstance(exceptions_data, dict):
+                    exceptions = exceptions_data.get("exceptions", [])
+                elif isinstance(exceptions_data, list):
+                    exceptions = exceptions_data
+                else:
+                    exceptions = []
                 
                 # Verify our four entries exist with correct types
                 verified_exceptions = {}
@@ -266,7 +274,7 @@ class ProductionExceptionTester:
                     # Find exception for this user
                     found_exception = None
                     for exc in exceptions:
-                        if exc.get("user_id") == user_id:
+                        if isinstance(exc, dict) and exc.get("user_id") == user_id:
                             found_exception = exc
                             break
                     
