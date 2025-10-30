@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://hrapp-tanseeq-replaced-1761028071.emergent.host/api"
+BASE_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
 SUPER_ADMIN_CREDENTIALS = {
     "email": "hatem@tan-seeq.co",
     "password": "hatem123"
