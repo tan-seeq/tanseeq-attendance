@@ -362,22 +362,23 @@ async def calculate_employee_deductions(
         # - No overtime credit for early arrivals
         # - No early-leave or under-hours deductions (free to leave at 17:00 or 18:00)
         # - Lateness counted starting strictly after 09:00 with NO grace minutes
-        if exc_type == 'partial-flex' and not detail.is_absent and not detail.is_public_holiday and not detail.is_on_leave:
+        # - NEVER escalate lateness to half/full-day for partial-flex (late-only policy)
+        if exc_type == 'partial-flex' and not detail.is_public_holiday and not detail.is_on_leave:
             # Recompute lateness strictly vs 09:00 without grace
             ci = _parse_time_safe(detail.check_in)
             if ci and ci > WORKING_HOURS_START:
                 late_only_minutes = int((datetime.combine(wd, ci) - datetime.combine(wd, WORKING_HOURS_START)).total_seconds() / 60)
             else:
                 late_only_minutes = 0
-            # keep half/full-day thresholds if hit by base logic
-            if not (detail.rule_applied.startswith("1-2h Late") or detail.rule_applied.startswith(">2h Late")):
-                detail.grace_applied = False
-                detail.early_leave_minutes = 0
-                detail.under_hours_minutes = 0
-                detail.late_minutes = late_only_minutes
-                detail.deductible_minutes = late_only_minutes
-                detail.deduction_amount = round((late_only_minutes / 60) * hourly_rate, 2)
-                detail.rule_applied = "Partial-Flex: Lateness Only (no grace)"
+            # Force late-only behavior regardless of any prior rule
+            detail.is_absent = False
+            detail.grace_applied = False
+            detail.early_leave_minutes = 0
+            detail.under_hours_minutes = 0
+            detail.late_minutes = late_only_minutes
+            detail.deductible_minutes = late_only_minutes
+            detail.deduction_amount = round((late_only_minutes / 60) * hourly_rate, 2)
+            detail.rule_applied = "Partial-Flex: Lateness Only (no grace)"
 
         # grace tracker
         if detail.late_minutes > 0 and detail.late_minutes <= GRACE_MIN and detail.grace_applied:
