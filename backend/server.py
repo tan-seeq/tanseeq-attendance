@@ -137,16 +137,26 @@ from db_client import get_db, get_client
 
 # Create a proxy class that initializes DB on first access
 class LazyDB:
-    """Lazy DB proxy that initializes MongoDB connection on first attribute access"""
+    """Lazy DB proxy that initializes MongoDB connection on first attribute access
+    and supports both attribute access (db.collection) and item access (db["collection"]).
+    """
     def __init__(self):
         self._db = None
         self._client = None
     
-    def __getattr__(self, name):
+    def _ensure(self):
         if self._db is None:
             self._db = get_db()
             self._client = get_client()
-        return getattr(self._db, name)
+        return self._db
+    
+    def __getattr__(self, name):
+        db = self._ensure()
+        return getattr(db, name)
+    
+    def __getitem__(self, key):
+        db = self._ensure()
+        return db[key]
     
     def __bool__(self):
         # Make sure truthiness works
