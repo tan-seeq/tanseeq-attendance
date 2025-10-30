@@ -333,26 +333,51 @@ class ProductionExceptionTester:
             if response.status_code == 200:
                 calculation_results = response.json()
                 
-                # Extract data for our four target users
+                # Debug: Print the raw response structure
+                print(f"DEBUG: Raw calculation response type: {type(calculation_results)}")
+                if isinstance(calculation_results, dict):
+                    print(f"DEBUG: Response keys: {list(calculation_results.keys())}")
+                elif isinstance(calculation_results, list):
+                    print(f"DEBUG: Response list length: {len(calculation_results)}")
+                    if len(calculation_results) > 0:
+                        print(f"DEBUG: First item keys: {list(calculation_results[0].keys()) if isinstance(calculation_results[0], dict) else 'Not a dict'}")
+                
+                # Extract data for our target users
                 user_results = {}
+                results_list = []
+                
+                # Normalize the response to a list
+                if isinstance(calculation_results, list):
+                    results_list = calculation_results
+                elif isinstance(calculation_results, dict):
+                    # Check common response patterns
+                    if "results" in calculation_results:
+                        results_list = calculation_results["results"]
+                    elif "deductions" in calculation_results:
+                        results_list = calculation_results["deductions"]
+                    elif "employees" in calculation_results:
+                        results_list = calculation_results["employees"]
+                    else:
+                        # Try to find any list in the response
+                        for key, value in calculation_results.items():
+                            if isinstance(value, list) and len(value) > 0:
+                                results_list = value
+                                break
+                
+                print(f"DEBUG: Normalized results list length: {len(results_list)}")
+                
                 for user_key, user_info in self.user_mappings.items():
                     user_id = user_info["user_id"]
                     
                     # Find this user's results in the calculation
                     user_result = None
-                    if isinstance(calculation_results, list):
-                        for result in calculation_results:
-                            if result.get("user_id") == user_id:
+                    for result in results_list:
+                        if isinstance(result, dict):
+                            # Try different possible user ID fields
+                            result_user_id = result.get("user_id") or result.get("employee_id") or result.get("id")
+                            if result_user_id == user_id:
                                 user_result = result
                                 break
-                    elif isinstance(calculation_results, dict):
-                        # Check if results are nested
-                        for key, value in calculation_results.items():
-                            if isinstance(value, list):
-                                for result in value:
-                                    if result.get("user_id") == user_id:
-                                        user_result = result
-                                        break
                     
                     if user_result:
                         user_results[user_key] = {
@@ -366,7 +391,11 @@ class ProductionExceptionTester:
                             "total_late_minutes": user_result.get("total_late_minutes", 0),
                             "raw_result": user_result
                         }
+                    else:
+                        print(f"DEBUG: No result found for {user_key} (ID: {user_id})")
                 
+                # Store raw response for debugging
+                self.test_results["raw_calculation_response"] = calculation_results
                 self.test_results["monthly_calculation_results"] = user_results
                 
                 self.log_step(
