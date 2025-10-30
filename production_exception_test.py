@@ -150,8 +150,8 @@ class ProductionExceptionTester:
                             "email": user.get("email")
                         }
                     
-                    # Check for Karim
-                    elif "karim" in user_name:
+                    # Check for Karim/Kareem
+                    elif "karim" in user_name or "kareem" in user_name:
                         found_users["Karim"] = {
                             "user_id": user_id,
                             "full_name": user.get("name"),
