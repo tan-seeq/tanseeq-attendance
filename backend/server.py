@@ -3880,62 +3880,6 @@ async def list_my_attendance(current_user: User = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-            raise HTTPException(status_code=404, detail="Deduction not found")
-        
-        if existing.get("is_voided", False):
-            raise HTTPException(status_code=400, detail="Deduction already voided")
-        
-        void_reason = void_data.get("reason", "إلغاء إداري")
-        
-        # Mark as voided
-        void_fields = {
-            "is_voided": True,
-            "voided_by": current_user.id,
-            "voided_at": datetime.now().isoformat(),
-            "void_reason": void_reason
-        }
-        
-        result = await db.payroll_deductions.update_one(
-            {"id": deduction_id},
-            {"$set": void_fields}
-        )
-        
-        
-        if result.modified_count == 0:
-            raise HTTPException(status_code=404, detail="Deduction not found")
-        
-        # Log activity (simplified for now)
-        await db.activity_logs.insert_one({
-            "id": str(uuid.uuid4()),
-            "user_id": current_user.id if hasattr(current_user, 'id') else current_user.id,
-            "user_name": current_user.name if hasattr(current_user, 'name') else current_user.name,
-            "action": f"Voided deduction {deduction_id}",
-            "details": f"Reason: {void_reason}",
-            "timestamp": datetime.now().isoformat()
-        })
-        
-        # Send notification
-        notification = {
-            "id": str(uuid.uuid4()),
-            "title": "إلغاء خصم من الراتب",
-            "message": f"تم إلغاء خصم بمبلغ {existing.get('amount', 0)} درهم. السبب: {void_reason}",
-            "severity": "important",
-            "category": "deduction",
-            "user_id": existing["employee_id"],
-            "sender": current_user.name,
-            "is_read": False,
-            "sent_at": datetime.now().isoformat(),
-            "created_at": datetime.now().isoformat()
-        }
-        await db.notifications.insert_one(notification)
-        
-        return {"message": "Deduction voided successfully"}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error voiding deduction: {str(e)}")
-
 @app.get("/api/attendance/stats/{employee_id}")
 async def get_attendance_stats(
     employee_id: str,
