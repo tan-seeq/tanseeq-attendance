@@ -1,0 +1,170 @@
+{
+  "test_name": "Comprehensive Live Streaming Test - Local vs Production",
+  "timestamp": "2025-11-02T09:56:01.775889",
+  "environments": {
+    "local": {
+      "base_url": "http://localhost:8001/api",
+      "authentication": {
+        "status_code": 200,
+        "success": true,
+        "response_size": 679,
+        "token_received": true,
+        "user_info": {
+          "id": "admin_001",
+          "name": "مدير النظام",
+          "email": "admin@tanseeq.com",
+          "role": "super_admin",
+          "position": "مدير",
+          "monthly_salary": 15000.0,
+          "daily_rate": 500.0,
+          "working_hours_start": "08:00",
+          "working_hours_end": "18:00",
+          "phone": "+971501234567",
+          "hire_date": null,
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": true,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-11:00",
+          "flexible_end_range": "16:00-20:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        }
+      },
+      "endpoint_availability": {
+        "/live/logs": {
+          "method": "GET",
+          "status_code": 200,
+          "available": true,
+          "response_size": 1291
+        },
+        "/live/metrics": {
+          "method": "GET",
+          "status_code": 200,
+          "available": true,
+          "response_size": 2319
+        },
+        "/live/progress/frontend": {
+          "method": "POST",
+          "status_code": 200,
+          "available": true,
+          "response_size": 16
+        }
+      },
+      "progress_streaming": {
+        "messages": [
+          {
+            "sequence": 1,
+            "message": "START: Frontend audit initiated",
+            "status_code": 200,
+            "success": true
+          },
+          {
+            "sequence": 2,
+            "message": "STEP 1: Login page reached",
+            "status_code": 200,
+            "success": true
+          },
+          {
+            "sequence": 3,
+            "message": "STEP 2: Dashboard loaded after login",
+            "status_code": 200,
+            "success": true
+          }
+        ],
+        "success_count": 3,
+        "total_messages": 3
+      },
+      "logs_verification": {
+        "status_code": 200,
+        "success": true,
+        "response_size": 1716,
+        "total_lines": 24,
+        "last_5_lines": [
+          "2025-11-02T09:56:02.064636 GET /api/live/metrics 200 2.34ms\n",
+          "2025-11-02T09:56:02.109815 POST /api/live/progress/frontend 200 2.45ms\n",
+          "2025-11-02T09:56:02.154974 POST /api/live/progress/frontend 200 2.51ms\n",
+          "2025-11-02T09:56:02.199771 POST /api/live/progress/frontend 200 2.41ms\n",
+          "2025-11-02T09:56:02.244902 POST /api/live/progress/frontend 200 2.56ms\n"
+        ]
+      }
+    },
+    "production": {
+      "base_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api",
+      "authentication": {
+        "status_code": 200,
+        "success": true,
+        "response_size": 741,
+        "token_received": true,
+        "user_info": {
+          "id": "831df8dc-ae8d-45ab-b2b6-4d1dc82a3289",
+          "name": "Admin QA",
+          "email": "admin@tanseeq.com",
+          "role": "super_admin",
+          "position": "QA Super Admin",
+          "monthly_salary": 0.0,
+          "daily_rate": 0.0,
+          "working_hours_start": "09:00",
+          "working_hours_end": "18:00",
+          "phone": "",
+          "hire_date": "2025-10-29T07:30:23.833000",
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": false,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-10:00",
+          "flexible_end_range": "16:00-19:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        }
+      },
+      "endpoint_availability": {
+        "/live/logs": {
+          "method": "GET",
+          "status_code": 404,
+          "available": false,
+          "response_size": 22
+        },
+        "/live/metrics": {
+          "method": "GET",
+          "status_code": 404,
+          "available": false,
+          "response_size": 22
+        },
+        "/live/progress/frontend": {
+          "method": "POST",
+          "status_code": 404,
+          "available": false,
+          "response_size": 22
+        }
+      },
+      "progress_streaming": {
+        "skipped": "Endpoint not available"
+      },
+      "logs_verification": {
+        "skipped": "Endpoint not available"
+      }
+    }
+  },
+  "summary": {
+    "local_environment": {
+      "authentication_success": true,
+      "endpoints_available": 3,
+      "total_endpoints": 3,
+      "progress_streaming_success": 3,
+      "logs_verification_success": true
+    },
+    "production_environment": {
+      "authentication_success": true,
+      "endpoints_available": 0,
+      "total_endpoints": 3,
+      "progress_streaming_success": 0,
+      "logs_verification_success": false
+    },
+    "deployment_status": {
+      "local_fully_functional": true,
+      "production_has_live_endpoints": false,
+      "deployment_issue": true
+    }
+  }
+}
