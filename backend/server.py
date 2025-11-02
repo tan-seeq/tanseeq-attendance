@@ -1138,27 +1138,44 @@ async def check_out(current_user: User = Depends(get_current_user)):
 
 @api_router.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
-    """User login"""
-    user = await db.users.find_one({"email": request.email})
-    if not user or not verify_password(request.password, user["password"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
-        
-    
-    if not user["is_active"]:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Account is inactive"
-        )
-        
-    
+    """User login (email is case-insensitive; trims whitespace)"""
+    import re
+    email_input = (request.email or "").strip()
+    password_input = request.password or ""
+
+    # Case-insensitive lookup on email to avoid mobile keyboard case issues
+    user = await db.users.find_one({
+        "email": {"$regex": f"^{re.escape(email_input)}$", "$options": "i"}
+    })
+
+    # If not found, try lower-cased value as exact match (legacy stored lower-case)
+    if not user and email_input:
+        user = await db.users.find_one({"email": email_input.lower()})
+
+    # Validate
+    if not user:
+        # log attempt without revealing which part failed
+        try:
+            await log_activity("anonymous", "login_failed", f"email_not_found:{email_input}")
+        except Exception:
+            pass
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    if not user.get("password") or not verify_password(password_input, user["password"]):
+        try:
+            await log_activity(user.get("id", "unknown"), "login_failed", "bad_password")
+        except Exception:
+            pass
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is inactive")
+
     access_token = create_access_token(data={"sub": user["id"]})
     user_response = UserResponse(**user)
-    
+
     await log_activity(user["id"], "login", f"User {user['email']} logged in")
-    
+
     return LoginResponse(access_token=access_token, user=user_response)
 
 @api_router.post("/auth/logout")
