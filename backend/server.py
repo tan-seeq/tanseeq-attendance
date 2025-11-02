@@ -114,6 +114,10 @@ async def get_live_logs(current_user: User = Depends(get_super_admin_user)):
 async def post_progress(channel: str, payload: dict, current_user: User = Depends(get_super_admin_user)):
     if channel not in ("backend", "frontend"):
         raise HTTPException(status_code=400, detail="channel must be backend|frontend")
+# ========================================
+# Live monitoring additions (after app is defined)
+# ========================================
+
     line = f"{datetime.now().isoformat()} [{channel}] {payload.get('message','')}\n"
     with open(os.path.join(LIVE_DIR, f"progress_{channel}.log"), "a", encoding="utf-8") as f:
         f.write(line)
