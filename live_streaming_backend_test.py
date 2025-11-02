@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api"
+BASE_URL = "http://localhost:8001/api"
 EVIDENCE_DIR = "/app/evidence/live"
 EVIDENCE_FILE = "/app/evidence/live/frontend_progress_init.json"
 
