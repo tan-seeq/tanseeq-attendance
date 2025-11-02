@@ -39,6 +39,9 @@ const AdminDashboard = () => {
   const [approving, setApproving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showRepayModal, setShowRepayModal] = useState(false);
+  const [repayForm, setRepayForm] = useState({ amount: '', repayment_date: new Date().toISOString().split('T')[0], method: '', reference: '', notes: '' });
+
 
   // Create advance/custody form
   const [createForm, setCreateForm] = useState({
