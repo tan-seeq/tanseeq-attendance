@@ -79,12 +79,69 @@ def _lower(s: str) -> str:
 def _parse_time_safe(ts: Optional[str]) -> Optional[time]:
     if not ts:
         return None
-    s = ts.strip()
+    s = str(ts).strip()
     for fmt in ("%H:%M:%S", "%H:%M"):
         try:
             return datetime.strptime(s, fmt).time()
         except Exception:
             continue
+    return None
+
+ARABIC_DIGITS = {
+    "٠":"0","١":"1","٢":"2","٣":"3","٤":"4",
+    "٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"
+}
+
+def _to_western_digits(s: str) -> str:
+    return "".join(ARABIC_DIGITS.get(ch, ch) for ch in s)
+
+def _parse_working_hours_hours(val) -> Optional[float]:
+    """Parse working hours from various formats to float hours.
+    Accepts:
+    - number (int/float) -> hours
+    - string "9.5", "hrs 9.5",
+    - string "09:30" -> 9.5
+    - Arabic numerals mixed with text
+    Returns float hours or None.
+    """
+    if val is None:
+        return None
+    # numeric directly
+    if isinstance(val, (int, float)):
+        try:
+            return float(val)
+        except Exception:
+            return None
+    # strings
+    s = _to_western_digits(str(val).strip().lower())
+    # HH:MM
+    if ":" in s:
+        parts = s.split(":")
+        try:
+            h = int(''.join(ch for ch in parts[0] if ch.isdigit()))
+            m = int(''.join(ch for ch in parts[1] if ch.isdigit()))
+            if m >= 60:
+                m = m % 60
+            return h + (m / 60.0)
+        except Exception:
+            pass
+    # extract first float number pattern
+    num = []
+    dot_seen = False
+    for ch in s:
+        if ch.isdigit():
+            num.append(ch)
+        elif ch == '.' and not dot_seen:
+            num.append('.')
+            dot_seen = True
+        else:
+            # ignore other characters
+            continue
+    try:
+        if num:
+            return float(''.join(num))
+    except Exception:
+        return None
     return None
 
 def get_cycle_dates(month: int, year: int) -> tuple[date, date]:
