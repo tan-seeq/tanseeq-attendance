@@ -3078,10 +3078,12 @@ async def calculate_monthly_deductions_endpoint(
             "mode": "monthly",
             "month": month,
             "cycle_window": {
-                "from": start_date.isoformat(),
-                "to": end_date.isoformat(),
-                "description": f"دورة شهرية: 29 {calendar.month_name[start_date.month]} إلى 28 {calendar.month_name[end_date.month]}"
+                "from": cycle_start.isoformat(),
+                "to": cycle_end.isoformat(),
+                "description": f"دورة شهرية: 29 {calendar.month_name[cycle_start.month]} إلى 28 {calendar.month_name[cycle_end.month]}"
             },
+            # Backward compatibility: keep 'employees' but primary key is 'summaries'
+            "summaries": results,
             "employees": results,
             "total_deductions": round(total_deductions, 2),
             "employee_count": len(results),
