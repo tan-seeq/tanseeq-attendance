@@ -2054,6 +2054,9 @@ async def delete_advance_transaction(
         "success": True,
         "message": "تم حذف المعاملة بنجاح",
         "transaction_id": transaction_id
+    }
+
+
 
 @api_router.post("/advances/repay")
 async def repay_advance(
