@@ -3069,7 +3069,8 @@ async def calculate_monthly_deductions_endpoint(
                     "deduction_details": deduction_details,
                     "late_count": late_count,
                     "absence_count": absence_count,
-                    "daily_breakdown": daily_breakdown  # ✅ Full daily details
+                    "daily_breakdown": daily_breakdown,
+                    "daily_records": daily_breakdown  # ✅ Also expose as daily_records for UI compatibility
                 })
                 total_deductions += total_employee_deduction
         
