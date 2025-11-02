@@ -1,0 +1,14 @@
+{
+  "test_name": "Comprehensive Frontend Audit - Tanseeq HR",
+  "timestamp": "2025-11-02T05:26:31.336177",
+  "environment": "Production UI",
+  "url": "https://attendance-pro-43.preview.emergentagent.com",
+  "tests": [],
+  "screenshots": [
+    "01_login_page.png"
+  ],
+  "performance": {},
+  "ui_issues": [],
+  "findings": [],
+  "critical_error": "object Locator can't be used in 'await' expression"
+}
