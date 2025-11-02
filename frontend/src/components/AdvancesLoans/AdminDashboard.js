@@ -383,7 +383,7 @@ const AdminDashboard = () => {
           const firstUser = data.allBalances[0];
           if (!firstUser) { return alert('لا يوجد موظفون لديهم أرصدة مسجلة'); }
           setSelectedTransaction({ employee_id: firstUser.employee_id, employee_name: firstUser.employee_name });
-          setRepayForm({ amount: '', repayment_date: new Date().toISOString().split('T')[0], method: '', reference: '', notes: '' });
+          setRepayForm({ employee_id: firstUser.employee_id, amount: '', repayment_date: new Date().toISOString().split('T')[0], method: 'cash', reference: '', notes: '', salary_month: '' });
           setShowRepayModal(true);
         }}
         className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
