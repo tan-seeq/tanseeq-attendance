@@ -1,11 +1,11 @@
 {
-  "audit_timestamp": "2025-11-02T07:51:04.231252",
+  "audit_timestamp": "2025-11-02T07:51:33.837654",
   "base_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api",
   "health_checks": {
     "healthz": {
       "status": "PASS",
       "status_code": 200,
-      "latency_ms": 162.12,
+      "latency_ms": 74.7,
       "response": {
         "status": "ok"
       }
@@ -13,7 +13,7 @@
     "readyz": {
       "status": "PASS",
       "status_code": 200,
-      "latency_ms": 57.39,
+      "latency_ms": 70.85,
       "response": {
         "status": "ready"
       }
@@ -62,53 +62,101 @@
   "october_calculations": {},
   "november_calculations": {},
   "summary": {
-    "overall_status": "FAIL",
+    "overall_status": "PASS",
     "employee_results": {
       "hatem": {
         "2025-10": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          },
           "issues": []
         },
         "2025-11": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          },
           "issues": []
         }
       },
       "tarek": {
         "2025-10": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          },
           "issues": []
         },
         "2025-11": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          },
           "issues": []
         }
       },
       "karim": {
         "2025-10": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 3.46,
+            "late_deduction": 3.46,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 22
+          },
           "issues": []
         },
         "2025-11": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          },
           "issues": []
         }
       },
       "hesham": {
         "2025-10": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 85.62,
+            "late_deduction": 85.62,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 590
+          },
           "issues": []
         },
         "2025-11": {
-          "status": "FAIL",
-          "metrics": {},
+          "status": "PASS",
+          "metrics": {
+            "total_deduction": 4.36,
+            "late_deduction": 4.36,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 30
+          },
           "issues": []
         }
       }
@@ -4310,20 +4358,48 @@
       },
       "validations": {
         "hatem": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          }
         },
         "tarek": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          }
         },
         "karim": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 3.46,
+            "late_deduction": 3.46,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 22
+          }
         },
         "hesham": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 85.62,
+            "late_deduction": 85.62,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 590
+          }
         }
       }
     }
@@ -8511,20 +8587,48 @@
       },
       "validations": {
         "hatem": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          }
         },
         "tarek": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          }
         },
         "karim": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 0.0,
+            "late_deduction": 0.0,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 0
+          }
         },
         "hesham": {
-          "status": "FAIL",
-          "reason": "User not found in calculation results"
+          "status": "PASS",
+          "issues": [],
+          "metrics": {
+            "total_deduction": 4.36,
+            "late_deduction": 4.36,
+            "absence_deduction": 0.0,
+            "days_absent": 0,
+            "total_late_minutes": 30
+          }
         }
       }
     }
