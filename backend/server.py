@@ -1087,6 +1087,7 @@ from advances_model import (
     AdvanceTransaction, CreateAdvanceRequest, CreateExpenseRequest, ApprovalRequest,
     TransactionResponse, BalanceResponse, AdvancesDB, EmployeeBalance,
     TransactionType, TransactionStatus, ExpenseCategory, Attachment,
+    RepaymentRequest,
     TRANSACTION_TYPE_AR, TRANSACTION_STATUS_AR, EXPENSE_CATEGORY_AR
 )
 
