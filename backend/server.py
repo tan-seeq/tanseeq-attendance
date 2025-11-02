@@ -350,6 +350,40 @@ app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
 # Create router with /api prefix
 api_router = APIRouter(prefix="/api")
 
+# ========================================
+# LIVE MONITORING ENDPOINTS
+# ========================================
+
+@api_router.get("/live/metrics")
+async def get_live_metrics(current_user: User = Depends(get_super_admin_user)):
+    """Get live metrics - Super Admin only"""
+    snap = await live_stats.snapshot()
+    return {"success": True, "metrics": snap}
+
+@api_router.get("/live/logs")
+async def get_live_logs(current_user: User = Depends(get_super_admin_user)):
+    """Get live logs - Super Admin only"""
+    logs_path = os.path.join(LIVE_DIR, "api_requests.log")
+    if not os.path.exists(logs_path):
+        return {"success": True, "lines": []}
+    try:
+        with open(logs_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()[-200:]
+        return {"success": True, "lines": lines}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/live/progress/{channel}")
+async def post_progress(channel: str, payload: dict, current_user: User = Depends(get_super_admin_user)):
+    """Post progress to live channel - Super Admin only"""
+    if channel not in ("backend", "frontend"):
+        raise HTTPException(status_code=400, detail="channel must be backend|frontend")
+    
+    line = f"{datetime.now().isoformat()} [{channel}] {payload.get('message','')}\n"
+    with open(os.path.join(LIVE_DIR, f"progress_{channel}.log"), "a", encoding="utf-8") as f:
+        f.write(line)
+    return {"success": True}
+
 # UAE timezone
 UAE_TZ = pytz.timezone('Asia/Dubai')
 
