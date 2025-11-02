@@ -205,19 +205,27 @@ class ProductionAudit:
     def validate_user_deductions(self, user_key, user_data, month_data, month):
         """Validate deductions per user type with business rules"""
         
-        if user_key not in month_data:
+        # Find user in summaries array by user_id
+        user_id = user_data.get("user_id")
+        user_calc = None
+        
+        summaries = month_data.get("summaries", [])
+        for summary in summaries:
+            if summary.get("employee_id") == user_id:
+                user_calc = summary
+                break
+                
+        if not user_calc:
             return {
                 "status": "FAIL",
                 "reason": "User not found in calculation results"
             }
             
-        user_calc = month_data[user_key]
-        
         # Extract key metrics
         total_deduction = user_calc.get("total_deduction", 0)
         late_deduction = user_calc.get("late_deduction", 0)
         absence_deduction = user_calc.get("absence_deduction", 0)
-        days_absent = user_calc.get("days_absent", 0)
+        days_absent = user_calc.get("absence_count", 0)
         total_late_minutes = user_calc.get("total_late_minutes", 0)
         
         issues = []
