@@ -364,10 +364,7 @@ async def calculate_employee_deductions(
         check_in = rec.get("check_in") if rec else None
         check_out = rec.get("check_out") if rec else None
         wh_val = rec.get("working_hours") if rec else None
-        try:
-            working_hours = float(wh_val) if wh_val is not None else None
-        except Exception:
-            working_hours = None
+        working_hours = _parse_working_hours_hours(wh_val)
 
         # Fully exempt employee: absolutely no deductions of any kind
         if exc_type == 'exempt':
