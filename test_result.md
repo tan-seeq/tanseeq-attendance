@@ -2278,6 +2278,17 @@ backend:
     stuck_count: 0
     priority: "high"
     needs_retesting: true
+  - task: "Live streaming frontend audit progress endpoints"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "🚨 CRITICAL DEPLOYMENT ISSUE - LIVE STREAMING ENDPOINTS NOT DEPLOYED TO PRODUCTION: Successfully tested live streaming functionality with comprehensive results. LOCAL ENVIRONMENT SUCCESS: ✅ All endpoints working perfectly (GET /api/live/logs, GET /api/live/metrics, POST /api/live/progress/frontend), ✅ Authentication successful (admin@tanseeq.com/ADMIN), ✅ All 10 progress messages posted successfully, ✅ Logs verification working with 24 log lines, ✅ Evidence saved to /app/evidence/live/frontend_progress_init.json. PRODUCTION DEPLOYMENT ISSUE: ❌ All live endpoints return 404 Not Found on production URL (https://hrapp-tanseeq-replaced-1761028017.emergent.host/api), ❌ Production environment not synchronized with latest server.py containing live streaming endpoints. ROOT CAUSE: Deployment synchronization issue - production environment missing updated server.py with live monitoring endpoints. IMMEDIATE ACTION: Deploy updated server.py to production to enable frontend audit progress streaming functionality."
     status_history:
       - working: "NA"
         agent: "main"
