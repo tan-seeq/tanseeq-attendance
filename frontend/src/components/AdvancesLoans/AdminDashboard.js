@@ -861,7 +861,11 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">طريقة السداد</label>
-                    <input type="text" value={repayForm.method} onChange={(e) => setRepayForm({...repayForm, method: e.target.value})} className="w-full px-3 py-2 border rounded-md" placeholder="نقدي / تحويل" />
+                    <select value={repayForm.method} onChange={(e) => setRepayForm({...repayForm, method: e.target.value})} className="w-full px-3 py-2 border rounded-md">
+                      <option value="cash">نقدي</option>
+                      <option value="bank">تحويل بنكي</option>
+                      <option value="salary">خصم من الراتب</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">رقم مرجع</label>
