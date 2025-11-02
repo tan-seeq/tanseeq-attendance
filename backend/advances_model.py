@@ -22,7 +22,7 @@ class TransactionType(str, Enum):
     ADVANCE = "advance"           # سلفة
     CUSTODY = "custody"           # عهدة
     EXPENSE = "expense"           # مصروف
-    RETURN = "return"             # إرجاع
+    RETURN = "return"             # إرجاع (سداد سلفة/عهدة)
     ADJUSTMENT = "adjustment"     # تسوية
     ADVANCE_SETTLEMENT = "advance_settlement"  # تسوية سلفة مع الراتب
 
@@ -134,6 +134,14 @@ class ApprovalRequest(BaseModel):
     status: TransactionStatus
     notes: Optional[str] = None
 
+class RepaymentRequest(BaseModel):
+    employee_id: str
+    amount: float = Field(..., gt=0)
+    repayment_date: Optional[str] = None  # YYYY-MM-DD
+    method: Optional[str] = None          # cash/bank/other
+    reference: Optional[str] = None
+    notes: Optional[str] = None
+
 # Response Models
 class TransactionResponse(BaseModel):
     id: str
@@ -219,7 +227,7 @@ class AdvancesDB:
             del data['_id']
             
         return AdvanceTransaction(**data)
-
+    
     @staticmethod
     async def calculate_employee_balance(db, employee_id: str) -> EmployeeBalance:
         """Calculate employee balance from all transactions"""
@@ -253,32 +261,25 @@ class AdvancesDB:
                 totals["total_custody"] += amount
             elif tx_type == TransactionType.EXPENSE:
                 totals["total_expenses"] += amount
-            elif tx_type == TransactionType.RETURN:
+            elif tx_type == TransactionType.RETURN or tx_type == TransactionType.ADVANCE_SETTLEMENT:
                 totals["total_returns"] += amount
             
             # Track last transaction date
             tx_date = transaction.get("created_at")
             if isinstance(tx_date, str):
                 tx_date = datetime.fromisoformat(tx_date.replace('Z', '+00:00'))
-            if not last_transaction_date or tx_date > last_transaction_date:
+            if not last_transaction_date or (tx_date and tx_date > last_transaction_date):
                 last_transaction_date = tx_date
         
         # Calculate remaining balances according to business rules:
-        # 1. Advances (السُلف) remain intact until settlement (تسوية) with salary
-        # 2. Only expenses marked to be deducted from custody are deducted
-        # 3. Returns are deducted from both advances and custody proportionally
+        # Returns and advance_settlement reduce advances balance
+        adv_and_cust_total = totals["total_advances"] + totals["total_custody"]
+        proportion_adv = (totals["total_advances"] / adv_and_cust_total) if adv_and_cust_total > 0 else 0
+        proportion_cust = (totals["total_custody"] / adv_and_cust_total) if adv_and_cust_total > 0 else 0
         
-        remaining_advance = totals["total_advances"] - totals["total_returns"] * (
-            totals["total_advances"] / (totals["total_advances"] + totals["total_custody"])
-            if (totals["total_advances"] + totals["total_custody"]) > 0 else 0
-        )
-        
-        # For custody, we need to check each expense to see if it's marked for custody deduction
-        # For now, we'll deduct all expenses from custody only (as per user requirement)
-        remaining_custody = totals["total_custody"] - totals["total_expenses"] - totals["total_returns"] * (
-            totals["total_custody"] / (totals["total_advances"] + totals["total_custody"])
-            if (totals["total_advances"] + totals["total_custody"]) > 0 else 0
-        )
+        remaining_advance = totals["total_advances"] - totals["total_returns"] * proportion_adv
+        # For custody, we deduct all expenses and proportional returns
+        remaining_custody = totals["total_custody"] - totals["total_expenses"] - totals["total_returns"] * proportion_cust
         
         # Ensure no negative values
         remaining_advance = max(0, remaining_advance)
