@@ -2022,13 +2022,7 @@ async def delete_advance_transaction(
     if not transaction:
         raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
     
-    # التأكد أن المعاملة لم تتم الموافقة عليها
-    if transaction.get("status") == "approved":
-        raise HTTPException(
-            status_code=400, 
-            detail="لا يمكن حذف معاملة تمت الموافقة عليها. يرجى استخدام خاصية 'التسوية' بدلاً من ذلك"
-        )
-        
+    # ملاحظة: السوبر أدمن مسموح له الحذف حتى لو كانت المعاملة معتمدة
     
     # حذف المعاملة من قاعدة البيانات
     result = await db.advance_transactions.delete_one({"id": transaction_id})
