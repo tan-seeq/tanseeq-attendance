@@ -2054,6 +2054,62 @@ async def delete_advance_transaction(
         "success": True,
         "message": "تم حذف المعاملة بنجاح",
         "transaction_id": transaction_id
+
+@api_router.post("/advances/repay")
+async def repay_advance(
+    req: RepaymentRequest,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تسجيل سداد سُلفة/عُهدة (RETURN) لموظف - Super Admin Only"""
+    # تحقق من الموظف
+    employee = await db.users.find_one({"id": req.employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="الموظف غير موجود")
+
+    # إنشاء معاملة سداد كـ RETURN
+    desc = req.notes or "سداد سُلفة/عُهدة"
+    if req.method or req.reference:
+        extra = []
+        if req.method:
+            extra.append(f"طريقة السداد: {req.method}")
+        if req.reference:
+            extra.append(f"مرجع: {req.reference}")
+        if extra:
+            desc = f"{desc} ({' - '.join(extra)})"
+
+    transaction = AdvanceTransaction(
+        employee_id=req.employee_id,
+        employee_name=employee["name"],
+        transaction_type=TransactionType.RETURN,
+        amount=float(req.amount),
+        description=desc,
+        expense_date=req.repayment_date,
+        status=TransactionStatus.APPROVED,
+        approved_by=current_user.id,
+        approved_at=datetime.now(timezone.utc),
+        notes=req.notes
+    )
+
+    # حفظ المعاملة
+    await db.advance_transactions.insert_one(AdvancesDB.transaction_to_dict(transaction))
+
+    # تحديث الرصيد
+    await update_employee_balance(req.employee_id)
+
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "advance_repayment_recorded",
+        f"تسجيل سداد بمبلغ {req.amount} درهم للموظف {employee['name']}"
+    )
+
+    return {
+        "success": True,
+        "message": "تم تسجيل سداد السُلفة/العُهدة بنجاح",
+        "transaction_id": transaction.id,
+        "amount": transaction.amount
+    }
+
     }
 
 @api_router.post("/advances/settle-advance")
