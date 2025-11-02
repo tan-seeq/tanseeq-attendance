@@ -1968,10 +1968,7 @@ async def edit_advance_transaction(
     if not transaction:
         raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
     
-    # التأكد أن المعاملة لم تتم الموافقة عليها بعد أو رفضها
-    if transaction.get("status") in ["approved", "rejected"]:
-        raise HTTPException(status_code=400, detail="لا يمكن تعديل معاملة تمت الموافقة عليها أو رفضها")
-    
+    # ملاحظة: السوبر أدمن مسموح له التعديل حتى لو كانت المعاملة معتمدة/مرفوضة
     # تحضير البيانات المحدثة
     update_data = {}
     
