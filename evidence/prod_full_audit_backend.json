@@ -1,0 +1,504 @@
+{
+  "audit_info": {
+    "timestamp": "2025-11-02T09:40:07.320099+00:00",
+    "base_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api",
+    "test_type": "production_full_audit",
+    "scope": [
+      "Health endpoints",
+      "Authentication & JWT validation",
+      "Users & RBAC",
+      "Attendance & Deductions",
+      "Payroll cycles",
+      "Advances system",
+      "Notifications",
+      "Work Reports",
+      "Security testing"
+    ]
+  },
+  "test_summary": {
+    "total_tests": 20,
+    "passed": 17,
+    "failed": 3,
+    "success_rate": 85.0
+  },
+  "test_categories": {
+    "Health": {
+      "tests": [
+        {
+          "test_name": "GET /healthz",
+          "success": true,
+          "details": "Status: 200, Response: {'status': 'ok'}",
+          "timestamp": "2025-11-02T09:40:07.464289+00:00"
+        },
+        {
+          "test_name": "GET /readyz",
+          "success": true,
+          "details": "Status: 200, Response: {'status': 'ready'}",
+          "timestamp": "2025-11-02T09:40:07.520255+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Authentication": {
+      "tests": [
+        {
+          "test_name": "POST /auth/login (admin)",
+          "success": true,
+          "details": "Login successful, Role: super_admin",
+          "timestamp": "2025-11-02T09:40:09.034848+00:00"
+        },
+        {
+          "test_name": "GET /auth/me (valid token)",
+          "success": true,
+          "details": "User ID: 831df8dc-ae8d-45ab-b2b6-4d1dc82a3289, Role: super_admin",
+          "timestamp": "2025-11-02T09:40:09.085169+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Security": {
+      "tests": [
+        {
+          "test_name": "Invalid JWT rejection",
+          "success": true,
+          "details": "Invalid token correctly rejected with 401",
+          "timestamp": "2025-11-02T09:40:09.136221+00:00"
+        },
+        {
+          "test_name": "CORS headers present",
+          "success": false,
+          "details": "No CORS headers found",
+          "timestamp": "2025-11-02T09:40:09.184861+00:00"
+        }
+      ],
+      "passed": 1,
+      "failed": 1
+    },
+    "RBAC": {
+      "tests": [
+        {
+          "test_name": "GET /users (admin access)",
+          "success": true,
+          "details": "Retrieved 11 users",
+          "timestamp": "2025-11-02T09:40:09.263396+00:00"
+        }
+      ],
+      "passed": 1,
+      "failed": 0
+    },
+    "Attendance": {
+      "tests": [
+        {
+          "test_name": "GET /attendance",
+          "success": true,
+          "details": "Retrieved 0 attendance records",
+          "timestamp": "2025-11-02T09:40:09.307406+00:00"
+        },
+        {
+          "test_name": "GET /attendance/with-absences",
+          "success": true,
+          "details": "Retrieved 468 records with absences",
+          "timestamp": "2025-11-02T09:40:09.480151+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Deductions": {
+      "tests": [
+        {
+          "test_name": "POST /deductions/calculate-monthly (2025-10)",
+          "success": true,
+          "details": "Monthly calculation successful: 6 employees",
+          "timestamp": "2025-11-02T09:40:10.681099+00:00"
+        },
+        {
+          "test_name": "POST /deductions/calculate-monthly (2025-11)",
+          "success": true,
+          "details": "Monthly calculation successful: 6 employees",
+          "timestamp": "2025-11-02T09:40:10.972629+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Payroll": {
+      "tests": [
+        {
+          "test_name": "GET /payroll/cycles",
+          "success": true,
+          "details": "Retrieved 4 payroll cycles",
+          "timestamp": "2025-11-02T09:40:11.056471+00:00"
+        },
+        {
+          "test_name": "GET /payroll/cycles/f7743792-51a3-4337-a099-f2e1885fd108/summary",
+          "success": true,
+          "details": "Cycle summary retrieved successfully",
+          "timestamp": "2025-11-02T09:40:11.294898+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Advances": {
+      "tests": [
+        {
+          "test_name": "GET /advances/admin/all-balances",
+          "success": true,
+          "details": "Retrieved 1 employee balances",
+          "timestamp": "2025-11-02T09:40:11.388290+00:00"
+        },
+        {
+          "test_name": "GET /advances/admin/all-transactions",
+          "success": true,
+          "details": "Retrieved 10 transactions",
+          "timestamp": "2025-11-02T09:40:11.436165+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Notifications": {
+      "tests": [
+        {
+          "test_name": "GET /notifications",
+          "success": true,
+          "details": "Retrieved 31 notifications",
+          "timestamp": "2025-11-02T09:40:11.489865+00:00"
+        },
+        {
+          "test_name": "GET /notifications/my",
+          "success": true,
+          "details": "Retrieved 0 personal notifications",
+          "timestamp": "2025-11-02T09:40:11.537499+00:00"
+        }
+      ],
+      "passed": 2,
+      "failed": 0
+    },
+    "Work Reports": {
+      "tests": [
+        {
+          "test_name": "GET /work-reports/clients",
+          "success": false,
+          "details": "Status: 500",
+          "timestamp": "2025-11-02T09:40:11.621041+00:00"
+        },
+        {
+          "test_name": "GET /work-reports/logs",
+          "success": false,
+          "details": "Status: 500",
+          "timestamp": "2025-11-02T09:40:11.681002+00:00"
+        }
+      ],
+      "passed": 0,
+      "failed": 2
+    },
+    "Policy Exceptions": {
+      "tests": [
+        {
+          "test_name": "Employee exception verification",
+          "success": true,
+          "details": "Found 4 target employees with schedule policies",
+          "timestamp": "2025-11-02T09:40:11.681276+00:00"
+        }
+      ],
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "critical_issues": [],
+  "security_findings": [],
+  "evidence": {
+    "admin_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MzFkZjhkYy1hZThkLTQ1YWItYjJiNi00ZDFkYzgyYTMyODkiLCJleHAiOjE3NjIwNzgyMDh9.ceMFSoTGF_266b2XS_HyQn2v2esYNQWprT20_LLmUNA",
+    "admin_user": {
+      "id": "831df8dc-ae8d-45ab-b2b6-4d1dc82a3289",
+      "name": "Admin QA",
+      "email": "admin@tanseeq.com",
+      "role": "super_admin",
+      "position": "QA Super Admin",
+      "monthly_salary": 0.0,
+      "daily_rate": 0.0,
+      "working_hours_start": "09:00",
+      "working_hours_end": "18:00",
+      "phone": "",
+      "hire_date": "2025-10-29T07:30:23.833000",
+      "is_active": true,
+      "has_custom_schedule": false,
+      "has_flexible_schedule": false,
+      "flexible_hours_per_day": 8.0,
+      "flexible_start_range": "07:00-10:00",
+      "flexible_end_range": "16:00-19:00",
+      "flexible_core_hours": "10:00-15:00",
+      "flexible_days_per_week": 5
+    },
+    "users_data": [
+      {
+        "id": "bbacd795-7561-4bfc-9b49-b5e5a09c7926",
+        "name": "Super Admin",
+        "email": "hatem@tan-seeq.co",
+        "role": "super_admin",
+        "position": "super_admin",
+        "monthly_salary": 0.0,
+        "daily_rate": 0.0,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "0509902344",
+        "hire_date": null,
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "09b65295-3506-4722-8ee3-927ff046b026",
+        "name": "TAREK ABDELMONEM ZAKI ALWAZAN",
+        "email": "Tarek.wzard@gmail.com",
+        "role": "user",
+        "position": "Manager",
+        "monthly_salary": 4000.0,
+        "daily_rate": 181.8181818181818,
+        "working_hours_start": "09:00",
+        "working_hours_end": "15:00",
+        "phone": "",
+        "hire_date": "2025-07-14T15:28:53.514000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": true,
+        "flexible_hours_per_day": 6.0,
+        "flexible_start_range": "8:30",
+        "flexible_end_range": "2:45",
+        "flexible_core_hours": "0",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "7205517e-f458-4f7c-a421-9cefbfab25cd",
+        "name": "*MAHMOUD ELSAYED AWWAD SOLIMAN*",
+        "email": "yazan.mh1982@gmail.com",
+        "role": "admin",
+        "position": "super_admin",
+        "monthly_salary": 0.0,
+        "daily_rate": 0.0,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "0561152030",
+        "hire_date": "2025-07-14T15:28:53.750000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "6e76ecda-3f55-454c-a075-505ecf6472e2",
+        "name": "GEHAD MOHAMED KAMAL AHMED",
+        "email": "jihadelashmawy@gmail.com",
+        "role": "user",
+        "position": "Employee",
+        "monthly_salary": 2700.0,
+        "daily_rate": 122.72727272727273,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:30",
+        "phone": "0565689189",
+        "hire_date": "2025-07-14T15:28:53.985000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "0f907fb8-1414-45bd-8db8-fb1a1fb5be65",
+        "name": "KARIM MOHAMED MOUSTAFA ABDELMEGEUID",
+        "email": "karim.abdelmegeuid@example.com",
+        "role": "user",
+        "position": "Employee",
+        "monthly_salary": 2550.0,
+        "daily_rate": 115.9090909090909,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "0554810889",
+        "hire_date": "2025-07-14T15:28:54.460000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "0a44663e-f3a8-48c0-b954-5fc525d75ddd",
+        "name": "*HOWYIDA AHMED ATTIA AHMED* ",
+        "email": "howyida.ahmed@example.com",
+        "role": "admin",
+        "position": "super_admin",
+        "monthly_salary": 0.0,
+        "daily_rate": 0.0,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "",
+        "hire_date": "2025-07-14T15:28:54.694000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "b996b8d7-6bbc-41e9-832b-4e22f2124200",
+        "name": "HESHAM AHMED MOHAMED MOSTAFA",
+        "email": "heshanrmostafa3873@gmail.com",
+        "role": "user",
+        "position": "Employee",
+        "monthly_salary": 2350.0,
+        "daily_rate": 106.81818181818181,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:26",
+        "phone": "0558084133",
+        "hire_date": "2025-07-14T15:28:54.931000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "5e4856d8-6fb6-4e96-bd86-39f5deaa52ba",
+        "name": "Mohamed AHMED MOHAMED MOSTAFA",
+        "email": "mohamedmostafa2881991@gmail.com",
+        "role": "user",
+        "position": "Employee",
+        "monthly_salary": 2500.0,
+        "daily_rate": 113.63636363636364,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "0558306483",
+        "hire_date": null,
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "c3691707-b0af-4c47-a06f-e220b6bc001e",
+        "name": "Hatem Mohamed Ahmed",
+        "email": "Hatemmo186@gmail.com",
+        "role": "user",
+        "position": "Administrator",
+        "monthly_salary": 5500.0,
+        "daily_rate": 250.0,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "0509902344",
+        "hire_date": "2025-07-16T06:13:42.034000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": true,
+        "flexible_hours_per_day": 7.0,
+        "flexible_start_range": "07:00-09:00",
+        "flexible_end_range": "15:00-19:00",
+        "flexible_core_hours": "08:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "1fb220bf-7c31-4d63-b3f8-a187554d02a6",
+        "name": "الإدارة العليا",
+        "email": "info@tan-seeq.co",
+        "role": "super_admin",
+        "position": "owner",
+        "monthly_salary": 0.0,
+        "daily_rate": 0.0,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "",
+        "hire_date": "2025-10-29T05:32:40.276000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": true,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      },
+      {
+        "id": "831df8dc-ae8d-45ab-b2b6-4d1dc82a3289",
+        "name": "Admin QA",
+        "email": "admin@tanseeq.com",
+        "role": "super_admin",
+        "position": "QA Super Admin",
+        "monthly_salary": 0.0,
+        "daily_rate": 0.0,
+        "working_hours_start": "09:00",
+        "working_hours_end": "18:00",
+        "phone": "",
+        "hire_date": "2025-10-29T07:30:23.833000",
+        "is_active": true,
+        "has_custom_schedule": false,
+        "has_flexible_schedule": false,
+        "flexible_hours_per_day": 8.0,
+        "flexible_start_range": "07:00-10:00",
+        "flexible_end_range": "16:00-19:00",
+        "flexible_core_hours": "10:00-15:00",
+        "flexible_days_per_week": 5
+      }
+    ],
+    "exception_employees": [
+      {
+        "name": "TAREK ABDELMONEM ZAKI ALWAZAN",
+        "has_flexible_schedule": true,
+        "role": "user",
+        "schedule_type": "flexible"
+      },
+      {
+        "name": "KARIM MOHAMED MOUSTAFA ABDELMEGEUID",
+        "has_flexible_schedule": false,
+        "role": "user",
+        "schedule_type": "fixed"
+      },
+      {
+        "name": "HESHAM AHMED MOHAMED MOSTAFA",
+        "has_flexible_schedule": false,
+        "role": "user",
+        "schedule_type": "fixed"
+      },
+      {
+        "name": "Hatem Mohamed Ahmed",
+        "has_flexible_schedule": true,
+        "role": "user",
+        "schedule_type": "flexible"
+      }
+    ]
+  },
+  "final_summary": {
+    "audit_completed": true,
+    "total_categories": 11,
+    "critical_issues_count": 0,
+    "security_findings_count": 0,
+    "overall_health": "GOOD"
+  }
+}
