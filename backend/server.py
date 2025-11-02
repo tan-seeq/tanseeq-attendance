@@ -2113,7 +2113,6 @@ async def repay_advance(
         "amount": transaction.amount
     }
 
-
 @api_router.post("/advances/settle-advance")
 async def settle_advance_with_salary(
     settlement_request: dict,
