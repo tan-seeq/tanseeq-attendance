@@ -1,0 +1,2838 @@
+{
+  "test_timestamp": "2025-11-02T06:08:40.883328",
+  "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
+  "authentication": {
+    "status": "success",
+    "user_name": "مدير النظام",
+    "user_role": "super_admin",
+    "user_email": "admin@tanseeq.com"
+  },
+  "october_2025_test": {
+    "status": "success",
+    "month": "2025-10",
+    "employee_count": 13,
+    "total_employees_with_records": 13,
+    "working_hours_samples": [],
+    "exception_samples": [
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-09-29",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-09-30",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-01",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-02",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-05",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-06",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-07",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-08",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-09",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-12",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-15",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-16",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-19",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-20",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-21",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-22",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-26",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-27",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-09-29",
+        "rule_applied": "Flexible (no late)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-09-30",
+        "rule_applied": "Flexible (no late)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-01",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-02",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-05",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-06",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-07",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-08",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-09",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-12",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-13",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-14",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-15",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-16",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-19",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-20",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-22",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-23",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-26",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-27",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-09-29",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 7,
+        "early_leave_minutes": 0,
+        "deduction_amount": 1.08,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 1.08,
+          "actual_late_minutes": 7,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-09-30",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 8,
+        "early_leave_minutes": 0,
+        "deduction_amount": 1.23,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 1.23,
+          "actual_late_minutes": 8,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-01",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-02",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-05",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-06",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-07",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-08",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-09",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-12",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-13",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-14",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-15",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-16",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-19",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-20",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-21",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-22",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-23",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-26",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-27",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-09-29",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 28,
+        "early_leave_minutes": 0,
+        "deduction_amount": 4.32,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 4.32,
+          "actual_late_minutes": 28,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-09-30",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 24,
+        "early_leave_minutes": 0,
+        "deduction_amount": 3.7,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 3.7,
+          "actual_late_minutes": 24,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-01",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-02",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-05",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-06",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-07",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-08",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-09",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-12",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-13",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-14",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-15",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-16",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-19",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-20",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-21",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-22",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-23",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-26",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-27",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      }
+    ]
+  },
+  "november_2025_test": {
+    "status": "success",
+    "month": "2025-11",
+    "employee_count": 13,
+    "total_employees_with_records": 13,
+    "working_hours_samples": [],
+    "exception_samples": [
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-30",
+        "rule_applied": "Flexible (no late)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed",
+        "date": "2025-10-30",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      }
+    ]
+  },
+  "working_hours_parsing": {
+    "status": "completed",
+    "samples": [],
+    "summary": {
+      "total_samples": 0,
+      "parsing_pass": 0,
+      "parsing_fail": 0,
+      "rule_pass": 0,
+      "rule_fail": 0
+    }
+  },
+  "exception_invariants": {
+    "status": "completed",
+    "validations": [
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-09-29",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-09-30",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-01",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-02",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-05",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-06",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-07",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-08",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-09",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-12",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-15",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-16",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-19",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-20",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-21",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-22",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-26",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed Ahmed",
+        "date": "2025-10-27",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-09-29",
+        "rule_applied": "Flexible (no late)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-09-30",
+        "rule_applied": "Flexible (no late)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-01",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-02",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-05",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-06",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-07",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-08",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-09",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-12",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-13",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-14",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-15",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-16",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-19",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-20",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-22",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-23",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-26",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-27",
+        "rule_applied": "Absence (Flexible)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 133.33,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 133.33,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": false,
+          "validation": "FAIL"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-09-29",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 7,
+        "early_leave_minutes": 0,
+        "deduction_amount": 1.08,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 1.08,
+          "actual_late_minutes": 7,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-09-30",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 8,
+        "early_leave_minutes": 0,
+        "deduction_amount": 1.23,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 1.23,
+          "actual_late_minutes": 8,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-01",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-02",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-05",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-06",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-07",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-08",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-09",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-12",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-13",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-14",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-15",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-16",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-19",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-20",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-21",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-22",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-23",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-26",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Kareem",
+        "date": "2025-10-27",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-09-29",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 28,
+        "early_leave_minutes": 0,
+        "deduction_amount": 4.32,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 4.32,
+          "actual_late_minutes": 28,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-09-30",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 24,
+        "early_leave_minutes": 0,
+        "deduction_amount": 3.7,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 3.7,
+          "actual_late_minutes": 24,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-01",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-02",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-05",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-06",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-07",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-08",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-09",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-12",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-13",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-14",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-15",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-16",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-19",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-20",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-21",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-22",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-23",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-26",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hesham",
+        "date": "2025-10-27",
+        "rule_applied": "Partial-Flex: Lateness Only (no grace)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "partial-flex",
+          "expected_behavior": "Lateness only (no grace), strict after 09:00",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Tarek Wazzan",
+        "date": "2025-10-30",
+        "rule_applied": "Flexible (no late)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "flex",
+          "expected_behavior": "No deductions (flexible schedule)",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      },
+      {
+        "employee_name": "Hatem Mohamed",
+        "date": "2025-10-30",
+        "rule_applied": "Exempt (no deductions)",
+        "late_minutes": 0,
+        "early_leave_minutes": 0,
+        "deduction_amount": 0.0,
+        "invariant_check": {
+          "exception_type": "exempt",
+          "expected_behavior": "No deductions, no late/early tracking",
+          "actual_deduction": 0.0,
+          "actual_late_minutes": 0,
+          "actual_early_minutes": 0,
+          "is_valid": true,
+          "validation": "PASS"
+        }
+      }
+    ],
+    "summary": {
+      "total_samples": 82,
+      "invariant_pass": 64,
+      "invariant_fail": 18
+    }
+  },
+  "conclusion": "FAIL"
+}
