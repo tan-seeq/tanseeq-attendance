@@ -118,6 +118,11 @@ async def post_progress(channel: str, payload: dict, current_user: User = Depend
     with open(os.path.join(LIVE_DIR, f"progress_{channel}.log"), "a", encoding="utf-8") as f:
         f.write(line)
     return {"success": True}
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, date, timedelta, timezone
+import json
+
 
 # CRITICAL: FastAPI app + health endpoints FIRST
 # ========================================
