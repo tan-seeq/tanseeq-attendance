@@ -1,13 +1,4 @@
-# ========================================
-# Live monitoring additions
-import os
-import asyncio
-from time import perf_counter
-from collections import deque
-
-LIVE_DIR = "/app/evidence/live"
-
-class LiveStats:
+# Live monitoring will be added after FastAPI app definition
     def __init__(self):
         self.lock = asyncio.Lock()
         self.events = deque(maxlen=5000)  # store recent events
