@@ -1,37 +1,38 @@
 {
-  "audit_timestamp": "2025-11-02T07:57:05.365659",
-  "production_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host",
-  "audit_status": "FAILED - AUTHENTICATION ISSUES",
-  "month": {
-    "2025-10": {},
-    "2025-11": {}
-  },
-  "timings": {
-    "page_load_ms": 2003.649
-  },
-  "notes": [],
-  "screenshots_taken": [
-    "prod_01_initial_page.png"
-  ],
-  "authentication_attempts": [
-    {
-      "credentials": "admin@tanseeq.com / ADMIN",
-      "success": false,
-      "network_responses": []
+  "months": {
+    "2025-10": {
+      "total_deduction": "510.27",
+      "total_late_days": "49",
+      "total_employees": "6",
+      "employees_found": [
+        {
+          "name": "TAREK ABDELMONEM ZAKI ALWAZAN",
+          "total_deduction": "0.00",
+          "late_deduction": "0.00",
+          "absence_deduction": "0.00",
+          "days_absent": "0",
+          "total_late_minutes": "0"
+        }
+      ]
     },
-    {
-      "credentials": "hatem@tan-seeq.co / hatem123",
-      "success": false,
-      "network_responses": []
-    }
-  ],
-  "ui_elements_found": {
-    "page_title": "Emergent | Fullstack App",
-    "login_form": {
-      "email_fields": 1,
-      "password_fields": 1,
-      "submit_buttons": 1
+    "2025-11": {
+      "total_deduction": "0.00",
+      "total_late_days": "0",
+      "total_employees": "0",
+      "employees_found": []
     }
   },
-  "network_errors": []
+  "employees": [],
+  "screenshots": [
+    "10_payroll_cycles.png",
+    "12_final_advanced_deductions.png"
+  ],
+  "timings": {
+    "total_audit_time": 16.737784
+  },
+  "notes": [
+    "Export buttons found: None",
+    "Employees found in system: "
+  ],
+  "test_start_time": "2025-11-02T08:07:52.571045"
 }
