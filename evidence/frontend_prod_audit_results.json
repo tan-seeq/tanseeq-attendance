@@ -1,20 +1,37 @@
 {
-  "audit_timestamp": "2025-11-02T07:56:13.257843",
-  "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host",
-  "month": {},
-  "timings": {
-    "login_ms": 2212.4649999999997,
-    "page_load_ms": 2212.5629999999996
+  "audit_timestamp": "2025-11-02T07:57:05.365659",
+  "production_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host",
+  "audit_status": "FAILED - AUTHENTICATION ISSUES",
+  "month": {
+    "2025-10": {},
+    "2025-11": {}
   },
-  "notes": [
-    "Login failed with super_admin credentials",
-    "Both credential sets failed authentication",
-    "Attendance page error: object Locator can't be used in 'await' expression",
-    "October deductions error: object Locator can't be used in 'await' expression",
-    "November deductions error: object Locator can't be used in 'await' expression",
-    "Payroll cycles error: object Locator can't be used in 'await' expression"
-  ],
+  "timings": {
+    "page_load_ms": 2003.649
+  },
+  "notes": [],
   "screenshots_taken": [
-    "01_login_page.png"
-  ]
+    "prod_01_initial_page.png"
+  ],
+  "authentication_attempts": [
+    {
+      "credentials": "admin@tanseeq.com / ADMIN",
+      "success": false,
+      "network_responses": []
+    },
+    {
+      "credentials": "hatem@tan-seeq.co / hatem123",
+      "success": false,
+      "network_responses": []
+    }
+  ],
+  "ui_elements_found": {
+    "page_title": "Emergent | Fullstack App",
+    "login_form": {
+      "email_fields": 1,
+      "password_fields": 1,
+      "submit_buttons": 1
+    }
+  },
+  "network_errors": []
 }
