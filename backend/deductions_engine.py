@@ -79,10 +79,22 @@ def _lower(s: str) -> str:
 def _parse_time_safe(ts: Optional[str]) -> Optional[time]:
     if not ts:
         return None
-    s = str(ts).strip()
+    s = _to_western_digits(str(ts).strip())
+    # Normalize Arabic AM/PM letters
+    s_norm = s.replace("ص", "AM").replace("م", "PM").replace("am", "AM").replace("pm", "PM")
+    # Remove any non time suffix like 'hrs'
+    s_clean = s_norm
+    # Try common formats
+    for fmt in ("%I:%M %p", "%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(s_clean, fmt).time()
+        except Exception:
+            continue
+    # Fallback: keep only digits and colon
+    filtered = ''.join(ch for ch in s_clean if ch.isdigit() or ch == ':')
     for fmt in ("%H:%M:%S", "%H:%M"):
         try:
-            return datetime.strptime(s, fmt).time()
+            return datetime.strptime(filtered, fmt).time()
         except Exception:
             continue
     return None
