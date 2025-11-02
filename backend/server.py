@@ -1,4 +1,124 @@
 # ========================================
+# Live monitoring additions
+import os
+import asyncio
+from time import perf_counter
+from collections import deque
+
+LIVE_DIR = "/app/evidence/live"
+
+class LiveStats:
+    def __init__(self):
+        self.lock = asyncio.Lock()
+        self.events = deque(maxlen=5000)  # store recent events
+        self.errors = 0
+        self.success = 0
+        self.total_latency_ms = 0.0
+        self.count = 0
+        self.window = deque(maxlen=3000)  # per-request latencies
+
+    async def record(self, method: str, path: str, status: int, duration_ms: float):
+        async with self.lock:
+            self.events.append({
+                "ts": datetime.now().isoformat(),
+                "method": method,
+                "path": path,
+                "status": status,
+                "duration_ms": round(duration_ms, 2)
+            })
+            self.count += 1
+            self.total_latency_ms += duration_ms
+            self.window.append(duration_ms)
+            if status >= 400:
+                self.errors += 1
+            else:
+                self.success += 1
+
+    async def snapshot(self):
+        async with self.lock:
+            total = max(1, self.count)
+            avg = self.total_latency_ms / total
+            err_rate = (self.errors / total) * 100.0
+            succ_rate = (self.success / total) * 100.0
+            last_min = list(self.events)[-60:] if len(self.events) > 60 else list(self.events)
+            return {
+                "requests_total": self.count,
+                "success_rate": round(succ_rate, 2),
+                "error_rate": round(err_rate, 2),
+                "avg_latency_ms": round(avg, 2),
+                "recent": last_min
+            }
+
+live_stats = LiveStats()
+
+# Ensure live dir exists
+os.makedirs(LIVE_DIR, exist_ok=True)
+
+# Middleware to track API requests
+@app.middleware("http")
+async def live_metrics_middleware(request, call_next):
+    start = perf_counter()
+    try:
+        response = await call_next(request)
+        return response
+    finally:
+        try:
+            duration_ms = (perf_counter() - start) * 1000.0
+            path = str(request.url.path)
+            # Only track /api paths
+            if path.startswith("/api"):
+                status = getattr(response, "status_code", 500)
+                await live_stats.record(request.method, path, status, duration_ms)
+                # Append to file (jsonl)
+                with open(os.path.join(LIVE_DIR, "api_requests.log"), "a", encoding="utf-8") as f:
+                    f.write(f"{datetime.now().isoformat()} {request.method} {path} {status} {duration_ms:.2f}ms\n")
+        except Exception:
+            pass
+
+# Background task to dump metrics periodically
+async def _periodic_metrics_dump():
+    while True:
+        try:
+            snap = await live_stats.snapshot()
+            with open(os.path.join(LIVE_DIR, "metrics.json"), "w", encoding="utf-8") as f:
+                json.dump(snap, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        await asyncio.sleep(30)
+
+@app.on_event("startup")
+async def _start_live_metrics():
+    try:
+        asyncio.create_task(_periodic_metrics_dump())
+    except Exception:
+        pass
+
+@api_router.get("/live/metrics")
+async def get_live_metrics(current_user: User = Depends(get_super_admin_user)):
+    snap = await live_stats.snapshot()
+    return {"success": True, "metrics": snap}
+
+@api_router.get("/live/logs")
+async def get_live_logs(current_user: User = Depends(get_super_admin_user)):
+    logs_path = os.path.join(LIVE_DIR, "api_requests.log")
+    if not os.path.exists(logs_path):
+        return {"success": True, "lines": []}
+    try:
+        with open(logs_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()[-200:]
+        return {"success": True, "lines": lines}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/live/progress/{channel}")
+async def post_progress(channel: str, payload: dict, current_user: User = Depends(get_super_admin_user)):
+    if channel not in ("backend", "frontend"):
+        raise HTTPException(status_code=400, detail="channel must be backend|frontend")
+    line = f"{datetime.now().isoformat()} [{channel}] {payload.get('message','')}\n"
+    with open(os.path.join(LIVE_DIR, f"progress_{channel}.log"), "a", encoding="utf-8") as f:
+        f.write(line)
+    return {"success": True}
+
 # CRITICAL: FastAPI app + health endpoints FIRST
 # ========================================
 import os
