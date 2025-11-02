@@ -1,5 +1,5 @@
 # Live monitoring will be added after FastAPI app definition
-    def __init__(self):
+# (placeholder removed)
         self.lock = asyncio.Lock()
         self.events = deque(maxlen=5000)  # store recent events
         self.errors = 0
