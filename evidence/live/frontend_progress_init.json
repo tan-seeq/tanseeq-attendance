@@ -1,39 +1,37 @@
 {
   "test_name": "Live Streaming Frontend Audit Progress",
-  "base_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api",
-  "timestamp": "2025-11-02T09:50:46.242642",
+  "base_url": "http://localhost:8001/api",
+  "timestamp": "2025-11-02T09:55:11.483112",
   "authentication": {
-    "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/auth/login",
+    "url": "http://localhost:8001/api/auth/login",
     "status_code": 200,
     "success": true,
-    "response_size": 741,
+    "response_size": 679,
     "headers": {
-      "Content-Length": "741",
-      "content-type": "application/json",
-      "date": "Sun, 02 Nov 2025 09:50:47 GMT",
-      "server": "nginx/1.26.3",
-      "via": "1.1 google",
-      "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+      "date": "Sun, 02 Nov 2025 09:55:11 GMT",
+      "server": "uvicorn",
+      "content-length": "679",
+      "content-type": "application/json"
     },
     "token_received": true,
     "user_info": {
-      "id": "831df8dc-ae8d-45ab-b2b6-4d1dc82a3289",
-      "name": "Admin QA",
+      "id": "admin_001",
+      "name": "مدير النظام",
       "email": "admin@tanseeq.com",
       "role": "super_admin",
-      "position": "QA Super Admin",
-      "monthly_salary": 0.0,
-      "daily_rate": 0.0,
-      "working_hours_start": "09:00",
+      "position": "مدير",
+      "monthly_salary": 15000.0,
+      "daily_rate": 500.0,
+      "working_hours_start": "08:00",
       "working_hours_end": "18:00",
-      "phone": "",
-      "hire_date": "2025-10-29T07:30:23.833000",
+      "phone": "+971501234567",
+      "hire_date": null,
       "is_active": true,
       "has_custom_schedule": false,
-      "has_flexible_schedule": false,
+      "has_flexible_schedule": true,
       "flexible_hours_per_day": 8.0,
-      "flexible_start_range": "07:00-10:00",
-      "flexible_end_range": "16:00-19:00",
+      "flexible_start_range": "07:00-11:00",
+      "flexible_end_range": "16:00-20:00",
       "flexible_core_hours": "10:00-15:00",
       "flexible_days_per_week": 5
     }
@@ -42,131 +40,177 @@
     {
       "sequence": 1,
       "message": "START: Frontend audit initiated",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:47.806657",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:11.767861",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 2,
       "message": "STEP 1: Login page reached",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:48.341279",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:12.273477",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 3,
       "message": "STEP 2: Dashboard loaded after login",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:48.879367",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:12.778983",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 4,
       "message": "STEP 3: Attendance page opened (read-only)",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:49.417804",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:13.284152",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 5,
       "message": "STEP 4: Advanced Deductions October calculation started",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:49.963872",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:13.789516",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 6,
       "message": "STEP 5: Advanced Deductions October calculation completed",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:50.533421",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:14.294749",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 7,
       "message": "STEP 6: Advanced Deductions November calculation started",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:51.072903",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:14.800011",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 8,
       "message": "STEP 7: Advanced Deductions November calculation completed",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:51.619715",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:15.305099",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 9,
       "message": "STEP 8: Payroll cycles page opened",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:52.172882",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:15.812795",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     },
     {
       "sequence": 10,
       "message": "COMPLETE: Frontend audit route sweep finished",
-      "url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api/live/progress/frontend",
-      "status_code": 404,
-      "success": false,
-      "timestamp": "2025-11-02T09:50:52.722394",
-      "response_size": 22,
-      "error": {
-        "detail": "Not Found"
+      "url": "http://localhost:8001/api/live/progress/frontend",
+      "status_code": 200,
+      "success": true,
+      "timestamp": "2025-11-02T09:55:16.318648",
+      "response_size": 16,
+      "response_data": {
+        "success": true
       }
     }
   ],
-  "live_logs": {},
+  "live_logs": {
+    "url": "http://localhost:8001/api/live/logs",
+    "status_code": 200,
+    "success": true,
+    "timestamp": "2025-11-02T09:55:16.823665",
+    "response_size": 1165,
+    "response_data": {
+      "success": true,
+      "lines": [
+        "2025-11-02T09:54:45.659343 GET /api/healthz 200 0.64ms\n",
+        "2025-11-02T09:54:59.299583 POST /api/auth/login 200 276.62ms\n",
+        "2025-11-02T09:54:59.305363 GET /api/live/logs 200 2.26ms\n",
+        "2025-11-02T09:54:59.310335 GET /api/live/metrics 200 2.06ms\n",
+        "2025-11-02T09:54:59.315150 POST /api/live/progress/frontend 200 2.18ms\n",
+        "2025-11-02T09:55:11.722235 POST /api/auth/login 200 234.77ms\n",
+        "2025-11-02T09:55:11.727088 POST /api/live/progress/frontend 200 2.28ms\n",
+        "2025-11-02T09:55:12.272451 POST /api/live/progress/frontend 200 2.54ms\n",
+        "2025-11-02T09:55:12.778126 POST /api/live/progress/frontend 200 2.95ms\n",
+        "2025-11-02T09:55:13.283244 POST /api/live/progress/frontend 200 2.58ms\n",
+        "2025-11-02T09:55:13.788400 POST /api/live/progress/frontend 200 2.49ms\n",
+        "2025-11-02T09:55:14.293802 POST /api/live/progress/frontend 200 2.48ms\n",
+        "2025-11-02T09:55:14.798964 POST /api/live/progress/frontend 200 2.50ms\n",
+        "2025-11-02T09:55:15.304164 POST /api/live/progress/frontend 200 2.49ms\n",
+        "2025-11-02T09:55:15.811898 POST /api/live/progress/frontend 200 5.21ms\n",
+        "2025-11-02T09:55:16.317288 POST /api/live/progress/frontend 200 2.81ms\n"
+      ]
+    },
+    "last_20_lines": [
+      "2025-11-02T09:54:45.659343 GET /api/healthz 200 0.64ms\n",
+      "2025-11-02T09:54:59.299583 POST /api/auth/login 200 276.62ms\n",
+      "2025-11-02T09:54:59.305363 GET /api/live/logs 200 2.26ms\n",
+      "2025-11-02T09:54:59.310335 GET /api/live/metrics 200 2.06ms\n",
+      "2025-11-02T09:54:59.315150 POST /api/live/progress/frontend 200 2.18ms\n",
+      "2025-11-02T09:55:11.722235 POST /api/auth/login 200 234.77ms\n",
+      "2025-11-02T09:55:11.727088 POST /api/live/progress/frontend 200 2.28ms\n",
+      "2025-11-02T09:55:12.272451 POST /api/live/progress/frontend 200 2.54ms\n",
+      "2025-11-02T09:55:12.778126 POST /api/live/progress/frontend 200 2.95ms\n",
+      "2025-11-02T09:55:13.283244 POST /api/live/progress/frontend 200 2.58ms\n",
+      "2025-11-02T09:55:13.788400 POST /api/live/progress/frontend 200 2.49ms\n",
+      "2025-11-02T09:55:14.293802 POST /api/live/progress/frontend 200 2.48ms\n",
+      "2025-11-02T09:55:14.798964 POST /api/live/progress/frontend 200 2.50ms\n",
+      "2025-11-02T09:55:15.304164 POST /api/live/progress/frontend 200 2.49ms\n",
+      "2025-11-02T09:55:15.811898 POST /api/live/progress/frontend 200 5.21ms\n",
+      "2025-11-02T09:55:16.317288 POST /api/live/progress/frontend 200 2.81ms\n"
+    ],
+    "total_lines": 16
+  },
   "summary": {
     "total_progress_messages": 10,
-    "successful_posts": 0,
-    "success_rate": "0.0%",
+    "successful_posts": 10,
+    "success_rate": "100.0%",
     "authentication_success": true,
-    "logs_retrieval_success": false,
-    "overall_success": false
+    "logs_retrieval_success": true,
+    "overall_success": true
   }
 }
