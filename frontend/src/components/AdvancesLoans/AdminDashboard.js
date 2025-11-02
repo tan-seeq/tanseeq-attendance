@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showRepayModal, setShowRepayModal] = useState(false);
-  const [repayForm, setRepayForm] = useState({ amount: '', repayment_date: new Date().toISOString().split('T')[0], method: '', reference: '', notes: '' });
+  const [repayForm, setRepayForm] = useState({ employee_id: '', amount: '', repayment_date: new Date().toISOString().split('T')[0], method: 'cash', reference: '', notes: '', salary_month: '' });
 
 
   // Create advance/custody form
