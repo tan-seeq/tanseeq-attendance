@@ -41,6 +41,10 @@ class ArabicReviewE2ETest:
         
         # Test results storage
         self.results = {
+            "total_tests": 0,
+            "passed_tests": 0,
+            "failed_tests": 0,
+            "success_rate": 0.0,
             "test_summary": {
                 "total_tests": 0,
                 "passed_tests": 0,
