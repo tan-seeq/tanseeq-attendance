@@ -32,6 +32,7 @@ const AdminDashboard = () => {
     allTransactions: [],
     users: []
   });
+  const [employeesWithBalances, setEmployeesWithBalances] = useState([]); // NEW: للموظفين الذين لديهم رصيد نشط
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
