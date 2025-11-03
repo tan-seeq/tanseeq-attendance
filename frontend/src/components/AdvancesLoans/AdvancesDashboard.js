@@ -114,6 +114,103 @@ const AdvancesDashboard = () => {
     }
   };
 
+  // NEW: Request Advance Handler
+  const handleRequestAdvance = async () => {
+    try {
+      if (!requestForm.amount || !requestForm.description) {
+        alert('الرجاء ملء جميع الحقول المطلوبة');
+        return;
+      }
+
+      const response = await axios.post(`${API}/advances/request`, {
+        transaction_type: 'advance',
+        amount: parseFloat(requestForm.amount),
+        description: requestForm.description,
+        notes: requestForm.notes,
+        expense_date: requestForm.expense_date
+      });
+
+      if (response.data.success) {
+        alert('✅ ' + response.data.message);
+        setShowRequestAdvanceModal(false);
+        setRequestForm({
+          amount: '',
+          description: '',
+          notes: '',
+          expense_date: new Date().toISOString().split('T')[0]
+        });
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error('Error requesting advance:', error);
+      alert('❌ حدث خطأ أثناء إرسال الطلب');
+    }
+  };
+
+  // NEW: Request Custody Handler
+  const handleRequestCustody = async () => {
+    try {
+      if (!requestForm.amount || !requestForm.description) {
+        alert('الرجاء ملء جميع الحقول المطلوبة');
+        return;
+      }
+
+      const response = await axios.post(`${API}/advances/request`, {
+        transaction_type: 'custody',
+        amount: parseFloat(requestForm.amount),
+        description: requestForm.description,
+        notes: requestForm.notes,
+        expense_date: requestForm.expense_date
+      });
+
+      if (response.data.success) {
+        alert('✅ ' + response.data.message);
+        setShowRequestCustodyModal(false);
+        setRequestForm({
+          amount: '',
+          description: '',
+          notes: '',
+          expense_date: new Date().toISOString().split('T')[0]
+        });
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error('Error requesting custody:', error);
+      alert('❌ حدث خطأ أثناء إرسال الطلب');
+    }
+  };
+
+  // NEW: Settle Custody Handler
+  const handleSettleCustody = async () => {
+    try {
+      if (!requestForm.amount) {
+        alert('الرجاء إدخال المبلغ');
+        return;
+      }
+
+      const response = await axios.post(`${API}/advances/custody-settlement`, {
+        amount: parseFloat(requestForm.amount),
+        settlement_date: requestForm.expense_date,
+        notes: requestForm.notes || 'تسوية عهدة'
+      });
+
+      if (response.data.success) {
+        alert('✅ ' + response.data.message);
+        setShowSettleCustodyModal(false);
+        setRequestForm({
+          amount: '',
+          description: '',
+          notes: '',
+          expense_date: new Date().toISOString().split('T')[0]
+        });
+        fetchDashboardData();
+      }
+    } catch (error) {
+      console.error('Error settling custody:', error);
+      alert('❌ حدث خطأ: ' + (error.response?.data?.detail || 'خطأ غير معروف'));
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
