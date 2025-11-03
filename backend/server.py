@@ -2149,10 +2149,11 @@ async def edit_advance_transaction(
         await update_employee_balance(transaction['employee_id'])
     
     # إضافة سجل في النشاطات
+    transaction_type_ar = TRANSACTION_TYPE_AR.get(transaction.get('transaction_type'), 'معاملة')
     await log_activity(
         current_user.id,
         "advance_edited",
-        f"تعديل معاملة {transaction['transaction_type_ar']} - {transaction['employee_name']}"
+        f"تعديل معاملة {transaction_type_ar} - {transaction['employee_name']}"
     )
     
     return {
