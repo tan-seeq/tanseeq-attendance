@@ -221,15 +221,18 @@ backend:
 
   - task: "Payment Registration Page (صفحة تسجيل السداد)"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "❌ RESPONSE STRUCTURE MISMATCH: /api/advances/admin/employees-with-balances returns dict structure instead of expected list format with employee_id, employee_name, remaining_advance, remaining_custody fields. Response structure needs verification and correction."
+      - working: true
+        agent: "testing"
+        comment: "✅ EMPLOYEES WITH BALANCES FIXED: GET /api/advances/admin/employees-with-balances now returning correct structure - Retrieved 5 employees with all required fields (employee_id, employee_name, remaining_advance, remaining_custody, total_remaining). Sample employee: Jihad with 6652.54 AED advance + 527.46 AED custody = 7180.0 AED total. Response structure is now properly formatted."
 
   - task: "Additional Advances Endpoints (اختبارات إضافية)"
     implemented: true
