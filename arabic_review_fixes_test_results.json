@@ -1,0 +1,116 @@
+{
+  "test_name": "Arabic Review Fixes Backend Test",
+  "timestamp": "2025-11-03T07:08:50.392908",
+  "base_url": "https://attend-deduct-hr.preview.emergentagent.com/api",
+  "tests": [
+    {
+      "name": "Super Admin Authentication",
+      "status": "PASS",
+      "details": "Login successful - Role: super_admin, Name: مدير النظام",
+      "timestamp": "2025-11-03T07:08:50.705359",
+      "response_data": {
+        "user_info": {
+          "id": "admin_001",
+          "name": "مدير النظام",
+          "email": "admin@tanseeq.com",
+          "role": "super_admin",
+          "position": "مدير",
+          "monthly_salary": 15000.0,
+          "daily_rate": 500.0,
+          "working_hours_start": "08:00",
+          "working_hours_end": "18:00",
+          "phone": "+971501234567",
+          "hire_date": null,
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": true,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-11:00",
+          "flexible_end_range": "16:00-20:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        }
+      }
+    },
+    {
+      "name": "User Authentication",
+      "status": "PASS",
+      "details": "Login successful - Role: user, Name: Jihad",
+      "timestamp": "2025-11-03T07:08:50.966535",
+      "response_data": {
+        "user_info": {
+          "id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+          "name": "Jihad",
+          "email": "jihad@tanseeq.com",
+          "role": "user",
+          "position": "Tax Consultant",
+          "monthly_salary": 2700.0,
+          "daily_rate": 122.72727272727273,
+          "working_hours_start": "09:00",
+          "working_hours_end": "18:00",
+          "phone": "+971501234567",
+          "hire_date": "2021-06-01T00:00:00",
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": true,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-11:00",
+          "flexible_end_range": "15:00-24:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        }
+      }
+    },
+    {
+      "name": "Edit Transaction Test",
+      "status": "PASS",
+      "details": "Edit transaction successful - Transaction ID: 06244e39-e3fd-4009-aa59-14c1d4b96509, Updated amount: 1500.0",
+      "timestamp": "2025-11-03T07:08:51.018715",
+      "response_data": {
+        "response": {
+          "success": true,
+          "message": "تم تعديل المعاملة بنجاح",
+          "transaction_id": "06244e39-e3fd-4009-aa59-14c1d4b96509"
+        },
+        "transaction_id": "06244e39-e3fd-4009-aa59-14c1d4b96509"
+      }
+    },
+    {
+      "name": "Advance Request Test",
+      "status": "PASS",
+      "details": "Advance request successful - Amount: 1000, Type: advance",
+      "timestamp": "2025-11-03T07:08:51.050777",
+      "response_data": {
+        "response": {
+          "success": true,
+          "message": "تم إرسال طلب سلفة بنجاح وسيتم مراجعته من الإدارة",
+          "transaction_id": "525f4554-16bd-4efc-a1a0-cacec54215c9",
+          "amount": 1000.0,
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "name": "Employees with Balances Test",
+      "status": "PASS",
+      "details": "Retrieved 5 employees - Required fields present: True",
+      "timestamp": "2025-11-03T07:08:51.083813",
+      "response_data": {
+        "employee_count": 5,
+        "sample_employee": {
+          "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+          "employee_name": "Jihad",
+          "remaining_advance": 6652.536231884058,
+          "remaining_custody": 527.463768115942,
+          "total_remaining": 7180.0
+        },
+        "has_required_fields": true
+      }
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  }
+}
