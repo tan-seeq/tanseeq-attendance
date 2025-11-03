@@ -191,15 +191,18 @@ backend:
 
   - task: "Employee Advance/Custody Requests (نظام السلف والعهد - طلبات الموظفين)"
     implemented: true
-    working: false
+    working: true
     file: "server.py, advances_model.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "testing"
         comment: "⚠️ VALIDATION ISSUES: /api/advances/request endpoint requires employee_id field (422 validation error), custody settlement working correctly (200 OK), Super Admin notifications confirmed (40 notifications). Endpoint validation requirements differ from expected - needs main agent review."
+      - working: true
+        agent: "testing"
+        comment: "✅ ADVANCE REQUEST FIXED: POST /api/advances/request now working correctly without employee_id in request body - Successfully created advance request for 1000 AED with transaction ID: 525f4554-16bd-4efc-a1a0-cacec54215c9. Arabic success message: 'تم إرسال طلب سلفة بنجاح وسيتم مراجعته من الإدارة'. Employee ID is now properly extracted from current_user token."
 
   - task: "Super Admin Permissions (نظام السلف والعهد - صلاحيات السوبر أدمن)"
     implemented: true
