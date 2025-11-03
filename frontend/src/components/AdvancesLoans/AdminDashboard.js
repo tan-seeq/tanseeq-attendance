@@ -685,29 +685,25 @@ const AdminDashboard = () => {
                               <EyeIcon className="h-4 w-4" />
                               <span>التفاصيل</span>
                             </button>
-                            {/* Edit button for pending transactions */}
-                            {transaction.status === 'pending' && (
-                              <button
-                                onClick={() => openEditModal(transaction)}
-                                className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-md hover:bg-yellow-200 transition-colors flex items-center space-x-1"
-                                title="تعديل المعاملة"
-                              >
-                                <PencilIcon className="h-4 w-4" />
-                                <span>تعديل</span>
-                              </button>
-                            )}
-                            {/* Delete button for pending or rejected transactions */}
-                            {['pending', 'rejected'].includes(transaction.status) && (
-                              <button
-                                onClick={() => handleDeleteTransaction(transaction.id, `${transaction.transaction_type_ar} - ${transaction.employee_name}`)}
-                                disabled={deleting}
-                                className="bg-red-100 text-red-700 px-4 py-2 rounded-md hover:bg-red-200 transition-colors flex items-center space-x-1 disabled:opacity-50"
-                                title="حذف المعاملة"
-                              >
-                                <TrashIcon className="h-4 w-4" />
-                                <span>حذف</span>
-                              </button>
-                            )}
+                            {/* Edit button - Available for ALL transactions (حتى بعد الموافقة) */}
+                            <button
+                              onClick={() => openEditModal(transaction)}
+                              className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-md hover:bg-yellow-200 transition-colors flex items-center space-x-1"
+                              title="تعديل المعاملة"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                              <span>تعديل</span>
+                            </button>
+                            {/* Delete button - Available for ALL transactions (حتى بعد الموافقة) */}
+                            <button
+                              onClick={() => handleDeleteTransaction(transaction.id, `${transaction.transaction_type_ar} - ${transaction.employee_name}`)}
+                              disabled={deleting}
+                              className="bg-red-100 text-red-700 px-4 py-2 rounded-md hover:bg-red-200 transition-colors flex items-center space-x-1 disabled:opacity-50"
+                              title="حذف المعاملة"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                              <span>حذف</span>
+                            </button>
                             {/* Add installment schedule button for approved advances/custody */}
                             {transaction.status === 'approved' && 
                              ['advance', 'custody'].includes(transaction.transaction_type) && (
