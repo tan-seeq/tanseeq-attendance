@@ -29,6 +29,19 @@ const AdvancesDashboard = () => {
     pendingApprovals: []
   });
   const [userRole, setUserRole] = useState('user');
+  
+  // NEW: Modal states for request forms
+  const [showRequestAdvanceModal, setShowRequestAdvanceModal] = useState(false);
+  const [showRequestCustodyModal, setShowRequestCustodyModal] = useState(false);
+  const [showSettleCustodyModal, setShowSettleCustodyModal] = useState(false);
+  
+  // NEW: Form states
+  const [requestForm, setRequestForm] = useState({
+    amount: '',
+    description: '',
+    notes: '',
+    expense_date: new Date().toISOString().split('T')[0]
+  });
 
   useEffect(() => {
     // Get user role from token or user object
