@@ -1,0 +1,293 @@
+{
+  "test_summary": {
+    "total": 15,
+    "passed": 10,
+    "failed": 5
+  },
+  "scenarios": {
+    "Super Admin Authentication": [
+      {
+        "status": "PASS",
+        "details": "Authenticated as مدير النظام (super_admin)",
+        "data": {
+          "id": "admin_001",
+          "name": "مدير النظام",
+          "email": "admin@tanseeq.com",
+          "role": "super_admin",
+          "position": "مدير",
+          "monthly_salary": 15000.0,
+          "daily_rate": 500.0,
+          "working_hours_start": "08:00",
+          "working_hours_end": "18:00",
+          "phone": "+971501234567",
+          "hire_date": null,
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": true,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-11:00",
+          "flexible_end_range": "16:00-20:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        },
+        "timestamp": "2025-11-03T07:03:59.281797"
+      }
+    ],
+    "User Authentication": [
+      {
+        "status": "PASS",
+        "details": "Authenticated as Jihad (user)",
+        "data": {
+          "id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+          "name": "Jihad",
+          "email": "jihad@tanseeq.com",
+          "role": "user",
+          "position": "Tax Consultant",
+          "monthly_salary": 2700.0,
+          "daily_rate": 122.72727272727273,
+          "working_hours_start": "09:00",
+          "working_hours_end": "18:00",
+          "phone": "+971501234567",
+          "hire_date": "2021-06-01T00:00:00",
+          "is_active": true,
+          "has_custom_schedule": false,
+          "has_flexible_schedule": true,
+          "flexible_hours_per_day": 8.0,
+          "flexible_start_range": "07:00-11:00",
+          "flexible_end_range": "15:00-24:00",
+          "flexible_core_hours": "10:00-15:00",
+          "flexible_days_per_week": 5
+        },
+        "timestamp": "2025-11-03T07:03:59.535864"
+      }
+    ],
+    "Check Attendance Policy": [
+      {
+        "status": "PASS",
+        "details": "Policy status: 200 - {'policy': {'id': 'b6345a9a-9213-44fa-9cfe-0f4cd8f647f8', 'employee_id': 'eed6d28b-7639-4d31-9386-4e99b9179d8f', 'employee_name': 'Jihad', 'start_time': '09:00:00', 'end_time': '18:00:00', 'no_penalties': False, 'early_start_allowed': False, 'end_flexible': False, 'grace_period_minutes': 0, 'custom_working_hours': None, 'effective_from': '2025-10-06', 'effective_until': None, 'created_at': '2025-10-06T13:16:11.469647', 'updated_at': None}}",
+        "data": {
+          "policy": {
+            "id": "b6345a9a-9213-44fa-9cfe-0f4cd8f647f8",
+            "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+            "employee_name": "Jihad",
+            "start_time": "09:00:00",
+            "end_time": "18:00:00",
+            "no_penalties": false,
+            "early_start_allowed": false,
+            "end_flexible": false,
+            "grace_period_minutes": 0,
+            "custom_working_hours": null,
+            "effective_from": "2025-10-06",
+            "effective_until": null,
+            "created_at": "2025-10-06T13:16:11.469647",
+            "updated_at": null
+          }
+        },
+        "timestamp": "2025-11-03T07:03:59.588906"
+      }
+    ],
+    "Flexible Exception Check-in": [
+      {
+        "status": "INFO",
+        "details": "Already checked in today - acceptable",
+        "data": {
+          "detail": "تم تسجيل الحضور مسبقاً اليوم"
+        },
+        "timestamp": "2025-11-03T07:03:59.609294"
+      }
+    ],
+    "Employee Advance Request": [
+      {
+        "status": "INFO",
+        "details": "Advance request: 422 - {'detail': [{'type': 'missing', 'loc': ['body', 'employee_id'], 'msg': 'Field required', 'input': {'transaction_type': 'advance', 'amount': 500.0, 'description': 'طلب سلفة للضرورة', 'notes': 'طلب عاجل'}, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}]}",
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "employee_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "transaction_type": "advance",
+                "amount": 500.0,
+                "description": "طلب سلفة للضرورة",
+                "notes": "طلب عاجل"
+              },
+              "url": "https://errors.pydantic.dev/2.11/v/missing"
+            }
+          ]
+        },
+        "timestamp": "2025-11-03T07:03:59.635446"
+      }
+    ],
+    "Employee Custody Request": [
+      {
+        "status": "INFO",
+        "details": "Custody request: 422 - {'detail': [{'type': 'missing', 'loc': ['body', 'employee_id'], 'msg': 'Field required', 'input': {'transaction_type': 'custody', 'amount': 300.0, 'description': 'طلب عهدة للمشروع', 'notes': 'عهدة مشروع جديد'}, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}]}",
+        "data": {
+          "detail": [
+            {
+              "type": "missing",
+              "loc": [
+                "body",
+                "employee_id"
+              ],
+              "msg": "Field required",
+              "input": {
+                "transaction_type": "custody",
+                "amount": 300.0,
+                "description": "طلب عهدة للمشروع",
+                "notes": "عهدة مشروع جديد"
+              },
+              "url": "https://errors.pydantic.dev/2.11/v/missing"
+            }
+          ]
+        },
+        "timestamp": "2025-11-03T07:03:59.661927"
+      }
+    ],
+    "Custody Settlement": [
+      {
+        "status": "PASS",
+        "details": "Settlement: 200 - {'success': True, 'message': 'تم إرسال طلب تسوية العهدة بنجاح وسيتم مراجعته من الإدارة', 'transaction_id': '06244e39-e3fd-4009-aa59-14c1d4b96509', 'amount': 100.0, 'status': 'pending'}",
+        "data": {
+          "success": true,
+          "message": "تم إرسال طلب تسوية العهدة بنجاح وسيتم مراجعته من الإدارة",
+          "transaction_id": "06244e39-e3fd-4009-aa59-14c1d4b96509",
+          "amount": 100.0,
+          "status": "pending"
+        },
+        "timestamp": "2025-11-03T07:03:59.699910"
+      }
+    ],
+    "Super Admin Notifications": [
+      {
+        "status": "PASS",
+        "details": "Found 40 advance/custody notifications",
+        "data": {
+          "total_notifications": 184,
+          "advance_notifications": 40
+        },
+        "timestamp": "2025-11-03T07:03:59.743450"
+      }
+    ],
+    "Super Admin Edit Transaction": [
+      {
+        "status": "INFO",
+        "details": "Edit: 500 - {'raw_response': 'Internal Server Error'}",
+        "data": {
+          "raw_response": "Internal Server Error"
+        },
+        "timestamp": "2025-11-03T07:03:59.795231"
+      }
+    ],
+    "Super Admin Delete Transaction": [
+      {
+        "status": "PASS",
+        "details": "Delete: 200 - {'success': True, 'message': 'تم حذف المعاملة بنجاح', 'transaction_id': '32e4d308-ab4f-49ca-a1a7-1f0d06b47822'}",
+        "data": {
+          "success": true,
+          "message": "تم حذف المعاملة بنجاح",
+          "transaction_id": "32e4d308-ab4f-49ca-a1a7-1f0d06b47822"
+        },
+        "timestamp": "2025-11-03T07:03:59.821499"
+      }
+    ],
+    "Balance Update Verification": [
+      {
+        "status": "PASS",
+        "details": "Balances after edit/delete: 200 - Found 5 employees",
+        "data": {
+          "employee_count": 5
+        },
+        "timestamp": "2025-11-03T07:03:59.852684"
+      }
+    ],
+    "Payment Registration Data": [
+      {
+        "status": "FAIL",
+        "details": "❌ Unexpected response structure: <class 'dict'>",
+        "data": {
+          "employees": [
+            {
+              "employee_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+              "employee_name": "Jihad",
+              "remaining_advance": 6652.536231884058,
+              "remaining_custody": 527.463768115942,
+              "total_remaining": 7180.0
+            },
+            {
+              "employee_id": "83da4c33-c9c2-42cd-9b82-dea36ff1f05d",
+              "employee_name": "Tarek Wazzan",
+              "remaining_advance": 2000.0,
+              "remaining_custody": 870.0,
+              "total_remaining": 2870.0
+            },
+            {
+              "employee_id": "33d2d833-f414-4b0c-920d-35e3ca4f853c",
+              "employee_name": "Mohamed Mostafa",
+              "remaining_advance": 1000.0,
+              "remaining_custody": 0.0,
+              "total_remaining": 1000.0
+            },
+            {
+              "employee_id": "48613bd9-9007-441f-9495-095408c49889",
+              "employee_name": "Hatem Mohamed Ahmed",
+              "remaining_advance": 0.0,
+              "remaining_custody": 350.0,
+              "total_remaining": 350.0
+            },
+            {
+              "employee_id": "hatem_tan_seeq_001",
+              "employee_name": "حاتم محمد",
+              "remaining_advance": 0.0,
+              "remaining_custody": 70.0,
+              "total_remaining": 70.0
+            }
+          ],
+          "count": 5
+        },
+        "timestamp": "2025-11-03T07:03:59.883852"
+      }
+    ],
+    "Employee Balance Check": [
+      {
+        "status": "PASS",
+        "details": "✅ Employee balance: 7180.0 AED available (Advance: 6652.536231884058, Custody: 527.463768115942)",
+        "data": {
+          "employee_name": "Jihad",
+          "total_advances": 7625.0,
+          "total_custody": 1000.0,
+          "total_expenses": 345.0,
+          "remaining_advance": 6652.536231884058,
+          "remaining_custody": 527.463768115942,
+          "total_available": 7180.0,
+          "last_transaction_date": "2025-10-07T06:01:13.879924+00:00"
+        },
+        "timestamp": "2025-11-03T07:03:59.905349"
+      }
+    ],
+    "Admin All Transactions": [
+      {
+        "status": "PASS",
+        "details": "✅ Retrieved 48 total transactions",
+        "data": {
+          "transaction_count": 48
+        },
+        "timestamp": "2025-11-03T07:03:59.934403"
+      }
+    ],
+    "Admin Pending Approvals": [
+      {
+        "status": "PASS",
+        "details": "✅ Found 3 pending transactions",
+        "data": {
+          "pending_count": 3
+        },
+        "timestamp": "2025-11-03T07:03:59.955390"
+      }
+    ]
+  }
+}
