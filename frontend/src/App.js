@@ -493,6 +493,7 @@ const Layout = ({ children }) => {
     { name: 'الإجازات', href: '/leaves', icon: CalendarIcon },
     { name: 'الزيارات الخارجية', href: '/field-exits', icon: DocumentTextIcon },
     { name: 'الزيارات التسويقية', href: '/marketing-visits', icon: BuildingOfficeIcon },
+    { name: 'السُلف والعُهد', href: '/advances', icon: BanknotesIcon }, // NEW: للموظفين
     { name: 'خصوماتي', href: '/my-deductions', icon: CalculatorIcon },
     
     // قسم الإدارة - للمديرين والسوبر أدمن
