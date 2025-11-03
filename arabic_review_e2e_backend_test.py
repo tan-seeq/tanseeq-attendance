@@ -71,11 +71,14 @@ class ArabicReviewE2ETest:
     async def log_test(self, test_name: str, status: str, details: str, response_data: Any = None):
         """Log test result"""
         self.results["total_tests"] += 1
+        self.results["test_summary"]["total_tests"] += 1
         
         if status == "PASS":
             self.results["passed_tests"] += 1
+            self.results["test_summary"]["passed_tests"] += 1
         else:
             self.results["failed_tests"] += 1
+            self.results["test_summary"]["failed_tests"] += 1
             
         log_entry = {
             "timestamp": datetime.now().isoformat(),
