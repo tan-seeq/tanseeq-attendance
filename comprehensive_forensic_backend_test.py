@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import uuid
 
 # Configuration
-BACKEND_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
+BACKEND_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
 
 # Test Credentials as specified in review
 TEST_CREDENTIALS = {

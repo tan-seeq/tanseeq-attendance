@@ -25,7 +25,7 @@
       }
     },
     "preview": {
-      "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
+      "base_url": "https://attend-deduct-hr.preview.emergentagent.com/api",
       "healthz": {
         "status": "healthy",
         "latency_ms": 55.95,

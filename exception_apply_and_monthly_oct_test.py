@@ -17,7 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
+BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
 EVIDENCE_DIR = Path("/app/evidence")
 EVIDENCE_DIR.mkdir(exist_ok=True)
 

@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Test Configuration
-BASE_URL = "https://attendance-pro-43.preview.emergentagent.com/api"
+BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
 TEST_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

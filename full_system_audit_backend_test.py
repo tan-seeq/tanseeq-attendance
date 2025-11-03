@@ -5,7 +5,7 @@ Full System Audit for Tanseeq HR as requested in review
 
 Target environments:
 1) Production: https://hrapp-tanseeq-replaced-1761028071.emergent.host/api
-2) Preview: https://attendance-pro-43.preview.emergentagent.com/api
+2) Preview: https://attend-deduct-hr.preview.emergentagent.com/api
 
 Scope: Health checks, Authentication & RBAC, Read-only integrity, Deductions engine,
 Security checks, Performance snapshot with comprehensive evidence collection.
@@ -23,7 +23,7 @@ import os
 # Test Configuration
 ENVIRONMENTS = {
     "production": "https://hrapp-tanseeq-replaced-1761028071.emergent.host/api",
-    "preview": "https://attendance-pro-43.preview.emergentagent.com/api"
+    "preview": "https://attend-deduct-hr.preview.emergentagent.com/api"
 }
 
 # Test Credentials

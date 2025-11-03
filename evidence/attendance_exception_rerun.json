@@ -2,7 +2,7 @@
   "test_execution": {
     "timestamp": "2025-10-30T06:01:50.663341+00:00",
     "test_type": "Attendance Exception Rerun Test",
-    "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
+    "base_url": "https://attend-deduct-hr.preview.emergentagent.com/api",
     "super_admin": "hatem@tan-seeq.co"
   },
   "summary": {

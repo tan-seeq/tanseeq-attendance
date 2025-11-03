@@ -22,7 +22,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://attendance-pro-43.preview.emergentagent.com"
+BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com"
 SUPER_ADMIN_EMAIL = "hatem@tan-seeq.co"
 SUPER_ADMIN_PASSWORD = "hatem123"
 TARGET_MONTH = "2025-10"

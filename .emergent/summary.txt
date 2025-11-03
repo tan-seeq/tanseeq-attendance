@@ -1,129 +1,79 @@
 <analysis>
-The trajectory details an iterative, highly challenging development and debugging process for the TANSEEQ HR Advanced Attendance Deduction System. Initially, the AI engineer focused on re-implementing complex, company-specific deduction rules in  and  after the user reported inaccuracies. This included grace periods, half/full-day deductions, and employee exemptions (Hatem, Tariq). The core logic was eventually fixed and validated in the preview environment. However, deploying these fixes to production became the central, recurring problem. This involved multiple attempts at GitHub saves, redeployments from different branches, addressing perceived frontend caching, and even database data resets. Ultimately, the root cause was diagnosed as conflicting imports in  where the old deduction logic was overriding the new, alongside persistent issues with the deployment system caching old code versions. Despite the code being locally correct and working in preview, these deployment hurdles led to user frustration and a decision to move to a new fork.
+The development trajectory details an iterative process focused on stabilizing and enhancing the TANSEEQ HR Advanced Attendance Deduction System. Key phases involved re-implementing complex deduction rules, fixing  errors that blocked  and configuration reads, and addressing persistent frontend build and deployment issues. The AI engineer has consistently tackled challenges related to specific employee exceptions (Hatem, Tariq, Karim, Hesham), a Calibration Mode for October, and payroll UI enhancements. Recurring problems include incorrect deductions, login failures due to email mismatch or frontend URL misconfiguration, and missing Daily Breakdown details in the UI. Most recently, the AI initiated a comprehensive audit, implemented live monitoring, and is actively resolving Tarek's check-in problem by ensuring exception rules are read from the database rather than the user profile. The system is progressively being refined, with a strong emphasis on debugging and ensuring data consistency across the backend and frontend.
 </analysis>
 
 <product_requirements>
-The TANSEEQ HR application requires an Advanced Attendance Deduction System for late arrival, early departure, and under-hours deductions, with configurable and consistent rules. Key specifications include:
-*   **Working Hours:** 09:00-18:00 (540 min).
-*   **Grace Period:** First 15 minutes late (up to 4 instances) are free; thereafter, all accumulated late minutes are deducted.
-*   **Lateness Penalties:** >20 minutes late (single instance) incurs actual time deduction; 1-2 hours late is a half-day deduction; >2 hours late is a full-day deduction.
-*   **Absence:** Full  deduction.
-*   **Calculation Formula:** .
-*   **Rounding:** Two decimal places.
-*   **Employee Exclusions:** Hatem (flexible hours, no late/early deductions); Tariq (flexible hours, no late/early deductions, only absence deducted).
-The system needs unified calculation logic (), a daily breakdown display (date, status, check-in/out, working hours, late/early/deficit minutes, daily deduction, notes), payroll cycle integration (display , , , , ), and data consistency (timezone: Asia/Dubai). Technical requirements emphasize Idempotency, correct API routing ( prefix), proper environment variable usage, and robust error handling.
+The TANSEEQ HR application requires an Advanced Attendance Deduction System for late arrival, early departure, and under-hours based on 09:00-18:00 working hours. Rules include a 15-minute grace period (up to 4 times), actual deduction for >20 mins late, half-day for 1-2 hours late, and full-day for >2 hours late or full absence. Deduction calculation: . Specific exceptions: Hatem (fully exempt), Tariq Al-Wazzan (flexible hours, only full absence deducted), and Karim/Hesham (partial-flex - late only if after 9:00 AM, no grace; no early/under-hours deduction, no overtime before 9 AM). The system requires unified calculation logic, daily breakdown display, and payroll cycle integration. A Calibration Mode for October 2025 has specific rules: Absence = Monthly Salary / 30, DailyRate = (Monthly Salary / 30) / 540, and a No-data No-deduction safeguard. The Payroll UI needs simplification with specific columns, manual overrides, salary letter generation (HTML/PDF), and export options (ZIP, Excel). Additionally, there's a need to manage advances (repayment, edit, delete) and fix recurring login and Daily Breakdown issues.
 </product_requirements>
 
 <key_technical_concepts>
--   **Backend**: FastAPI, MongoDB (Motor), Pydantic,  (core logic),  (unified logic), Idempotency, JWT, RBAC.
--   **Frontend**: React.js, Axios, Tailwind CSS, , environment variables ().
--   **Database**: MongoDB, UUIDs for IDs.
--   **Deployment**: Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:07
-code-server                      RUNNING   pid 28, uptime 0:00:07
-frontend                         STOPPING  
-mongodb                          RUNNING   pid 30, uptime 0:00:07
-supervisor> , browser caching.
+- **Backend:** FastAPI, MongoDB (Motor,  proxy), Pydantic,  (unified logic), JWT, RBAC, , .
+- **Frontend:** React.js, Axios, Babel/Craco (JSX, optional chaining, nullish coalescing).
+- **Database:** MongoDB, UUIDs for IDs, collections for , , .
+- **Deployment:** Kubernetes (Kaniko), backend                          RUNNING   pid 28, uptime 0:00:07
+code-server                      RUNNING   pid 30, uptime 0:00:07
+frontend                         RUNNING   pid 31, uptime 0:00:07
+mongodb                          RUNNING   pid 32, uptime 0:00:07
+supervisor> .
 </key_technical_concepts>
 
 <code_architecture>
-The application uses a monorepo structure with a React frontend and a FastAPI backend.
 
-
-
--   ****: The core FastAPI application, handling all API endpoints.
-    -   **Importance**: Central routing and logic.
-    -   **Changes Made**: Initial logic for  and  was updated to use . The  endpoint was updated to return granular deduction fields. **Crucially, conflicting imports for  and  from  were removed to ensure 's logic was correctly applied.**
--   ****: Contains core deduction logic.
-    -   **Importance**: Implements business rules for late/absence/under-hours deductions.
-    -   **Changes Made**: Extensively re-written to accurately implement company-specific rules, including complex grace periods, half-day/full-day deductions, and flexible hours for Hatem/Tariq. Helper functions , , and  were updated, and logic to track  for grace periods and handle Tarek's flexible schedule was added.
--   ****: A service for unified deduction logic.
-    -   **Importance**: Designed to be the single source of truth for deduction calculations.
-    -   **Changes Made**: Modified to specifically handle the 15-minute grace period (up to 4 times) and the exemptions for Tarek Wazzan.
--   **🔄 Populating October 2025 attendance data...
-👥 Found 13 active employees
-📅 Working days in cycle: 22
-🗑️  Deleted 286 existing records
-
-👤 Hatem Mohamed Ahmed (Salary: 5500.00 AED)
-   ✅ Exempt employee - adding normal attendance
-
-👤 Jihad (Salary: 2700.00 AED)
-   📋 Normal attendance pattern
-
-👤 Tarek Wazzan (Salary: 4000.00 AED)
-   📋 Normal attendance pattern
-
-👤 Tarek Hegazy (Salary: 5000.00 AED)
-   📋 Normal attendance pattern
-
-👤 Kareem (Salary: 2500.00 AED)
-   📋 Normal attendance pattern
-
-👤 Hesham (Salary: 2500.00 AED)
-   🎯 Target: 39.17 AED → Need ~186 late minutes
-
-👤 Mohamed Mostafa (Salary: 3500.00 AED)
-   🎯 Target: 297.74 AED with 2 absences + 154 late minutes (14 times)
-
-👤 Mahmoud (Salary: 5000.00 AED)
-   📋 Normal attendance pattern
-
-👤 Howaida (Salary: 5000.00 AED)
-   📋 Normal attendance pattern
-
-👤 Hatem Mohamed (Salary: 15000.00 AED)
-   ✅ Exempt employee - adding normal attendance
-
-👤 حاتم محمد (Salary: 15000.00 AED)
-   ✅ Exempt employee - adding normal attendance
-
-👤 مدير النظام (Salary: 15000.00 AED)
-   📋 Normal attendance pattern
-
-👤 max (Salary: 5000.00 AED)
-   📋 Normal attendance pattern
-
-✅ Inserted 286 attendance records
-
-📊 Summary:
-   Total records: 286
-   Employees: 13
-   Working days: 22
-   Cycle: 2025-09-29 to 2025-10-28
-
-✅ October 2025 attendance population complete!**: Temporary script.
-    -   **Importance**: Used to generate initial dummy attendance data for testing.
-    -   **Changes Made**: Created and later modified to correctly map employee names.
--   ****: Temporary script.
-    -   **Importance**: Used to verify and clean duplicate attendance records. No duplicates were found.
--   ****: Temporary script.
-    -   **Importance**: Used to import actual October 2025 attendance data.
-    -   **Changes Made**: Created and then modified to correctly map employee names.
--   ****: Temporary script.
-    -   **Importance**: Used to manually add an advance payment for Mohamed Mostafa.
-    -   **Changes Made**: Created and executed.
--   ****: Advanced Attendance Deductions UI.
-    -   **Importance**: UI for configuring/viewing deductions and displaying daily breakdowns.
-    -   **Changes Made**: Updated display of deduction rules, visual indicator for unified engine, expanded daily breakdown, fixed API call from  to , and added date validation.
--   ****: Displays payroll cycle summary.
-    -   **Importance**: Critical for viewing employee payroll and detailed deductions.
-    -   **Changes Made**: Modified to display new detailed deduction fields, widened layout to , enlarged input fields/table headers for better visibility.
--   ****: Backend environment variables.
-    -   **Importance**: Configures  and .
-    -   **Changes Made**:  was explicitly set to  to resolve a configuration error.
+- ****: Core FastAPI application for API routing.
+  - **Importance**: Central hub for all API endpoints including attendance, deductions, payroll, and now advance management and live monitoring.
+  - **Changes**: Extensively modified to fix  subscriptability, apply exception logic in  and deductions, add new API endpoints for exception management (), and implement advance repayment, edit, and delete functionalities (, , ). Also, added live monitoring middleware and endpoints (). Login logic updated for case-insensitivity and whitespace trimming. Deductions calculation endpoints () were unified to return  and  consistently.
+- ****: Unified deduction logic service.
+  - **Importance**: Single source of truth for applying complex attendance deduction rules and exceptions.
+  - **Changes**: Modified to incorporate , , and  exception types. Logic for  was tightened to only count late deductions after 09:00 without grace, and ignore early/under-hours. Improved parsing of working hours and check-in/out times to handle various formats (e.g., hrs 9.90, Arabic numbers).
+- ****: Service for managing application configurations.
+  - **Importance**: Centralizes access to database-stored configurations, especially employee exceptions.
+  - **Changes**: Fixed a bug where  was incorrectly read, ensuring proper retrieval of , , and  types.
+- ****: Database client setup.
+  - **Importance**: Manages MongoDB connection.
+  - **Changes**: Crucially updated to support subscriptable access () for  objects, resolving a  that blocked various operations including check-in.
+- ****: Model for employee advances and transactions.
+  - **Importance**: Defines the data structure for advances, loans, and their repayment transactions.
+  - **Changes**: Created/modified to support new advance repayment, edit, and delete features, including various repayment methods (cash, bank, salary deduction).
+- ****: Main application component.
+  - **Importance**: Handles routing, authentication, and core UI structure.
+  - **Changes**: Modified  usage to prevent double  prefixing, addressing login Not Found errors.  logic was reviewed but the core fix was backend-centric for exceptions.
+- ****: UI for advanced deductions.
+  - **Importance**: Displays calculation results and detailed daily breakdowns.
+  - **Changes**: Updated to correctly interpret  (or ) and display  (with fallback to ) to resolve the Daily Breakdown missing issue. Also updated to support various working hours display formats.
+- ****: UI for managing employee advances.
+  - **Importance**: Allows Super Admins to create, approve, and now repay, edit, and delete advance transactions.
+  - **Changes**: Heavily modified to fix a JSX syntax error that caused deployment failures. Implemented the Record Repayment modal with fields for amount, date, method (cash, bank, salary deduction), reference, and notes. Enabled edit/delete buttons for advance transactions for Super Admins.
+- ****: Frontend environment variables.
+  - **Importance**: Configures .
+  - **Changes**: Updated  to the correct production base URL (without the  suffix) to resolve  and Not Found issues on client-side API calls.
 </code_architecture>
 
 <pending_tasks>
-- Verify PDF/Excel exports include new absence and lateness fields once calculations are fully validated in a stable production environment.
-- Ensure consistent and correct deployment of all code changes to the production environment to reflect the fixed deduction logic. This involves resolving underlying platform-level caching or versioning issues that prevent  from receiving updates.
+- Building the Mini Admin UI at  for Exceptions and Import Mapping with add/edit/remove functionality and audit logging.
+- Delivering two sample PDFs (different employees) matching the on-screen HTML exactly.
+- Providing a screenshot/log proving the Auto-off of October calibration after 2025-10-31, including an audit log entry.
+- Summarizing the 4 seeded user_ids for exceptions and their applied types, including resolution logic for ambiguous names.
+- Demonstrating an import test using a variant name mapped correctly via .
+- Final confirmation that the PDF filename pattern is .
+- Addressing recurring login issues and employee check-in problems for Tarek, and ensuring Advanced Deductions and Daily Breakdown are fully functional and stable.
+- The overall Zero-defect technical report from the comprehensive audit requested.
+- Implementing an in-UI dashboard at  for live metrics.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer had successfully identified and resolved the fundamental code error: conflicting imports in  that caused the application to use outdated deduction logic despite other code changes. After removing these conflicting imports and restarting the backend, local testing confirmed that the deduction calculations were 100% correct, aligning with all complex business rules, including grace periods and employee exemptions (Tarek: 0 AED, Hatem: 0 AED, Mohamed Mostafa: 354.68 AED, Total: ~442 AED).
+The AI engineer is currently in a phase of deep debugging and system stabilization, following repeated reports of recurring issues from the user. Immediately before this summary, the user expressed significant frustration that Advanced Deductions were not working, and the Daily Breakdown details had disappeared (Chat Message 403, 405). The user also previously reported employees (specifically Tarek) still facing check-in problems (Chat Message 431, 436), and general login failures despite previous fixes (Chat Message 369, 385).
 
-The preceding several interactions were dominated by persistent, unresolved deployment issues. The user repeatedly reported that the production environment () continued to display old, incorrect calculations despite numerous redeployment attempts (using Deploy button, Save to GitHub, merging branches, shutting down and replacing deployments). Investigations by various agents (troubleshoot, deployment, support) indicated issues ranging from frontend caching to database environment mismatches, and ultimately, a system-level caching problem where the deployment environment wasn't reflecting the latest code from GitHub. Despite the code being functionally correct in the preview environment, these deployment challenges created significant user frustration. The AI engineer's current state is having a locally and preview-tested, working backend, but an intractable deployment problem preventing the fix from reaching the production URL.
+The AI's immediate focus, as confirmed in Chat Message 414 and 436, is a comprehensive hotfix and audit on the production environment to address these issues. Key actions being taken include:
+1.  **Daily Breakdown & Advanced Deductions Fix**:
+    *   **Backend**: Unifying the deduction calculation API response to consistently include  (alongside  for backward compatibility) and ensuring each employee's entry contains . If only  is present, it's being converted to . The cycle window for  is also being corrected.
+    *   **Frontend**: Updating  to correctly display  from  (with fallback to ) and support various working hours display formats.
+2.  **Tarek's Check-in Fix**: The AI identified that Tarek's check-in issue stemmed from the  endpoint relying on  instead of the more accurate  from the database. The AI is modifying this endpoint to correctly classify users (exempt, flex, partial-flex) based on DB exceptions.
+3.  **Login Stability**: Previous fixes for case-insensitive email login and whitespace trimming are being reinforced, along with frontend  configuration to prevent double  prefixes.
+4.  **Live Monitoring**: Live streaming endpoints (, , ) have been implemented and are awaiting full deployment to production for real-time audit monitoring.
+
+The work is being conducted in a read-only audit mode on production, with live progress updates streamed via the new API endpoints. The estimated time for the current hotfix and verification is 60-90 minutes, with a comprehensive report expected within 4-6 hours.
 </current_work>
 
 <optional_next_step>
-Provide the detailed report summarizing the work and issues, as requested by the user.
+The next step is to complete the ongoing hotfix for Daily Breakdown and Tarek's check-in, then request the user to test and confirm the resolution.
 </optional_next_step>

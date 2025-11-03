@@ -1,6 +1,6 @@
 {
   "test_timestamp": "2025-11-02T06:08:40.883328",
-  "base_url": "https://attendance-pro-43.preview.emergentagent.com/api",
+  "base_url": "https://attend-deduct-hr.preview.emergentagent.com/api",
   "authentication": {
     "status": "success",
     "user_name": "مدير النظام",

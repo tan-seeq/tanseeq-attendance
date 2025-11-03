@@ -1,7 +1,7 @@
 # RBAC Testing Summary - Arabic Review Scenario 1
 
 ## Test Environment
-- **URL**: https://attendance-pro-43.preview.emergentagent.com
+- **URL**: https://attend-deduct-hr.preview.emergentagent.com
 - **Timezone**: Asia/Dubai
 - **Date**: October 20, 2025
 

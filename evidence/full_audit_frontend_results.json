@@ -2,7 +2,7 @@
   "test_name": "Comprehensive Frontend Audit - Tanseeq HR",
   "timestamp": "2025-11-02T05:26:31.336177",
   "environment": "Production UI",
-  "url": "https://attendance-pro-43.preview.emergentagent.com",
+  "url": "https://attend-deduct-hr.preview.emergentagent.com",
   "tests": [],
   "screenshots": [
     "01_login_page.png"
@@ -11,7 +11,7 @@
   "test_name": "Comprehensive Frontend Audit - Tanseeq HR System",
   "timestamp": "2025-01-02T05:27:17.000000",
   "environment": "Production UI",
-  "url": "https://attendance-pro-43.preview.emergentagent.com",
+  "url": "https://attend-deduct-hr.preview.emergentagent.com",
   "scope": "Full System Audit (Frontend) - Data-safety Option A (QA test user only; no destructive actions)",
   "target_environments": [
     {
@@ -21,7 +21,7 @@
     },
     {
       "name": "Preview UI", 
-      "url": "https://attendance-pro-43.preview.emergentagent.com",
+      "url": "https://attend-deduct-hr.preview.emergentagent.com",
       "status": "Tested successfully"
     }
   ],

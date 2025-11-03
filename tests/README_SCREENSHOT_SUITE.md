@@ -116,7 +116,7 @@ The script uses the following configuration (can be modified in the script):
 
 ```python
 # Base URL
-base_url = "https://attendance-pro-43.preview.emergentagent.com"
+base_url = "https://attend-deduct-hr.preview.emergentagent.com"
 
 # Screenshot settings
 viewport = {"width": 1920, "height": 800}
