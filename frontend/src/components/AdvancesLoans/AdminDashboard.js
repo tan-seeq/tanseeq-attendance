@@ -69,6 +69,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchEmployeesWithBalances(); // NEW: جلب الموظفين الذين لديهم رصيد نشط
   }, []);
 
   const fetchDashboardData = async () => {
@@ -93,6 +94,16 @@ const AdminDashboard = () => {
       console.error('Error fetching admin dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // NEW: جلب الموظفين الذين لديهم رصيد سلف/عهد نشط
+  const fetchEmployeesWithBalances = async () => {
+    try {
+      const response = await axios.get(`${API}/advances/admin/employees-with-balances`);
+      setEmployeesWithBalances(response.data.employees || []);
+    } catch (error) {
+      console.error('Error fetching employees with balances:', error);
     }
   };
 
