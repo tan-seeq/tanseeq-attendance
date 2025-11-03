@@ -2354,6 +2354,309 @@ async def set_expense_deduction_source(
     }
 
 # ====================
+# NEW: EMPLOYEE ADVANCE/CUSTODY REQUEST ENDPOINTS
+# ====================
+
+@api_router.post("/advances/request")
+async def request_advance_or_custody(
+    request: CreateAdvanceRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """طلب سلفة أو عهدة من الموظف - يحتاج موافقة السوبر أدمن"""
+    
+    # إنشاء المعاملة بحالة Pending
+    transaction = AdvanceTransaction(
+        employee_id=current_user.id,
+        employee_name=current_user.name,
+        transaction_type=request.transaction_type,
+        amount=request.amount,
+        description=request.description,
+        category=request.category,
+        expense_date=request.expense_date,
+        status=TransactionStatus.PENDING,  # يحتاج موافقة
+        notes=request.notes,
+        created_by=current_user.id
+    )
+    
+    # حفظ في قاعدة البيانات
+    transaction_dict = AdvancesDB.transaction_to_dict(transaction)
+    await db.advance_transactions.insert_one(transaction_dict)
+    
+    # إرسال إشعار للسوبر أدمن
+    await send_advance_request_notification(current_user, transaction)
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        f"advance_{request.transaction_type}_requested",
+        f"طلب {TRANSACTION_TYPE_AR[request.transaction_type]} بمبلغ {request.amount} درهم"
+    )
+    
+    return {
+        "success": True,
+        "message": f"تم إرسال طلب {TRANSACTION_TYPE_AR[request.transaction_type]} بنجاح وسيتم مراجعته من الإدارة",
+        "transaction_id": transaction.id,
+        "amount": request.amount,
+        "status": "pending"
+    }
+
+@api_router.post("/advances/custody-settlement")
+async def settle_custody(
+    settlement_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """تسوية العهدة (رد العهدة) من الموظف"""
+    
+    amount = settlement_data.get("amount")
+    notes = settlement_data.get("notes", "")
+    settlement_date = settlement_data.get("settlement_date")
+    
+    if not amount or not settlement_date:
+        raise HTTPException(status_code=400, detail="المبلغ وتاريخ التسوية مطلوبان")
+    
+    # التحقق من رصيد العهدة
+    balance = await AdvancesDB.calculate_employee_balance(db, current_user.id)
+    if balance.remaining_custody <= 0:
+        raise HTTPException(status_code=400, detail="لا يوجد رصيد عهدة متبقي للتسوية")
+    
+    if float(amount) > balance.remaining_custody:
+        raise HTTPException(
+            status_code=400,
+            detail=f"المبلغ المطلوب ({amount} درهم) يتجاوز رصيد العهدة المتبقي ({balance.remaining_custody} درهم)"
+        )
+    
+    # إنشاء معاملة تسوية/رد
+    transaction = AdvanceTransaction(
+        employee_id=current_user.id,
+        employee_name=current_user.name,
+        transaction_type=TransactionType.RETURN,
+        amount=float(amount),
+        description=f"تسوية عهدة - {notes}" if notes else "تسوية عهدة",
+        expense_date=settlement_date,
+        status=TransactionStatus.PENDING,  # يحتاج موافقة السوبر أدمن
+        notes=notes,
+        created_by=current_user.id
+    )
+    
+    # حفظ في قاعدة البيانات
+    transaction_dict = AdvancesDB.transaction_to_dict(transaction)
+    await db.advance_transactions.insert_one(transaction_dict)
+    
+    # إرسال إشعار للسوبر أدمن
+    await send_custody_settlement_notification(current_user, transaction)
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "custody_settlement_requested",
+        f"طلب تسوية عهدة بمبلغ {amount} درهم"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم إرسال طلب تسوية العهدة بنجاح وسيتم مراجعته من الإدارة",
+        "transaction_id": transaction.id,
+        "amount": amount,
+        "status": "pending"
+    }
+
+# ====================
+# NEW: SUPER ADMIN EDIT/DELETE ENDPOINTS
+# ====================
+
+@api_router.put("/advances/{transaction_id}/edit")
+async def edit_transaction(
+    transaction_id: str,
+    edit_data: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """تعديل معاملة سلفة/عهدة - Super Admin Only (حتى بعد الموافقة)"""
+    
+    # البحث عن المعاملة
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    # تحضير بيانات التحديث
+    update_fields = {}
+    
+    if "amount" in edit_data:
+        update_fields["amount"] = float(edit_data["amount"])
+    
+    if "description" in edit_data:
+        update_fields["description"] = edit_data["description"]
+    
+    if "notes" in edit_data:
+        update_fields["notes"] = edit_data["notes"]
+    
+    if "expense_date" in edit_data:
+        update_fields["expense_date"] = edit_data["expense_date"]
+    
+    if "category" in edit_data:
+        update_fields["category"] = edit_data["category"]
+    
+    # إضافة بيانات التحديث
+    update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_fields["updated_by"] = current_user.id
+    
+    # تحديث المعاملة
+    result = await db.advance_transactions.update_one(
+        {"id": transaction_id},
+        {"$set": update_fields}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="لم يتم التحديث")
+    
+    # تحديث رصيد الموظف
+    await update_employee_balance(transaction["employee_id"])
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "advance_transaction_edited",
+        f"تعديل معاملة للموظف {transaction['employee_name']} (ID: {transaction_id})"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم تعديل المعاملة بنجاح",
+        "transaction_id": transaction_id
+    }
+
+@api_router.delete("/advances/{transaction_id}")
+async def delete_transaction(
+    transaction_id: str,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """حذف معاملة سلفة/عهدة - Super Admin Only (حتى بعد الموافقة)"""
+    
+    # البحث عن المعاملة
+    transaction = await db.advance_transactions.find_one({"id": transaction_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    
+    employee_id = transaction["employee_id"]
+    employee_name = transaction["employee_name"]
+    
+    # حذف المعاملة
+    result = await db.advance_transactions.delete_one({"id": transaction_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=400, detail="فشل الحذف")
+    
+    # تحديث رصيد الموظف
+    await update_employee_balance(employee_id)
+    
+    # تسجيل النشاط
+    await log_activity(
+        current_user.id,
+        "advance_transaction_deleted",
+        f"حذف معاملة للموظف {employee_name} (ID: {transaction_id})"
+    )
+    
+    return {
+        "success": True,
+        "message": "تم حذف المعاملة بنجاح",
+        "transaction_id": transaction_id
+    }
+
+# ====================
+# NEW: GET EMPLOYEES WITH ACTIVE BALANCES FOR REPAYMENT
+# ====================
+
+@api_router.get("/advances/admin/employees-with-balances")
+async def get_employees_with_active_balances(current_user: User = Depends(get_super_admin_user)):
+    """الحصول على جميع الموظفين الذين لديهم رصيد سلف/عهد نشط - Super Admin Only"""
+    
+    # الحصول على جميع الموظفين الذين لديهم معاملات
+    employee_ids = await db.advance_transactions.distinct("employee_id")
+    
+    employees_with_balances = []
+    for employee_id in employee_ids:
+        # حساب الرصيد
+        balance = await AdvancesDB.calculate_employee_balance(db, employee_id)
+        
+        # فقط الموظفين الذين لديهم رصيد متبقي (سلفة أو عهدة)
+        total_remaining = balance.remaining_advance + balance.remaining_custody
+        if total_remaining > 0:
+            employees_with_balances.append({
+                "employee_id": balance.employee_id,
+                "employee_name": balance.employee_name,
+                "remaining_advance": balance.remaining_advance,
+                "remaining_custody": balance.remaining_custody,
+                "total_remaining": total_remaining
+            })
+    
+    # ترتيب حسب إجمالي المبلغ المتبقي
+    employees_with_balances.sort(key=lambda x: x["total_remaining"], reverse=True)
+    
+    return {
+        "employees": employees_with_balances,
+        "count": len(employees_with_balances)
+    }
+
+# ====================
+# NOTIFICATION HELPER FUNCTIONS
+# ====================
+
+async def send_advance_request_notification(employee, transaction):
+    """إرسال إشعار للسوبر أدمن عند طلب سلفة/عهدة من موظف"""
+    
+    super_admins = await db.users.find({"role": "super_admin"}).to_list(10)
+    
+    message = f"""💰 طلب {TRANSACTION_TYPE_AR[TransactionType(transaction.transaction_type)]} جديد
+    
+👤 الموظف: {employee.name}
+💵 المبلغ: {transaction.amount} درهم
+📝 الوصف: {transaction.description}
+📅 التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+
+يرجى مراجعة الطلب للموافقة أو الرفض."""
+
+    for admin in super_admins:
+        notification = Notification(
+            recipient_id=admin["id"],
+            recipient_name=admin["name"],
+            sender_id=employee.id,
+            sender_name=employee.name,
+            subject=f"💰 طلب {TRANSACTION_TYPE_AR[TransactionType(transaction.transaction_type)]} - {employee.name}",
+            message=message,
+            type="info",
+            priority="high",
+            sent_at=datetime.utcnow()
+        )
+        await db.notifications.insert_one(notification.dict())
+
+async def send_custody_settlement_notification(employee, transaction):
+    """إرسال إشعار للسوبر أدمن عند طلب تسوية عهدة"""
+    
+    super_admins = await db.users.find({"role": "super_admin"}).to_list(10)
+    
+    message = f"""✅ طلب تسوية عهدة
+    
+👤 الموظف: {employee.name}
+💵 المبلغ: {transaction.amount} درهم
+📅 التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+📝 ملاحظات: {transaction.notes or 'لا توجد'}
+
+يرجى مراجعة الطلب للموافقة."""
+
+    for admin in super_admins:
+        notification = Notification(
+            recipient_id=admin["id"],
+            recipient_name=admin["name"],
+            sender_id=employee.id,
+            sender_name=employee.name,
+            subject=f"✅ طلب تسوية عهدة - {employee.name}",
+            message=message,
+            type="info",
+            priority="high",
+            sent_at=datetime.utcnow()
+        )
+        await db.notifications.insert_one(notification.dict())
+
+# ====================
 # ADVANCED ATTENDANCE & DEDUCTIONS API
 # ====================
 
