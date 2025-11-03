@@ -115,7 +115,7 @@ class EmployeeBalance(BaseModel):
 
 # Request Models
 class CreateAdvanceRequest(BaseModel):
-    employee_id: str
+    employee_id: Optional[str] = None  # Optional - يتم أخذه من current_user إذا لم يتم تحديده
     transaction_type: TransactionType
     amount: float = Field(..., gt=0)
     description: str = Field(..., min_length=5)
