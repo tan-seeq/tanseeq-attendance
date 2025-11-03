@@ -392,10 +392,23 @@ const AdminDashboard = () => {
       {/* Repay Button Modal Trigger */}
       <button
         onClick={() => {
-          const firstUser = data.allBalances[0];
-          if (!firstUser) { return alert('لا يوجد موظفون لديهم أرصدة مسجلة'); }
-          setSelectedTransaction({ employee_id: firstUser.employee_id, employee_name: firstUser.employee_name });
-          setRepayForm({ employee_id: firstUser.employee_id, amount: '', repayment_date: new Date().toISOString().split('T')[0], method: 'cash', reference: '', notes: '', salary_month: '' });
+          if (employeesWithBalances.length === 0) {
+            return alert('لا يوجد موظفون لديهم أرصدة نشطة');
+          }
+          const firstEmployee = employeesWithBalances[0];
+          setSelectedTransaction({ 
+            employee_id: firstEmployee.employee_id, 
+            employee_name: firstEmployee.employee_name 
+          });
+          setRepayForm({ 
+            employee_id: firstEmployee.employee_id, 
+            amount: '', 
+            repayment_date: new Date().toISOString().split('T')[0], 
+            method: 'cash', 
+            reference: '', 
+            notes: '', 
+            salary_month: '' 
+          });
           setShowRepayModal(true);
         }}
         className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
