@@ -857,15 +857,13 @@ const AdminDashboard = () => {
                 <h3 className="text-xl font-bold text-gray-900">تسجيل سداد سُلفة/عُهدة</h3>
                 <button onClick={() => setShowRepayModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                <p className="text-sm text-gray-600"><strong>الموظف:</strong> {selectedTransaction?.employee_name || '—'}</p>
-              </div>
+              
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 try {
                   const token = localStorage.getItem('token');
                   const payload = {
-                    employee_id: selectedTransaction?.employee_id,
+                    employee_id: repayForm.employee_id,
                     amount: parseFloat(repayForm.amount),
                     repayment_date: repayForm.repayment_date,
                     method: repayForm.method || undefined,
@@ -880,10 +878,18 @@ const AdminDashboard = () => {
                     headers: { Authorization: `Bearer ${token}` }
                   });
                   if (res.data?.success) {
-                    alert('تم تسجيل السداد بنجاح');
+                    alert('✅ تم تسجيل السداد بنجاح');
                     setShowRepayModal(false);
-                    setRepayForm({ amount: '', repayment_date: new Date().toISOString().split('T')[0], method: '', reference: '', notes: '' });
+                    setRepayForm({ 
+                      employee_id: '',
+                      amount: '', 
+                      repayment_date: new Date().toISOString().split('T')[0], 
+                      method: 'cash', 
+                      reference: '', 
+                      notes: '' 
+                    });
                     fetchDashboardData();
+                    fetchEmployeesWithBalances(); // تحديث قائمة الموظفين
                   } else {
                     alert(res.data?.message || 'حدث خطأ في تسجيل السداد');
                   }
@@ -892,6 +898,51 @@ const AdminDashboard = () => {
                   alert(err.response?.data?.detail || 'حدث خطأ في تسجيل السداد');
                 }
               }} className="space-y-4">
+                
+                {/* NEW: Dropdown لاختيار الموظف */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الموظف *</label>
+                  <select 
+                    value={repayForm.employee_id} 
+                    onChange={(e) => {
+                      const selectedEmp = employeesWithBalances.find(emp => emp.employee_id === e.target.value);
+                      setRepayForm({...repayForm, employee_id: e.target.value});
+                      setSelectedTransaction({
+                        employee_id: e.target.value,
+                        employee_name: selectedEmp?.employee_name || ''
+                      });
+                    }}
+                    className="w-full px-3 py-2 border rounded-md"
+                    required
+                  >
+                    <option value="">-- اختر الموظف --</option>
+                    {employeesWithBalances.map(emp => (
+                      <option key={emp.employee_id} value={emp.employee_id}>
+                        {emp.employee_name} (رصيد: {(emp.total_remaining || 0).toFixed(2)} درهم)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* عرض تفاصيل الرصيد للموظف المختار */}
+                {repayForm.employee_id && (() => {
+                  const selectedEmp = employeesWithBalances.find(emp => emp.employee_id === repayForm.employee_id);
+                  return selectedEmp ? (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">رصيد السُلف:</span>
+                          <span className="font-bold text-blue-600 mr-2">{(selectedEmp.remaining_advance || 0).toFixed(2)} درهم</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">رصيد العُهد:</span>
+                          <span className="font-bold text-green-600 mr-2">{(selectedEmp.remaining_custody || 0).toFixed(2)} درهم</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ *</label>
                   <input type="number" step="0.01" value={repayForm.amount} onChange={(e) => setRepayForm({...repayForm, amount: e.target.value})} className="w-full px-3 py-2 border rounded-md" required />
@@ -918,9 +969,9 @@ const AdminDashboard = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
                   <textarea value={repayForm.notes} onChange={(e) => setRepayForm({...repayForm, notes: e.target.value})} className="w-full px-3 py-2 border rounded-md" rows={2} placeholder="اختياري"></textarea>
                 </div>
-                <div className="flex justify-end space-x-3">
+                <div className="flex justify-end space-x-3 space-x-reverse">
                   <button type="button" onClick={() => setShowRepayModal(false)} className="px-4 py-2 border rounded-md">إلغاء</button>
-                  <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-md">تسجيل السداد</button>
+                  <button type="submit" className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">تسجيل السداد</button>
                 </div>
               </form>
             </div>
