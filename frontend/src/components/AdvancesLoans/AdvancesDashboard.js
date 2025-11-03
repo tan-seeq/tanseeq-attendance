@@ -187,61 +187,110 @@ const AdvancesDashboard = () => {
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <button
-          onClick={() => navigate('/advances/submit-expense')}
-          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-200"
-        >
-          <div className="text-center">
-            <div className="bg-blue-100 p-4 rounded-full inline-block mb-3">
-              <DocumentTextIcon className="h-8 w-8 text-blue-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">تقديم مصروف</h3>
-            <p className="text-sm text-gray-600">رفع فاتورة وطلب خصم من الرصيد</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => navigate('/advances/my-transactions')}
-          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-green-200"
-        >
-          <div className="text-center">
-            <div className="bg-green-100 p-4 rounded-full inline-block mb-3">
-              <ChartBarIcon className="h-8 w-8 text-green-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">سجل المعاملات</h3>
-            <p className="text-sm text-gray-600">عرض جميع السلف والمصروفات</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => navigate('/advances/balance-details')}
-          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-purple-200"
-        >
-          <div className="text-center">
-            <div className="bg-purple-100 p-4 rounded-full inline-block mb-3">
-              <CurrencyDollarIcon className="h-8 w-8 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">تفاصيل الرصيد</h3>
-            <p className="text-sm text-gray-600">عرض تفصيلي للأرصدة المتاحة</p>
-          </div>
-        </button>
-
-        {userRole === 'super_admin' && (
+      {/* Quick Actions - Row 1: Request Actions */}
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">📝 طلبات جديدة</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <button
-            onClick={() => navigate('/advances/admin')}
-            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-orange-200"
+            onClick={() => setShowRequestAdvanceModal(true)}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-200"
           >
             <div className="text-center">
-              <div className="bg-orange-100 p-4 rounded-full inline-block mb-3">
-                <UserIcon className="h-8 w-8 text-orange-600" />
+              <div className="bg-blue-100 p-4 rounded-full inline-block mb-3">
+                <ArrowUpIcon className="h-8 w-8 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">لوحة الإدارة</h3>
-              <p className="text-sm text-gray-600">إدارة السلف والموافقات</p>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">طلب سلفة</h3>
+              <p className="text-sm text-gray-600">طلب سلفة جديدة من الإدارة</p>
             </div>
           </button>
-        )}
+
+          <button
+            onClick={() => setShowRequestCustodyModal(true)}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-green-200"
+          >
+            <div className="text-center">
+              <div className="bg-green-100 p-4 rounded-full inline-block mb-3">
+                <BanknotesIcon className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">طلب عهدة</h3>
+              <p className="text-sm text-gray-600">طلب عهدة جديدة من الإدارة</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setShowSettleCustodyModal(true)}
+            disabled={!stats.myBalance || stats.myBalance.remaining_custody <= 0}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="text-center">
+              <div className="bg-purple-100 p-4 rounded-full inline-block mb-3">
+                <CheckCircleIcon className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">تسوية عهدة</h3>
+              <p className="text-sm text-gray-600">رد العهدة المستلمة</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Quick Actions - Row 2: View Actions */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 عرض البيانات</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <button
+            onClick={() => navigate('/advances/submit-expense')}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-red-200"
+          >
+            <div className="text-center">
+              <div className="bg-red-100 p-4 rounded-full inline-block mb-3">
+                <DocumentTextIcon className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">تقديم مصروف</h3>
+              <p className="text-sm text-gray-600">رفع فاتورة وطلب خصم من الرصيد</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => navigate('/advances/my-transactions')}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-indigo-200"
+          >
+            <div className="text-center">
+              <div className="bg-indigo-100 p-4 rounded-full inline-block mb-3">
+                <ChartBarIcon className="h-8 w-8 text-indigo-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">سجل المعاملات</h3>
+              <p className="text-sm text-gray-600">عرض جميع السلف والمصروفات</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => navigate('/advances/balance-details')}
+            className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-teal-200"
+          >
+            <div className="text-center">
+              <div className="bg-teal-100 p-4 rounded-full inline-block mb-3">
+                <CurrencyDollarIcon className="h-8 w-8 text-teal-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">تفاصيل الرصيد</h3>
+              <p className="text-sm text-gray-600">عرض تفصيلي للأرصدة المتاحة</p>
+            </div>
+          </button>
+
+          {userRole === 'super_admin' && (
+            <button
+              onClick={() => navigate('/advances/admin')}
+              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-orange-200"
+            >
+              <div className="text-center">
+                <div className="bg-orange-100 p-4 rounded-full inline-block mb-3">
+                  <UserIcon className="h-8 w-8 text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">لوحة الإدارة</h3>
+                <p className="text-sm text-gray-600">إدارة السلف والموافقات</p>
+              </div>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Pending Approvals (Super Admin Only) */}
