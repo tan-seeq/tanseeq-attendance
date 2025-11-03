@@ -2438,14 +2438,21 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
-  stuck_tasks: []
-  test_all: true
-  test_priority: "critical_first"
+  current_focus:
+    - "Employee Advance/Custody Requests (نظام السلف والعهد - طلبات الموظفين)"
+    - "Super Admin Permissions (نظام السلف والعهد - صلاحيات السوبر أدمن)"
+    - "Payment Registration Page (صفحة تسجيل السداد)"
+  stuck_tasks:
+    - "Super Admin Edit Transaction (KeyError: transaction_type_ar)"
+    - "Payment Registration Response Structure Mismatch"
+    - "Advance Request Endpoint Validation Requirements"
+  test_all: false
+  test_priority: "arabic_review_scenarios"
   comprehensive_testing_completed: true
   unified_deductions_engine_validated: true
   forensic_testing_success_rate: "94.3%"
   advanced_deductions_fixes_verified: true
+  arabic_review_e2e_success_rate: "66.7%"
 
 agent_communication:
   - agent: "main"
