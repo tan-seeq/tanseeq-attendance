@@ -508,6 +508,236 @@ const AdvancesDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Request Advance Modal */}
+      {showRequestAdvanceModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">📝 طلب سلفة جديدة</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">المبلغ (درهم) *</label>
+                <input
+                  type="number"
+                  value={requestForm.amount}
+                  onChange={(e) => setRequestForm({...requestForm, amount: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="أدخل المبلغ"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">الوصف *</label>
+                <input
+                  type="text"
+                  value={requestForm.description}
+                  onChange={(e) => setRequestForm({...requestForm, description: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="سبب طلب السلفة"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">التاريخ</label>
+                <input
+                  type="date"
+                  value={requestForm.expense_date}
+                  onChange={(e) => setRequestForm({...requestForm, expense_date: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ملاحظات</label>
+                <textarea
+                  value={requestForm.notes}
+                  onChange={(e) => setRequestForm({...requestForm, notes: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                  placeholder="ملاحظات إضافية (اختياري)"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 space-x-reverse mt-6">
+              <button
+                onClick={handleRequestAdvance}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                إرسال الطلب
+              </button>
+              <button
+                onClick={() => {
+                  setShowRequestAdvanceModal(false);
+                  setRequestForm({
+                    amount: '',
+                    description: '',
+                    notes: '',
+                    expense_date: new Date().toISOString().split('T')[0]
+                  });
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request Custody Modal */}
+      {showRequestCustodyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">📝 طلب عهدة جديدة</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">المبلغ (درهم) *</label>
+                <input
+                  type="number"
+                  value={requestForm.amount}
+                  onChange={(e) => setRequestForm({...requestForm, amount: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  placeholder="أدخل المبلغ"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">الوصف *</label>
+                <input
+                  type="text"
+                  value={requestForm.description}
+                  onChange={(e) => setRequestForm({...requestForm, description: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  placeholder="سبب طلب العهدة"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">التاريخ</label>
+                <input
+                  type="date"
+                  value={requestForm.expense_date}
+                  onChange={(e) => setRequestForm({...requestForm, expense_date: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ملاحظات</label>
+                <textarea
+                  value={requestForm.notes}
+                  onChange={(e) => setRequestForm({...requestForm, notes: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  rows="3"
+                  placeholder="ملاحظات إضافية (اختياري)"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 space-x-reverse mt-6">
+              <button
+                onClick={handleRequestCustody}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                إرسال الطلب
+              </button>
+              <button
+                onClick={() => {
+                  setShowRequestCustodyModal(false);
+                  setRequestForm({
+                    amount: '',
+                    description: '',
+                    notes: '',
+                    expense_date: new Date().toISOString().split('T')[0]
+                  });
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settle Custody Modal */}
+      {showSettleCustodyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">✅ تسوية عهدة</h3>
+            
+            {stats.myBalance && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-purple-700 font-medium">رصيد العهدة المتبقي:</p>
+                <p className="text-2xl font-bold text-purple-800">
+                  {formatCurrency(stats.myBalance.remaining_custody)}
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">المبلغ المراد رده (درهم) *</label>
+                <input
+                  type="number"
+                  value={requestForm.amount}
+                  onChange={(e) => setRequestForm({...requestForm, amount: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  placeholder="أدخل المبلغ"
+                  max={stats.myBalance?.remaining_custody || 0}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">تاريخ التسوية</label>
+                <input
+                  type="date"
+                  value={requestForm.expense_date}
+                  onChange={(e) => setRequestForm({...requestForm, expense_date: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ملاحظات</label>
+                <textarea
+                  value={requestForm.notes}
+                  onChange={(e) => setRequestForm({...requestForm, notes: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                  rows="3"
+                  placeholder="ملاحظات التسوية (اختياري)"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 space-x-reverse mt-6">
+              <button
+                onClick={handleSettleCustody}
+                className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                تسجيل التسوية
+              </button>
+              <button
+                onClick={() => {
+                  setShowSettleCustodyModal(false);
+                  setRequestForm({
+                    amount: '',
+                    description: '',
+                    notes: '',
+                    expense_date: new Date().toISOString().split('T')[0]
+                  });
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
