@@ -3919,26 +3919,45 @@ async def get_my_notifications(
         notification["source"] = "system"
         all_notifications.append(notification)
     
-    # ترتيب حسب التاريخ - معالجة datetime و strings
+    # ترتيب حسب التاريخ - معالجة آمنة لـ datetime و strings
     def get_sort_key(notif):
-        """Get sortable timestamp from notification"""
-        timestamp = notif.get("sent_at") or notif.get("created_at", "")
+        """Get sortable timestamp from notification - always returns comparable string"""
+        from datetime import datetime
+        
+        timestamp = notif.get("sent_at") or notif.get("created_at")
+        
+        # Handle None or empty values
         if not timestamp:
-            return ""
+            return "1970-01-01T00:00:00"  # Default old date for sorting
+        
         # If it's already a string, return it
         if isinstance(timestamp, str):
-            return timestamp
+            return timestamp if timestamp else "1970-01-01T00:00:00"
+        
         # If it's a datetime object, convert to ISO string
+        if isinstance(timestamp, datetime):
+            return timestamp.isoformat()
+        
+        # If it has isoformat method (datetime-like), use it
+        if hasattr(timestamp, 'isoformat'):
+            try:
+                return timestamp.isoformat()
+            except:
+                pass
+        
+        # Fallback: convert to string
         try:
-            return timestamp.isoformat() if hasattr(timestamp, 'isoformat') else str(timestamp)
+            return str(timestamp) if timestamp else "1970-01-01T00:00:00"
         except:
-            return ""
+            return "1970-01-01T00:00:00"
     
     try:
         all_notifications.sort(key=get_sort_key, reverse=True)
     except Exception as e:
-        # If sorting fails, at least return the notifications
-        print(f"Warning: Could not sort notifications: {e}")
+        # If sorting still fails, log and return unsorted
+        import traceback
+        print(f"❌ Error sorting notifications: {e}")
+        print(traceback.format_exc())
     
     return {"notifications": all_notifications[:limit]}
 
