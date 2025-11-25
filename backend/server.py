@@ -6443,11 +6443,13 @@ async def get_my_notifications(current_user: User = Depends(get_current_user)):
 async def get_notifications_count(current_user: User = Depends(get_current_user)):
     """Get unread notification count for current user"""
     try:
+        # ✅ FIX: البحث باستخدام recipient_id بدلاً من user_id
         unread_count = await db.notifications.count_documents({
             "$or": [
-                {"user_id": current_user.id},
-                {"user_id": None},
-                {"user_id": ""}
+                {"recipient_id": current_user.id},  # ✅ FIXED: استخدام recipient_id
+                {"user_id": current_user.id},  # للتوافق مع الإشعارات القديمة
+                {"recipient_id": None},
+                {"recipient_id": ""}
             ],
             "is_read": False
         })
