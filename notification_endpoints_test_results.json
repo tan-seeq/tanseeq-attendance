@@ -1,0 +1,34 @@
+{
+  "test_summary": {
+    "total_tests": 3,
+    "passed_tests": 2,
+    "failed_tests": 1,
+    "success_rate": "66.7%"
+  },
+  "test_results": [
+    {
+      "test": "User Authentication",
+      "success": true,
+      "details": "Successfully authenticated Admin QA (admin@tanseeq.com) - Role: super_admin",
+      "status_code": 200,
+      "timestamp": "2025-11-25T06:48:19.435490"
+    },
+    {
+      "test": "GET /notifications/my?unread_only=true",
+      "success": true,
+      "details": "Successfully retrieved 0 unread notifications",
+      "status_code": 200,
+      "timestamp": "2025-11-25T06:48:19.520314"
+    },
+    {
+      "test": "POST /notifications/{id}/acknowledge",
+      "success": false,
+      "details": "No notifications available to test acknowledge endpoint",
+      "status_code": null,
+      "timestamp": "2025-11-25T06:48:19.556819"
+    }
+  ],
+  "backend_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host",
+  "test_user": "admin@tanseeq.com",
+  "timestamp": "2025-11-25T06:48:19.557078"
+}
