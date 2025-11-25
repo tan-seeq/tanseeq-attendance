@@ -4011,7 +4011,13 @@ async def acknowledge_notification(
 ):
     """تأكيد الاطلاع على إشعار - من كلا الـ collections"""
     
+    from bson import ObjectId
+    
     # ✅ FIX: البحث في notifications أولاً (إشعارات الأدمن)
+    # البحث بـ id أو _id (للإشعارات القديمة)
+    notification_from_admin = None
+    
+    # محاولة البحث بـ id أولاً
     notification_from_admin = await db.notifications.find_one({
         "id": notification_id,
         "$or": [
@@ -4020,10 +4026,26 @@ async def acknowledge_notification(
         ]
     })
     
+    # إذا لم يُعثر عليه، حاول البحث بـ _id (للإشعارات القديمة بدون id)
+    if not notification_from_admin:
+        try:
+            # محاولة استخدام notification_id كـ ObjectId
+            notification_from_admin = await db.notifications.find_one({
+                "_id": ObjectId(notification_id),
+                "$or": [
+                    {"recipient_id": current_user.id},
+                    {"user_id": current_user.id}
+                ]
+            })
+        except:
+            pass  # notification_id ليس ObjectId صحيح
+    
     if notification_from_admin:
-        # تحديث إشعار الأدمن
+        # تحديث إشعار الأدمن (باستخدام _id أو id حسب ما وُجد)
+        update_query = {"_id": notification_from_admin["_id"]} if "_id" in notification_from_admin else {"id": notification_id}
+        
         await db.notifications.update_one(
-            {"id": notification_id},
+            update_query,
             {"$set": {
                 "is_read": True,
                 "read_at": datetime.now(timezone.utc).isoformat()
@@ -4041,18 +4063,33 @@ async def acknowledge_notification(
         "employee_id": current_user.id
     })
     
+    # إذا لم يُعثر عليه، حاول البحث بـ _id
+    if not notification:
+        try:
+            notification = await db.system_notifications.find_one({
+                "_id": ObjectId(notification_id),
+                "employee_id": current_user.id
+            })
+        except:
+            pass
+    
     if not notification:
         raise HTTPException(status_code=404, detail="الإشعار غير موجود")
     
     # تأكيد الاطلاع
+    update_query = {"_id": notification["_id"]} if "_id" in notification else {"id": notification_id}
     await db.system_notifications.update_one(
-        {"id": notification_id},
+        update_query,
         {"$set": {
             "acknowledged_at": datetime.now(timezone.utc).isoformat(),
             "read_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
+    return {
+        "success": True,
+        "message": "تم تأكيد الاطلاع على الإشعار"
+    }
     return {
         "success": True,
         "message": "تم تأكيد الاطلاع على الإشعار"
