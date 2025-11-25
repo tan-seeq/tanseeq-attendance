@@ -3953,9 +3953,33 @@ async def acknowledge_notification(
     notification_id: str,
     current_user: User = Depends(get_current_user)
 ):
-    """تأكيد الاطلاع على إشعار"""
+    """تأكيد الاطلاع على إشعار - من كلا الـ collections"""
     
-    # البحث عن الإشعار
+    # ✅ FIX: البحث في notifications أولاً (إشعارات الأدمن)
+    notification_from_admin = await db.notifications.find_one({
+        "id": notification_id,
+        "$or": [
+            {"recipient_id": current_user.id},
+            {"user_id": current_user.id}
+        ]
+    })
+    
+    if notification_from_admin:
+        # تحديث إشعار الأدمن
+        await db.notifications.update_one(
+            {"id": notification_id},
+            {"$set": {
+                "is_read": True,
+                "read_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        return {
+            "success": True,
+            "message": "تم تأكيد الاطلاع على الإشعار"
+        }
+    
+    # البحث في system_notifications (إشعارات النظام)
     notification = await db.system_notifications.find_one({
         "id": notification_id,
         "employee_id": current_user.id
@@ -3965,7 +3989,7 @@ async def acknowledge_notification(
         raise HTTPException(status_code=404, detail="الإشعار غير موجود")
     
     # تأكيد الاطلاع
-    result = await db.system_notifications.update_one(
+    await db.system_notifications.update_one(
         {"id": notification_id},
         {"$set": {
             "acknowledged_at": datetime.now(timezone.utc).isoformat(),
