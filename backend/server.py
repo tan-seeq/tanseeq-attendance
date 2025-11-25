@@ -3893,18 +3893,22 @@ async def get_my_notifications(
     
     # معالجة notifications من الأدمن
     for notification in notifications_from_admin:
+        # ✅ CRITICAL FIX: استخدام _id من MongoDB إذا لم يكن هناك id
+        notif_id = notification.get("id")
+        if not notif_id and "_id" in notification:
+            # استخدام MongoDB _id كـ string
+            notif_id = str(notification["_id"])
+        elif not notif_id:
+            # في حالة نادرة جداً، أنشئ UUID
+            import uuid
+            notif_id = str(uuid.uuid4())
+        
+        # حذف _id لتجنب مشاكل JSON serialization
         if "_id" in notification:
             del notification["_id"]
         
-        # ✅ CRITICAL FIX: تأكد من وجود ID صحيح
-        notif_id = notification.get("id")
-        if not notif_id:
-            # إذا لم يكن هناك ID، استخدم _id أو أنشئ واحد جديد
-            import uuid
-            notif_id = str(notification.get("_id", uuid.uuid4()))
-        
         all_notifications.append({
-            "id": notif_id,  # ✅ FIXED: تأكد من وجود ID
+            "id": notif_id,  # ✅ FIXED: استخدام _id من MongoDB أو id الموجود
             "subject": notification.get("subject", "إشعار"),
             "message": notification.get("message", ""),
             "type": notification.get("type", "info"),
@@ -3917,13 +3921,16 @@ async def get_my_notifications(
     
     # معالجة system_notifications
     for notification in system_notifications:
+        # ✅ CRITICAL FIX: استخدام _id من MongoDB إذا لم يكن هناك id
+        if not notification.get("id") and "_id" in notification:
+            notification["id"] = str(notification["_id"])
+        elif not notification.get("id"):
+            import uuid
+            notification["id"] = str(uuid.uuid4())
+        
+        # حذف _id لتجنب مشاكل JSON serialization
         if "_id" in notification:
             del notification["_id"]
-        
-        # ✅ CRITICAL FIX: تأكد من وجود ID صحيح
-        if not notification.get("id"):
-            import uuid
-            notification["id"] = str(notification.get("_id", uuid.uuid4()))
         
         notification["severity_ar"] = NOTIFICATION_SEVERITY_AR.get(
             NotificationSeverity(notification["severity"]), notification["severity"]
