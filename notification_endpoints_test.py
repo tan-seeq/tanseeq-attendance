@@ -296,7 +296,7 @@ class NotificationEndpointsTest:
                     },
                     "test_results": self.test_results,
                     "backend_url": BACKEND_URL,
-                    "test_user": TEST_USER["email"],
+                    "test_user": getattr(self, 'authenticated_user', {}).get('email', 'unknown'),
                     "timestamp": datetime.now().isoformat()
                 }, f, ensure_ascii=False, indent=2)
             print("📁 Results saved to notification_endpoints_test_results.json")
