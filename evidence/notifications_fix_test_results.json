@@ -1,0 +1,41 @@
+{
+  "test_summary": {
+    "backend_url": "https://attend-deduct-hr.preview.emergentagent.com/api",
+    "test_user": "jihad@tanseeq.com",
+    "timestamp": "2025-11-25T05:55:17.478329",
+    "total_tests": 3,
+    "passed_tests": 3,
+    "success_rate": "100.0%"
+  },
+  "test_results": [
+    {
+      "test": "User Authentication",
+      "status": "PASS",
+      "details": "Successfully authenticated jihad@tanseeq.com",
+      "timestamp": "2025-11-25T05:55:17.408239",
+      "response_data": {
+        "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "role": "user"
+      }
+    },
+    {
+      "test": "Notifications Count Endpoint",
+      "status": "PASS",
+      "details": "Successfully retrieved unread_count: 37",
+      "timestamp": "2025-11-25T05:55:17.459064",
+      "response_data": {
+        "unread_count": 37
+      }
+    },
+    {
+      "test": "Notifications My Unread Only",
+      "status": "PASS",
+      "details": "Successfully retrieved unread notifications: 20 items",
+      "timestamp": "2025-11-25T05:55:17.478088",
+      "response_data": {
+        "count": 20,
+        "structure": "dict"
+      }
+    }
+  ]
+}
