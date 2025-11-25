@@ -190,7 +190,7 @@ work_reports_db = LazyWorkReportsDB()
 
 # Notification Model
 class Notification(BaseModel):
-    id: Optional[str] = None
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))  # ✅ FIXED: Auto-generate UUID
     recipient_id: str
     recipient_name: Optional[str] = None
     sender_id: str
