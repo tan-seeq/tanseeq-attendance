@@ -165,26 +165,45 @@ class NotificationEndpointsTest:
     def test_notification_acknowledge(self, notification_id):
         """Test POST /api/notifications/{id}/acknowledge"""
         if not notification_id:
-            # Try to get any notification first
+            # Try to get any notification first (without unread_only filter)
             try:
+                print("   📋 Checking for any existing notifications...")
                 response = self.session.get(f"{BASE_URL}/notifications/my", timeout=30)
                 if response.status_code == 200:
                     data = response.json()
                     notifications = data if isinstance(data, list) else data.get("notifications", [])
+                    print(f"   📊 Found {len(notifications)} total notifications")
+                    
                     if notifications and len(notifications) > 0:
-                        notification_id = notifications[0].get("id")
-                    else:
-                        self.log_result(
-                            "POST /notifications/{id}/acknowledge",
-                            False,
-                            "No notifications available to test acknowledge endpoint"
-                        )
-                        return
+                        # Find an unacknowledged notification
+                        for notif in notifications:
+                            if not notif.get("is_read", False) and not notif.get("acknowledged", False):
+                                notification_id = notif.get("id")
+                                print(f"   🎯 Found unacknowledged notification: {notification_id}")
+                                break
+                        
+                        # If no unacknowledged found, use the first one
+                        if not notification_id and notifications:
+                            notification_id = notifications[0].get("id")
+                            print(f"   🎯 Using first available notification: {notification_id}")
+                    
+                    if not notification_id:
+                        # Try to create a test notification if user is super_admin
+                        if hasattr(self, 'authenticated_user') and self.authenticated_user.get('role') == 'super_admin':
+                            notification_id = self.create_test_notification()
+                        
+                        if not notification_id:
+                            self.log_result(
+                                "POST /notifications/{id}/acknowledge",
+                                False,
+                                "No notifications available to test acknowledge endpoint"
+                            )
+                            return
                 else:
                     self.log_result(
                         "POST /notifications/{id}/acknowledge",
                         False,
-                        "Could not retrieve notifications to test acknowledge endpoint"
+                        f"Could not retrieve notifications to test acknowledge endpoint: {response.status_code}"
                     )
                     return
             except Exception as e:
