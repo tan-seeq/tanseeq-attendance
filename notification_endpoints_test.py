@@ -19,11 +19,24 @@ from datetime import datetime
 BACKEND_URL = "https://hrapp-tanseeq-replaced-1761028017.emergent.host"
 BASE_URL = f"{BACKEND_URL}/api"
 
-# Test credentials
-TEST_USER = {
-    "email": "jihad@tanseeq.com",
-    "password": "jihad123"
-}
+# Test credentials - trying multiple known working credentials
+TEST_CREDENTIALS = [
+    {
+        "email": "jihad@tanseeq.com",
+        "password": "jihad123",
+        "role": "user"
+    },
+    {
+        "email": "admin@tanseeq.com", 
+        "password": "ADMIN",
+        "role": "super_admin"
+    },
+    {
+        "email": "mahmoud@tanseeq.com",
+        "password": "mahmoud123", 
+        "role": "admin"
+    }
+]
 
 class NotificationEndpointsTest:
     def __init__(self):
