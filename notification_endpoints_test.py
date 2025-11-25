@@ -67,46 +67,47 @@ class NotificationEndpointsTest:
         print()
         
     def authenticate_user(self):
-        """Authenticate user and get token"""
-        try:
-            print("🔐 Authenticating user...")
-            response = self.session.post(
-                f"{BASE_URL}/auth/login",
-                json=TEST_USER,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                self.user_token = data.get("access_token")
-                self.session.headers.update({
-                    'Authorization': f'Bearer {self.user_token}'
-                })
-                
-                user_info = data.get("user", {})
-                self.log_result(
-                    "User Authentication",
-                    True,
-                    f"Successfully authenticated {user_info.get('name', 'User')} ({user_info.get('email', '')})",
-                    200
+        """Try to authenticate with available credentials"""
+        print("🔐 Trying authentication with available credentials...")
+        
+        for cred in TEST_CREDENTIALS:
+            try:
+                print(f"   Trying {cred['email']}...")
+                response = self.session.post(
+                    f"{BASE_URL}/auth/login",
+                    json={"email": cred["email"], "password": cred["password"]},
+                    timeout=30
                 )
-                return True
-            else:
-                self.log_result(
-                    "User Authentication",
-                    False,
-                    f"Authentication failed: {response.text}",
-                    response.status_code
-                )
-                return False
                 
-        except Exception as e:
-            self.log_result(
-                "User Authentication",
-                False,
-                f"Authentication error: {str(e)}"
-            )
-            return False
+                if response.status_code == 200:
+                    data = response.json()
+                    self.user_token = data.get("access_token")
+                    self.session.headers.update({
+                        'Authorization': f'Bearer {self.user_token}'
+                    })
+                    
+                    user_info = data.get("user", {})
+                    self.log_result(
+                        "User Authentication",
+                        True,
+                        f"Successfully authenticated {user_info.get('name', 'User')} ({user_info.get('email', '')}) - Role: {user_info.get('role', 'unknown')}",
+                        200
+                    )
+                    self.authenticated_user = cred
+                    return True
+                else:
+                    print(f"   ❌ {cred['email']}: {response.status_code} - {response.text}")
+                    
+            except Exception as e:
+                print(f"   ❌ {cred['email']}: Error - {str(e)}")
+        
+        self.log_result(
+            "User Authentication",
+            False,
+            "All authentication attempts failed",
+            None
+        )
+        return False
     
     def test_notifications_my_unread_only(self):
         """Test GET /api/notifications/my?unread_only=true"""
