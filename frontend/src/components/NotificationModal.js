@@ -80,8 +80,11 @@ const NotificationModal = ({ isOpen, onClose }) => {
 
   const acknowledgeNotification = async (notificationId) => {
     try {
+      console.log('🔔 Attempting to acknowledge notification:', notificationId);
       setAcknowledging(true);
-      await axios.post(`${API}/notifications/${notificationId}/acknowledge`);
+      
+      const response = await axios.post(`${API}/notifications/${notificationId}/acknowledge`);
+      console.log('✅ Acknowledge successful:', response.data);
       
       // إزالة الإشعار من القائمة
       const updatedNotifications = notifications.filter(n => n.id !== notificationId);
@@ -94,8 +97,13 @@ const NotificationModal = ({ isOpen, onClose }) => {
         setCurrentIndex(0);
       }
     } catch (error) {
-      console.error('Error acknowledging notification:', error);
-      alert('حدث خطأ في تأكيد الإشعار');
+      console.error('❌ Error acknowledging notification:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      alert(`حدث خطأ في تأكيد الإشعار: ${error.response?.data?.detail || error.message}`);
     } finally {
       setAcknowledging(false);
     }
