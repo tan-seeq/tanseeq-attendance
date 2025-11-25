@@ -1,0 +1,83 @@
+{
+  "test_type": "E2E Notification System Testing",
+  "test_date": "2025-11-25T05:50:35.686296",
+  "backend_url": "https://attend-deduct-hr.preview.emergentagent.com",
+  "total_tests": 7,
+  "passed_tests": 6,
+  "success_rate": 85.71428571428571,
+  "test_results": [
+    {
+      "test": "Super Admin Authentication",
+      "success": true,
+      "details": "Successfully authenticated as مدير النظام with role super_admin",
+      "timestamp": "2025-11-25T05:50:33.261272",
+      "response_data": {
+        "user_id": "admin_001",
+        "role": "super_admin"
+      }
+    },
+    {
+      "test": "Find Jihad User ID",
+      "success": true,
+      "details": "Found Jihad user with ID: eed6d28b-7639-4d31-9386-4e99b9179d8f",
+      "timestamp": "2025-11-25T05:50:33.282296",
+      "response_data": {
+        "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "name": "Jihad"
+      }
+    },
+    {
+      "test": "Send Notification to Jihad",
+      "success": true,
+      "details": "Successfully sent notification with ID: None",
+      "timestamp": "2025-11-25T05:50:33.351492",
+      "response_data": {
+        "notification_id": null,
+        "subject": "🚨 إشعار عاجل - اختبار النظام",
+        "type": "alert",
+        "priority": "urgent"
+      }
+    },
+    {
+      "test": "Verify Notification in Database",
+      "success": true,
+      "details": "Notification found with all required fields. is_read: False",
+      "timestamp": "2025-11-25T05:50:33.379422",
+      "response_data": {
+        "notification_id": null,
+        "recipient_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "is_read": false,
+        "subject": "🚨 إشعار عاجل - اختبار النظام",
+        "message": "هذا إشعار تجريبي لاختبار نظام الإشعارات من السوبر أدمن إلى الموظف جهاد. يرجى التأكد من وصول هذا الإش...",
+        "type": "alert",
+        "priority": "urgent"
+      }
+    },
+    {
+      "test": "User (Jihad) Authentication",
+      "success": true,
+      "details": "Successfully authenticated as Jihad with role user",
+      "timestamp": "2025-11-25T05:50:35.621813",
+      "response_data": {
+        "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "role": "user"
+      }
+    },
+    {
+      "test": "Test Notifications Count",
+      "success": true,
+      "details": "Unread count is 36 (> 0 as expected)",
+      "timestamp": "2025-11-25T05:50:35.632015",
+      "response_data": {
+        "unread_count": 36
+      }
+    },
+    {
+      "test": "Test My Notifications (Unread Only)",
+      "success": false,
+      "details": "Failed to get unread notifications with status 500",
+      "timestamp": "2025-11-25T05:50:35.686208",
+      "response_data": "Internal Server Error"
+    }
+  ]
+}
