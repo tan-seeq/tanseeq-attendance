@@ -4011,8 +4011,6 @@ async def acknowledge_notification(
 ):
     """تأكيد الاطلاع على إشعار - من كلا الـ collections"""
     
-    from bson import ObjectId
-    
     # ✅ FIX: البحث في notifications أولاً (إشعارات الأدمن)
     # البحث بـ id أو _id (للإشعارات القديمة)
     notification_from_admin = None
@@ -4037,8 +4035,8 @@ async def acknowledge_notification(
                     {"user_id": current_user.id}
                 ]
             })
-        except:
-            pass  # notification_id ليس ObjectId صحيح
+        except Exception as e:
+            print(f"Could not parse as ObjectId: {e}")
     
     if notification_from_admin:
         # تحديث إشعار الأدمن (باستخدام _id أو id حسب ما وُجد)
@@ -4070,8 +4068,8 @@ async def acknowledge_notification(
                 "_id": ObjectId(notification_id),
                 "employee_id": current_user.id
             })
-        except:
-            pass
+        except Exception as e:
+            print(f"Could not parse as ObjectId: {e}")
     
     if not notification:
         raise HTTPException(status_code=404, detail="الإشعار غير موجود")
