@@ -11,24 +11,24 @@
       "success": true,
       "details": "Successfully authenticated Admin QA (admin@tanseeq.com) - Role: super_admin",
       "status_code": 200,
-      "timestamp": "2025-11-25T06:48:19.435490"
+      "timestamp": "2025-11-25T06:50:09.598777"
     },
     {
       "test": "GET /notifications/my?unread_only=true",
       "success": true,
       "details": "Successfully retrieved 0 unread notifications",
       "status_code": 200,
-      "timestamp": "2025-11-25T06:48:19.520314"
+      "timestamp": "2025-11-25T06:50:09.675762"
     },
     {
       "test": "POST /notifications/{id}/acknowledge",
       "success": false,
       "details": "No notifications available to test acknowledge endpoint",
       "status_code": null,
-      "timestamp": "2025-11-25T06:48:19.556819"
+      "timestamp": "2025-11-25T06:50:09.831564"
     }
   ],
   "backend_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host",
   "test_user": "admin@tanseeq.com",
-  "timestamp": "2025-11-25T06:48:19.557078"
+  "timestamp": "2025-11-25T06:50:09.831801"
 }
