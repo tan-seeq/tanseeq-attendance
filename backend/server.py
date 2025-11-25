@@ -3865,26 +3865,64 @@ async def get_my_notifications(
     unread_only: bool = False,
     current_user: User = Depends(get_current_user)
 ):
-    """الحصول على إشعارات الموظف"""
+    """الحصول على إشعارات الموظف - من كلا الـ collections"""
     
-    query = {"employee_id": current_user.id}
+    # ✅ FIX: جلب الإشعارات من notifications collection أيضاً
+    # جلب من notifications (الإشعارات المرسلة من السوبر أدمن)
+    notifications_query = {
+        "$or": [
+            {"recipient_id": current_user.id},
+            {"user_id": current_user.id}  # للتوافق مع الإشعارات القديمة
+        ]
+    }
     
     if unread_only:
-        query["acknowledged_at"] = None
+        notifications_query["is_read"] = False
     
-    notifications = await db.system_notifications.find(query).sort("created_at", -1).limit(limit).to_list(limit)
+    notifications_from_admin = await db.notifications.find(notifications_query).sort("sent_at", -1).limit(limit).to_list(limit)
     
-    # تنظيف البيانات
-    for notification in notifications:
+    # جلب من system_notifications (الإشعارات التلقائية من النظام)
+    system_query = {"employee_id": current_user.id}
+    if unread_only:
+        system_query["acknowledged_at"] = None
+    
+    system_notifications = await db.system_notifications.find(system_query).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # دمج ومعالجة الإشعارات
+    all_notifications = []
+    
+    # معالجة notifications من الأدمن
+    for notification in notifications_from_admin:
+        if "_id" in notification:
+            del notification["_id"]
+        
+        all_notifications.append({
+            "id": notification.get("id"),
+            "subject": notification.get("subject", "إشعار"),
+            "message": notification.get("message", ""),
+            "type": notification.get("type", "info"),
+            "priority": notification.get("priority", "normal"),
+            "is_read": notification.get("is_read", False),
+            "sent_at": notification.get("sent_at"),
+            "sender_name": notification.get("sender_name", "الإدارة"),
+            "source": "admin"
+        })
+    
+    # معالجة system_notifications
+    for notification in system_notifications:
         if "_id" in notification:
             del notification["_id"]
         
         notification["severity_ar"] = NOTIFICATION_SEVERITY_AR.get(
             NotificationSeverity(notification["severity"]), notification["severity"]
         )
-        
+        notification["source"] = "system"
+        all_notifications.append(notification)
     
-    return {"notifications": notifications}
+    # ترتيب حسب التاريخ
+    all_notifications.sort(key=lambda x: x.get("sent_at") or x.get("created_at", ""), reverse=True)
+    
+    return {"notifications": all_notifications[:limit]}
 
 @api_router.get("/notifications/unread-mandatory")
 async def get_unread_mandatory_notifications(
