@@ -158,6 +158,63 @@ class NotificationEndpointsTest:
             self.log_result(
                 "GET /notifications/my?unread_only=true",
                 False,
+    
+    def create_test_notification(self):
+        """Create a test notification for acknowledge testing (Super Admin only)"""
+        try:
+            print("   📝 Creating test notification...")
+            
+            # Get current user info for self-notification
+            me_response = self.session.get(f"{BASE_URL}/auth/me", timeout=30)
+            if me_response.status_code != 200:
+                print("   ❌ Could not get current user info")
+                return None
+            
+            user_info = me_response.json()
+            user_id = user_info.get("id")
+            
+            if not user_id:
+                print("   ❌ Could not get user ID")
+                return None
+            
+            # Create test notification
+            notification_data = {
+                "recipient_id": user_id,
+                "subject": "Test Notification for Acknowledge Testing",
+                "message": "This is a test notification created for testing the acknowledge endpoint.",
+                "type": "info",
+                "priority": "normal"
+            }
+            
+            response = self.session.post(
+                f"{BASE_URL}/notifications/send",
+                json=notification_data,
+                timeout=30
+            )
+            
+            if response.status_code in [200, 201]:
+                print("   ✅ Test notification created successfully")
+                
+                # Get the created notification ID
+                my_notifications = self.session.get(f"{BASE_URL}/notifications/my", timeout=30)
+                if my_notifications.status_code == 200:
+                    data = my_notifications.json()
+                    notifications = data if isinstance(data, list) else data.get("notifications", [])
+                    
+                    # Find the notification we just created
+                    for notif in notifications:
+                        if notif.get("subject") == "Test Notification for Acknowledge Testing":
+                            return notif.get("id")
+                
+                print("   ⚠️  Could not find created notification ID")
+                return None
+            else:
+                print(f"   ❌ Failed to create test notification: {response.status_code} - {response.text}")
+                return None
+                
+        except Exception as e:
+            print(f"   ❌ Error creating test notification: {str(e)}")
+            return None
                 f"Request error: {str(e)}"
             )
             return None
