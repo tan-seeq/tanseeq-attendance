@@ -245,7 +245,7 @@ class NotificationEndpointsTest:
         print("🚀 Starting Notification Endpoints Testing")
         print("=" * 60)
         print(f"Backend URL: {BACKEND_URL}")
-        print(f"Test User: {TEST_USER['email']}")
+        print(f"Test Users: {', '.join([cred['email'] for cred in TEST_CREDENTIALS])}")
         print("=" * 60)
         print()
         
