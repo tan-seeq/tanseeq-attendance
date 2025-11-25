@@ -3896,8 +3896,15 @@ async def get_my_notifications(
         if "_id" in notification:
             del notification["_id"]
         
+        # ✅ CRITICAL FIX: تأكد من وجود ID صحيح
+        notif_id = notification.get("id")
+        if not notif_id:
+            # إذا لم يكن هناك ID، استخدم _id أو أنشئ واحد جديد
+            import uuid
+            notif_id = str(notification.get("_id", uuid.uuid4()))
+        
         all_notifications.append({
-            "id": notification.get("id"),
+            "id": notif_id,  # ✅ FIXED: تأكد من وجود ID
             "subject": notification.get("subject", "إشعار"),
             "message": notification.get("message", ""),
             "type": notification.get("type", "info"),
@@ -3912,6 +3919,11 @@ async def get_my_notifications(
     for notification in system_notifications:
         if "_id" in notification:
             del notification["_id"]
+        
+        # ✅ CRITICAL FIX: تأكد من وجود ID صحيح
+        if not notification.get("id"):
+            import uuid
+            notification["id"] = str(notification.get("_id", uuid.uuid4()))
         
         notification["severity_ar"] = NOTIFICATION_SEVERITY_AR.get(
             NotificationSeverity(notification["severity"]), notification["severity"]
