@@ -3919,8 +3919,26 @@ async def get_my_notifications(
         notification["source"] = "system"
         all_notifications.append(notification)
     
-    # ترتيب حسب التاريخ
-    all_notifications.sort(key=lambda x: x.get("sent_at") or x.get("created_at", ""), reverse=True)
+    # ترتيب حسب التاريخ - معالجة datetime و strings
+    def get_sort_key(notif):
+        """Get sortable timestamp from notification"""
+        timestamp = notif.get("sent_at") or notif.get("created_at", "")
+        if not timestamp:
+            return ""
+        # If it's already a string, return it
+        if isinstance(timestamp, str):
+            return timestamp
+        # If it's a datetime object, convert to ISO string
+        try:
+            return timestamp.isoformat() if hasattr(timestamp, 'isoformat') else str(timestamp)
+        except:
+            return ""
+    
+    try:
+        all_notifications.sort(key=get_sort_key, reverse=True)
+    except Exception as e:
+        # If sorting fails, at least return the notifications
+        print(f"Warning: Could not sort notifications: {e}")
     
     return {"notifications": all_notifications[:limit]}
 
