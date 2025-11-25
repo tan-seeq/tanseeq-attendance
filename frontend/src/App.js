@@ -183,12 +183,17 @@ const AuthProvider = ({ children }) => {
 
   const checkMandatoryNotifications = async () => {
     try {
+      console.log('🔔 Checking for unread notifications...');
       const response = await axios.get(`${API}/notifications/count`);
+      console.log('🔔 Notification count response:', response.data);
       if (response.data.unread_count > 0) {
+        console.log(`🔔 Found ${response.data.unread_count} unread notifications - showing modal`);
         setShowNotificationModal(true);
+      } else {
+        console.log('🔔 No unread notifications');
       }
     } catch (error) {
-      console.error('Error checking notifications:', error);
+      console.error('❌ Error checking notifications:', error);
     }
   };
 
