@@ -30,13 +30,20 @@ const NotificationModal = ({ isOpen, onClose }) => {
       setLoading(true);
       const response = await axios.get(`${API}/notifications/my?unread_only=true`);
       
+      console.log('🔔 Fetched notifications:', response.data);
+      
       // ✅ FIX: عرض جميع الإشعارات غير المقروءة (من الأدمن والنظام)
       const allUnreadNotifications = response.data.notifications || [];
+      
+      console.log(`📊 Total unread notifications: ${allUnreadNotifications.length}`);
+      if (allUnreadNotifications.length > 0) {
+        console.log('📧 First notification:', allUnreadNotifications[0]);
+      }
       
       setNotifications(allUnreadNotifications);
       setCurrentIndex(0);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('❌ Error fetching notifications:', error);
       setNotifications([]);
     } finally {
       setLoading(false);
