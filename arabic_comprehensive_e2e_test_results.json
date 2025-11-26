@@ -1,0 +1,178 @@
+{
+  "summary": {
+    "total_tests": 23,
+    "successful_tests": 17,
+    "failed_tests": 6,
+    "success_rate": 73.91304347826086,
+    "test_timestamp": "2025-11-26T08:00:00.392460"
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication - super_admin",
+      "success": true,
+      "details": "Login successful for admin@tanseeq.com (Role: super_admin)",
+      "timestamp": "2025-11-26T07:59:59.437765",
+      "response_data": {
+        "user_id": "admin_001",
+        "role": "super_admin"
+      }
+    },
+    {
+      "test": "Authentication - user",
+      "success": true,
+      "details": "Login successful for jihad@tanseeq.com (Role: user)",
+      "timestamp": "2025-11-26T07:59:59.690326",
+      "response_data": {
+        "user_id": "eed6d28b-7639-4d31-9386-4e99b9179d8f",
+        "role": "user"
+      }
+    },
+    {
+      "test": "Authentication - tarek",
+      "success": false,
+      "details": "Login failed: 401 - {\"detail\":\"Invalid credentials\"}",
+      "timestamp": "2025-11-26T07:59:59.710126",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Check-in (User)",
+      "success": true,
+      "details": "Check-in response: 200 - تم تسجيل الحضور بنجاح ✅",
+      "timestamp": "2025-11-26T07:59:59.794789",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Check-in (Tarek - Flexible)",
+      "success": false,
+      "details": "Tarek check-in failed: 403 - {\"detail\":\"Not authenticated\"}",
+      "timestamp": "2025-11-26T07:59:59.845092",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Check-out (User)",
+      "success": true,
+      "details": "Check-out response: 200 - تم تسجيل الانصراف بنجاح ✅",
+      "timestamp": "2025-11-26T07:59:59.862718",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Records Retrieval",
+      "success": true,
+      "details": "Retrieved 156 attendance records",
+      "timestamp": "2025-11-26T07:59:59.888577",
+      "response_data": null
+    },
+    {
+      "test": "Notifications Count",
+      "success": true,
+      "details": "Unread notifications count: 37",
+      "timestamp": "2025-11-26T07:59:59.949857",
+      "response_data": null
+    },
+    {
+      "test": "Fetch Unread Notifications",
+      "success": true,
+      "details": "Retrieved 20 unread notifications",
+      "timestamp": "2025-11-26T07:59:59.978914",
+      "response_data": null
+    },
+    {
+      "test": "Acknowledge Notification",
+      "success": true,
+      "details": "Successfully acknowledged notification 692544005fdccf231de051f5",
+      "timestamp": "2025-11-26T08:00:00.013021",
+      "response_data": null
+    },
+    {
+      "test": "Send Notification (Super Admin)",
+      "success": false,
+      "details": "Send failed: 404 - {\"detail\":\"Recipient not found\"}",
+      "timestamp": "2025-11-26T08:00:00.028217",
+      "response_data": null
+    },
+    {
+      "test": "Request Advance (Employee)",
+      "success": false,
+      "details": "Request failed: 422 - {\"detail\":[{\"type\":\"enum\",\"loc\":[\"body\",\"category\"],\"msg\":\"Input should be 'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\",\"input\":\"personal\",\"ctx\":{\"expected\":\"'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\"},\"url\":\"https://errors.pydantic.dev/2.11/v/enum\"}]}",
+      "timestamp": "2025-11-26T08:00:00.080429",
+      "response_data": null
+    },
+    {
+      "test": "Request Custody (Employee)",
+      "success": false,
+      "details": "Request failed: 422 - {\"detail\":[{\"type\":\"enum\",\"loc\":[\"body\",\"category\"],\"msg\":\"Input should be 'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\",\"input\":\"business\",\"ctx\":{\"expected\":\"'transportation', 'meals', 'accommodation', 'supplies', 'fuel', 'maintenance', 'client_entertainment', 'travel', 'communications' or 'other'\"},\"url\":\"https://errors.pydantic.dev/2.11/v/enum\"}]}",
+      "timestamp": "2025-11-26T08:00:00.091765",
+      "response_data": null
+    },
+    {
+      "test": "Custody Settlement (Employee)",
+      "success": false,
+      "details": "Settlement failed: 400 - {\"detail\":\"المبلغ وتاريخ التسوية مطلوبان\"}",
+      "timestamp": "2025-11-26T08:00:00.143459",
+      "response_data": null
+    },
+    {
+      "test": "Employee Balance",
+      "success": true,
+      "details": "Balance retrieved - Total available: 7180.0 AED",
+      "timestamp": "2025-11-26T08:00:00.205201",
+      "response_data": null
+    },
+    {
+      "test": "Employees with Balances (Super Admin)",
+      "success": true,
+      "details": "Retrieved 0 employees with balances",
+      "timestamp": "2025-11-26T08:00:00.229235",
+      "response_data": null
+    },
+    {
+      "test": "Record Repayment (Super Admin)",
+      "success": true,
+      "details": "Repayment response: 404",
+      "timestamp": "2025-11-26T08:00:00.241572",
+      "response_data": null
+    },
+    {
+      "test": "All Transactions (Super Admin)",
+      "success": true,
+      "details": "Retrieved 49 transactions",
+      "timestamp": "2025-11-26T08:00:00.259367",
+      "response_data": null
+    },
+    {
+      "test": "Pending Approvals (Super Admin)",
+      "success": true,
+      "details": "Retrieved 4 pending approvals",
+      "timestamp": "2025-11-26T08:00:00.272493",
+      "response_data": null
+    },
+    {
+      "test": "Monthly Deductions Calculation",
+      "success": true,
+      "details": "Calculation successful for 2025-11",
+      "timestamp": "2025-11-26T08:00:00.297568",
+      "response_data": null
+    },
+    {
+      "test": "Deductions Exceptions Verification",
+      "success": true,
+      "details": "Found 4 exception users in deductions: ['Hatem Mohamed Ahmed', 'Hatem Mohamed Ahmed', 'Hatem Mohamed Ahmed', 'Hatem Mohamed Ahmed']",
+      "timestamp": "2025-11-26T08:00:00.331298",
+      "response_data": null
+    },
+    {
+      "test": "Health Check (/healthz)",
+      "success": true,
+      "details": "Health check passed: ok",
+      "timestamp": "2025-11-26T08:00:00.380582",
+      "response_data": null
+    },
+    {
+      "test": "Users Endpoint",
+      "success": true,
+      "details": "Retrieved 14 users",
+      "timestamp": "2025-11-26T08:00:00.392122",
+      "response_data": null
+    }
+  ]
+}
