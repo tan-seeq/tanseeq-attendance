@@ -1,0 +1,137 @@
+{
+  "summary": {
+    "total_tests": 18,
+    "successful_tests": 17,
+    "failed_tests": 1,
+    "success_rate": 94.44444444444444,
+    "test_timestamp": "2025-11-26T08:01:27.461676"
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication - super_admin",
+      "success": true,
+      "details": "✅ admin@tanseeq.com (Role: super_admin)",
+      "timestamp": "2025-11-26T08:01:26.655949",
+      "response_data": null
+    },
+    {
+      "test": "Authentication - user",
+      "success": true,
+      "details": "✅ jihad@tanseeq.com (Role: user)",
+      "timestamp": "2025-11-26T08:01:26.903972",
+      "response_data": null
+    },
+    {
+      "test": "Authentication - tarek",
+      "success": false,
+      "details": "❌ tarek@tanseeq.com - 401: {\"detail\":\"Invalid credentials\"}",
+      "timestamp": "2025-11-26T08:01:26.957969",
+      "response_data": null
+    },
+    {
+      "test": "/api/attendance/check-in (Regular User)",
+      "success": true,
+      "details": "Status: 400 - {\"detail\":\"تم تسجيل الحضور مسبقاً اليوم\"}",
+      "timestamp": "2025-11-26T08:01:26.970316",
+      "response_data": null
+    },
+    {
+      "test": "/api/attendance/check-out",
+      "success": true,
+      "details": "Status: 400 - {\"detail\":\"تم تسجيل الانصراف مسبقاً اليوم\"}",
+      "timestamp": "2025-11-26T08:01:26.985126",
+      "response_data": null
+    },
+    {
+      "test": "/api/notifications/count",
+      "success": true,
+      "details": "Unread count: 36",
+      "timestamp": "2025-11-26T08:01:27.038885",
+      "response_data": null
+    },
+    {
+      "test": "/api/notifications/my?unread_only=true",
+      "success": true,
+      "details": "Retrieved 20 unread notifications",
+      "timestamp": "2025-11-26T08:01:27.054709",
+      "response_data": null
+    },
+    {
+      "test": "/api/notifications/{id}/acknowledge",
+      "success": true,
+      "details": "Successfully acknowledged notification 692543a95fdccf231de051f0",
+      "timestamp": "2025-11-26T08:01:27.067607",
+      "response_data": null
+    },
+    {
+      "test": "/api/notifications/send (Super Admin)",
+      "success": true,
+      "details": "Successfully sent test notification",
+      "timestamp": "2025-11-26T08:01:27.080974",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/request (Advance)",
+      "success": true,
+      "details": "Advance request: تم إرسال طلب سلفة بنجاح وسيتم مراجعته من الإدارة",
+      "timestamp": "2025-11-26T08:01:27.143952",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/request (Custody)",
+      "success": true,
+      "details": "Custody request: تم إرسال طلب عهدة بنجاح وسيتم مراجعته من الإدارة",
+      "timestamp": "2025-11-26T08:01:27.202941",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/custody-settlement",
+      "success": true,
+      "details": "Settlement: تم إرسال طلب تسوية العهدة بنجاح وسيتم مراجعته من الإدارة",
+      "timestamp": "2025-11-26T08:01:27.265867",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/my-balance",
+      "success": true,
+      "details": "Total: 7180.0 AED (Advance: 6652.536231884058, Custody: 527.463768115942)",
+      "timestamp": "2025-11-26T08:01:27.280664",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/admin/employees-with-balances",
+      "success": true,
+      "details": "Found 0 employees with balances",
+      "timestamp": "2025-11-26T08:01:27.347056",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/admin/all-transactions",
+      "success": true,
+      "details": "Retrieved 52 transactions",
+      "timestamp": "2025-11-26T08:01:27.380047",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/admin/pending-approvals",
+      "success": true,
+      "details": "Found 7 pending approvals",
+      "timestamp": "2025-11-26T08:01:27.398544",
+      "response_data": null
+    },
+    {
+      "test": "/api/advances/repay",
+      "success": true,
+      "details": "Repayment response: 200",
+      "timestamp": "2025-11-26T08:01:27.424006",
+      "response_data": null
+    },
+    {
+      "test": "/api/deductions/calculate-monthly",
+      "success": true,
+      "details": "Processed 5 employees for 2025-11",
+      "timestamp": "2025-11-26T08:01:27.461398",
+      "response_data": null
+    }
+  ]
+}
