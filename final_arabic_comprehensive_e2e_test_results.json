@@ -1,0 +1,237 @@
+{
+  "summary": {
+    "total_tests": 27,
+    "successful_tests": 27,
+    "failed_tests": 0,
+    "success_rate": 100.0,
+    "test_timestamp": "2025-11-26T08:03:57.320161",
+    "test_credentials_used": {
+      "super_admin": "admin@tanseeq.com",
+      "user": "jihad@tanseeq.com",
+      "tarek": "tarek.wazzan@tanseeq.com"
+    }
+  },
+  "detailed_results": [
+    {
+      "test": "Authentication - super_admin",
+      "success": true,
+      "details": "✅ admin@tanseeq.com (Role: super_admin, ID: admin_001)",
+      "timestamp": "2025-11-26T08:03:56.128613",
+      "response_data": null
+    },
+    {
+      "test": "Authentication - user",
+      "success": true,
+      "details": "✅ jihad@tanseeq.com (Role: user, ID: eed6d28b-7639-4d31-9386-4e99b9179d8f)",
+      "timestamp": "2025-11-26T08:03:56.375267",
+      "response_data": null
+    },
+    {
+      "test": "Authentication - tarek",
+      "success": true,
+      "details": "✅ tarek.wazzan@tanseeq.com (Role: user, ID: 83da4c33-c9c2-42cd-9b82-dea36ff1f05d)",
+      "timestamp": "2025-11-26T08:03:56.660195",
+      "response_data": null
+    },
+    {
+      "test": "JWT Token Validity - super_admin",
+      "success": true,
+      "details": "Token valid - User: مدير النظام (Role: super_admin)",
+      "timestamp": "2025-11-26T08:03:56.673615",
+      "response_data": null
+    },
+    {
+      "test": "JWT Token Validity - user",
+      "success": true,
+      "details": "Token valid - User: Jihad (Role: user)",
+      "timestamp": "2025-11-26T08:03:56.684382",
+      "response_data": null
+    },
+    {
+      "test": "JWT Token Validity - tarek",
+      "success": true,
+      "details": "Token valid - User: Tarek Wazzan (Role: user)",
+      "timestamp": "2025-11-26T08:03:56.734077",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Check-in (Regular User)",
+      "success": true,
+      "details": "Status: 400 - {\"detail\":\"تم تسجيل الحضور مسبقاً اليوم\"}",
+      "timestamp": "2025-11-26T08:03:56.745987",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Check-in (Tarek - Flexible)",
+      "success": true,
+      "details": "Status: 200 - تم تسجيل الحضور بنجاح ✅ (Schedule: flexible, Exception: flex, Late: False, Minutes: 0)",
+      "timestamp": "2025-11-26T08:03:56.759704",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Check-out",
+      "success": true,
+      "details": "Status: 400 - {\"detail\":\"تم تسجيل الانصراف مسبقاً اليوم\"}",
+      "timestamp": "2025-11-26T08:03:56.811432",
+      "response_data": null
+    },
+    {
+      "test": "Attendance Records & Exceptions",
+      "success": true,
+      "details": "Total: 157, Late records: 9, Exception records: 0",
+      "timestamp": "2025-11-26T08:03:56.837442",
+      "response_data": null
+    },
+    {
+      "test": "Notifications Count",
+      "success": true,
+      "details": "Unread notifications: 36",
+      "timestamp": "2025-11-26T08:03:56.891080",
+      "response_data": null
+    },
+    {
+      "test": "Fetch Unread Notifications",
+      "success": true,
+      "details": "Retrieved 20 unread notifications",
+      "timestamp": "2025-11-26T08:03:56.905711",
+      "response_data": null
+    },
+    {
+      "test": "Acknowledge Notification",
+      "success": true,
+      "details": "Successfully acknowledged notification 29a2bbcb-0f92-4943-a37f-7700412f2279",
+      "timestamp": "2025-11-26T08:03:56.958111",
+      "response_data": null
+    },
+    {
+      "test": "Send Notification (Super Admin)",
+      "success": true,
+      "details": "Successfully sent test notification",
+      "timestamp": "2025-11-26T08:03:56.971337",
+      "response_data": null
+    },
+    {
+      "test": "Request Advance (Employee)",
+      "success": true,
+      "details": "Advance request: تم إرسال طلب سلفة بنجاح وسيتم مراجعته من الإدارة",
+      "timestamp": "2025-11-26T08:03:56.988226",
+      "response_data": null
+    },
+    {
+      "test": "Request Custody (Employee)",
+      "success": true,
+      "details": "Custody request: تم إرسال طلب عهدة بنجاح وسيتم مراجعته من الإدارة",
+      "timestamp": "2025-11-26T08:03:57.049996",
+      "response_data": null
+    },
+    {
+      "test": "Custody Settlement (Employee)",
+      "success": true,
+      "details": "Settlement: تم إرسال طلب تسوية العهدة بنجاح وسيتم مراجعته من الإدارة",
+      "timestamp": "2025-11-26T08:03:57.072755",
+      "response_data": null
+    },
+    {
+      "test": "Employee Balance",
+      "success": true,
+      "details": "Total Available: 7130.0 AED (Advance: 6608.333333333333, Custody: 521.6666666666666) | Totals: Advances=7625.0, Custody=1000.0, Expenses=345.0",
+      "timestamp": "2025-11-26T08:03:57.084551",
+      "response_data": null
+    },
+    {
+      "test": "Employees with Balances (Super Admin)",
+      "success": true,
+      "details": "Found 0 employees with balances",
+      "timestamp": "2025-11-26T08:03:57.105420",
+      "response_data": null
+    },
+    {
+      "test": "Record Repayment (Super Admin)",
+      "success": true,
+      "details": "Repayment response: 200",
+      "timestamp": "2025-11-26T08:03:57.161821",
+      "response_data": null
+    },
+    {
+      "test": "Edit Transaction (Super Admin)",
+      "success": true,
+      "details": "Successfully edited transaction 7f84b690-e792-4adb-b267-b56829c75f53",
+      "timestamp": "2025-11-26T08:03:57.233891",
+      "response_data": null
+    },
+    {
+      "test": "All Transactions (Super Admin)",
+      "success": true,
+      "details": "Retrieved 57 transactions",
+      "timestamp": "2025-11-26T08:03:57.233934",
+      "response_data": null
+    },
+    {
+      "test": "Pending Approvals (Super Admin)",
+      "success": true,
+      "details": "Found 10 pending approvals",
+      "timestamp": "2025-11-26T08:03:57.246518",
+      "response_data": null
+    },
+    {
+      "test": "Monthly Deductions Calculation",
+      "success": true,
+      "details": "Processed 5 employees for 2025-11, Total deductions: 0 AED",
+      "timestamp": "2025-11-26T08:03:57.271653",
+      "response_data": null
+    },
+    {
+      "test": "Deductions Exceptions Verification",
+      "success": true,
+      "details": "Found 1 exception users: ['Hatem'] | Details: {'Hatem': {'name': 'Hatem Mohamed Ahmed', 'deduction_amount': 0}}",
+      "timestamp": "2025-11-26T08:03:57.300104",
+      "response_data": null
+    },
+    {
+      "test": "Health Check (/healthz)",
+      "success": true,
+      "details": "Health status: ok",
+      "timestamp": "2025-11-26T08:03:57.308370",
+      "response_data": null
+    },
+    {
+      "test": "Users Endpoint",
+      "success": true,
+      "details": "Retrieved 14 total users, 14 active users",
+      "timestamp": "2025-11-26T08:03:57.319683",
+      "response_data": null
+    }
+  ],
+  "systems_breakdown": {
+    "🔐 Authentication & JWT": {
+      "total": 6,
+      "passed": 6,
+      "success_rate": 100.0
+    },
+    "🕐 Attendance System": {
+      "total": 4,
+      "passed": 4,
+      "success_rate": 100.0
+    },
+    "🔔 Notifications": {
+      "total": 4,
+      "passed": 4,
+      "success_rate": 100.0
+    },
+    "💰 Advances & Custody": {
+      "total": 8,
+      "passed": 8,
+      "success_rate": 100.0
+    },
+    "📊 Deductions": {
+      "total": 2,
+      "passed": 2,
+      "success_rate": 100.0
+    },
+    "🏥 Health Checks": {
+      "total": 2,
+      "passed": 2,
+      "success_rate": 100.0
+    }
+  }
+}
