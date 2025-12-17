@@ -286,7 +286,14 @@ const NotificationModal = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm font-medium"
+                  >
+                    تخطي الآن
+                  </button>
+                  
                   {notifications.length > 1 && (
                     <button
                       onClick={acknowledgeAll}
