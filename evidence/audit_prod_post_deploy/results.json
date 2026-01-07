@@ -1,0 +1,73 @@
+{
+  "audit_timestamp": "2026-01-07T07:21:03.546367",
+  "base_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api",
+  "areas": {
+    "authentication": {
+      "status": "PASS",
+      "details": [
+        "✅ Login successful for admin@tanseeq.com",
+        "✅ Token received: eyJhbGciOiJIUzI1NiIs...",
+        "✅ User role: super_admin",
+        "✅ User name: Admin QA",
+        "✅ /auth/me working - ID: dff42139-d98e-47d4-8d78-f075e54a53c8"
+      ],
+      "issues": []
+    },
+    "payroll_cycles": {
+      "status": "PASS",
+      "details": [
+        "✅ GET /payroll/cycles successful",
+        "✅ Found 5 payroll cycles",
+        "✅ Testing cycle: Unknown",
+        "✅ GET /payroll/cycles/32c95b7e-7fac-42c9-a9a7-5e552b9ac230/summary successful",
+        "✅ total_basic_salary: 0",
+        "✅ total_allowances: 0",
+        "✅ total_deductions: 0",
+        "✅ total_net_salary: 0"
+      ],
+      "issues": [
+        "⚠️ Missing summary fields: ['total_basic_salary', 'total_allowances', 'total_deductions', 'total_net_salary']"
+      ]
+    },
+    "advanced_deductions": {
+      "status": "PASS",
+      "details": [
+        "✅ POST /deductions/calculate-monthly?month=2025-10 successful",
+        "✅ Response contains summaries/employees structure",
+        "✅ Found 6 employees in calculation",
+        "✅ POST /deductions/calculate (custom range) successful",
+        "✅ Custom response contains summaries/employees structure"
+      ],
+      "issues": [
+        "⚠️ daily_records missing from response",
+        "⚠️ daily_records missing from custom response"
+      ]
+    },
+    "manual_absence_creation": {
+      "status": "FAIL",
+      "details": [
+        "✅ Found potential endpoint: /attendance/mark-absence"
+      ],
+      "issues": [
+        "❌ Absence creation failed: 405"
+      ]
+    },
+    "users_module": {
+      "status": "PASS",
+      "details": [
+        "✅ GET /users successful - found 11 users",
+        "✅ Testing with user: Super Admin (ID: bbacd795-7561-4bfc-9b49-b5e5a09c7926)",
+        "✅ PUT /users/bbacd795-7561-4bfc-9b49-b5e5a09c7926 successful - employee code update working"
+      ],
+      "issues": []
+    }
+  },
+  "summary": {
+    "total_areas": 5,
+    "passed": 4,
+    "failed": 1,
+    "actionable_fixes": [
+      "Fix manual absence creation functionality"
+    ]
+  }
+}
