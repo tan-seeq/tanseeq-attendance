@@ -1,5 +1,5 @@
 {
-  "audit_timestamp": "2026-01-07T07:21:03.546367",
+  "audit_timestamp": "2026-01-07T07:22:54.405002",
   "base_url": "https://hrapp-tanseeq-replaced-1761028017.emergent.host/api",
   "areas": {
     "authentication": {
@@ -44,13 +44,14 @@
       ]
     },
     "manual_absence_creation": {
-      "status": "FAIL",
+      "status": "PASS",
       "details": [
-        "✅ Found potential endpoint: /attendance/mark-absence"
+        "✅ Using test user: TAREK ABDELMONEM ZAKI ALWAZAN (ID: 09b65295-3506-4722-8ee3-927ff046b026)",
+        "✅ Manual absence creation successful",
+        "✅ Created absence with ID: 61ae7273-d0df-4db3-a3bf-87e42e77bd62",
+        "✅ Test absence deleted successfully"
       ],
-      "issues": [
-        "❌ Absence creation failed: 405"
-      ]
+      "issues": []
     },
     "users_module": {
       "status": "PASS",
@@ -64,10 +65,8 @@
   },
   "summary": {
     "total_areas": 5,
-    "passed": 4,
-    "failed": 1,
-    "actionable_fixes": [
-      "Fix manual absence creation functionality"
-    ]
+    "passed": 5,
+    "failed": 0,
+    "actionable_fixes": []
   }
 }
