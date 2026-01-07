@@ -257,7 +257,7 @@ class ProductionAuditTester:
             self.add_actionable_fix("Debug advanced deductions system")
     
     def test_manual_absence_creation(self):
-        """Test 4: Manual absence creation - Find admin endpoint and test"""
+        """Test 4: Manual absence creation - Test correct endpoint"""
         print("\n🏥 Testing Manual Absence Creation...")
         
         if not self.token:
@@ -266,61 +266,66 @@ class ProductionAuditTester:
             return
         
         try:
-            # Try common admin absence endpoints
-            potential_endpoints = [
-                "/attendance/admin/create-absence",
-                "/attendance/mark-absence",
-                "/attendance/admin/mark-absence",
-                "/attendance/absence/create",
-                "/admin/attendance/create-absence"
-            ]
+            # Get a test user first
+            users_response = self.session.get(f"{BASE_URL}/users")
+            if users_response.status_code != 200:
+                self.log_detail("manual_absence_creation", "❌ Could not get users list", True)
+                self.set_area_status("manual_absence_creation", "FAIL")
+                return
             
-            found_endpoint = None
+            users = users_response.json()
+            test_user = None
             
-            for endpoint in potential_endpoints:
-                # Test with OPTIONS or GET first to see if endpoint exists
-                test_response = self.session.options(f"{BASE_URL}{endpoint}")
-                if test_response.status_code != 404:
-                    found_endpoint = endpoint
-                    self.log_detail("manual_absence_creation", f"✅ Found potential endpoint: {endpoint}")
+            # Find a regular user (not admin/super_admin)
+            for user in users:
+                if user.get("role") == "user":
+                    test_user = user
                     break
             
-            if found_endpoint:
-                # Try to create a test absence
-                test_absence_data = {
-                    "user_id": "test-user-id",
-                    "date": "2025-01-15",
-                    "reason": "QA Testing - Manual Absence",
-                    "absence_type": "sick_leave"
-                }
-                
-                create_response = self.session.post(f"{BASE_URL}{found_endpoint}", json=test_absence_data)
-                
-                if create_response.status_code in [200, 201]:
-                    self.log_detail("manual_absence_creation", f"✅ Manual absence creation successful")
-                    
-                    # Try to delete or mark void if possible
-                    response_data = create_response.json()
-                    absence_id = response_data.get("id") or response_data.get("absence_id")
-                    
-                    if absence_id:
-                        # Try to delete
-                        delete_response = self.session.delete(f"{BASE_URL}/attendance/{absence_id}")
-                        if delete_response.status_code == 200:
-                            self.log_detail("manual_absence_creation", f"✅ Test absence deleted successfully")
-                        else:
-                            self.log_detail("manual_absence_creation", f"⚠️ Could not delete test absence: {delete_response.status_code}")
-                    
-                    self.set_area_status("manual_absence_creation", "PASS")
-                    
-                else:
-                    self.log_detail("manual_absence_creation", f"❌ Absence creation failed: {create_response.status_code}", True)
-                    self.set_area_status("manual_absence_creation", "FAIL")
-                    self.add_actionable_fix("Fix manual absence creation functionality")
-            else:
-                self.log_detail("manual_absence_creation", "❌ No manual absence creation endpoint found", True)
+            if not test_user and users:
+                # Use first user if no regular user found
+                test_user = users[0]
+            
+            if not test_user:
+                self.log_detail("manual_absence_creation", "❌ No users available for testing", True)
                 self.set_area_status("manual_absence_creation", "FAIL")
-                self.add_actionable_fix("Implement manual absence creation endpoint: POST /attendance/admin/create-absence with fields: user_id, date, reason, absence_type")
+                return
+            
+            self.log_detail("manual_absence_creation", f"✅ Using test user: {test_user.get('name')} (ID: {test_user.get('id')})")
+            
+            # Test the correct endpoint: POST /attendance/create-absence
+            test_absence_data = {
+                "user_id": test_user.get("id"),
+                "date": "2025-01-15",
+                "reason": "QA Testing - Manual Absence Creation"
+            }
+            
+            create_response = self.session.post(f"{BASE_URL}/attendance/create-absence", json=test_absence_data)
+            
+            if create_response.status_code in [200, 201]:
+                self.log_detail("manual_absence_creation", f"✅ Manual absence creation successful")
+                
+                response_data = create_response.json()
+                absence_id = response_data.get("id")
+                
+                if absence_id:
+                    self.log_detail("manual_absence_creation", f"✅ Created absence with ID: {absence_id}")
+                    
+                    # Try to delete the test absence
+                    delete_response = self.session.delete(f"{BASE_URL}/attendance/delete-absence/{absence_id}")
+                    
+                    if delete_response.status_code == 200:
+                        self.log_detail("manual_absence_creation", f"✅ Test absence deleted successfully")
+                    else:
+                        self.log_detail("manual_absence_creation", f"⚠️ Could not delete test absence: {delete_response.status_code}")
+                
+                self.set_area_status("manual_absence_creation", "PASS")
+                
+            else:
+                self.log_detail("manual_absence_creation", f"❌ Absence creation failed: {create_response.status_code}", True)
+                self.log_detail("manual_absence_creation", f"Response: {create_response.text}", True)
+                self.set_area_status("manual_absence_creation", "FAIL")
+                self.add_actionable_fix("Fix manual absence creation functionality")
                 
         except Exception as e:
             self.log_detail("manual_absence_creation", f"❌ Manual absence creation error: {str(e)}", True)
