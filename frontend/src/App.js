@@ -4436,6 +4436,80 @@ const AttendanceManagement = () => {
     }
   };
 
+  // NEW: Manual Absence Handlers (نفس منطق الحضور اليدوي)
+  const handleFetchMissingDaysForAbsence = async () => {
+    if (!manualAbsenceForm.employee_id || !manualAbsenceForm.start_date || !manualAbsenceForm.end_date) {
+      alert('الرجاء اختيار الموظف والفترة');
+      return;
+    }
+
+    try {
+      setLoadingMissingDaysAbsence(true);
+      const response = await axios.get(
+        `${API}/attendance/missing-days/${manualAbsenceForm.employee_id}?start_date=${manualAbsenceForm.start_date}&end_date=${manualAbsenceForm.end_date}`
+      );
+      
+      setMissingDaysForAbsence(response.data.missing_days || []);
+      setSelectedAbsenceDays(response.data.missing_days.map(d => d.date) || []);
+      
+      if (response.data.missing_days.length === 0) {
+        alert('لا توجد أيام مفقودة في هذه الفترة ✅');
+      }
+    } catch (error) {
+      console.error('Error fetching missing days:', error);
+      alert('حدث خطأ في جلب الأيام المفقودة');
+    } finally {
+      setLoadingMissingDaysAbsence(false);
+    }
+  };
+
+  const handleAddManualAbsence = async () => {
+    if (selectedAbsenceDays.length === 0) {
+      alert('الرجاء اختيار الأيام المراد إضافتها');
+      return;
+    }
+
+    try {
+      setAddingAbsenceRecords(true);
+      const response = await axios.post(`${API}/attendance/bulk-add-absence`, {
+        employee_id: manualAbsenceForm.employee_id,
+        missing_days: selectedAbsenceDays,
+        absence_type: manualAbsenceForm.absence_type,
+        reason: manualAbsenceForm.reason || 'غياب يدوي'
+      });
+
+      alert(`✅ ${response.data.message}\nالخصم الكلي: ${response.data.total_deduction} درهم\nدورة الرواتب: ${response.data.cycle_month}`);
+      
+      // Reset and close
+      setShowManualAbsenceModal(false);
+      setManualAbsenceForm({
+        employee_id: '',
+        start_date: '',
+        end_date: '',
+        absence_type: 'full_day',
+        reason: ''
+      });
+      setMissingDaysForAbsence([]);
+      setSelectedAbsenceDays([]);
+      
+      // Refresh attendance data
+      fetchAllAttendance();
+    } catch (error) {
+      console.error('Error adding manual absence:', error);
+      alert(error.response?.data?.detail || 'حدث خطأ في إضافة سجلات الغياب');
+    } finally {
+      setAddingAbsenceRecords(false);
+    }
+  };
+
+  const toggleAbsenceDaySelection = (date) => {
+    if (selectedAbsenceDays.includes(date)) {
+      setSelectedAbsenceDays(selectedAbsenceDays.filter(d => d !== date));
+    } else {
+      setSelectedAbsenceDays([...selectedAbsenceDays, date]);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
   }
