@@ -1532,6 +1532,173 @@ async def generate_custom_attendance_report(
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"خطأ في إنشاء التقرير: {str(e)}")
 
+
+@api_router.post("/attendance/bulk-add-absence")
+async def bulk_add_manual_absence(
+    request: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    إضافة سجلات غياب يدوية للأيام المفقودة مع احتساب الخصومات - Super Admin Only
+    
+    Request Body:
+    {
+        "employee_id": "uuid",
+        "missing_days": ["2025-01-01", "2025-01-02", ...],
+        "absence_type": "full_day" | "half_day",
+        "reason": "سبب الغياب (اختياري)"
+    }
+    """
+    try:
+        from datetime import datetime, timezone
+        
+        employee_id = request.get("employee_id")
+        missing_days = request.get("missing_days", [])
+        absence_type = request.get("absence_type", "full_day")
+        reason = request.get("reason", "غياب يدوي")
+        
+        if not employee_id or not missing_days:
+            raise HTTPException(status_code=400, detail="معرف الموظف والأيام مطلوبة")
+        
+        # التحقق من وجود الموظف
+        employee = await db.users.find_one({"id": employee_id})
+        if not employee:
+            raise HTTPException(status_code=404, detail="الموظف غير موجود")
+        
+        # الحصول على الراتب الشهري للموظف
+        monthly_salary = employee.get("salary", 0)
+        if monthly_salary <= 0:
+            raise HTTPException(status_code=400, detail="راتب الموظف غير محدد")
+        
+        # احتساب خصم اليوم الواحد (الراتب الشهري / 30)
+        daily_deduction = monthly_salary / 30
+        half_day_deduction = daily_deduction / 2
+        
+        # إضافة سجلات الغياب
+        added_count = 0
+        failed_dates = []
+        total_deduction = 0
+        
+        for date_str in missing_days:
+            try:
+                # التحقق من عدم وجود سجل بالفعل
+                existing = await db.attendance.find_one({
+                    "user_id": employee_id,
+                    "date": date_str
+                })
+                
+                if existing:
+                    failed_dates.append(f"{date_str} (موجود مسبقاً)")
+                    continue
+                
+                # احتساب الخصم
+                deduction_amount = daily_deduction if absence_type == "full_day" else half_day_deduction
+                total_deduction += deduction_amount
+                
+                # إنشاء سجل الغياب
+                attendance_data = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": employee_id,
+                    "user_name": employee["name"],
+                    "date": date_str,
+                    "check_in": None,
+                    "check_out": None,
+                    "status": "absent",
+                    "absence_type": absence_type,  # full_day or half_day
+                    "absence_reason": reason,
+                    "is_late": False,
+                    "working_hours": 0,
+                    "late_minutes": 0,
+                    "early_departure_minutes": 0,
+                    "deducted_hours": 0.0,
+                    "absence_deduction": deduction_amount,  # ✅ خصم الغياب
+                    "manual_entry": True,
+                    "manual_absence": True,  # ✅ تمييز الغياب اليدوي
+                    "added_by": current_user.id,
+                    "added_by_name": current_user.name,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                
+                await db.attendance.insert_one(attendance_data)
+                added_count += 1
+                
+            except Exception as e:
+                failed_dates.append(f"{date_str} ({str(e)})")
+        
+        # ✅ ربط الخصومات بدورة الرواتب الحالية
+        # الحصول على الشهر الحالي أو إنشاء دورة رواتب جديدة
+        from datetime import datetime
+        first_date = min(missing_days)
+        year_month = first_date[:7]  # "2025-01"
+        
+        # البحث عن دورة رواتب موجودة لهذا الشهر
+        payroll_cycle = await db.payroll_cycles.find_one({
+            "cycle_month": year_month,
+            "status": {"$in": ["draft", "pending"]}  # فقط الدورات غير المكتملة
+        })
+        
+        payroll_cycle_id = None
+        if payroll_cycle:
+            payroll_cycle_id = payroll_cycle["id"]
+        else:
+            # إنشاء دورة رواتب جديدة
+            payroll_cycle_id = str(uuid.uuid4())
+            new_cycle = {
+                "id": payroll_cycle_id,
+                "cycle_month": year_month,
+                "status": "draft",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_by": current_user.id
+            }
+            await db.payroll_cycles.insert_one(new_cycle)
+        
+        # ✅ إضافة سجل الخصم في دورة الرواتب
+        if added_count > 0 and total_deduction > 0:
+            deduction_record = {
+                "id": str(uuid.uuid4()),
+                "payroll_cycle_id": payroll_cycle_id,
+                "cycle_month": year_month,
+                "employee_id": employee_id,
+                "employee_name": employee["name"],
+                "deduction_type": "manual_absence",
+                "deduction_amount": total_deduction,
+                "absence_days": added_count,
+                "absence_type": absence_type,
+                "reason": reason,
+                "dates": missing_days[:added_count],  # الأيام الفعلية
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_by": current_user.id,
+                "created_by_name": current_user.name
+            }
+            
+            await db.payroll_deductions.insert_one(deduction_record)
+        
+        # تسجيل النشاط
+        await log_activity(
+            current_user.id,
+            "bulk_absence_added",
+            f"أضاف {added_count} سجل غياب يدوي للموظف {employee['name']} بخصم {total_deduction:.2f} درهم"
+        )
+        
+        return {
+            "success": True,
+            "message": f"تم إضافة {added_count} سجل غياب بنجاح",
+            "added_count": added_count,
+            "failed_dates": failed_dates,
+            "employee_name": employee["name"],
+            "total_deduction": round(total_deduction, 2),
+            "payroll_cycle_id": payroll_cycle_id,
+            "cycle_month": year_month
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Error adding absence records: {e}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"خطأ في إضافة سجلات الغياب: {str(e)}")
+
 # ============ EMPLOYEE ADVANCES & CUSTODY SYSTEM ============
 
 from advances_model import (
