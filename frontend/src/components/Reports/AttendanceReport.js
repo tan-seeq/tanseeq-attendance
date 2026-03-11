@@ -32,6 +32,10 @@ const AttendanceReport = () => {
     format: 'excel'
   });
   const [generatingReport, setGeneratingReport] = useState(false);
+  // Fetch employees on component mount
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
   const applyDeductions = async () => {
     if (!window.confirm(`هل أنت متأكد من تطبيق خصومات التأخير والغياب للشهر ${selectedMonth}؟\n\nسيتم حساب:\n- خصومات التأخير\n- خصومات الغياب\n- أقساط السلف المستحقة`)) {
