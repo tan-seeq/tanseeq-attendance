@@ -4718,6 +4718,162 @@ const AttendanceManagement = () => {
           </div>
         </div>
       )}
+
+      {/* NEW: Manual Attendance Modal */}
+      {showManualAttendanceModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-6 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">إضافة حضور يدوي للموظفين</h3>
+            
+            {/* Step 1: Select Employee and Date Range */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-blue-900 mb-3">الخطوة 1: اختر الموظف والفترة</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
+                  <select
+                    value={manualAttendanceForm.employee_id}
+                    onChange={(e) => setManualAttendanceForm({...manualAttendanceForm, employee_id: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">-- اختر الموظف --</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
+                    <input
+                      type="date"
+                      value={manualAttendanceForm.start_date}
+                      onChange={(e) => setManualAttendanceForm({...manualAttendanceForm, start_date: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
+                    <input
+                      type="date"
+                      value={manualAttendanceForm.end_date}
+                      onChange={(e) => setManualAttendanceForm({...manualAttendanceForm, end_date: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleFetchMissingDays}
+                disabled={loadingMissingDays}
+                className="mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loadingMissingDays ? 'جاري البحث...' : 'عرض الأيام المفقودة'}
+              </button>
+            </div>
+
+            {/* Step 2: Show Missing Days */}
+            {missingDays.length > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-yellow-900 mb-3">
+                  الخطوة 2: الأيام المفقودة ({missingDays.length} يوم)
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                  {missingDays.map(day => (
+                    <label key={day.date} className="flex items-center space-x-2 space-x-reverse bg-white p-2 rounded border hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedMissingDays.includes(day.date)}
+                        onChange={() => toggleDaySelection(day.date)}
+                        className="h-4 w-4"
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{day.date}</div>
+                        <div className="text-xs text-gray-600">{day.day_name_ar}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center space-x-2">
+                  <button
+                    onClick={() => setSelectedMissingDays(missingDays.map(d => d.date))}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    اختيار الكل
+                  </button>
+                  <span className="text-gray-400">|</span>
+                  <button
+                    onClick={() => setSelectedMissingDays([])}
+                    className="text-sm text-gray-600 hover:underline"
+                  >
+                    إلغاء الاختيار
+                  </button>
+                  <span className="flex-1 text-left text-sm text-gray-700">
+                    محدد: {selectedMissingDays.length} يوم
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Set Times */}
+            {selectedMissingDays.length > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-green-900 mb-3">الخطوة 3: حدد أوقات الحضور والانصراف</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">وقت الحضور</label>
+                    <input
+                      type="time"
+                      value={manualAttendanceForm.check_in_time}
+                      onChange={(e) => setManualAttendanceForm({...manualAttendanceForm, check_in_time: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">وقت الانصراف</label>
+                    <input
+                      type="time"
+                      value={manualAttendanceForm.check_out_time}
+                      onChange={(e) => setManualAttendanceForm({...manualAttendanceForm, check_out_time: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 space-x-reverse pt-4 border-t">
+              <button
+                onClick={() => {
+                  setShowManualAttendanceModal(false);
+                  setManualAttendanceForm({
+                    employee_id: '',
+                    start_date: '',
+                    end_date: '',
+                    check_in_time: '09:00',
+                    check_out_time: '18:00'
+                  });
+                  setMissingDays([]);
+                  setSelectedMissingDays([]);
+                }}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                إلغاء
+              </button>
+              {selectedMissingDays.length > 0 && (
+                <button
+                  onClick={handleAddManualAttendance}
+                  disabled={addingManualRecords}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {addingManualRecords ? 'جاري الإضافة...' : `إضافة ${selectedMissingDays.length} سجل`}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
