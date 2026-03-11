@@ -1368,8 +1368,6 @@ async def bulk_add_manual_attendance(
                     is_admin_edited=True
                 )
                 
-                print(f"DEBUG: work_calc = {work_calc}")  # Debug line
-                
                 # إنشاء سجل الحضور
                 attendance_data = {
                     "id": str(uuid.uuid4()),
