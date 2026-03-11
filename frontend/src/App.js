@@ -4529,6 +4529,13 @@ const AttendanceManagement = () => {
                 <span>تقرير مخصص</span>
               </button>
               <button
+                onClick={() => setShowManualAbsenceModal(true)}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center space-x-2"
+              >
+                <XMarkIcon className="h-5 w-5" />
+                <span>إضافة غياب يدوي</span>
+              </button>
+              <button
                 onClick={() => setShowManualAttendanceModal(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
               >
@@ -4543,7 +4550,7 @@ const AttendanceManagement = () => {
               </button>
               <button
                 onClick={() => setShowAbsenceModal(true)}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
               >
                 إنشاء سجل غياب
               </button>
