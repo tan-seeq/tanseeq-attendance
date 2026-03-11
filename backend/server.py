@@ -1378,7 +1378,7 @@ async def bulk_add_manual_attendance(
                     "check_out": check_out_time,
                     "status": "present",
                     "is_late": False,
-                    "working_hours": work_calc["working_hours"],
+                    "working_hours": work_calc["total_hours"],
                     "late_minutes": 0,
                     "early_departure_minutes": 0,
                     "deducted_hours": 0.0,
