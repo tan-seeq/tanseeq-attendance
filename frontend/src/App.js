@@ -4113,6 +4113,20 @@ const AttendanceManagement = () => {
   const [loadingMissingDays, setLoadingMissingDays] = useState(false);
   const [addingManualRecords, setAddingManualRecords] = useState(false);
   
+  // NEW: Manual Absence State
+  const [showManualAbsenceModal, setShowManualAbsenceModal] = useState(false);
+  const [manualAbsenceForm, setManualAbsenceForm] = useState({
+    employee_id: '',
+    start_date: '',
+    end_date: '',
+    absence_type: 'full_day',
+    reason: ''
+  });
+  const [missingDaysForAbsence, setMissingDaysForAbsence] = useState([]);
+  const [selectedAbsenceDays, setSelectedAbsenceDays] = useState([]);
+  const [loadingMissingDaysAbsence, setLoadingMissingDaysAbsence] = useState(false);
+  const [addingAbsenceRecords, setAddingAbsenceRecords] = useState(false);
+  
   // NEW: Custom Report State
   const [showCustomReportModal, setShowCustomReportModal] = useState(false);
   const [customReportForm, setCustomReportForm] = useState({
