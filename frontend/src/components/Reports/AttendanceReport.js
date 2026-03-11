@@ -290,6 +290,14 @@ const AttendanceReport = () => {
                 </>
               )}
             </button>
+            
+            <button
+              onClick={openCustomReportModal}
+              className="flex-1 px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center justify-center gap-2"
+            >
+              <DocumentArrowDownIcon className="h-5 w-5" />
+              تقرير مخصص
+            </button>
           </div>
         </div>
       </div>
