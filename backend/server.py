@@ -1286,8 +1286,8 @@ async def get_missing_attendance_days(
         current_date = start
         while current_date <= end:
             date_str = current_date.strftime("%Y-%m-%d")
-            # تخطي يوم الجمعة (يوم 4 = الجمعة في Python)
-            if current_date.weekday() != 4:  # 4 = Friday
+            # ✅ FIX: تخطي يوم الجمعة (4) والسبت (5) - عطلة نهاية الأسبوع
+            if current_date.weekday() not in [4, 5]:  # 4=Friday, 5=Saturday
                 if date_str not in existing_dates:
                     missing_days.append({
                         "date": date_str,
