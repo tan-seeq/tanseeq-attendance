@@ -1413,6 +1413,125 @@ async def bulk_add_manual_attendance(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"خطأ في إضافة السجلات: {str(e)}")
+
+
+@api_router.post("/attendance/custom-report")
+async def generate_custom_attendance_report(
+    request: dict,
+    current_user: User = Depends(get_super_admin_user)
+):
+    """
+    إنشاء تقرير حضور مخصص - Super Admin Only
+    
+    Request Body:
+    {
+        "employee_ids": ["uuid1", "uuid2", ...],
+        "start_date": "2025-01-01",
+        "end_date": "2025-01-31",
+        "format": "excel" | "csv"
+    }
+    """
+    try:
+        import pandas as pd
+        from io import BytesIO
+        import base64
+        
+        employee_ids = request.get("employee_ids", [])
+        start_date = request.get("start_date")
+        end_date = request.get("end_date")
+        export_format = request.get("format", "excel")
+        
+        if not employee_ids or not start_date or not end_date:
+            raise HTTPException(status_code=400, detail="جميع الحقول مطلوبة")
+        
+        # جلب بيانات الحضور
+        attendance_records = await db.attendance.find({
+            "user_id": {"$in": employee_ids},
+            "date": {
+                "$gte": start_date,
+                "$lte": end_date
+            }
+        }).sort("date", 1).to_list(None)
+        
+        if not attendance_records:
+            raise HTTPException(status_code=404, detail="لا توجد سجلات حضور في هذه الفترة")
+        
+        # جلب أسماء الموظفين
+        employees = await db.users.find({"id": {"$in": employee_ids}}).to_list(None)
+        employee_map = {emp["id"]: emp["name"] for emp in employees}
+        
+        # تحضير البيانات للـ Excel/CSV
+        report_data = []
+        for record in attendance_records:
+            report_data.append({
+                "اسم الموظف": employee_map.get(record["user_id"], "غير معروف"),
+                "التاريخ": record.get("date", ""),
+                "اليوم": record.get("day_name", ""),
+                "الحضور": record.get("check_in", "لم يسجل"),
+                "الانصراف": record.get("check_out", "لم يسجل"),
+                "الحالة": "حاضر" if record.get("status") == "present" else 
+                         "متأخر" if record.get("status") == "late" else 
+                         "غائب" if record.get("status") == "absent" else 
+                         record.get("status", "غير محدد"),
+                "ساعات العمل": record.get("working_hours", 0),
+                "دقائق التأخير": record.get("late_minutes", 0),
+                "خروج مبكر (دقائق)": record.get("early_departure_minutes", 0),
+                "ملاحظات": "إدخال يدوي" if record.get("manual_entry") else ""
+            })
+        
+        # إنشاء DataFrame
+        df = pd.DataFrame(report_data)
+        
+        if export_format == "excel":
+            # إنشاء Excel file
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name='تقرير الحضور')
+                
+                # تنسيق الأعمدة
+                worksheet = writer.sheets['تقرير الحضور']
+                for column in worksheet.columns:
+                    max_length = 0
+                    column_letter = column[0].column_letter
+                    for cell in column:
+                        try:
+                            if len(str(cell.value)) > max_length:
+                                max_length = len(str(cell.value))
+                        except:
+                            pass
+                    adjusted_width = min(max_length + 2, 50)
+                    worksheet.column_dimensions[column_letter].width = adjusted_width
+            
+            output.seek(0)
+            file_content = base64.b64encode(output.read()).decode()
+            filename = f"attendance_report_{start_date}_to_{end_date}.xlsx"
+            content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            
+        else:  # CSV
+            output = BytesIO()
+            df.to_csv(output, index=False, encoding='utf-8-sig')
+            output.seek(0)
+            file_content = base64.b64encode(output.read()).decode()
+            filename = f"attendance_report_{start_date}_to_{end_date}.csv"
+            content_type = "text/csv"
+        
+        return {
+            "success": True,
+            "filename": filename,
+            "content_type": content_type,
+            "file_content": file_content,
+            "records_count": len(report_data),
+            "employees_count": len(employee_ids)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"Error generating report: {e}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"خطأ في إنشاء التقرير: {str(e)}")
+
 # ============ EMPLOYEE ADVANCES & CUSTODY SYSTEM ============
 
 from advances_model import (
