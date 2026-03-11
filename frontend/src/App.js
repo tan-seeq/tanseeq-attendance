@@ -4097,6 +4097,22 @@ const AttendanceManagement = () => {
   const [absenceData, setAbsenceData] = useState({});
   const [missingEmployees, setMissingEmployees] = useState([]);
   const [showMissingModal, setShowMissingModal] = useState(false);
+  
+  // NEW: Manual Attendance State
+  const [showManualAttendanceModal, setShowManualAttendanceModal] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [manualAttendanceForm, setManualAttendanceForm] = useState({
+    employee_id: '',
+    start_date: '',
+    end_date: '',
+    check_in_time: '09:00',
+    check_out_time: '18:00'
+  });
+  const [missingDays, setMissingDays] = useState([]);
+  const [selectedMissingDays, setSelectedMissingDays] = useState([]);
+  const [loadingMissingDays, setLoadingMissingDays] = useState(false);
+  const [addingManualRecords, setAddingManualRecords] = useState(false);
+  
   const { user } = useAuth();
   const { t } = useLanguage();
 
