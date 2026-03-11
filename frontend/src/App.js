@@ -4265,6 +4265,85 @@ const AttendanceManagement = () => {
     }
   };
 
+  // NEW: Manual Attendance Handlers
+  const handleFetchMissingDays = async () => {
+    if (!manualAttendanceForm.employee_id || !manualAttendanceForm.start_date || !manualAttendanceForm.end_date) {
+      alert('الرجاء اختيار الموظف والفترة');
+      return;
+    }
+
+    try {
+      setLoadingMissingDays(true);
+      const response = await axios.get(
+        `${API}/attendance/missing-days/${manualAttendanceForm.employee_id}?start_date=${manualAttendanceForm.start_date}&end_date=${manualAttendanceForm.end_date}`
+      );
+      
+      setMissingDays(response.data.missing_days || []);
+      setSelectedMissingDays(response.data.missing_days.map(d => d.date) || []);
+      
+      if (response.data.missing_days.length === 0) {
+        alert('لا توجد أيام مفقودة في هذه الفترة ✅');
+      }
+    } catch (error) {
+      console.error('Error fetching missing days:', error);
+      alert('حدث خطأ في جلب الأيام المفقودة');
+    } finally {
+      setLoadingMissingDays(false);
+    }
+  };
+
+  const handleAddManualAttendance = async () => {
+    if (selectedMissingDays.length === 0) {
+      alert('الرجاء اختيار الأيام المراد إضافتها');
+      return;
+    }
+
+    if (!manualAttendanceForm.check_in_time || !manualAttendanceForm.check_out_time) {
+      alert('الرجاء تحديد وقت الحضور والانصراف');
+      return;
+    }
+
+    try {
+      setAddingManualRecords(true);
+      const response = await axios.post(`${API}/attendance/bulk-add-manual`, {
+        employee_id: manualAttendanceForm.employee_id,
+        missing_days: selectedMissingDays,
+        check_in_time: `${manualAttendanceForm.check_in_time}:00`,
+        check_out_time: `${manualAttendanceForm.check_out_time}:00`
+      });
+
+      alert(response.data.message);
+      
+      // Reset and close
+      setShowManualAttendanceModal(false);
+      setManualAttendanceForm({
+        employee_id: '',
+        start_date: '',
+        end_date: '',
+        check_in_time: '09:00',
+        check_out_time: '18:00'
+      });
+      setMissingDays([]);
+      setSelectedMissingDays([]);
+      
+      // Refresh attendance data
+      fetchAllAttendance();
+    } catch (error) {
+      console.error('Error adding manual attendance:', error);
+      alert(error.response?.data?.detail || 'حدث خطأ في إضافة السجلات');
+    } finally {
+      setAddingManualRecords(false);
+    }
+  };
+
+  const toggleDaySelection = (date) => {
+    if (selectedMissingDays.includes(date)) {
+      setSelectedMissingDays(selectedMissingDays.filter(d => d !== date));
+    } else {
+      setSelectedMissingDays([...selectedMissingDays, date]);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
   }
