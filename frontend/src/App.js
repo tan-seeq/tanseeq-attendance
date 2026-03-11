@@ -4137,20 +4137,6 @@ const AttendanceManagement = () => {
   });
   const [generatingReport, setGeneratingReport] = useState(false);
   
-  // NEW: Manual Absence State (نفس منطق الحضور اليدوي)
-  const [showManualAbsenceModal, setShowManualAbsenceModal] = useState(false);
-  const [manualAbsenceForm, setManualAbsenceForm] = useState({
-    employee_id: '',
-    start_date: '',
-    end_date: '',
-    absence_type: 'full_day',
-    reason: ''
-  });
-  const [missingDaysForAbsence, setMissingDaysForAbsence] = useState([]);
-  const [selectedAbsenceDays, setSelectedAbsenceDays] = useState([]);
-  const [loadingMissingDaysAbsence, setLoadingMissingDaysAbsence] = useState(false);
-  const [addingAbsenceRecords, setAddingAbsenceRecords] = useState(false);
-  
   const { user } = useAuth();
   const { t } = useLanguage();
 
