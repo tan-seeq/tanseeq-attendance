@@ -322,6 +322,158 @@ const AttendanceReport = () => {
           </p>
         </div>
       )}
+
+      {/* NEW: Custom Report Modal */}
+      {showCustomReportModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-6 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">تقرير حضور مخصص</h3>
+            
+            {/* Employee Selection */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-blue-900 mb-3">1️⃣ اختر الموظفين</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                {employees.map(emp => (
+                  <label key={emp.id} className="flex items-center space-x-2 space-x-reverse bg-white p-2 rounded border hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={customReportForm.employee_ids.includes(emp.id)}
+                      onChange={() => toggleEmployeeSelection(emp.id)}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm">{emp.name}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="mt-3 flex items-center space-x-2">
+                <button
+                  onClick={() => setCustomReportForm({
+                    ...customReportForm,
+                    employee_ids: employees.map(e => e.id)
+                  })}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  اختيار الكل
+                </button>
+                <span className="text-gray-400">|</span>
+                <button
+                  onClick={() => setCustomReportForm({
+                    ...customReportForm,
+                    employee_ids: []
+                  })}
+                  className="text-sm text-gray-600 hover:underline"
+                >
+                  إلغاء الاختيار
+                </button>
+                <span className="flex-1 text-left text-sm text-gray-700">
+                  محدد: {customReportForm.employee_ids.length} موظف
+                </span>
+              </div>
+            </div>
+
+            {/* Date Range */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-green-900 mb-3">2️⃣ حدد الفترة</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
+                  <input
+                    type="date"
+                    value={customReportForm.start_date}
+                    onChange={(e) => setCustomReportForm({...customReportForm, start_date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
+                  <input
+                    type="date"
+                    value={customReportForm.end_date}
+                    onChange={(e) => setCustomReportForm({...customReportForm, end_date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Export Format */}
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-purple-900 mb-3">3️⃣ اختر صيغة التصدير</h4>
+              <div className="flex space-x-4 space-x-reverse">
+                <label className="flex items-center space-x-2 space-x-reverse cursor-pointer">
+                  <input
+                    type="radio"
+                    value="excel"
+                    checked={customReportForm.format === 'excel'}
+                    onChange={(e) => setCustomReportForm({...customReportForm, format: e.target.value})}
+                    className="h-4 w-4"
+                  />
+                  <span className="flex items-center space-x-2">
+                    <span>📊 Excel (.xlsx)</span>
+                  </span>
+                </label>
+                <label className="flex items-center space-x-2 space-x-reverse cursor-pointer">
+                  <input
+                    type="radio"
+                    value="csv"
+                    checked={customReportForm.format === 'csv'}
+                    onChange={(e) => setCustomReportForm({...customReportForm, format: e.target.value})}
+                    className="h-4 w-4"
+                  />
+                  <span className="flex items-center space-x-2">
+                    <span>📄 CSV (.csv)</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Summary */}
+            {customReportForm.employee_ids.length > 0 && customReportForm.start_date && customReportForm.end_date && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-yellow-800">
+                  📋 سيتم تصدير تقرير حضور لـ <strong>{customReportForm.employee_ids.length}</strong> موظف
+                  من <strong>{customReportForm.start_date}</strong> إلى <strong>{customReportForm.end_date}</strong>
+                </p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 space-x-reverse pt-4 border-t">
+              <button
+                onClick={() => {
+                  setShowCustomReportModal(false);
+                  setCustomReportForm({
+                    employee_ids: [],
+                    start_date: '',
+                    end_date: '',
+                    format: 'excel'
+                  });
+                }}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleGenerateCustomReport}
+                disabled={generatingReport || customReportForm.employee_ids.length === 0}
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center space-x-2"
+              >
+                {generatingReport ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>جاري التصدير...</span>
+                  </>
+                ) : (
+                  <>
+                    <DocumentArrowDownIcon className="h-5 w-5" />
+                    <span>تصدير التقرير</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
