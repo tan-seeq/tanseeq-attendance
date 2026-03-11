@@ -4354,6 +4354,74 @@ const AttendanceManagement = () => {
     }
   };
 
+  // NEW: Custom Report Handler
+  const handleGenerateCustomReport = async () => {
+    if (customReportForm.employee_ids.length === 0) {
+      alert('الرجاء اختيار موظف واحد على الأقل');
+      return;
+    }
+    
+    if (!customReportForm.start_date || !customReportForm.end_date) {
+      alert('الرجاء تحديد الفترة');
+      return;
+    }
+
+    try {
+      setGeneratingReport(true);
+      const response = await axios.post(`${API}/attendance/custom-report`, customReportForm);
+      
+      // تحويل base64 إلى blob وتحميل الملف
+      const byteCharacters = atob(response.data.file_content);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: response.data.content_type });
+      
+      // إنشاء رابط تحميل
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = response.data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      alert(`✅ تم تصدير التقرير بنجاح\nعدد السجلات: ${response.data.records_count}\nعدد الموظفين: ${response.data.employees_count}`);
+      
+      // Reset form
+      setShowCustomReportModal(false);
+      setCustomReportForm({
+        employee_ids: [],
+        start_date: '',
+        end_date: '',
+        format: 'excel'
+      });
+      
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert(error.response?.data?.detail || 'حدث خطأ في إنشاء التقرير');
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
+  const toggleEmployeeSelection = (employeeId) => {
+    if (customReportForm.employee_ids.includes(employeeId)) {
+      setCustomReportForm({
+        ...customReportForm,
+        employee_ids: customReportForm.employee_ids.filter(id => id !== employeeId)
+      });
+    } else {
+      setCustomReportForm({
+        ...customReportForm,
+        employee_ids: [...customReportForm.employee_ids, employeeId]
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
   }
