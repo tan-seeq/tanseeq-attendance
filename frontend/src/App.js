@@ -5054,6 +5054,172 @@ const AttendanceManagement = () => {
           </div>
         </div>
       )}
+
+      {/* NEW: Manual Absence Modal (نفس منطق الحضور اليدوي) */}
+      {showManualAbsenceModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-6 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">إضافة غياب يدوي للموظفين</h3>
+            
+            {/* Step 1: Select Employee and Date Range */}
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-red-900 mb-3">الخطوة 1: اختر الموظف والفترة</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
+                  <select
+                    value={manualAbsenceForm.employee_id}
+                    onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, employee_id: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">-- اختر الموظف --</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
+                    <input
+                      type="date"
+                      value={manualAbsenceForm.start_date}
+                      onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, start_date: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
+                    <input
+                      type="date"
+                      value={manualAbsenceForm.end_date}
+                      onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, end_date: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleFetchMissingDaysForAbsence}
+                disabled={loadingMissingDaysAbsence}
+                className="mt-3 w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                {loadingMissingDaysAbsence ? 'جاري البحث...' : 'عرض الأيام المتاحة لتسجيل الغياب'}
+              </button>
+            </div>
+
+            {/* Step 2: Show Missing Days */}
+            {missingDaysForAbsence.length > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-yellow-900 mb-3">
+                  الخطوة 2: الأيام المتاحة ({missingDaysForAbsence.length} يوم)
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-60 overflow-y-auto">
+                  {missingDaysForAbsence.map(day => (
+                    <label key={day.date} className="flex items-center space-x-2 space-x-reverse bg-white p-2 rounded border hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedAbsenceDays.includes(day.date)}
+                        onChange={() => toggleAbsenceDaySelection(day.date)}
+                        className="h-4 w-4"
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{day.date}</div>
+                        <div className="text-xs text-gray-600">{day.day_name_ar}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center space-x-2">
+                  <button
+                    onClick={() => setSelectedAbsenceDays(missingDaysForAbsence.map(d => d.date))}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    اختيار الكل
+                  </button>
+                  <span className="text-gray-400">|</span>
+                  <button
+                    onClick={() => setSelectedAbsenceDays([])}
+                    className="text-sm text-gray-600 hover:underline"
+                  >
+                    إلغاء الاختيار
+                  </button>
+                  <span className="flex-1 text-left text-sm text-gray-700">
+                    محدد: {selectedAbsenceDays.length} يوم
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Set Absence Type & Reason */}
+            {selectedAbsenceDays.length > 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                <h4 className="font-semibold text-orange-900 mb-3">الخطوة 3: حدد نوع الغياب والسبب</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">نوع الغياب</label>
+                    <select
+                      value={manualAbsenceForm.absence_type}
+                      onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, absence_type: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="full_day">يوم كامل (خصم كامل)</option>
+                      <option value="half_day">نصف يوم (خصم نصف)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">سبب الغياب (اختياري)</label>
+                    <input
+                      type="text"
+                      value={manualAbsenceForm.reason}
+                      onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, reason: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="مثال: مرضي، شخصي، ..."
+                    />
+                  </div>
+                </div>
+                
+                {/* Deduction Preview */}
+                <div className="mt-3 bg-white border border-orange-300 rounded p-3">
+                  <p className="text-sm text-orange-900">
+                    💰 <strong>ملاحظة:</strong> سيتم احتساب خصم الغياب تلقائياً وإضافته إلى دورة الرواتب الحالية/القادمة
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 space-x-reverse pt-4 border-t">
+              <button
+                onClick={() => {
+                  setShowManualAbsenceModal(false);
+                  setManualAbsenceForm({
+                    employee_id: '',
+                    start_date: '',
+                    end_date: '',
+                    absence_type: 'full_day',
+                    reason: ''
+                  });
+                  setMissingDaysForAbsence([]);
+                  setSelectedAbsenceDays([]);
+                }}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                إلغاء
+              </button>
+              {selectedAbsenceDays.length > 0 && (
+                <button
+                  onClick={handleAddManualAbsence}
+                  disabled={addingAbsenceRecords}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  {addingAbsenceRecords ? 'جاري الإضافة...' : `إضافة ${selectedAbsenceDays.length} سجل غياب`}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
