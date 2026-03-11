@@ -22,6 +22,17 @@ const AttendanceReport = () => {
   const [applyingDeductions, setApplyingDeductions] = useState(false);
   const [deductionsResult, setDeductionsResult] = useState(null);
 
+  // Custom Report Modal State
+  const [showCustomReportModal, setShowCustomReportModal] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [customReportForm, setCustomReportForm] = useState({
+    employee_ids: [],
+    start_date: '',
+    end_date: '',
+    format: 'excel'
+  });
+  const [generatingReport, setGeneratingReport] = useState(false);
+
   const applyDeductions = async () => {
     if (!window.confirm(`هل أنت متأكد من تطبيق خصومات التأخير والغياب للشهر ${selectedMonth}؟\n\nسيتم حساب:\n- خصومات التأخير\n- خصومات الغياب\n- أقساط السلف المستحقة`)) {
       return;
