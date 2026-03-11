@@ -4113,6 +4113,16 @@ const AttendanceManagement = () => {
   const [loadingMissingDays, setLoadingMissingDays] = useState(false);
   const [addingManualRecords, setAddingManualRecords] = useState(false);
   
+  // NEW: Custom Report State
+  const [showCustomReportModal, setShowCustomReportModal] = useState(false);
+  const [customReportForm, setCustomReportForm] = useState({
+    employee_ids: [],
+    start_date: '',
+    end_date: '',
+    format: 'excel'
+  });
+  const [generatingReport, setGeneratingReport] = useState(false);
+  
   const { user } = useAuth();
   const { t } = useLanguage();
 
