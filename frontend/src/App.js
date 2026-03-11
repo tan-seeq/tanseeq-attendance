@@ -4434,6 +4434,13 @@ const AttendanceManagement = () => {
           {user?.role === 'super_admin' && (
             <div className="flex space-x-2 space-x-reverse">
               <button
+                onClick={() => setShowCustomReportModal(true)}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center space-x-2"
+              >
+                <DocumentArrowDownIcon className="h-5 w-5" />
+                <span>تقرير مخصص</span>
+              </button>
+              <button
                 onClick={() => setShowManualAttendanceModal(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
               >
