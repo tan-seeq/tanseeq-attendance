@@ -138,6 +138,92 @@ const AttendanceReport = () => {
       setLoading(false);
     }
   };
+  // Custom Report Functions
+  const toggleEmployeeSelection = (employeeId) => {
+    setCustomReportForm(prev => ({
+      ...prev,
+      employee_ids: prev.employee_ids.includes(employeeId)
+        ? prev.employee_ids.filter(id => id !== employeeId)
+        : [...prev.employee_ids, employeeId]
+    }));
+  };
+
+  const handleGenerateCustomReport = async () => {
+    if (customReportForm.employee_ids.length === 0) {
+      alert('يرجى اختيار موظف واحد على الأقل');
+      return;
+    }
+
+    if (!customReportForm.start_date || !customReportForm.end_date) {
+      alert('يرجى تحديد تاريخ البداية والنهاية');
+      return;
+    }
+
+    try {
+      setGeneratingReport(true);
+      
+      const response = await axios.post(`${API}/reports/attendance/custom`, {
+        employee_ids: customReportForm.employee_ids,
+        start_date: customReportForm.start_date,
+        end_date: customReportForm.end_date,
+        format: customReportForm.format
+      }, {
+        responseType: 'blob'
+      });
+
+      // Create download link
+      const blob = new Blob([response.data], {
+        type: customReportForm.format === 'excel' 
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          : 'text/csv'
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const extension = customReportForm.format === 'excel' ? 'xlsx' : 'csv';
+      const filename = `attendance_report_${customReportForm.start_date}_to_${customReportForm.end_date}.${extension}`;
+      link.download = filename;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Close modal and reset form
+      setShowCustomReportModal(false);
+      setCustomReportForm({
+        employee_ids: [],
+        start_date: '',
+        end_date: '',
+        format: 'excel'
+      });
+
+      alert('تم تصدير التقرير بنجاح!');
+    } catch (error) {
+      console.error('Error generating custom report:', error);
+      alert('حدث خطأ في تصدير التقرير: ' + (error.response?.data?.detail || error.message));
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
+  // Fetch employees when modal opens
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(`${API}/users`);
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
+
+  // Open custom report modal
+  const openCustomReportModal = () => {
+    setShowCustomReportModal(true);
+    fetchEmployees();
+  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto" dir="rtl">
