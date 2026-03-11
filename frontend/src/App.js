@@ -4118,7 +4118,19 @@ const AttendanceManagement = () => {
 
   useEffect(() => {
     fetchAllAttendance();
+    if (user?.role === 'super_admin') {
+      fetchEmployees();
+    }
   }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(`${API}/users`);
+      setEmployees(response.data || []);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
 
   const fetchAllAttendance = async () => {
     try {
