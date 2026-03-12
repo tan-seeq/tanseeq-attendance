@@ -98,6 +98,15 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notificationDismissed, setNotificationDismissed] = useState(
+    () => sessionStorage.getItem('notificationDismissed') === 'true'
+  );
+  
+  const dismissNotifications = () => {
+    setShowNotificationModal(false);
+    setNotificationDismissed(true);
+    sessionStorage.setItem('notificationDismissed', 'true');
+  };
 
   useEffect(() => {
     // Always attach token via interceptor to avoid missing auth on deep links or new tabs
@@ -182,6 +191,7 @@ const AuthProvider = ({ children }) => {
   };
 
   const checkMandatoryNotifications = async () => {
+    if (notificationDismissed) return;
     try {
       console.log('🔔 Checking for unread notifications...');
       const response = await axios.get(`${API}/notifications/count`);
@@ -222,6 +232,8 @@ const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
+    sessionStorage.removeItem('notificationDismissed');
+    setNotificationDismissed(false);
     delete axios.defaults.headers.common['Authorization'];
     setLoading(false);
   };
@@ -235,6 +247,7 @@ const AuthProvider = ({ children }) => {
       loading, 
       showNotificationModal, 
       setShowNotificationModal,
+      dismissNotifications,
       checkMandatoryNotifications 
     }}>
       {children}
@@ -3547,7 +3560,11 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
 // App with Notifications Component
 const AppWithNotifications = () => {
-  const { user, showNotificationModal, setShowNotificationModal } = useAuth();
+  const { user, showNotificationModal, dismissNotifications } = useAuth();
+  
+  const handleCloseNotificationModal = () => {
+    dismissNotifications();
+  };
   
   return (
     <>
@@ -3864,7 +3881,7 @@ const AppWithNotifications = () => {
         {/* Notification Modal */}
         <NotificationModal 
           isOpen={showNotificationModal}
-          onClose={() => setShowNotificationModal(false)}
+          onClose={handleCloseNotificationModal}
         />
       </>
     );
