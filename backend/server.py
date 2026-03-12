@@ -1566,12 +1566,10 @@ async def bulk_add_manual_absence(
             raise HTTPException(status_code=404, detail="الموظف غير موجود")
         
         # الحصول على الراتب الشهري للموظف
-        monthly_salary = employee.get("salary", 0)
-        if monthly_salary <= 0:
-            raise HTTPException(status_code=400, detail="راتب الموظف غير محدد")
+        monthly_salary = employee.get("monthly_salary", 0) or employee.get("salary", 0)
         
         # احتساب خصم اليوم الواحد (الراتب الشهري / 30)
-        daily_deduction = monthly_salary / 30
+        daily_deduction = monthly_salary / 30 if monthly_salary > 0 else 0
         half_day_deduction = daily_deduction / 2
         
         # إضافة سجلات الغياب
