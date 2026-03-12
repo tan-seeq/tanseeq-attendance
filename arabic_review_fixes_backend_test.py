@@ -20,7 +20,7 @@ from datetime import datetime
 import os
 
 # Configuration
-BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BASE_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 
 # Test credentials
 SUPER_ADMIN_CREDS = {

@@ -10,7 +10,7 @@ import os
 from datetime import datetime
 
 # Production Configuration
-BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com"
+BASE_URL = "https://payroll-management-4.preview.emergentagent.com"
 SUPER_ADMIN_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

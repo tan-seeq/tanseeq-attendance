@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 TEST_CREDENTIALS = {
     "email": "admin@tanseeq.com",
     "password": "ADMIN"

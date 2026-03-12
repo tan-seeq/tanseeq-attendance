@@ -1,7 +1,7 @@
 {
   "test_type": "E2E Notification System Testing",
   "test_date": "2025-11-25T05:50:35.686296",
-  "backend_url": "https://attend-deduct-hr.preview.emergentagent.com",
+  "backend_url": "https://payroll-management-4.preview.emergentagent.com",
   "total_tests": 7,
   "passed_tests": 6,
   "success_rate": 85.71428571428571,

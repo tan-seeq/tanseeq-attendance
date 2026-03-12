@@ -20,7 +20,7 @@ import sys
 import os
 
 # Configuration
-BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BASE_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 TIMEOUT = 30
 
 # Test Credentials - Based on test_result.md working credentials

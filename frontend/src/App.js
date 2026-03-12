@@ -4727,6 +4727,7 @@ const AttendanceManagement = () => {
                             onClick={() => handleEdit(record)}
                             className="text-blue-600 hover:text-blue-900"
                             title="تعديل"
+                            data-testid={`edit-attendance-${record.id}`}
                           >
                             <PencilIcon className="h-4 w-4" />
                           </button>
@@ -4735,6 +4736,7 @@ const AttendanceManagement = () => {
                               onClick={() => handleDeleteAttendance(record.id, record)}
                               className="text-red-600 hover:text-red-900"
                               title="حذف سجل الحضور"
+                              data-testid={`delete-attendance-${record.id}`}
                             >
                               <TrashIcon className="h-4 w-4" />
                             </button>
@@ -5216,6 +5218,106 @@ const AttendanceManagement = () => {
                   {addingAbsenceRecords ? 'جاري الإضافة...' : `إضافة ${selectedAbsenceDays.length} سجل غياب`}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Report Modal */}
+      {showCustomReportModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" data-testid="custom-report-modal">
+          <div className="relative top-10 mx-auto p-6 border w-11/12 max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">تقرير حضور مخصص</h3>
+            
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+              <h4 className="font-semibold text-purple-900 mb-3">اختر الموظفين</h4>
+              <div className="mb-2 flex space-x-2 space-x-reverse">
+                <button
+                  onClick={() => setCustomReportForm({...customReportForm, employee_ids: employees.map(e => e.id)})}
+                  className="text-sm text-purple-600 hover:underline"
+                  data-testid="select-all-employees-report"
+                >
+                  اختيار الكل
+                </button>
+                <span className="text-gray-400">|</span>
+                <button
+                  onClick={() => setCustomReportForm({...customReportForm, employee_ids: []})}
+                  className="text-sm text-gray-600 hover:underline"
+                >
+                  إلغاء الاختيار
+                </button>
+                <span className="text-sm text-gray-500 mr-auto">محدد: {customReportForm.employee_ids.length} موظف</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                {employees.map(emp => (
+                  <label key={emp.id} className="flex items-center space-x-2 space-x-reverse bg-white p-2 rounded border hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={customReportForm.employee_ids.includes(emp.id)}
+                      onChange={() => toggleEmployeeSelection(emp.id)}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm">{emp.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
+                <input
+                  type="date"
+                  value={customReportForm.start_date}
+                  onChange={(e) => setCustomReportForm({...customReportForm, start_date: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  data-testid="custom-report-start-date"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
+                <input
+                  type="date"
+                  value={customReportForm.end_date}
+                  onChange={(e) => setCustomReportForm({...customReportForm, end_date: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  data-testid="custom-report-end-date"
+                />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">صيغة التصدير</label>
+              <select
+                value={customReportForm.format}
+                onChange={(e) => setCustomReportForm({...customReportForm, format: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="custom-report-format"
+              >
+                <option value="excel">Excel (.xlsx)</option>
+                <option value="csv">CSV (.csv)</option>
+              </select>
+            </div>
+
+            <div className="flex justify-end space-x-3 space-x-reverse">
+              <button
+                onClick={() => {
+                  setShowCustomReportModal(false);
+                  setCustomReportForm({ employee_ids: [], start_date: '', end_date: '', format: 'excel' });
+                }}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                data-testid="custom-report-cancel"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={handleGenerateCustomReport}
+                disabled={generatingReport || customReportForm.employee_ids.length === 0 || !customReportForm.start_date || !customReportForm.end_date}
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                data-testid="custom-report-generate"
+              >
+                {generatingReport ? 'جاري إنشاء التقرير...' : 'تصدير التقرير'}
+              </button>
             </div>
           </div>
         </div>

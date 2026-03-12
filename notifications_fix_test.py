@@ -16,7 +16,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 TEST_USER_EMAIL = "jihad@tanseeq.com"
 TEST_USER_PASSWORD = "jihad123"
 

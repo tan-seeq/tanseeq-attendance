@@ -19,7 +19,7 @@ from typing import Dict, Any
 
 class FocusedArabicReviewTest:
     def __init__(self):
-        self.base_url = "https://attend-deduct-hr.preview.emergentagent.com/api"
+        self.base_url = "https://payroll-management-4.preview.emergentagent.com/api"
         
         # Test credentials
         self.super_admin_creds = {"email": "admin@tanseeq.com", "password": "ADMIN"}

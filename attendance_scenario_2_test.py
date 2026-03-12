@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://attend-deduct-hr.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://payroll-management-4.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 # Test Accounts

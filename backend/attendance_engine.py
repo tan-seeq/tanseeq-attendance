@@ -39,38 +39,42 @@ class AttendanceEngine:
             await self.db.attendance_config.insert_one(prepare_for_mongo(self.config.dict()))
     
     async def _ensure_collections_indexed(self):
-        """إنشاء فهارس قاعدة البيانات"""
-        # Attendance policies
-        await self.db.attendance_policies.create_index([
-            ("employee_id", 1), 
-            ("effective_from", -1)
-        ])
-        
-        # Daily attendance 
-        await self.db.daily_attendance.create_index([
-            ("employee_id", 1), 
-            ("date", -1)
-        ])
-        
-        # Monthly counters
-        await self.db.monthly_lateness_counters.create_index([
-            ("employee_id", 1), 
-            ("month", -1)
-        ])
-        
-        # Deductions
-        await self.db.payroll_deductions.create_index([
-            ("employee_id", 1), 
-            ("date", -1),
-            ("is_voided", 1)
-        ])
-        
-        # Notifications
-        await self.db.system_notifications.create_index([
-            ("employee_id", 1), 
-            ("created_at", -1),
-            ("acknowledged_at", 1)
-        ])
+        """إنشاء فهارس قاعدة البيانات - مع حماية من أخطاء الصلاحيات"""
+        try:
+            # Attendance policies
+            await self.db.attendance_policies.create_index([
+                ("employee_id", 1), 
+                ("effective_from", -1)
+            ])
+            
+            # Daily attendance 
+            await self.db.daily_attendance.create_index([
+                ("employee_id", 1), 
+                ("date", -1)
+            ])
+            
+            # Monthly counters
+            await self.db.monthly_lateness_counters.create_index([
+                ("employee_id", 1), 
+                ("month", -1)
+            ])
+            
+            # Deductions
+            await self.db.payroll_deductions.create_index([
+                ("employee_id", 1), 
+                ("date", -1),
+                ("is_voided", 1)
+            ])
+            
+            # Notifications
+            await self.db.system_notifications.create_index([
+                ("employee_id", 1), 
+                ("created_at", -1),
+                ("acknowledged_at", 1)
+            ])
+            print("✅ Attendance engine indexes created successfully")
+        except Exception as e:
+            print(f"⚠️ Could not create DB indexes due to permissions: {e}. This may affect query performance but the app will continue.")
 
     async def get_employee_policy(self, employee_id: str, target_date: date = None) -> AttendancePolicy:
         """الحصول على سياسة حضور الموظف"""

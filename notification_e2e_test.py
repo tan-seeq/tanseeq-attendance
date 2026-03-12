@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://attend-deduct-hr.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://payroll-management-4.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class NotificationE2ETest:

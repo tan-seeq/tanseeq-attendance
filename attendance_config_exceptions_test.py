@@ -17,7 +17,7 @@ import traceback
 sys.path.append('/app/backend')
 
 # Configuration
-BACKEND_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 EVIDENCE_DIR = Path("/app/evidence")
 EVIDENCE_DIR.mkdir(exist_ok=True)
 

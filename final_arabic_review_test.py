@@ -10,7 +10,7 @@ import sys
 from datetime import datetime, timedelta
 
 # Configuration
-BACKEND_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 
 # Test credentials
 SUPER_ADMIN_CREDENTIALS = {"email": "admin@tanseeq.com", "password": "ADMIN"}

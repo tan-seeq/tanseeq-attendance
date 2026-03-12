@@ -25,7 +25,7 @@ import os
 from pathlib import Path
 
 # Configuration
-BACKEND_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BACKEND_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 
 # CORRECTED Test credentials based on database verification
 TEST_CREDENTIALS = {

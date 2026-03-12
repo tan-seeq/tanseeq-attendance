@@ -17,7 +17,7 @@ import os
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com"
+BASE_URL = "https://payroll-management-4.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 # Test credentials

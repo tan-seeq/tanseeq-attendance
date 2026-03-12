@@ -34,37 +34,37 @@
     {
       "test_name": "Config Exception - hatem",
       "status": "FAIL",
-      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/hatem_tan_seeq_001'\"}",
+      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/hatem_tan_seeq_001'\"}",
       "timestamp": "2025-10-30T05:56:26.983916",
       "response_data": {
-        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/hatem_tan_seeq_001'"
+        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/hatem_tan_seeq_001'"
       }
     },
     {
       "test_name": "Config Exception - tarek",
       "status": "FAIL",
-      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/83da4c33-c9c2-42cd-9b82-dea36ff1f05d'\"}",
+      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/83da4c33-c9c2-42cd-9b82-dea36ff1f05d'\"}",
       "timestamp": "2025-10-30T05:56:27.000197",
       "response_data": {
-        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/83da4c33-c9c2-42cd-9b82-dea36ff1f05d'"
+        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/83da4c33-c9c2-42cd-9b82-dea36ff1f05d'"
       }
     },
     {
       "test_name": "Config Exception - kareem",
       "status": "FAIL",
-      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/41a2f63a-a584-4a65-ae84-d7f0a98f5981'\"}",
+      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/41a2f63a-a584-4a65-ae84-d7f0a98f5981'\"}",
       "timestamp": "2025-10-30T05:56:27.012544",
       "response_data": {
-        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/41a2f63a-a584-4a65-ae84-d7f0a98f5981'"
+        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/41a2f63a-a584-4a65-ae84-d7f0a98f5981'"
       }
     },
     {
       "test_name": "Config Exception - hesham",
       "status": "FAIL",
-      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/16d4a924-ff1f-401c-b95e-9b57db963d42'\"}",
+      "details": "Failed to set exception: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/16d4a924-ff1f-401c-b95e-9b57db963d42'\"}",
       "timestamp": "2025-10-30T05:56:27.026286",
       "response_data": {
-        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/config/exceptions/16d4a924-ff1f-401c-b95e-9b57db963d42'"
+        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/config/exceptions/16d4a924-ff1f-401c-b95e-9b57db963d42'"
       }
     },
     {
@@ -122,10 +122,10 @@
     {
       "test_name": "Check-in - hatem",
       "status": "FAIL",
-      "details": "Check-in failed: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/attendance/check-in'\"}",
+      "details": "Check-in failed: {'error': \"500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/attendance/check-in'\"}",
       "timestamp": "2025-10-30T05:56:30.231122",
       "response_data": {
-        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/attendance/check-in'"
+        "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/attendance/check-in'"
       }
     },
     {
@@ -194,7 +194,7 @@
       "hatem": {
         "status": 500,
         "response": {
-          "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://attend-deduct-hr.preview.emergentagent.com/api/attendance/check-in'"
+          "error": "500, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://payroll-management-4.preview.emergentagent.com/api/attendance/check-in'"
         },
         "expected_exception": "exempt",
         "user_name": "حاتم محمد"

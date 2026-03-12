@@ -26,7 +26,7 @@ import uuid
 class ArabicReviewE2ETest:
     def __init__(self):
         # Get backend URL from environment
-        self.base_url = "https://attend-deduct-hr.preview.emergentagent.com/api"
+        self.base_url = "https://payroll-management-4.preview.emergentagent.com/api"
         
         # Test credentials
         self.super_admin_creds = {

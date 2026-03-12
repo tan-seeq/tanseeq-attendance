@@ -17,7 +17,7 @@ from datetime import datetime
 import sys
 
 # Backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://attend-deduct-hr.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://payroll-management-4.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class ArabicReview3FixesTester:

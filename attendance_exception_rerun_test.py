@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BASE_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 SUPER_ADMIN_EMAIL = "hatem@tan-seeq.co"
 SUPER_ADMIN_PASSWORD = "hatem123"
 

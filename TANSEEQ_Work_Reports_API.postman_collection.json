@@ -50,7 +50,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://attend-deduct-hr.preview.emergentagent.com",
+			"value": "https://payroll-management-4.preview.emergentagent.com",
 			"type": "string"
 		}
 	],

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Working Hours Parsing Fix and Exception Invariants Validation Test
-Target: https://attend-deduct-hr.preview.emergentagent.com/api
+Target: https://payroll-management-4.preview.emergentagent.com/api
 Focus: Verify working_hours parsing fix and exception invariants for October/November 2025
 """
 
@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://attend-deduct-hr.preview.emergentagent.com/api"
+BASE_URL = "https://payroll-management-4.preview.emergentagent.com/api"
 SUPER_ADMIN_EMAIL = "admin@tanseeq.com"
 SUPER_ADMIN_PASSWORD = "ADMIN"
 
