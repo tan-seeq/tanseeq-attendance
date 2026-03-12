@@ -47,6 +47,11 @@ async def root():
     """Root endpoint for LB checks"""
     return {"ok": True}
 
+@app.get("/health")
+async def health():
+    """Health check endpoint for Kubernetes probes"""
+    return {"status": "ok"}
+
 # ========================================
 # NOW safe to import heavy modules
 # ========================================
@@ -13900,13 +13905,6 @@ async def shutdown_db_client():
             app.state.mongo_client.close()
     except Exception:
         pass
-
-# Root endpoint
-@app.get("/")
-async def root():
-    """Root endpoint for health checks"""
-    return {"status": "ok", "app": "TANSEEQ HR System"}
-
 
 # ============================================
 # Advanced Deductions System

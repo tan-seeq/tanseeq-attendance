@@ -54,6 +54,8 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 - [x] Edit/Delete buttons: Verified working for super_admin role
 - [x] Notification modal UX: Added session-based dismissal to prevent re-showing after close
 - [x] Manual Absence bug: Fixed field name mismatch (salary -> monthly_salary), allow absence without salary
+- [x] Deployment health check: Added `/health` endpoint for Kubernetes probes (was returning 404)
+- [x] Removed duplicate root endpoint to prevent conflicts
 
 ## Pending/Upcoming Tasks
 ### P0 (Critical)
