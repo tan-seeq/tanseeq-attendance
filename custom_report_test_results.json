@@ -1,0 +1,28 @@
+{
+  "test_name": "Custom Attendance Report Endpoint Test",
+  "timestamp": "2026-03-12T14:17:06.560220",
+  "total_tests": 3,
+  "passed_tests": 3,
+  "failed_tests": 0,
+  "success_rate": "100.0%",
+  "test_results": [
+    {
+      "test": "Super Admin Authentication",
+      "status": "PASS",
+      "details": "Login successful - Role: super_admin, Name: مدير النظام",
+      "timestamp": "2026-03-12T14:17:06.364185"
+    },
+    {
+      "test": "Employee IDs Retrieval",
+      "status": "PASS",
+      "details": "Found 14 active employees",
+      "timestamp": "2026-03-12T14:17:06.423962"
+    },
+    {
+      "test": "Custom Report Endpoint",
+      "status": "PASS",
+      "details": "All criteria passed: True. Details: {\n  \"status_code\": 200,\n  \"response_size\": 7456,\n  \"file_content_size\": 7240,\n  \"filename\": \"attendance_report_2025-01-01_to_2025-01-31.xlsx\",\n  \"content_type\": \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\n  \"records_count\": 3,\n  \"employees_count\": 3,\n  \"success_criteria\": {\n    \"Response Status\": true,\n    \"JSON Response\": true,\n    \"Success Field\": true,\n    \"File Content Present\": true,\n    \"File Content Not Empty\": true,\n    \"Filename Present\": true,\n    \"Content Type Present\": true\n  }\n}",
+      "timestamp": "2026-03-12T14:17:06.559651"
+    }
+  ]
+}
