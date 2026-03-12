@@ -2489,6 +2489,7 @@ test_plan:
   forensic_testing_success_rate: "94.3%"
   advanced_deductions_fixes_verified: true
   arabic_review_e2e_success_rate: "66.7%"
+  custom_report_endpoint_tested: true
 
 agent_communication:
   - agent: "main"
