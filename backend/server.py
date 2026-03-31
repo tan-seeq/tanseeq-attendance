@@ -96,11 +96,25 @@ class LiveStats:
             err_rate = (self.errors / total) * 100.0
             succ_rate = (self.success / total) * 100.0
             last_min = list(self.events)[-60:] if len(self.events) > 60 else list(self.events)
+            # Build endpoints breakdown
+            endpoints = {}
+            for ev in self.events:
+                p = ev["path"]
+                if p not in endpoints:
+                    endpoints[p] = {"count": 0, "total_ms": 0}
+                endpoints[p]["count"] += 1
+                endpoints[p]["total_ms"] += ev["duration_ms"]
+            ep_summary = {k: {"count": v["count"], "avg_ms": round(v["total_ms"]/max(1,v["count"]),2)} for k,v in endpoints.items()}
             return {
-                "requests_total": self.count,
+                "total_requests": self.count,
+                "success_count": self.success,
+                "error_count": self.errors,
                 "success_rate": round(succ_rate, 2),
                 "error_rate": round(err_rate, 2),
+                "avg_response_ms": round(avg, 2),
                 "avg_latency_ms": round(avg, 2),
+                "requests_total": self.count,
+                "endpoints": ep_summary,
                 "recent": last_min
             }
 live_stats = LiveStats()
@@ -7065,8 +7079,8 @@ async def get_payroll_cycle_summary(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching payroll summary: {str(e)}")
 
-# Disabled legacy salary letter endpoint in favor of router-based implementation
-@app.get("/__disabled__/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
+# Salary letter endpoint - generates detailed salary statement
+@app.get("/api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter")
 async def generate_salary_letter(
     cycle_id: str,
     employee_id: str,
@@ -7256,7 +7270,7 @@ async def generate_salary_letter(
                 for d in attendance_deductions:
                     deductions_rows += f"""
                     <tr>
-                        <td>خصم حضور/تأخير</td>
+                        <td>Attendance/Late Deduction</td>
                         <td>{d['description']}</td>
                         <td style='color:#dc2626;font-weight:bold;'>{d['amount']:.2f}</td>
                     </tr>
@@ -7264,7 +7278,7 @@ async def generate_salary_letter(
             else:
                 deductions_rows += """
                 <tr>
-                    <td colspan='3' style='text-align:center;color:#666;'>✓ لا توجد خصومات حضور</td>
+                    <td colspan='3' style='text-align:center;color:#666;'>No attendance deductions</td>
                 </tr>
                 """
             
@@ -7273,7 +7287,7 @@ async def generate_salary_letter(
                 for d in manual_deductions:
                     deductions_rows += f"""
                     <tr>
-                        <td>خصم يدوي</td>
+                        <td>Manual Deduction</td>
                         <td>{d['description']}</td>
                         <td style='color:#dc2626;font-weight:bold;'>{d['amount']:.2f}</td>
                     </tr>
@@ -7284,7 +7298,7 @@ async def generate_salary_letter(
                 for d in advance_installments:
                     deductions_rows += f"""
                     <tr>
-                        <td>قسط سُلفة</td>
+                        <td>Advance Installment</td>
                         <td>{d['description']}</td>
                         <td style='color:#dc2626;font-weight:bold;'>{d['amount']:.2f}</td>
                     </tr>
@@ -7295,12 +7309,12 @@ async def generate_salary_letter(
             if advance_details:
                 advance_details_html = f"""
                 <div class='advance-details-box'>
-                    <p style='margin:0;'><strong>📊 تفاصيل السُلفة:</strong></p>
+                    <p style='margin:0;'><strong>Advance Details:</strong></p>
                     <ul style='margin:10px 0;'>
                         <li>Total Advance: <strong>{advance_details['total_amount']:.2f} AED</strong></li>
-                        <li>عدد الأقساط: <strong>{advance_details['installments_count']}</strong></li>
-                        <li>القسط الحالي: <strong>{advance_details['current_installment_amount']:.2f} AED</strong> (استحقاق: {advance_details['current_installment_date'][:10]})</li>
-                        <li>الأقساط المتبقية: <strong>{advance_details['remaining_installments']}</strong></li>
+                        <li>Installments Count: <strong>{advance_details['installments_count']}</strong></li>
+                        <li>Current Installment: <strong>{advance_details['current_installment_amount']:.2f} AED</strong> (Due: {advance_details['current_installment_date'][:10]})</li>
+                        <li>Remaining Installments: <strong>{advance_details['remaining_installments']}</strong></li>
                     </ul>
                 </div>
                 """
@@ -7315,12 +7329,12 @@ async def generate_salary_letter(
             if not os.path.exists(template_path):
                 # Fallback: create inline template
                 html_template = """<!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Salary Letter</title>
     <style>
-        body {{ font-family: Arial, sans-serif; padding: 20px; direction: rtl; }}
+        body {{ font-family: Arial, sans-serif; padding: 20px; }}
         .letter {{ background: white; padding: 30px; }}
         .header {{ text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 15px; }}
         table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
@@ -7330,8 +7344,8 @@ async def generate_salary_letter(
 <body>
     <div class="letter">
         <div class="header"><h2>TANSEEQ Tax Consultancy</h2></div>
-        <p>الموظف: {employee_name}</p>
-        <p>التاريخ: {statement_date}</p>
+        <p>Employee: {employee_name}</p>
+        <p>Date: {statement_date}</p>
         <table>
             <tr><td>Basic Salary</td><td>{base_salary}</td></tr>
             <tr><td>Deductions</td><td>{total_deductions}</td></tr>
@@ -13489,9 +13503,12 @@ async def create_activity_type(
 @app.on_event("startup")
 async def init_work_reports_indexes():
     """
-    Initialize Work Reports MongoDB indexes
-    ✅ Non-blocking: runs in background, doesn't block startup
+    Initialize Work Reports MongoDB indexes + start live metrics background task
     """
+    # Start live metrics periodic dump
+    import asyncio
+    asyncio.create_task(_periodic_metrics_dump())
+    
     try:
         # ✅ Check if work_reports_db is available
         if work_reports_db is None:
@@ -13499,7 +13516,6 @@ async def init_work_reports_indexes():
             return
         
         # ✅ Create indexes in background (non-blocking) - safe for Atlas restricted users
-        import asyncio
         async def create_indexes_background():
             try:
                 await work_reports_db.work_logs.create_index([("created_by", 1), ("start_at", -1)])
