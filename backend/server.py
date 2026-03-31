@@ -1459,6 +1459,23 @@ async def check_in(current_user: User = Depends(get_current_user)):
         f"Checked in at {check_in_time} (late_minutes: {late_minutes}, exception: {exception_type or 'none'})"
     )
     
+    # Auto-send email notification if late
+    if is_late and late_minutes > 0:
+        try:
+            await send_auto_email_notifications(
+                "lateness",
+                current_user.name,
+                current_user.email,
+                {
+                    "date": today,
+                    "expected_time": "09:15",
+                    "actual_time": check_in_time,
+                    "late_minutes": late_minutes
+                }
+            )
+        except Exception:
+            pass  # Don't fail check-in if email fails
+    
     return {
         "message": "تم تسجيل الحضور بنجاح ✅",
         "time": check_in_time,
@@ -2085,6 +2102,23 @@ async def bulk_add_manual_absence(
             "bulk_absence_added",
             f"أضاف {added_count} سجل غياب يدوي للموظف {employee['name']} بخصم {total_deduction:.2f} درهم"
         )
+        
+        # Auto-send absence email notifications
+        if added_count > 0:
+            try:
+                await send_auto_email_notifications(
+                    "absence",
+                    employee.get("name", "Unknown"),
+                    employee.get("email", ""),
+                    {
+                        "date": ", ".join(missing_days[:3]) + ("..." if len(missing_days) > 3 else ""),
+                        "absence_type": "يوم كامل" if absence_type == "full_day" else "نصف يوم",
+                        "reason": reason or "غير محدد",
+                        "days_count": added_count
+                    }
+                )
+            except Exception:
+                pass  # Don't fail the operation if email fails
         
         return {
             "success": True,
@@ -14902,5 +14936,114 @@ async def merge_advanced_deductions(
     except Exception as e:
         print(f"❌ Error merging deductions: {str(e)}")
         raise HTTPException(status_code=500, detail=f"خطأ في دمج الخصومات: {str(e)}")
+
+
+
+# ============================================================
+# SYSTEM HEALTH CHECK ENDPOINT
+# ============================================================
+import time as _time
+
+@app.get("/api/system/health-check")
+async def system_health_check(current_user: User = Depends(get_super_admin_user)):
+    """Comprehensive system health check for all services"""
+    services = {}
+
+    # 1. Database check
+    try:
+        t0 = _time.time()
+        await db.users.find_one({}, {"_id": 0, "id": 1})
+        rt = int((_time.time() - t0) * 1000)
+        emp_count = await db.users.count_documents({"is_active": True})
+        services["database"] = {"status": "up", "name": "قاعدة البيانات MongoDB", "response_time": rt, "details": f"{emp_count} مستخدم نشط"}
+    except Exception as e:
+        services["database"] = {"status": "down", "name": "قاعدة البيانات MongoDB", "details": str(e)}
+
+    # 2. SMTP check
+    try:
+        import smtplib
+        t0 = _time.time()
+        smtp_host = os.environ.get('SMTP_HOST', 'smtpout.secureserver.net')
+        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=5) as srv:
+            srv.ehlo()
+            srv.starttls()
+            srv.ehlo()
+            smtp_email = os.environ.get('SMTP_EMAIL', '')
+            smtp_pass = os.environ.get('SMTP_PASSWORD', '')
+            if smtp_email and smtp_pass:
+                srv.login(smtp_email, smtp_pass)
+        rt = int((_time.time() - t0) * 1000)
+        services["smtp"] = {"status": "up", "name": "خدمة البريد SMTP", "response_time": rt, "details": f"متصل بـ {smtp_host}"}
+    except Exception as e:
+        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": str(e)[:80]}
+
+    # 3. API self-check
+    try:
+        t0 = _time.time()
+        att_count = await db.attendance.count_documents({})
+        rt = int((_time.time() - t0) * 1000)
+        services["api"] = {"status": "up", "name": "واجهة برمجة التطبيقات API", "response_time": rt, "details": f"{att_count} سجل حضور"}
+    except Exception as e:
+        services["api"] = {"status": "down", "name": "واجهة برمجة التطبيقات API", "details": str(e)}
+
+    # 4. Auth check
+    services["auth"] = {"status": "up", "name": "نظام المصادقة", "response_time": 0, "details": f"مسجل الدخول: {current_user.name}"}
+
+    # 5. Storage check
+    try:
+        t0 = _time.time()
+        notif_count = await db.messages.count_documents({})
+        rt = int((_time.time() - t0) * 1000)
+        services["storage"] = {"status": "up", "name": "التخزين والبيانات", "response_time": rt, "details": f"{notif_count} رسالة في النظام"}
+    except Exception as e:
+        services["storage"] = {"status": "down", "name": "التخزين والبيانات", "details": str(e)}
+
+    all_up = all(s["status"] == "up" for s in services.values())
+    emp_count_total = await db.users.count_documents({"is_active": True})
+
+    return {
+        "overall": "up" if all_up else "degraded",
+        "services": services,
+        "system_info": {
+            "version": "2.0",
+            "environment": os.environ.get("ENV", "production"),
+            "employee_count": emp_count_total,
+            "uptime": "Active"
+        }
+    }
+
+
+# ============================================================
+# AUTO EMAIL NOTIFICATION HELPER
+# ============================================================
+async def send_auto_email_notifications(notification_type: str, employee_name: str, employee_email: str, details: dict):
+    """
+    Fire-and-forget email notification for lateness/absence events.
+    Sends to: employee + all super admins (based on email preferences).
+    """
+    try:
+        # Check if email notifications are enabled for this type
+        prefs = await db.system_config.find_one({"type": "email_preferences"})
+        if prefs:
+            pref_list = prefs.get("preferences", [])
+            type_pref = next((p for p in pref_list if p.get("type") == notification_type), None)
+            if type_pref and not type_pref.get("enabled", True):
+                return  # Notifications disabled for this type
+
+        # 1. Send to employee
+        if employee_email:
+            send_notification_email(employee_email, employee_name, notification_type, details)
+
+        # 2. Send to all super admins
+        super_admins = await db.users.find({"role": "super_admin", "is_active": True}, {"_id": 0, "email": 1, "name": 1}).to_list(20)
+        admin_type = f"{notification_type}_admin"
+        for admin in super_admins:
+            admin_email = admin.get("email", "")
+            if admin_email and admin_email != employee_email:
+                send_notification_email(admin_email, employee_name, admin_type, details)
+
+    except Exception as e:
+        print(f"Auto email notification error: {e}")
 
     return {"message": "TANSEEQ HR System API"}

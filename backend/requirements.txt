@@ -5,6 +5,7 @@ aiosmtplib==5.1.0
 alembic==1.16.4
 annotated-types==0.7.0
 anyio==4.9.0
+arabic-reshaper==3.0.0
 asyncio-throttle==1.0.2
 asyncpg==0.30.0
 attrs==25.3.0
@@ -80,6 +81,7 @@ pyotp==2.9.0
 pyparsing==3.2.3
 pyphen==0.17.2
 pytest==8.4.1
+python-bidi==0.6.7
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 python-jose==3.5.0

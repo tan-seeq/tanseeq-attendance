@@ -56,6 +56,7 @@ import AttendanceManagement from './components/Attendance/AttendanceManagement';
 import AdminConfig from './components/Admin/AdminConfig';
 import LiveMonitoring from './components/Admin/LiveMonitoring';
 import SalarySlips from './components/Admin/SalarySlips';
+import SystemHealth from './components/Admin/SystemHealth';
 
 // Import Work Reports Components
 import WorkReportsDashboard from './WorkReports/WorkReportsDashboard';
@@ -264,6 +265,7 @@ const Layout = ({ children }) => {
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'إعدادات النظام', href: '/admin/config', icon: Cog6ToothIcon },
       { name: 'المراقبة المباشرة', href: '/admin/live', icon: ChartBarIcon },
+      { name: 'صحة النظام', href: '/system-health', icon: ShieldCheckIcon },
     ] : []),
   ];
 
@@ -3392,6 +3394,13 @@ const AppWithNotifications = () => {
               <ProtectedRoute requiredRole="super_admin">
                 <Layout>
                   <SalarySlips />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/system-health" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <SystemHealth />
                 </Layout>
               </ProtectedRoute>
             } />
