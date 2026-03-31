@@ -72,6 +72,9 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [x] **All PDFs and reports converted to English**: Rewrote pdf_generator.py, email_service.py, payroll Excel export, attendance Excel report, salary email template, enhanced payroll report - zero Arabic text in any exported document
 - [x] **October Calibration Proof**: Added calibration status to `/api/system/health-check` API with audit trail. SystemHealth page now displays: calibration window, expiry status, and auto-off audit log entry (Oct 29, 2025)
 - [x] **App.js Refinements**: All extracted components linted clean - no issues found
+- [x] **Live Monitoring Enhanced**: Fixed metrics snapshot to include endpoints breakdown, started periodic dump background task
+- [x] **Salary Letter Endpoint Re-enabled**: `/api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter` now active with English-only HTML template
+- [x] **Email Templates English**: Rewrote `email_service.py` - all email templates (salary slip, lateness, absence) now 100% English
 
 ### Earlier Sessions (Completed)
 - [x] Tarek's check-in issue fixed
