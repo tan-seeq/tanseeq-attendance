@@ -11,7 +11,7 @@ import logging
 
 logger = logging.getLogger("email_service")
 
-SMTP_HOST = os.environ.get('SMTP_HOST', 'smtpout.secureserver.net')
+SMTP_HOST = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtpout.secureserver.net'))
 SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
 SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
 SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
