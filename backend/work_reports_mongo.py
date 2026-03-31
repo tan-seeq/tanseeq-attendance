@@ -318,18 +318,23 @@ async def init_work_reports_collections():
         ]
         
         # Wait only for essential indexes with short timeout
-        await asyncio.wait_for(
+        results = await asyncio.wait_for(
             asyncio.gather(*index_tasks, return_exceptions=True),
             timeout=3.0  # 3 second timeout
         )
         
-        print("Work Reports MongoDB essential indexes created successfully")
+        # Log any index creation failures (e.g. Atlas permission issues)
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                print(f"⚠️ Index creation {i} skipped (permissions): {result}")
+        
+        print("Work Reports MongoDB index initialization completed")
         return True
     except asyncio.TimeoutError:
         print("Work Reports index creation timed out - continuing with server startup")
         return True  # Don't fail startup on timeout
     except Exception as e:
-        print(f"Warning: Work Reports collections initialization failed: {e}")
+        print(f"⚠️ Work Reports collections init skipped: {e}")
         return True  # Don't fail startup on errors
 
 async def init_default_activity_types():
