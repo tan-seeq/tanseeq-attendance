@@ -20,15 +20,115 @@ const ServiceCard = ({ name, status, responseTime, details, icon }) => {
         <div className="flex items-center gap-2">
           <span className={`inline-block w-3 h-3 rounded-full animate-pulse ${isUp ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
           <span className={`text-sm font-semibold ${isUp ? 'text-emerald-700' : 'text-red-700'}`}>
-            {isUp ? 'متصل' : 'غير متصل'}
+            {isUp ? 'Online' : 'Offline'}
           </span>
         </div>
       </div>
       {responseTime !== undefined && (
         <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
-          <span>زمن الاستجابة:</span>
+          <span>Response:</span>
           <span className="font-mono font-bold">{responseTime}ms</span>
         </div>
+      )}
+    </div>
+  );
+};
+
+const CalibrationCard = ({ calibration }) => {
+  if (!calibration) return null;
+
+  const statusColors = {
+    expired: 'border-emerald-200 bg-emerald-50/50',
+    active: 'border-amber-200 bg-amber-50/50',
+    disabled: 'border-gray-200 bg-gray-50/50',
+  };
+
+  const statusLabels = {
+    expired: { text: 'Expired & Auto-Disabled', color: 'text-emerald-700', bg: 'bg-emerald-100' },
+    active: { text: 'Active', color: 'text-amber-700', bg: 'bg-amber-100' },
+    disabled: { text: 'Disabled', color: 'text-gray-700', bg: 'bg-gray-100' },
+  };
+
+  const st = statusLabels[calibration.status] || statusLabels.disabled;
+
+  return (
+    <div data-testid="calibration-status" className={`rounded-xl border-2 p-6 ${statusColors[calibration.status] || statusColors.disabled}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg bg-blue-100 text-blue-600">
+            <i className="fas fa-sliders-h"></i>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800">October 2025 Calibration Mode</h3>
+            <p className="text-xs text-gray-500">Deduction calculation adjustment period</p>
+          </div>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-sm font-bold ${st.color} ${st.bg}`}>
+          {st.text}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+        <div>
+          <span className="text-gray-500">Window Start</span>
+          <p className="font-bold">{calibration.window_from}</p>
+        </div>
+        <div>
+          <span className="text-gray-500">Window End</span>
+          <p className="font-bold">{calibration.window_to}</p>
+        </div>
+        <div>
+          <span className="text-gray-500">Current Date</span>
+          <p className="font-bold">{calibration.current_date}</p>
+        </div>
+        <div>
+          <span className="text-gray-500">ENV Enabled</span>
+          <p className="font-bold">{calibration.env_enabled ? 'Yes' : 'No'}</p>
+        </div>
+      </div>
+
+      {calibration.status === 'expired' && (
+        <div className="bg-emerald-100 border border-emerald-300 rounded-lg p-3 mb-3">
+          <p className="text-emerald-800 text-sm font-medium">
+            <i className="fas fa-check-circle mr-2"></i>
+            Calibration mode has been automatically disabled. Current payroll cycles use standard deduction rates.
+          </p>
+        </div>
+      )}
+
+      {calibration.auto_off_logged && calibration.audit_entries?.length > 0 && (
+        <div className="mt-3">
+          <h4 className="text-sm font-bold text-gray-700 mb-2">
+            <i className="fas fa-history mr-1"></i> Auto-Off Audit Log
+          </h4>
+          <div className="bg-white rounded-lg border overflow-hidden">
+            <table className="min-w-full text-xs">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-medium text-gray-500">Timestamp</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-500">Period</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-500">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {calibration.audit_entries.map((entry, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="px-3 py-2 text-gray-600">{entry.created_at?.slice(0, 19) || '-'}</td>
+                    <td className="px-3 py-2 text-gray-600 font-mono">{entry.payload?.period?.slice(0, 21) || '-'}</td>
+                    <td className="px-3 py-2 text-gray-600">{entry.payload?.note || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {!calibration.auto_off_logged && calibration.status === 'expired' && (
+        <p className="text-sm text-gray-500 mt-2">
+          <i className="fas fa-info-circle mr-1"></i>
+          No audit entries yet. The auto-off log will be recorded when a payroll cycle beyond October 2025 is first calculated.
+        </p>
       )}
     </div>
   );
@@ -44,15 +144,15 @@ const SystemHealth = () => {
     try {
       const res = await axios.get(`${API}/system/health-check`);
       setHealthData(res.data);
-      setLastCheck(new Date().toLocaleTimeString('ar-SA'));
+      setLastCheck(new Date().toLocaleTimeString());
     } catch (err) {
       console.error('Health check failed:', err);
       setHealthData({
         overall: 'down',
         services: {
-          database: { status: 'down', details: 'فشل الاتصال' },
-          smtp: { status: 'down', details: 'فشل الاتصال' },
-          api: { status: 'down', details: 'فشل الاتصال' },
+          database: { status: 'down', details: 'Connection failed' },
+          smtp: { status: 'down', details: 'Connection failed' },
+          api: { status: 'down', details: 'Connection failed' },
         }
       });
     } finally {
@@ -80,12 +180,12 @@ const SystemHealth = () => {
   };
 
   return (
-    <div data-testid="system-health-page" className="max-w-4xl mx-auto space-y-6" dir="rtl">
+    <div data-testid="system-health-page" className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">صحة النظام</h1>
-          <p className="text-sm text-gray-500 mt-1">مراقبة حالة الخدمات في الوقت الفعلي</p>
+          <h1 className="text-2xl font-bold text-gray-800">System Health</h1>
+          <p className="text-sm text-gray-500 mt-1">Real-time service monitoring</p>
         </div>
         <button
           data-testid="refresh-health-btn"
@@ -94,19 +194,19 @@ const SystemHealth = () => {
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all"
         >
           <i className={`fas fa-sync-alt ${loading ? 'animate-spin' : ''}`}></i>
-          {loading ? 'جاري الفحص...' : 'فحص الآن'}
+          {loading ? 'Checking...' : 'Refresh'}
         </button>
       </div>
 
       {/* Overall Status Banner */}
-      <div className={`rounded-xl p-6 text-center border-2 ${overallUp ? 'bg-gradient-to-l from-emerald-50 to-green-50 border-emerald-200' : 'bg-gradient-to-l from-red-50 to-orange-50 border-red-200'}`}>
+      <div className={`rounded-xl p-6 text-center border-2 ${overallUp ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200' : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-200'}`}>
         <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full text-lg font-bold ${overallUp ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
           <span className={`w-4 h-4 rounded-full animate-pulse ${overallUp ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-          {overallUp ? 'جميع الخدمات تعمل بشكل طبيعي' : 'بعض الخدمات تواجه مشاكل'}
+          {overallUp ? 'All services are running normally' : 'Some services have issues'}
         </div>
         <p className="text-sm text-gray-500 mt-3">
-          {upCount} من {totalCount} خدمات متصلة
-          {lastCheck && ` | آخر فحص: ${lastCheck}`}
+          {upCount} of {totalCount} services online
+          {lastCheck && ` | Last check: ${lastCheck}`}
         </p>
       </div>
 
@@ -114,7 +214,7 @@ const SystemHealth = () => {
       {loading && !healthData ? (
         <div className="text-center py-12">
           <i className="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
-          <p className="text-gray-500">جاري فحص الخدمات...</p>
+          <p className="text-gray-500">Checking services...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,28 +231,33 @@ const SystemHealth = () => {
         </div>
       )}
 
+      {/* October Calibration Status */}
+      {healthData?.calibration && (
+        <CalibrationCard calibration={healthData.calibration} />
+      )}
+
       {/* System Info */}
       {healthData?.system_info && (
         <div className="bg-gray-50 rounded-xl border p-5">
           <h3 className="font-bold text-gray-700 mb-3">
-            <i className="fas fa-info-circle ml-2"></i>
-            معلومات النظام
+            <i className="fas fa-info-circle mr-2"></i>
+            System Information
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">الإصدار</span>
+              <span className="text-gray-500">Version</span>
               <p className="font-bold">{healthData.system_info.version || '1.0'}</p>
             </div>
             <div>
-              <span className="text-gray-500">بيئة التشغيل</span>
+              <span className="text-gray-500">Environment</span>
               <p className="font-bold">{healthData.system_info.environment || 'production'}</p>
             </div>
             <div>
-              <span className="text-gray-500">عدد الموظفين</span>
+              <span className="text-gray-500">Active Employees</span>
               <p className="font-bold">{healthData.system_info.employee_count || 0}</p>
             </div>
             <div>
-              <span className="text-gray-500">وقت التشغيل</span>
+              <span className="text-gray-500">Uptime</span>
               <p className="font-bold">{healthData.system_info.uptime || '-'}</p>
             </div>
           </div>

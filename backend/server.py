@@ -15218,9 +15218,9 @@ async def system_health_check(current_user: User = Depends(get_super_admin_user)
         await db.users.find_one({}, {"_id": 0, "id": 1})
         rt = int((_time.time() - t0) * 1000)
         emp_count = await db.users.count_documents({"is_active": True})
-        services["database"] = {"status": "up", "name": "قاعدة البيانات MongoDB", "response_time": rt, "details": f"{emp_count} مستخدم نشط"}
+        services["database"] = {"status": "up", "name": "MongoDB Database", "response_time": rt, "details": f"{emp_count} active users"}
     except Exception as e:
-        services["database"] = {"status": "down", "name": "قاعدة البيانات MongoDB", "details": str(e)}
+        services["database"] = {"status": "down", "name": "MongoDB Database", "details": str(e)}
 
     # 2. SMTP check
     try:
@@ -15243,39 +15243,68 @@ async def system_health_check(current_user: User = Depends(get_super_admin_user)
                 continue
         rt = int((_time.time() - t0) * 1000)
         if connected_host:
-            services["smtp"] = {"status": "up", "name": "خدمة البريد SMTP", "response_time": rt, "details": f"متصل بـ {connected_host} ({_email})"}
+            services["smtp"] = {"status": "up", "name": "SMTP Email Service", "response_time": rt, "details": f"Connected to {connected_host} ({_email})"}
         else:
-            services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"فشل الاتصال بجميع الخوادم ({_email})"}
+            services["smtp"] = {"status": "down", "name": "SMTP Email Service", "details": f"Failed to connect to all servers ({_email})"}
     except Exception as e:
-        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"خطأ: {str(e)[:50]}"}
+        services["smtp"] = {"status": "down", "name": "SMTP Email Service", "details": f"Error: {str(e)[:50]}"}
 
     # 3. API self-check
     try:
         t0 = _time.time()
         att_count = await db.attendance.count_documents({})
         rt = int((_time.time() - t0) * 1000)
-        services["api"] = {"status": "up", "name": "واجهة برمجة التطبيقات API", "response_time": rt, "details": f"{att_count} سجل حضور"}
+        services["api"] = {"status": "up", "name": "Application API", "response_time": rt, "details": f"{att_count} attendance records"}
     except Exception as e:
-        services["api"] = {"status": "down", "name": "واجهة برمجة التطبيقات API", "details": str(e)}
+        services["api"] = {"status": "down", "name": "Application API", "details": str(e)}
 
     # 4. Auth check
-    services["auth"] = {"status": "up", "name": "نظام المصادقة", "response_time": 0, "details": f"مسجل الدخول: {current_user.name}"}
+    services["auth"] = {"status": "up", "name": "Authentication System", "response_time": 0, "details": f"Logged in: {current_user.name}"}
 
     # 5. Storage check
     try:
         t0 = _time.time()
         notif_count = await db.messages.count_documents({})
         rt = int((_time.time() - t0) * 1000)
-        services["storage"] = {"status": "up", "name": "التخزين والبيانات", "response_time": rt, "details": f"{notif_count} رسالة في النظام"}
+        services["storage"] = {"status": "up", "name": "Data Storage", "response_time": rt, "details": f"{notif_count} messages"}
     except Exception as e:
-        services["storage"] = {"status": "down", "name": "التخزين والبيانات", "details": str(e)}
+        services["storage"] = {"status": "down", "name": "Data Storage", "details": str(e)}
 
     all_up = all(s["status"] == "up" for s in services.values())
     emp_count_total = await db.users.count_documents({"is_active": True})
 
+    # 6. October Calibration Status
+    from deductions_engine import CALIBRATION_OCTOBER_ENV, CALIB_FROM, CALIB_TO
+    from datetime import date as _date
+    today = _date.today()
+    calib_expired = today > CALIB_TO
+    calib_status = "expired" if calib_expired else ("active" if CALIBRATION_OCTOBER_ENV else "disabled")
+    
+    # Get audit log entries for calibration
+    audit_entries = []
+    try:
+        entries = await db.config_audit.find(
+            {"action": "calibration_off"},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(10)
+        audit_entries = entries
+    except Exception:
+        pass
+
+    calibration_info = {
+        "env_enabled": CALIBRATION_OCTOBER_ENV,
+        "window_from": CALIB_FROM.isoformat(),
+        "window_to": CALIB_TO.isoformat(),
+        "status": calib_status,
+        "current_date": today.isoformat(),
+        "auto_off_logged": len(audit_entries) > 0,
+        "audit_entries": audit_entries
+    }
+
     return {
         "overall": "up" if all_up else "degraded",
         "services": services,
+        "calibration": calibration_info,
         "system_info": {
             "version": "2.0",
             "environment": os.environ.get("ENV", "production"),

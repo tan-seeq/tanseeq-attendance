@@ -69,7 +69,9 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [x] Extracted 15 components into dedicated files
 - [x] Fixed missing Cog6ToothIcon import in Dashboard.js
 - [x] **Fixed time-only format parsing**: Production Atlas DB stores check_in/check_out as `"09:00:00"` (time-only). Parser now handles: time-only (`HH:MM:SS`), full datetime (`YYYY-MM-DD HH:MM:SS`), and ISO format (`YYYY-MM-DDTHH:MM:SS`)
-- [x] **All PDFs and reports converted to English**: Rewrote pdf_generator.py, payroll Excel export, attendance Excel report, salary email template, enhanced payroll report - zero Arabic text in any exported document
+- [x] **All PDFs and reports converted to English**: Rewrote pdf_generator.py, email_service.py, payroll Excel export, attendance Excel report, salary email template, enhanced payroll report - zero Arabic text in any exported document
+- [x] **October Calibration Proof**: Added calibration status to `/api/system/health-check` API with audit trail. SystemHealth page now displays: calibration window, expiry status, and auto-off audit log entry (Oct 29, 2025)
+- [x] **App.js Refinements**: All extracted components linted clean - no issues found
 
 ### Earlier Sessions (Completed)
 - [x] Tarek's check-in issue fixed
@@ -89,4 +91,3 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [ ] Build Mini Admin UI at `/admin/config` for managing Exceptions and Import Mappings
 - [ ] Live monitoring dashboard enhancements at `/admin/live`
 - [ ] Sample PDF salary letters
-- [ ] October calibration mode proof
