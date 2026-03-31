@@ -6,7 +6,7 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 ## Tech Stack
 - **Backend**: FastAPI, MongoDB (Motor), APScheduler
 - **Frontend**: React.js, Tailwind CSS, Heroicons
-- **PDF**: ReportLab with arabic-reshaper + python-bidi
+- **PDF**: ReportLab (English-only output)
 - **Email**: Microsoft 365 SMTP with fallback
 
 ## Code Architecture (Post-Refactoring)
@@ -14,8 +14,10 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 /app/
 ├── backend/
 │   ├── server.py                 # Core API + startup events
-│   ├── email_service.py          # SMTP with fallback
-│   ├── pdf_generator.py          # Arabic PDF generation
+│   ├── time_utils.py             # Robust time parsing utilities (NEW)
+│   ├── email_service.py          # SMTP with fallback (English)
+│   ├── pdf_generator.py          # English PDF generation
+│   ├── advanced_deductions_system.py # Monthly deductions
 │   ├── attendance_engine.py      # Attendance processing
 │   ├── work_reports_mongo.py     # Work reports DB layer
 │   └── requirements.txt
@@ -35,46 +37,42 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 │   │       │   └── AttendanceManagement.js
 │   │       ├── Employees/Employees.js
 │   │       ├── FieldExits/
-│   │       │   ├── FieldExits.js
-│   │       │   └── FieldExitManagement.js
 │   │       ├── Leaves/
-│   │       │   ├── Leaves.js
-│   │       │   └── LeaveManagement.js
 │   │       ├── Payroll/Payroll.js
 │   │       ├── Reports/
-│   │       │   ├── ReportsPage.js
-│   │       │   ├── OvertimeReport.js
-│   │       │   └── (other report components)
 │   │       ├── Admin/
 │   │       │   ├── AdminConfig.js
-│   │       │   ├── AdminRequestCreation.js
-│   │       │   ├── AttachmentViewer.js
-│   │       │   ├── BackupManagement.js
 │   │       │   ├── LiveMonitoring.js
 │   │       │   ├── SalarySlips.js
 │   │       │   └── SystemHealth.js
-│   │       └── (other existing components)
+│   │       └── (other components)
 │   └── .env
 └── memory/PRD.md
 ```
 
 ## What's Been Implemented
 
-### Session 7 (2026-03-31): Deployment Fix
-- [x] Wrapped all `create_index` calls with try-except for MongoDB Atlas OperationFailure
-- [x] Removed unused PostgreSQL env variables from backend/.env
+### Session 9 (2026-03-31): Critical Deployment Fix - Time Parsing
+- [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility handling all DB formats: `"09:00:00"`, `"2025-10-01 09:00:00"`, `"2025-10-01T09:00:00"`, `"09:00"`
+- [x] **Fixed `advanced_deductions_system.py`**: Replaced rigid `strptime("%H:%M:%S")` with `safe_parse_time()`
+- [x] **Fixed `server.py` (4 locations)**: Lines 8477, 8599, 11311, 12888 - all check_in/check_out parsing now robust
+- [x] **Fixed `fix_historical_attendance_data.py`**: Uses `safe_parse_time()` instead of format loop
+- [x] **Fixed `forensic_data_fixes.py`**: Same robust parsing applied
+- [x] **Fixed `import_october_real_data.py`**: Same robust parsing applied
+- [x] **Verified Custom Report feature**: POST `/api/attendance/custom-report` works correctly (backend returns base64 file, frontend decodes and downloads)
+- [x] **Verified Edit/Delete buttons**: 163 edit + 163 delete buttons visible for super_admin on Attendance Management page
+- [x] **Testing: 100% pass rate** - 10/10 backend tests, all frontend features verified
 
-### Session 8 (2026-03-31): Major Refactoring + Time Format Fix + English-Only Reports
-- [x] **App.js refactored**: 6386 lines → 349 lines (95% reduction)
+### Session 8 (2026-03-31): Major Refactoring + English-Only Reports
+- [x] App.js refactored: 6386 → 349 lines (95% reduction)
 - [x] Extracted 15 components into dedicated files
-- [x] Fixed missing Cog6ToothIcon import in Dashboard.js
-- [x] **Fixed time-only format parsing**: Production Atlas DB stores check_in/check_out as `"09:00:00"` (time-only). Parser now handles: time-only (`HH:MM:SS`), full datetime (`YYYY-MM-DD HH:MM:SS`), and ISO format (`YYYY-MM-DDTHH:MM:SS`)
-- [x] **All PDFs and reports converted to English**: Rewrote pdf_generator.py, email_service.py, payroll Excel export, attendance Excel report, salary email template, enhanced payroll report - zero Arabic text in any exported document
-- [x] **October Calibration Proof**: Added calibration status to `/api/system/health-check` API with audit trail. SystemHealth page now displays: calibration window, expiry status, and auto-off audit log entry (Oct 29, 2025)
-- [x] **App.js Refinements**: All extracted components linted clean - no issues found
-- [x] **Live Monitoring Enhanced**: Fixed metrics snapshot to include endpoints breakdown, started periodic dump background task
-- [x] **Salary Letter Endpoint Re-enabled**: `/api/payroll/cycles/{cycle_id}/employees/{employee_id}/letter` now active with English-only HTML template
-- [x] **Email Templates English**: Rewrote `email_service.py` - all email templates (salary slip, lateness, absence) now 100% English
+- [x] All PDFs, reports, and emails converted to 100% English
+- [x] October Calibration Proof added to System Health
+- [x] Live Monitoring metrics fixed
+- [x] Salary Letter Endpoint re-enabled (English HTML template)
+
+### Session 7 (2026-03-31): Deployment Fix (MongoDB)
+- [x] Wrapped all `create_index` calls with try-except for MongoDB Atlas OperationFailure
 
 ### Earlier Sessions (Completed)
 - [x] Tarek's check-in issue fixed
@@ -83,12 +81,14 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [x] Manual attendance/absence entry
 - [x] Custom attendance report
 - [x] Weekend logic (Fri/Sat)
-- [x] Arabic PDF salary slips
 - [x] APScheduler auto-reports
 - [x] Microsoft 365 SMTP integration
 - [x] System Health monitoring page
 
 ## Pending Tasks
+
+### P1 (Important)
+- [ ] Refactor `backend/server.py` (15,000+ lines) into modular route files
 
 ### P2 (Backlog)
 - [ ] Build Mini Admin UI at `/admin/config` for managing Exceptions and Import Mappings
