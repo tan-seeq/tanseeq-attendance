@@ -15239,29 +15239,30 @@ async def system_health_check(current_user: User = Depends(get_super_admin_user)
 
     # 2. SMTP check
     try:
-        import smtplib
+        import smtplib as _smtplib
+        from email_service import SMTP_SERVERS as _servers, SMTP_EMAIL as _email, SMTP_PASSWORD as _pass, SMTP_HOST as _primary
         t0 = _time.time()
-        smtp_host = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtp.office365.com'))
-        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
-        # Override old GoDaddy server if still in env
-        if 'secureserver' in smtp_host:
-            smtp_host = 'smtp.office365.com'
-        smtp_email = os.environ.get('SMTP_EMAIL', '').lower().strip()
-        smtp_pass = os.environ.get('SMTP_PASSWORD', '')
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as srv:
-            srv.ehlo()
-            srv.starttls()
-            srv.ehlo()
-            if smtp_email and smtp_pass:
-                srv.login(smtp_email, smtp_pass)
+        connected_host = None
+        servers_to_try = [_primary] + [s for s in _servers if s != _primary]
+        for srv_host in servers_to_try:
+            try:
+                with _smtplib.SMTP(srv_host, int(os.environ.get('SMTP_PORT', '587')), timeout=15) as srv:
+                    srv.ehlo()
+                    srv.starttls()
+                    srv.ehlo()
+                    if _email and _pass:
+                        srv.login(_email, _pass)
+                connected_host = srv_host
+                break
+            except Exception:
+                continue
         rt = int((_time.time() - t0) * 1000)
-        services["smtp"] = {"status": "up", "name": "خدمة البريد SMTP", "response_time": rt, "details": f"متصل بـ {smtp_host} ({smtp_email})"}
-    except smtplib.SMTPAuthenticationError:
-        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"فشل المصادقة - {smtp_host} ({smtp_email})"}
-    except smtplib.SMTPConnectError:
-        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"فشل الاتصال بـ {smtp_host}"}
+        if connected_host:
+            services["smtp"] = {"status": "up", "name": "خدمة البريد SMTP", "response_time": rt, "details": f"متصل بـ {connected_host} ({_email})"}
+        else:
+            services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"فشل الاتصال بجميع الخوادم ({_email})"}
     except Exception as e:
-        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"خطأ: {str(e)[:50]} ({smtp_host})"}
+        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"خطأ: {str(e)[:50]}"}
 
     # 3. API self-check
     try:

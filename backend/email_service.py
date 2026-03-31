@@ -1,6 +1,6 @@
 """
 Email Service - TANSEEQ HR System
-Handles SMTP email sending via GoDaddy with Arabic templates
+Handles SMTP email sending with multi-server fallback
 """
 import os
 import smtplib
@@ -11,22 +11,38 @@ import logging
 
 logger = logging.getLogger("email_service")
 
-SMTP_HOST = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtp.office365.com'))
+# SMTP Configuration with fallback servers
+SMTP_SERVERS = [
+    'smtp.office365.com',
+    'smtpout.secureserver.net',
+]
 SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
-SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '').lower().strip()
+SMTP_EMAIL = os.environ.get('SMTP_EMAIL', 'Taxagent@tan-seeq.co').strip()
 SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
 SMTP_FROM_NAME = os.environ.get('SMTP_FROM_NAME', 'Al Tanseeq HR System')
 
-# Override old GoDaddy server if still present in env
+# Resolved host (set after first successful connection)
+SMTP_HOST = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtp.office365.com'))
 if 'secureserver' in SMTP_HOST:
     SMTP_HOST = 'smtp.office365.com'
 
 
+def _try_send_via_server(smtp_host, to_email, msg):
+    """Try sending via a specific SMTP server"""
+    with smtplib.SMTP(smtp_host, SMTP_PORT, timeout=20) as server:
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.send_message(msg)
+    return smtp_host
+
+
 def send_email(to_email: str, subject: str, html_body: str, attachments: list = None) -> dict:
-    """Send email via GoDaddy SMTP"""
+    """Send email via SMTP with automatic server fallback"""
     try:
         if not SMTP_EMAIL or not SMTP_PASSWORD:
-            return {"success": False, "error": "SMTP credentials not configured"}
+            return {"success": False, "error": "لم يتم تكوين بيانات اعتماد SMTP"}
 
         msg = MIMEMultipart()
         msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_EMAIL}>"
@@ -40,32 +56,44 @@ def send_email(to_email: str, subject: str, html_body: str, attachments: list = 
                 part['Content-Disposition'] = f'attachment; filename="{att["filename"]}"'
                 msg.attach(part)
 
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(SMTP_EMAIL, SMTP_PASSWORD)
-            server.send_message(msg)
+        # Try primary host first, then fallback servers
+        servers_to_try = [SMTP_HOST] + [s for s in SMTP_SERVERS if s != SMTP_HOST]
+        last_error = None
 
-        logger.info(f"Email sent successfully to {to_email}")
-        return {"success": True, "message": f"Email sent to {to_email}"}
-    except smtplib.SMTPAuthenticationError:
-        logger.error(f"SMTP Authentication failed for {SMTP_EMAIL}")
-        return {"success": False, "error": "فشل في المصادقة مع خادم البريد. تحقق من اسم المستخدم وكلمة المرور"}
-    except smtplib.SMTPConnectError:
-        logger.error(f"SMTP Connection failed to {SMTP_HOST}")
-        return {"success": False, "error": "فشل الاتصال بخادم البريد. تحقق من عنوان الخادم والمنفذ"}
-    except smtplib.SMTPRecipientsRefused:
-        logger.error(f"SMTP Recipient refused: {to_email}")
-        return {"success": False, "error": f"عنوان البريد {to_email} مرفوض من الخادم"}
+        for server_host in servers_to_try:
+            try:
+                used_host = _try_send_via_server(server_host, to_email, msg)
+                logger.info(f"Email sent to {to_email} via {used_host}")
+                return {"success": True, "message": f"تم إرسال البريد إلى {to_email}", "server": used_host}
+            except smtplib.SMTPAuthenticationError as e:
+                last_error = e
+                logger.warning(f"Auth failed on {server_host}, trying next...")
+                continue
+            except smtplib.SMTPConnectError as e:
+                last_error = e
+                logger.warning(f"Connect failed on {server_host}, trying next...")
+                continue
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Error on {server_host}: {e}, trying next...")
+                continue
+
+        # All servers failed
+        if isinstance(last_error, smtplib.SMTPAuthenticationError):
+            return {"success": False, "error": "فشل في المصادقة مع خادم البريد. تحقق من اسم المستخدم وكلمة المرور"}
+        elif isinstance(last_error, smtplib.SMTPConnectError):
+            return {"success": False, "error": "فشل الاتصال بخادم البريد. تحقق من عنوان الخادم والمنفذ"}
+        else:
+            return {"success": False, "error": f"فشل إرسال البريد عبر جميع الخوادم المتاحة"}
+
     except Exception as e:
         logger.error(f"Email failed to {to_email}: {e}")
-        return {"success": False, "error": "حدث خطأ في إرسال البريد. تحقق من إعدادات SMTP"}
+        return {"success": False, "error": "حدث خطأ في إرسال البريد الإلكتروني"}
 
 
 def send_salary_slip_email(to_email: str, employee_name: str, cycle_month: str, pdf_data: bytes) -> dict:
     """Send salary slip PDF via email"""
-    subject = f"كشف الراتب - {cycle_month} | Al Tanseeq"
+    subject = f"كشف الراتب - {cycle_month} | التنسيق للاستشارات الضريبية"
     html_body = f"""
     <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #2b6cb0, #1a365d); color: white; padding: 25px; text-align: center; border-radius: 12px 12px 0 0;">
@@ -87,7 +115,7 @@ def send_salary_slip_email(to_email: str, employee_name: str, cycle_month: str, 
 
 
 def send_notification_email(to_email: str, employee_name: str, notification_type: str, details: dict) -> dict:
-    """Send notification email for lateness/absence/advance with Arabic templates"""
+    """Send notification email for lateness/absence with Arabic templates"""
 
     templates = {
         'lateness': {
@@ -148,23 +176,9 @@ def send_notification_email(to_email: str, employee_name: str, notification_type
                 </div>
             """
         },
-        'advance_request': {
-            'subject': f'طلب سلفة جديد - {employee_name} | التنسيق',
-            'color': '#2b6cb0',
-            'title': 'طلب سلفة جديد',
-            'body': f"""
-                <p>تم تقديم طلب سلفة جديد:</p>
-                <div style="background: #ebf8ff; border-right: 4px solid #2b6cb0; padding: 12px; margin: 10px 0; border-radius: 4px;">
-                    <p><strong>الموظف:</strong> {employee_name}</p>
-                    <p><strong>المبلغ:</strong> {details.get('amount', 0)} درهم</p>
-                    <p><strong>النوع:</strong> {details.get('type', 'سلفة')}</p>
-                    <p><strong>السبب:</strong> {details.get('reason', 'غير محدد')}</p>
-                </div>
-            """
-        }
     }
 
-    template = templates.get(notification_type, templates['lateness'])
+    template = templates.get(notification_type, templates.get('lateness', {'subject': 'تنبيه', 'color': '#2b6cb0', 'title': 'تنبيه', 'body': f'<p>{employee_name}</p>'}))
 
     html_body = f"""
     <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
