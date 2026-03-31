@@ -824,45 +824,29 @@ def calculate_working_hours_and_deductions(check_in, check_out, break_time_minut
             "status": "incomplete"
         }
 
-    try:
-        # Parse times - handle both ISO format (T separator) and space format
-        if isinstance(check_in, str):
-            try:
-                if 'T' in check_in:
-                    # ISO format: "2025-08-28T11:08:41"
-                    check_in_time = datetime.strptime(check_in.split('T')[0] + ' ' + check_in.split('T')[1][:5], "%Y-%m-%d %H:%M")
-                else:
-                    # Space format: "2025-08-28 11:08:41" or "2025-08-28 11:08"
-                    if len(check_in.split(' ')) >= 2:
-                        date_part = check_in.split(' ')[0]
-                        time_part = check_in.split(' ')[1][:5]  # Take first 5 chars (HH:MM)
-                        check_in_time = datetime.strptime(f"{date_part} {time_part}", "%Y-%m-%d %H:%M")
-                    else:
-                        raise ValueError(f"Invalid check_in format: {check_in}")
-            except ValueError as e:
-                print(f"Error parsing check_in time '{check_in}': {e}")
-                raise
-        else:
-            check_in_time = check_in
+    def _parse_time_str(time_str, label="time"):
+        """Parse various time/datetime string formats into a datetime object."""
+        if not isinstance(time_str, str):
+            return time_str
+        s = time_str.strip()
+        # ISO format: "2025-08-28T11:08:41"
+        if 'T' in s:
+            date_part, time_part = s.split('T', 1)
+            return datetime.strptime(f"{date_part} {time_part[:5]}", "%Y-%m-%d %H:%M")
+        # Space-separated: "2025-08-28 11:08:41" or "2025-08-28 11:08"
+        if ' ' in s:
+            date_part, time_part = s.split(' ', 1)
+            return datetime.strptime(f"{date_part} {time_part[:5]}", "%Y-%m-%d %H:%M")
+        # Time-only: "09:00:00" or "09:00" (production Atlas format)
+        if ':' in s:
+            time_part = s[:5]  # HH:MM
+            ref_date = datetime.now().strftime("%Y-%m-%d")
+            return datetime.strptime(f"{ref_date} {time_part}", "%Y-%m-%d %H:%M")
+        raise ValueError(f"Unrecognized {label} format: {s}")
 
-        if isinstance(check_out, str):
-            try:
-                if 'T' in check_out:
-                    # ISO format: "2025-08-28T18:00:00"
-                    check_out_time = datetime.strptime(check_out.split('T')[0] + ' ' + check_out.split('T')[1][:5], "%Y-%m-%d %H:%M")
-                else:
-                    # Space format: "2025-08-28 18:00:00" or "2025-08-28 18:00"
-                    if len(check_out.split(' ')) >= 2:
-                        date_part = check_out.split(' ')[0]
-                        time_part = check_out.split(' ')[1][:5]  # Take first 5 chars (HH:MM)
-                        check_out_time = datetime.strptime(f"{date_part} {time_part}", "%Y-%m-%d %H:%M")
-                    else:
-                        raise ValueError(f"Invalid check_out format: {check_out}")
-            except ValueError as e:
-                print(f"Error parsing check_out time '{check_out}': {e}")
-                raise
-        else:
-            check_out_time = check_out
+    try:
+        check_in_time = _parse_time_str(check_in, "check_in") if isinstance(check_in, str) else check_in
+        check_out_time = _parse_time_str(check_out, "check_out") if isinstance(check_out, str) else check_out
 
         # Calculate total worked time
         total_worked_time = (check_out_time - check_in_time).total_seconds() / 3600.0
@@ -10616,10 +10600,18 @@ async def calculate_payroll(month: str, current_user: User = Depends(get_admin_u
             elif record.get("check_in") and record.get("check_out"):
                 present_days += 1
                 
-                # Use improved calculation function
+                # Use improved calculation function - prepend date for time-only values
+                ci_val = record.get("check_in", "")
+                co_val = record.get("check_out", "")
+                rec_date = record.get("date", "")
+                # If check_in is time-only (no date), prepend record date
+                if ci_val and rec_date and ' ' not in ci_val and 'T' not in ci_val:
+                    ci_val = f"{rec_date} {ci_val}"
+                if co_val and rec_date and ' ' not in co_val and 'T' not in co_val:
+                    co_val = f"{rec_date} {co_val}"
                 working_calc = calculate_working_hours_and_deductions(
-                    record.get("check_in"),
-                    record.get("check_out"),
+                    ci_val,
+                    co_val,
                     break_time_minutes=60,
                     is_admin_edited=record.get("admin_edited", False)
                 )
