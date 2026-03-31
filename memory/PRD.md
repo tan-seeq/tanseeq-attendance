@@ -1,62 +1,94 @@
 # TANSEEQ HR Management System - PRD
 
 ## Original Problem Statement
-Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (RTL) application managing attendance, payroll, advances/loans, notifications, leaves, field exits, marketing visits, and work reports.
+Full-stack HR management application for TANSEEQ Tax Consultancy. Features: attendance tracking, payroll management, leave/field-exit management, advances/loans, notifications, reporting, PDF salary slips, SMTP email integration.
 
 ## Tech Stack
-- **Backend**: FastAPI + MongoDB (Motor) + Pydantic + ReportLab (PDF) + arabic-reshaper + python-bidi + APScheduler
-- **Frontend**: React.js + Axios + TailwindCSS + Heroicons
-- **Email**: GoDaddy SMTP (smtpout.secureserver.net:587) via smtplib
-- **Fonts**: Amiri Arabic (RTL PDF support)
-- **Scheduler**: APScheduler (AsyncIOScheduler + CronTrigger)
+- **Backend**: FastAPI, MongoDB (Motor), APScheduler
+- **Frontend**: React.js, Tailwind CSS, Heroicons
+- **PDF**: ReportLab with arabic-reshaper + python-bidi
+- **Email**: Microsoft 365 SMTP with fallback
 
-## Key Credentials
-- Super Admin: admin@tanseeq.com / ADMIN
-- SMTP: Taxagent@tan-seeq.co via smtpout.secureserver.net:587
-
-## Architecture
+## Code Architecture (Post-Refactoring)
 ```
 /app/
 ├── backend/
-│   ├── server.py              # Core backend (~15300 lines)
-│   ├── pdf_generator.py       # Arabic PDF salary slip generation
-│   ├── email_service.py       # Arabic SMTP with friendly error messages
-│   ├── attendance_engine.py
-│   ├── fonts/Amiri-Regular.ttf, Amiri-Bold.ttf
+│   ├── server.py                 # Core API + startup events
+│   ├── email_service.py          # SMTP with fallback
+│   ├── pdf_generator.py          # Arabic PDF generation
+│   ├── attendance_engine.py      # Attendance processing
+│   ├── work_reports_mongo.py     # Work reports DB layer
 │   └── requirements.txt
 ├── frontend/
-│   └── src/components/
-│       ├── Admin/SalarySlips.js  # 4 tabs: slips, auto-report, email, logs
-│       ├── Admin/SystemHealth.js
-│       ├── Dashboard/HRDashboard.js
-│       └── ...
+│   ├── src/
+│   │   ├── App.js                # LEAN: 349 lines (routing only)
+│   │   ├── config.js             # BACKEND_URL, API exports
+│   │   ├── contexts/
+│   │   │   ├── AuthContext.js
+│   │   │   └── LanguageContext.js
+│   │   └── components/
+│   │       ├── Auth/Login.js
+│   │       ├── Layout/Layout.js
+│   │       ├── Dashboard/Dashboard.js
+│   │       ├── Attendance/
+│   │       │   ├── Attendance.js
+│   │       │   └── AttendanceManagement.js
+│   │       ├── Employees/Employees.js
+│   │       ├── FieldExits/
+│   │       │   ├── FieldExits.js
+│   │       │   └── FieldExitManagement.js
+│   │       ├── Leaves/
+│   │       │   ├── Leaves.js
+│   │       │   └── LeaveManagement.js
+│   │       ├── Payroll/Payroll.js
+│   │       ├── Reports/
+│   │       │   ├── ReportsPage.js
+│   │       │   ├── OvertimeReport.js
+│   │       │   └── (other report components)
+│   │       ├── Admin/
+│   │       │   ├── AdminConfig.js
+│   │       │   ├── AdminRequestCreation.js
+│   │       │   ├── AttachmentViewer.js
+│   │       │   ├── BackupManagement.js
+│   │       │   ├── LiveMonitoring.js
+│   │       │   ├── SalarySlips.js
+│   │       │   └── SystemHealth.js
+│   │       └── (other existing components)
+│   └── .env
+└── memory/PRD.md
 ```
 
-## Completed Work (All Sessions)
+## What's Been Implemented
 
-### Session 1-2: Core Features + Refactoring
-- All HR modules, Admin Config, Live Monitoring, PDF Slips, Email Integration
+### Session 7 (2026-03-31): Deployment Fix
+- [x] Wrapped all `create_index` calls with try-except for MongoDB Atlas OperationFailure
+- [x] Removed unused PostgreSQL env variables from backend/.env
 
-### Session 3: Production Stability (2026-03-31)
-- HRDashboard crash fix, date overflow bug, backend defensive coding
+### Session 8 (2026-03-31): Major Refactoring
+- [x] **App.js refactored**: 6386 lines → 349 lines (95% reduction)
+- [x] Extracted 15 components into dedicated files:
+  - Login, Layout, Dashboard, Attendance, Employees, FieldExits
+  - Payroll, LeaveManagement, FieldExitManagement, ReportsPage
+  - Leaves, AdminRequestCreation, AttachmentViewer, BackupManagement, OvertimeReport
+- [x] All routes verified working (100% test pass rate)
+- [x] Fixed missing Cog6ToothIcon import in Dashboard.js
 
-### Session 4: New Features (2026-03-31)
-- Auto email notifications lateness/absence, Arabic PDF, System Health page
-
-### Session 5: Auto Monthly Report (2026-03-31)
-- APScheduler cron job (day 28), manual trigger, config UI, run history
-
-### Session 6: Post-Deployment Bug Fixes (2026-03-31)
-- [x] **SMTP error messages**: Raw Python errors replaced with Arabic messages (فشل في المصادقة, فشل الاتصال, etc.)
-- [x] **React Error #31**: Fixed all places where Pydantic validation objects were rendered in JSX
-- [x] **Safe error handling**: All frontend alert() calls now handle object/array `detail` fields from FastAPI
-- [x] **email_service.py**: Specific exception handling for SMTPAuthenticationError, SMTPConnectError, SMTPRecipientsRefused
-
-### Session 7: Deployment Fix (2026-03-31)
-- [x] Wrapped all `create_index` calls in `server.py` and `work_reports_mongo.py` with robust `try-except` to handle MongoDB Atlas `OperationFailure` (no `createIndex` permission)
-- [x] Removed unused PostgreSQL env variables from `backend/.env` (flagged as deployment blocker)
-- [x] Verified healthz/readyz endpoints, login, and clean startup logs
+### Earlier Sessions (Completed)
+- [x] Tarek's check-in issue fixed
+- [x] Advances & Loans module
+- [x] Notification system overhaul
+- [x] Manual attendance/absence entry
+- [x] Custom attendance report
+- [x] Weekend logic (Fri/Sat)
+- [x] Arabic PDF salary slips
+- [x] APScheduler auto-reports
+- [x] Microsoft 365 SMTP integration
+- [x] System Health monitoring page
 
 ## Pending Tasks
+
 ### P2 (Backlog)
-- [ ] Further refactoring of App.js (~6380 lines)
+- [ ] Build Mini Admin UI at `/admin/config` for managing Exceptions and Import Mappings
+- [ ] Live monitoring dashboard enhancements at `/admin/live`
+- [ ] Sample PDF salary letters
+- [ ] October calibration mode proof
