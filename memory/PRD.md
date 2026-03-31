@@ -4,14 +4,15 @@
 Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (RTL) application managing attendance, payroll, advances/loans, notifications, leaves, field exits, marketing visits, and work reports.
 
 ## Tech Stack
-- **Backend**: FastAPI + MongoDB (Motor) + Pydantic + ReportLab (PDF) + arabic-reshaper + python-bidi
+- **Backend**: FastAPI + MongoDB (Motor) + Pydantic + ReportLab (PDF) + arabic-reshaper + python-bidi + APScheduler
 - **Frontend**: React.js + Axios + TailwindCSS + Heroicons
 - **Email**: GoDaddy SMTP (smtpout.secureserver.net:587) via smtplib
 - **Fonts**: Amiri Arabic (RTL PDF support)
+- **Scheduler**: APScheduler (AsyncIOScheduler + CronTrigger)
 - **Language**: Arabic (RTL) primary
 
 ## User Roles
-- **Super Admin**: Full system access, config, health monitoring
+- **Super Admin**: Full system access, config, health monitoring, auto-reports
 - **Admin**: Management access
 - **User (Employee)**: Self-service attendance, leave requests
 
@@ -24,28 +25,22 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 ```
 /app/
 ├── backend/
-│   ├── server.py              # Core backend (~15000 lines)
+│   ├── server.py              # Core backend (~15280 lines)
 │   ├── pdf_generator.py       # Arabic PDF salary slip generation
 │   ├── email_service.py       # Arabic SMTP email service with templates
 │   ├── attendance_engine.py   # Attendance logic
 │   ├── fonts/                 # Amiri Arabic font files
-│   │   ├── Amiri-Regular.ttf
-│   │   └── Amiri-Bold.ttf
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
 │   │   ├── App.js
-│   │   ├── config.js
-│   │   ├── contexts/
-│   │   │   ├── AuthContext.js
-│   │   │   └── LanguageContext.js
+│   │   ├── contexts/AuthContext.js, LanguageContext.js
 │   │   └── components/
-│   │       ├── Attendance/AttendanceManagement.js
 │   │       ├── Admin/
+│   │       │   ├── SalarySlips.js     # 4 tabs: slips, auto-report, email settings, logs
+│   │       │   ├── SystemHealth.js    # Service health monitoring
 │   │       │   ├── AdminConfig.js
-│   │       │   ├── LiveMonitoring.js
-│   │       │   ├── SalarySlips.js
-│   │       │   └── SystemHealth.js     # NEW
+│   │       │   └── LiveMonitoring.js
 │   │       ├── Dashboard/HRDashboard.js
 │   │       └── ...
 │   └── .env
@@ -53,50 +48,42 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 
 ## Completed Work
 
-### Session 1 - Core Features
-- Login/Auth, Dashboard, Attendance, Employee CRUD
-- Payroll, Advances & Loans, Notifications
-- Manual attendance/absence, Custom reports
-
-### Session 2 - Features & Refactoring
-- Deployment fix (MongoDB indexes, /health endpoint)
-- AttendanceManagement refactoring (extracted from App.js)
-- Admin Config, Live Monitoring, PDF Salary Slips
-- Email Integration (GoDaddy SMTP)
+### Session 1-2 - Core Features + Refactoring
+- All HR modules (attendance, payroll, advances, notifications, etc.)
+- Admin Config, Live Monitoring, PDF Salary Slips, Email Integration
 
 ### Session 3 - Production Stability (2026-03-31)
-- HRDashboard crash fix (Promise.allSettled + DEFAULT_KPIS)
-- Date overflow bug fix (calendar.monthrange)
-- Backend defensive coding (safe dict access)
-- SalarySlips Promise.allSettled fix
+- HRDashboard crash fix, date overflow bug, backend defensive coding
 
 ### Session 4 - New Features (2026-03-31)
-- [x] **Auto email notifications**: Lateness/absence triggers send emails to employee + all super admins (fire-and-forget)
-- [x] **Arabic PDF support**: Amiri font + arabic_reshaper + python-bidi for full RTL Arabic salary slips
-- [x] **System Health page**: /system-health with real-time monitoring of MongoDB, SMTP, API, Auth, Storage services
-- [x] **Arabic email templates**: lateness, absence, lateness_admin, absence_admin notification templates
+- [x] Auto email notifications for lateness/absence
+- [x] Arabic PDF support (Amiri font + RTL)
+- [x] System Health page (/system-health)
+
+### Session 5 - Auto Monthly Report (2026-03-31)
+- [x] **Monthly report auto-send**: APScheduler cron job (day 28, 8:00 AM) sends all employees email + PDF
+- [x] **Manual trigger**: POST /api/payroll/send-monthly-reports runs in background (asyncio.create_task)
+- [x] **Auto-report config**: Enable/disable + day selector (1-28) saved to DB
+- [x] **Report history**: Full run history with sent/failed/total per run
+- [x] **UI**: New "التقرير التلقائي" tab in SalarySlips page with toggle, day picker, send now, history
 
 ## Key API Endpoints
 
+### Auto Monthly Reports
+- `POST /api/payroll/send-monthly-reports` - Manual trigger (background task)
+- `GET/PUT /api/payroll/auto-report-config` - Auto-scheduler config
+- `GET /api/payroll/auto-report-history` - Run history
+
 ### System Health
-- `GET /api/system/health-check` - Comprehensive service health check (super admin only)
+- `GET /api/system/health-check` - Comprehensive service health
 
 ### PDF & Email
 - `GET /api/salary-slip/{employee_id}/{cycle_month}` - Generate Arabic PDF
-- `POST /api/email/test` - Test SMTP connection
-- `POST /api/email/send-salary-slip` - Send salary slip email
-- `GET/PUT /api/email/preferences` - Email notification preferences
-
-### Deductions
-- `POST /api/deductions/calculate-monthly?month=YYYY-MM` - Monthly deductions
-- `POST /api/deductions/calculate?mode=custom` - Custom period
-
-### Admin Config
-- `GET/PUT /api/admin/config/system` - System configuration
-- `GET/POST/DELETE /api/admin/config/exceptions` - Attendance exceptions
+- `POST /api/email/test` - Test SMTP
+- `POST /api/email/send-salary-slip` - Individual salary slip
 
 ## Pending Tasks
 
 ### P2 (Backlog)
 - [ ] Further refactoring of App.js (still ~6380 lines)
-- [ ] Dashboard and Employees component extraction from App.js
+- [ ] Dashboard and Employees component extraction
