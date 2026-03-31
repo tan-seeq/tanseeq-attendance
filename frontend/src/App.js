@@ -55,6 +55,7 @@ import AttendanceManagement from './components/Attendance/AttendanceManagement';
 // Import Admin Pages
 import AdminConfig from './components/Admin/AdminConfig';
 import LiveMonitoring from './components/Admin/LiveMonitoring';
+import SalarySlips from './components/Admin/SalarySlips';
 
 // Import Work Reports Components
 import WorkReportsDashboard from './WorkReports/WorkReportsDashboard';
@@ -259,6 +260,7 @@ const Layout = ({ children }) => {
     // قسم النظام - Super Admin فقط
     ...(user?.role === 'super_admin' ? [
       { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
+      { name: 'قسائم الرواتب والبريد', href: '/salary-slips', icon: DocumentIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
       { name: 'إعدادات النظام', href: '/admin/config', icon: Cog6ToothIcon },
       { name: 'المراقبة المباشرة', href: '/admin/live', icon: ChartBarIcon },
@@ -3383,6 +3385,13 @@ const AppWithNotifications = () => {
               <ProtectedRoute requiredRole="super_admin">
                 <Layout>
                   <LiveMonitoring />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/salary-slips" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <SalarySlips />
                 </Layout>
               </ProtectedRoute>
             } />

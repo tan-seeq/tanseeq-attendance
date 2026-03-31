@@ -158,6 +158,11 @@ import openpyxl
 import json
 import calendar
 
+# PDF & Email imports
+from pdf_generator import generate_salary_slip
+from email_service import send_email, send_salary_slip_email, send_notification_email
+
+
 # Import Work Reports Database Module - MongoDB version (now lazy)
 from work_reports_mongo import (
     get_work_reports_db, init_work_reports_collections, init_default_activity_types,
@@ -949,6 +954,262 @@ async def get_super_admin_user(current_user: User = Depends(get_current_user)):
 # ========================================
 # LIVE MONITORING ENDPOINTS
 # ========================================
+
+
+# ========================================
+# PDF SALARY SLIP ENDPOINTS
+# ========================================
+
+@api_router.get("/salary-slip/{employee_id}/{cycle_month}")
+async def generate_employee_salary_slip(employee_id: str, cycle_month: str, current_user: User = Depends(get_current_user)):
+    """Generate PDF salary slip for an employee"""
+    # Only admins or the employee themselves
+    if current_user.role not in ['super_admin', 'admin'] and current_user.id != employee_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Get payroll data for this cycle
+    payroll_data = await _build_payroll_data(employee_id, cycle_month)
+    
+    pdf_bytes = generate_salary_slip(employee, payroll_data, cycle_month)
+    
+    import base64
+    return {
+        "success": True,
+        "filename": f"salary_slip_{cycle_month}_{employee.get('name','').replace(' ','_')}.pdf",
+        "file_content": base64.b64encode(pdf_bytes).decode(),
+        "employee_name": employee.get('name', '')
+    }
+
+@api_router.post("/salary-slips/bulk/{cycle_month}")
+async def generate_bulk_salary_slips(cycle_month: str, data: dict = None, current_user: User = Depends(get_admin_user)):
+    """Generate salary slips for multiple employees"""
+    employee_ids = data.get("employee_ids", []) if data else []
+    
+    if not employee_ids:
+        employees = await db.users.find({"is_active": True}, {"_id": 0}).to_list(None)
+        employee_ids = [e["id"] for e in employees]
+    
+    results = []
+    for emp_id in employee_ids:
+        employee = await db.users.find_one({"id": emp_id}, {"_id": 0})
+        if not employee:
+            continue
+        payroll_data = await _build_payroll_data(emp_id, cycle_month)
+        results.append({
+            "employee_id": emp_id,
+            "employee_name": employee.get("name", ""),
+            "basic_salary": payroll_data.get("basic_salary", 0),
+            "total_deductions": payroll_data.get("lateness_deductions", 0) + payroll_data.get("absence_deductions", 0) + payroll_data.get("advance_deductions", 0),
+            "net_salary": payroll_data.get("basic_salary", 0) - (payroll_data.get("lateness_deductions", 0) + payroll_data.get("absence_deductions", 0) + payroll_data.get("advance_deductions", 0))
+        })
+    
+    return {"success": True, "count": len(results), "slips": results}
+
+async def _build_payroll_data(employee_id: str, cycle_month: str) -> dict:
+    """Build payroll data for salary slip generation"""
+    # Parse month
+    try:
+        year, month = cycle_month.split('-')
+        year, month = int(year), int(month)
+    except:
+        year, month = datetime.now().year, datetime.now().month
+    
+    # Get employee
+    employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+    basic_salary = employee.get("monthly_salary", 0) if employee else 0
+    
+    # Get attendance records for this month
+    start_date = f"{year}-{month:02d}-01"
+    end_date = f"{year}-{month:02d}-{calendar.monthrange(year, month)[1]}"
+    
+    attendance_records = await db.attendance.find({
+        "user_id": employee_id,
+        "date": {"$gte": start_date, "$lte": end_date}
+    }).to_list(None)
+    
+    present_days = len([r for r in attendance_records if r.get("status") in ["present", "checked_out", "late"]])
+    late_days = len([r for r in attendance_records if r.get("status") == "late" or r.get("is_late")])
+    absent_days = len([r for r in attendance_records if r.get("status") == "absent"])
+    
+    # Calculate working days (exclude Friday and Saturday)
+    import datetime as dt_module
+    working_days = 0
+    d = dt_module.date(year, month, 1)
+    while d.month == month:
+        if d.weekday() not in [4, 5]:  # Friday=4, Saturday=5
+            working_days += 1
+        d += dt_module.timedelta(days=1)
+    
+    # Get deductions
+    deductions = await db.payroll_deductions.find({
+        "employee_id": employee_id,
+        "cycle_month": cycle_month,
+        "is_voided": {"$ne": True}
+    }).to_list(None)
+    
+    lateness_ded = sum(d.get("amount", 0) for d in deductions if d.get("type") in ["lateness", "late"])
+    absence_ded = sum(d.get("amount", 0) for d in deductions if d.get("type") in ["absence", "absent"])
+    
+    # Get advances balance
+    advance_transactions = await db.advances_transactions.find({
+        "employee_id": employee_id,
+        "status": {"$in": ["approved", "active"]}
+    }).to_list(None)
+    
+    advances_balance = sum(t.get("remaining_balance", t.get("amount", 0)) for t in advance_transactions if t.get("type") == "advance")
+    loans_balance = sum(t.get("remaining_balance", t.get("amount", 0)) for t in advance_transactions if t.get("type") == "loan")
+    advance_ded = sum(t.get("amount", 0) for t in advance_transactions if t.get("type") == "repayment" and t.get("date", "").startswith(cycle_month))
+    
+    # Get overtime
+    overtime_hours = sum(float(r.get("overtime_hours", 0)) for r in attendance_records)
+    hourly_rate = basic_salary / (working_days * 8) if working_days > 0 and basic_salary > 0 else 0
+    overtime_amount = overtime_hours * hourly_rate * 1.25
+    
+    return {
+        "basic_salary": basic_salary,
+        "overtime_amount": round(overtime_amount, 2),
+        "overtime_hours": round(overtime_hours, 1),
+        "allowances": 0,
+        "lateness_deductions": round(lateness_ded, 2),
+        "absence_deductions": round(absence_ded, 2),
+        "advance_deductions": round(advance_ded, 2),
+        "loan_installments": 0,
+        "other_deductions": 0,
+        "working_days": working_days,
+        "present_days": present_days,
+        "absent_days": absent_days,
+        "late_days": late_days,
+        "advances_balance": round(advances_balance, 2),
+        "loans_balance": round(loans_balance, 2),
+        "company_name": "TANSEEQ Tax Consultancy"
+    }
+
+# ========================================
+# EMAIL ENDPOINTS
+# ========================================
+
+@api_router.post("/email/test")
+async def test_email_connection(current_user: User = Depends(get_super_admin_user)):
+    """Test SMTP email connection"""
+    result = send_email(
+        os.environ.get('SMTP_EMAIL', ''),
+        "TANSEEQ HR - Email Test",
+        "<h2>Email connection test successful!</h2><p>Your SMTP configuration is working correctly.</p>"
+    )
+    return result
+
+@api_router.post("/email/send-salary-slip")
+async def email_salary_slip(data: dict, current_user: User = Depends(get_admin_user)):
+    """Send salary slip PDF via email to an employee"""
+    employee_id = data.get("employee_id")
+    cycle_month = data.get("cycle_month")
+    
+    if not employee_id or not cycle_month:
+        raise HTTPException(status_code=400, detail="employee_id and cycle_month required")
+    
+    employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    if not employee.get("email"):
+        raise HTTPException(status_code=400, detail="Employee has no email address")
+    
+    payroll_data = await _build_payroll_data(employee_id, cycle_month)
+    pdf_bytes = generate_salary_slip(employee, payroll_data, cycle_month)
+    
+    result = send_salary_slip_email(employee["email"], employee.get("name", ""), cycle_month, pdf_bytes)
+    
+    if result["success"]:
+        await db.email_logs.insert_one({
+            "employee_id": employee_id,
+            "employee_name": employee.get("name", ""),
+            "email": employee["email"],
+            "type": "salary_slip",
+            "cycle_month": cycle_month,
+            "sent_at": datetime.now().isoformat(),
+            "sent_by": current_user.id
+        })
+    
+    return result
+
+@api_router.post("/email/send-bulk-salary-slips")
+async def email_bulk_salary_slips(data: dict, current_user: User = Depends(get_admin_user)):
+    """Send salary slips to multiple employees"""
+    employee_ids = data.get("employee_ids", [])
+    cycle_month = data.get("cycle_month")
+    
+    if not cycle_month:
+        raise HTTPException(status_code=400, detail="cycle_month required")
+    
+    if not employee_ids:
+        employees = await db.users.find({"is_active": True, "email": {"$exists": True, "$ne": ""}}, {"_id": 0}).to_list(None)
+        employee_ids = [e["id"] for e in employees]
+    
+    results = {"sent": 0, "failed": 0, "details": []}
+    
+    for emp_id in employee_ids:
+        employee = await db.users.find_one({"id": emp_id}, {"_id": 0})
+        if not employee or not employee.get("email"):
+            results["failed"] += 1
+            results["details"].append({"employee_id": emp_id, "status": "no_email"})
+            continue
+        
+        payroll_data = await _build_payroll_data(emp_id, cycle_month)
+        pdf_bytes = generate_salary_slip(employee, payroll_data, cycle_month)
+        result = send_salary_slip_email(employee["email"], employee.get("name", ""), cycle_month, pdf_bytes)
+        
+        if result["success"]:
+            results["sent"] += 1
+            await db.email_logs.insert_one({
+                "employee_id": emp_id,
+                "employee_name": employee.get("name", ""),
+                "email": employee["email"],
+                "type": "salary_slip",
+                "cycle_month": cycle_month,
+                "sent_at": datetime.now().isoformat(),
+                "sent_by": current_user.id
+            })
+        else:
+            results["failed"] += 1
+        
+        results["details"].append({
+            "employee_id": emp_id,
+            "employee_name": employee.get("name", ""),
+            "status": "sent" if result["success"] else "failed",
+            "error": result.get("error")
+        })
+    
+    return {"success": True, **results}
+
+@api_router.get("/email/preferences")
+async def get_email_preferences(current_user: User = Depends(get_admin_user)):
+    """Get email notification preferences"""
+    prefs = await db.email_preferences.find({}, {"_id": 0}).to_list(None)
+    if not prefs:
+        prefs = [{"type": "lateness", "enabled": True, "recipients": "employee"},
+                 {"type": "absence", "enabled": True, "recipients": "employee"},
+                 {"type": "advance_request", "enabled": True, "recipients": "admin"}]
+    return {"success": True, "preferences": prefs}
+
+@api_router.put("/email/preferences")
+async def update_email_preferences(data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Update email notification preferences"""
+    prefs = data.get("preferences", [])
+    await db.email_preferences.delete_many({})
+    if prefs:
+        await db.email_preferences.insert_many(prefs)
+    return {"success": True, "message": "Email preferences updated"}
+
+@api_router.get("/email/logs")
+async def get_email_logs(current_user: User = Depends(get_admin_user)):
+    """Get email sending logs"""
+    logs = await db.email_logs.find({}, {"_id": 0}).sort("sent_at", -1).to_list(50)
+    return {"success": True, "logs": logs}
+
 
 # ========================================
 # ADMIN CONFIG ENDPOINTS
