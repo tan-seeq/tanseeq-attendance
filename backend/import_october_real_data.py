@@ -194,9 +194,10 @@ async def import_attendance():
         if status == "late" and check_in:
             # Check if after 09:00
             try:
-                check_in_time = datetime.strptime(check_in, "%H:%M:%S").time()
+                from time_utils import safe_parse_time
+                check_in_time = safe_parse_time(check_in)
                 standard_time = datetime.strptime("09:00:00", "%H:%M:%S").time()
-                if check_in_time > standard_time:
+                if check_in_time and check_in_time > standard_time:
                     late_minutes = int((datetime.combine(datetime.today(), check_in_time) - 
                                       datetime.combine(datetime.today(), standard_time)).total_seconds() / 60)
                     is_late = True

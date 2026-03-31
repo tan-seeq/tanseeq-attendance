@@ -198,11 +198,11 @@ def calculate_daily_deduction(
         result["deduction_amount"] = minute_rate * REQUIRED_MINUTES
         return result
     
-    # Parse times
-    try:
-        check_in_time = datetime.strptime(check_in, "%H:%M:%S").time()
-        check_out_time = datetime.strptime(check_out, "%H:%M:%S").time()
-    except:
+    # Parse times (robust: handles "09:00:00", "2025-10-01 09:00:00", ISO formats)
+    from time_utils import safe_parse_time
+    check_in_time = safe_parse_time(check_in)
+    check_out_time = safe_parse_time(check_out)
+    if check_in_time is None or check_out_time is None:
         # Invalid format, treat as absent
         result["is_absent"] = True
         result["deficit_minutes"] = REQUIRED_MINUTES

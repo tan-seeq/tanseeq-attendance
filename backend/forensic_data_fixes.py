@@ -87,17 +87,9 @@ class ForensicDataFixer:
                 continue
                 
             try:
-                # Parse check_in time
-                check_in_clean = check_in_str.strip()
-                time_formats = ["%H:%M:%S", "%H:%M", "%H%M"]
-                check_in_time = None
-                
-                for fmt in time_formats:
-                    try:
-                        check_in_time = datetime.strptime(check_in_clean, fmt).time()
-                        break
-                    except ValueError:
-                        continue
+                # Parse check_in time (robust: handles datetime and time-only strings)
+                from time_utils import safe_parse_time
+                check_in_time = safe_parse_time(check_in_str)
                 
                 if check_in_time is None:
                     continue

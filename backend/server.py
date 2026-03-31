@@ -8474,8 +8474,9 @@ async def check_out(current_user: User = Depends(get_current_user)):
         raise HTTPException(status_code=400, detail="Already checked out today")
     
     # Calculate working hours (handle day crossing if needed)
-    check_in_time = datetime.strptime(attendance["check_in"], "%H:%M:%S")
-    check_out_time = datetime.strptime(time_str, "%H:%M:%S")
+    from time_utils import safe_parse_datetime
+    check_in_time = safe_parse_datetime(attendance["check_in"], "check_in") or datetime.strptime(datetime.now().strftime("%Y-%m-%d") + " 09:00", "%Y-%m-%d %H:%M")
+    check_out_time = safe_parse_datetime(time_str, "check_out") or datetime.now()
     
     # Handle case where checkout is after midnight (next day)
     if check_out_time < check_in_time:
@@ -8596,15 +8597,17 @@ async def edit_absence_record(attendance_id: str, attendance_data: dict, current
         
         # Calculate working hours
         try:
-            check_in_time = datetime.strptime(check_in, "%H:%M:%S")
-            check_out_time = datetime.strptime(check_out, "%H:%M:%S")
+            from time_utils import safe_parse_datetime
+            check_in_time = safe_parse_datetime(check_in, "check_in")
+            check_out_time = safe_parse_datetime(check_out, "check_out")
             
-            if check_out_time < check_in_time:
-                check_out_time += timedelta(days=1)
-            
-            working_hours = (check_out_time - check_in_time).total_seconds() / 3600
-            update_data["working_hours"] = working_hours
-        except ValueError:
+            if check_in_time and check_out_time:
+                if check_out_time < check_in_time:
+                    check_out_time += timedelta(days=1)
+                
+                working_hours = (check_out_time - check_in_time).total_seconds() / 3600
+                update_data["working_hours"] = working_hours
+        except Exception:
             pass
     
     # If editing absence reason
@@ -11307,8 +11310,11 @@ async def calculate_late_penalties(month: str, current_user: User = Depends(get_
                 if not check_in:
                     continue
                 
-                # Parse check-in time
-                check_in_time = datetime.strptime(check_in, '%H:%M:%S').time()
+                # Parse check-in time (robust: handles multiple formats)
+                from time_utils import safe_parse_time
+                check_in_time = safe_parse_time(check_in)
+                if check_in_time is None:
+                    continue
                 
                 # Calculate late minutes based on user-specific rules
                 late_minutes = 0
@@ -12883,11 +12889,11 @@ async def get_overtime_report(month: str, current_user: User = Depends(get_admin
             if not check_in_str or not check_out_str:
                 continue
             
-            # Parse times
-            try:
-                check_in_time = datetime.strptime(check_in_str, "%H:%M:%S").time()
-                check_out_time = datetime.strptime(check_out_str, "%H:%M:%S").time()
-            except:
+            # Parse times (robust: handles multiple formats)
+            from time_utils import safe_parse_time
+            check_in_time = safe_parse_time(check_in_str)
+            check_out_time = safe_parse_time(check_out_str)
+            if check_in_time is None or check_out_time is None:
                 continue
             
             # Standard work hours: 9:00 AM to 6:00 PM (9 hours)

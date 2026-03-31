@@ -1,12 +1,490 @@
 {
-  "total_requests": 0,
-  "success_count": 0,
-  "error_count": 0,
-  "success_rate": 0.0,
-  "error_rate": 0.0,
-  "avg_response_ms": 0.0,
-  "avg_latency_ms": 0.0,
-  "requests_total": 0,
-  "endpoints": {},
-  "recent": []
+  "total_requests": 106,
+  "success_count": 100,
+  "error_count": 6,
+  "success_rate": 94.34,
+  "error_rate": 5.66,
+  "avg_response_ms": 44.54,
+  "avg_latency_ms": 44.54,
+  "requests_total": 106,
+  "endpoints": {
+    "/api/auth/login": {
+      "count": 17,
+      "avg_ms": 211.17
+    },
+    "/api/system/health-check": {
+      "count": 1,
+      "avg_ms": 1.19
+    },
+    "/api/notifications/my": {
+      "count": 18,
+      "avg_ms": 12.24
+    },
+    "/api/healthz": {
+      "count": 4,
+      "avg_ms": 0.38
+    },
+    "/api/users": {
+      "count": 13,
+      "avg_ms": 7.22
+    },
+    "/api/attendance/custom-report": {
+      "count": 5,
+      "avg_ms": 18.57
+    },
+    "/api/attendance": {
+      "count": 10,
+      "avg_ms": 20.3
+    },
+    "/api/attendance/with-absences": {
+      "count": 3,
+      "avg_ms": 15.86
+    },
+    "/api/auth/me": {
+      "count": 3,
+      "avg_ms": 3.63
+    },
+    "/api/leaves": {
+      "count": 6,
+      "avg_ms": 9.11
+    },
+    "/api/field-exits": {
+      "count": 6,
+      "avg_ms": 21.38
+    },
+    "/api/messages": {
+      "count": 7,
+      "avg_ms": 20.39
+    },
+    "/api/messages/unread-count": {
+      "count": 7,
+      "avg_ms": 15.96
+    },
+    "/api/notifications/count": {
+      "count": 6,
+      "avg_ms": 3.83
+    }
+  },
+  "recent": [
+    {
+      "ts": "2026-03-31T13:59:45.945038",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 25.74
+    },
+    {
+      "ts": "2026-03-31T13:59:45.946310",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 23.72
+    },
+    {
+      "ts": "2026-03-31T13:59:46.015746",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.83
+    },
+    {
+      "ts": "2026-03-31T13:59:46.070348",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.59
+    },
+    {
+      "ts": "2026-03-31T13:59:46.732227",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.45
+    },
+    {
+      "ts": "2026-03-31T13:59:46.800224",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 5.15
+    },
+    {
+      "ts": "2026-03-31T13:59:46.803579",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 7.16
+    },
+    {
+      "ts": "2026-03-31T14:00:15.877506",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.98
+    },
+    {
+      "ts": "2026-03-31T14:00:15.882170",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 3.75
+    },
+    {
+      "ts": "2026-03-31T14:00:15.889053",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 5.46
+    },
+    {
+      "ts": "2026-03-31T14:00:15.930458",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.61
+    },
+    {
+      "ts": "2026-03-31T14:00:54.365349",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "duration_ms": 236.51
+    },
+    {
+      "ts": "2026-03-31T14:00:54.432044",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.28
+    },
+    {
+      "ts": "2026-03-31T14:00:54.472316",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 5.39
+    },
+    {
+      "ts": "2026-03-31T14:00:54.510400",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 10.48
+    },
+    {
+      "ts": "2026-03-31T14:00:54.515801",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 9.7
+    },
+    {
+      "ts": "2026-03-31T14:00:54.516093",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 13.2
+    },
+    {
+      "ts": "2026-03-31T14:00:54.529790",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 20.39
+    },
+    {
+      "ts": "2026-03-31T14:00:54.535790",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 17.14
+    },
+    {
+      "ts": "2026-03-31T14:00:54.548122",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 27.98
+    },
+    {
+      "ts": "2026-03-31T14:00:54.550517",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 13.7
+    },
+    {
+      "ts": "2026-03-31T14:00:54.575006",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 5.6
+    },
+    {
+      "ts": "2026-03-31T14:00:54.581977",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 7.96
+    },
+    {
+      "ts": "2026-03-31T14:00:54.582170",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 9.87
+    },
+    {
+      "ts": "2026-03-31T14:00:54.596203",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 4.57
+    },
+    {
+      "ts": "2026-03-31T14:00:54.611645",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 14.48
+    },
+    {
+      "ts": "2026-03-31T14:00:54.626428",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 14.5
+    },
+    {
+      "ts": "2026-03-31T14:00:54.656084",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 11.52
+    },
+    {
+      "ts": "2026-03-31T14:00:54.718155",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.19
+    },
+    {
+      "ts": "2026-03-31T14:00:55.431184",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.33
+    },
+    {
+      "ts": "2026-03-31T14:00:55.499981",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.19
+    },
+    {
+      "ts": "2026-03-31T14:00:55.506547",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 4.65
+    },
+    {
+      "ts": "2026-03-31T14:00:59.769677",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 13.51
+    },
+    {
+      "ts": "2026-03-31T14:00:59.845718",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 13.39
+    },
+    {
+      "ts": "2026-03-31T14:01:40.879213",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "duration_ms": 234.13
+    },
+    {
+      "ts": "2026-03-31T14:01:40.949918",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 5.87
+    },
+    {
+      "ts": "2026-03-31T14:01:41.018620",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 15.08
+    },
+    {
+      "ts": "2026-03-31T14:01:41.036699",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 5.53
+    },
+    {
+      "ts": "2026-03-31T14:01:41.049939",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 14.47
+    },
+    {
+      "ts": "2026-03-31T14:01:41.051627",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 10.49
+    },
+    {
+      "ts": "2026-03-31T14:01:41.064077",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 20.01
+    },
+    {
+      "ts": "2026-03-31T14:01:41.064891",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 25.56
+    },
+    {
+      "ts": "2026-03-31T14:01:41.066970",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 25.61
+    },
+    {
+      "ts": "2026-03-31T14:01:41.089855",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 14.19
+    },
+    {
+      "ts": "2026-03-31T14:01:41.102805",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 3.94
+    },
+    {
+      "ts": "2026-03-31T14:01:41.123274",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 9.15
+    },
+    {
+      "ts": "2026-03-31T14:01:41.144093",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 22.86
+    },
+    {
+      "ts": "2026-03-31T14:01:41.145098",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 19.85
+    },
+    {
+      "ts": "2026-03-31T14:01:41.151004",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 19.87
+    },
+    {
+      "ts": "2026-03-31T14:01:41.152977",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 23.54
+    },
+    {
+      "ts": "2026-03-31T14:01:41.229071",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.85
+    },
+    {
+      "ts": "2026-03-31T14:01:41.286929",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.39
+    },
+    {
+      "ts": "2026-03-31T14:01:41.943920",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.52
+    },
+    {
+      "ts": "2026-03-31T14:01:42.013097",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 4.34
+    },
+    {
+      "ts": "2026-03-31T14:01:42.014655",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 7.57
+    },
+    {
+      "ts": "2026-03-31T14:01:45.742722",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 6.18
+    },
+    {
+      "ts": "2026-03-31T14:01:45.754518",
+      "method": "GET",
+      "path": "/api/attendance/with-absences",
+      "status": 200,
+      "duration_ms": 16.48
+    },
+    {
+      "ts": "2026-03-31T14:01:45.827354",
+      "method": "GET",
+      "path": "/api/attendance/with-absences",
+      "status": 200,
+      "duration_ms": 16.26
+    },
+    {
+      "ts": "2026-03-31T14:01:45.830303",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 4.05
+    },
+    {
+      "ts": "2026-03-31T14:01:52.756134",
+      "method": "POST",
+      "path": "/api/attendance/custom-report",
+      "status": 200,
+      "duration_ms": 15.8
+    }
+  ]
 }
