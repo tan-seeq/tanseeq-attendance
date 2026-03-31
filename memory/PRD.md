@@ -4,37 +4,38 @@
 Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (RTL) application managing attendance, payroll, advances/loans, notifications, leaves, field exits, marketing visits, and work reports.
 
 ## Tech Stack
-- **Backend**: FastAPI + MongoDB (Motor) + Pydantic + ReportLab (PDF)
-- **Frontend**: React.js + Axios + TailwindCSS
-- **Data**: pandas + openpyxl for Excel exports
-- **Email**: GoDaddy SMTP (smtpout.secureserver.net:587)
+- **Backend**: FastAPI + MongoDB (Motor) + Pydantic + ReportLab (PDF) + arabic-reshaper + python-bidi
+- **Frontend**: React.js + Axios + TailwindCSS + Heroicons
+- **Email**: GoDaddy SMTP (smtpout.secureserver.net:587) via smtplib
+- **Fonts**: Amiri Arabic (RTL PDF support)
 - **Language**: Arabic (RTL) primary
 
 ## User Roles
-- **Super Admin**: Full system access, edit/delete permissions, config management
+- **Super Admin**: Full system access, config, health monitoring
 - **Admin**: Management access
 - **User (Employee)**: Self-service attendance, leave requests
 
 ## Key Credentials
 - Super Admin: admin@tanseeq.com / ADMIN
 - Employee: hatem@tan-seeq.co / hatem123
-- DB Name: tanseeq_hr
 - SMTP: Taxagent@tan-seeq.co via smtpout.secureserver.net:587
 
 ## Architecture
 ```
 /app/
 ├── backend/
-│   ├── server.py              # Core backend (~14900 lines)
-│   ├── pdf_generator.py       # PDF salary slip generation
-│   ├── email_service.py       # SMTP email service
+│   ├── server.py              # Core backend (~15000 lines)
+│   ├── pdf_generator.py       # Arabic PDF salary slip generation
+│   ├── email_service.py       # Arabic SMTP email service with templates
 │   ├── attendance_engine.py   # Attendance logic
-│   ├── advances_model.py      # Advances data models
+│   ├── fonts/                 # Amiri Arabic font files
+│   │   ├── Amiri-Regular.ttf
+│   │   └── Amiri-Bold.ttf
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── App.js             # Main app (~6360 lines)
-│   │   ├── config.js          # API constants
+│   │   ├── App.js
+│   │   ├── config.js
 │   │   ├── contexts/
 │   │   │   ├── AuthContext.js
 │   │   │   └── LanguageContext.js
@@ -43,68 +44,59 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 │   │       ├── Admin/
 │   │       │   ├── AdminConfig.js
 │   │       │   ├── LiveMonitoring.js
-│   │       │   └── SalarySlips.js
+│   │       │   ├── SalarySlips.js
+│   │       │   └── SystemHealth.js     # NEW
 │   │       ├── Dashboard/HRDashboard.js
-│   │       ├── AttendanceDeductions/
-│   │       │   ├── MyAttendanceDeductions.js
-│   │       │   └── MonthlyDeductionsCalculator.js
 │   │       └── ...
 │   └── .env
 ```
 
-## Completed Work (All Sessions)
+## Completed Work
 
-### Core Features (Session 1)
+### Session 1 - Core Features
 - Login/Auth, Dashboard, Attendance, Employee CRUD
 - Payroll, Advances & Loans, Notifications
 - Manual attendance/absence, Custom reports
-- Leave/Field exit/Marketing visits, Work reports
 
-### Session 2 Fixes & Features
-- [x] Deployment fix (MongoDB indexes, /health endpoint)
-- [x] Custom Report modal, Manual absence bug
-- [x] Login resilience, Notification UX
-- [x] AttendanceManagement refactoring (1254 lines extracted from App.js)
-- [x] AuthContext & LanguageContext extracted
-- [x] Admin Config (/admin/config)
-- [x] Live Monitoring (/admin/live)
-- [x] PDF Salary Slips
-- [x] Email Integration (GoDaddy SMTP)
+### Session 2 - Features & Refactoring
+- Deployment fix (MongoDB indexes, /health endpoint)
+- AttendanceManagement refactoring (extracted from App.js)
+- Admin Config, Live Monitoring, PDF Salary Slips
+- Email Integration (GoDaddy SMTP)
 
-### Session 3 - Production Stability Fixes (2026-03-31)
-- [x] **HRDashboard crash fix** - Changed Promise.all to Promise.allSettled with DEFAULT_KPIS fallback
-- [x] **Date overflow bug** - Fixed cycle date calculation for months without day 29 (Feb)
-- [x] **Backend defensive coding** - All employee loops use .get() instead of dict['key'] access
-- [x] **User model resilience** - get_current_user has fallback User construction for prod DB mismatches
-- [x] **Payroll cycles _id fix** - pop("_id") instead of str(_id) to prevent serialization issues
-- [x] **Email test endpoint** - Wrapped in try/except to prevent 500 crashes
-- [x] **Clients endpoint** - Returns [] on error instead of raising 500
-- [x] **SalarySlips page** - Promise.allSettled prevents cascade failure
-- [x] **Ledger endpoint** - Fixed dict-typed current_user and added _id removal
+### Session 3 - Production Stability (2026-03-31)
+- HRDashboard crash fix (Promise.allSettled + DEFAULT_KPIS)
+- Date overflow bug fix (calendar.monthrange)
+- Backend defensive coding (safe dict access)
+- SalarySlips Promise.allSettled fix
 
-## Pending Tasks
-
-### P2 (Backlog)
-- [ ] Further refactoring of App.js (still ~6360 lines)
-- [ ] Auto-trigger email notifications on lateness/absence events
-- [ ] Arabic content in PDF salary slips
+### Session 4 - New Features (2026-03-31)
+- [x] **Auto email notifications**: Lateness/absence triggers send emails to employee + all super admins (fire-and-forget)
+- [x] **Arabic PDF support**: Amiri font + arabic_reshaper + python-bidi for full RTL Arabic salary slips
+- [x] **System Health page**: /system-health with real-time monitoring of MongoDB, SMTP, API, Auth, Storage services
+- [x] **Arabic email templates**: lateness, absence, lateness_admin, absence_admin notification templates
 
 ## Key API Endpoints
+
+### System Health
+- `GET /api/system/health-check` - Comprehensive service health check (super admin only)
+
 ### PDF & Email
-- `GET /api/salary-slip/{employee_id}/{cycle_month}` - Generate PDF
+- `GET /api/salary-slip/{employee_id}/{cycle_month}` - Generate Arabic PDF
 - `POST /api/email/test` - Test SMTP connection
-- `POST /api/email/send-salary-slip` - Send individual salary slip
+- `POST /api/email/send-salary-slip` - Send salary slip email
 - `GET/PUT /api/email/preferences` - Email notification preferences
 
 ### Deductions
 - `POST /api/deductions/calculate-monthly?month=YYYY-MM` - Monthly deductions
-- `POST /api/deductions/calculate?mode=custom&from_date=&to_date=` - Custom period
+- `POST /api/deductions/calculate?mode=custom` - Custom period
 
 ### Admin Config
 - `GET/PUT /api/admin/config/system` - System configuration
 - `GET/POST/DELETE /api/admin/config/exceptions` - Attendance exceptions
 
-### Monitoring
-- `GET /api/live/metrics` - Real-time metrics
-- `GET /api/live/logs` - Server logs
-- `GET /api/healthz` - Kubernetes health probe
+## Pending Tasks
+
+### P2 (Backlog)
+- [ ] Further refactoring of App.js (still ~6380 lines)
+- [ ] Dashboard and Employees component extraction from App.js
