@@ -20,59 +20,85 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 - Field exit management
 - Marketing visits tracking
 - Work reports module
+- Admin configuration panel
+- Live monitoring dashboard
 
 ## User Roles
-- **Super Admin**: Full system access, edit/delete permissions
+- **Super Admin**: Full system access, edit/delete permissions, config management
 - **Admin**: Management access
 - **User (Employee)**: Self-service attendance, leave requests
 
 ## Key Credentials
 - Super Admin: admin@tanseeq.com / ADMIN
+- Employee: hatem@tan-seeq.co / hatem123
 - DB Name: tanseeq_hr
 
-## What's Been Implemented
+## Architecture (Post-Refactoring)
+```
+/app/
+├── backend/
+│   ├── server.py              # Core backend (14500+ lines)
+│   ├── attendance_engine.py   # Attendance logic engine
+│   ├── advances_model.py      # Advances data models
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── App.js             # Main app (6350 lines - reduced from 7883)
+│   │   ├── config.js          # NEW: API constants
+│   │   ├── contexts/
+│   │   │   ├── AuthContext.js  # NEW: Auth provider/hook
+│   │   │   └── LanguageContext.js # NEW: Language provider/hook
+│   │   └── components/
+│   │       ├── Attendance/
+│   │       │   └── AttendanceManagement.js  # NEW: Extracted (1254 lines)
+│   │       ├── Admin/
+│   │       │   ├── AdminConfig.js     # NEW: System config page
+│   │       │   └── LiveMonitoring.js  # NEW: Live monitoring dashboard
+│   │       ├── AdvancesLoans/
+│   │       ├── IntegratedPayroll/
+│   │       ├── NotificationModal.js
+│   │       └── ...
+│   └── .env
+```
+
+## Completed Work
+### Session 1 (Previous)
 - Login/Auth system with JWT
 - Dashboard with stats
 - Attendance tracking (check-in/check-out)
 - Employee management (CRUD)
 - Payroll cycles and summaries
-- Advances & Loans module (requests, repayments, admin control)
-- Notification system (send, acknowledge, modal)
-- Manual attendance entry (bulk add)
-- Manual absence entry (with payroll deductions)
-- Custom attendance report (Excel/CSV export)
-- Leave management
-- Field exit management
-- Marketing visits
-- Work reports module
+- Advances & Loans module
+- Notification system
+- Manual attendance/absence entry
+- Custom attendance report
+- Leave/Field exit management
+- Marketing visits & Work reports
 - Weekend logic (Friday + Saturday)
-- Attendance edit/delete for super admins
 
-## Completed Fixes (Feb 2026)
-- [x] Deployment fix: MongoDB createIndex permission error handled with try/except
-- [x] Custom Report modal: Added missing modal JSX for report generation
-- [x] Edit/Delete buttons: Verified working for super_admin role
-- [x] Notification modal UX: Added session-based dismissal to prevent re-showing after close
-- [x] Manual Absence bug: Fixed field name mismatch (salary -> monthly_salary), allow absence without salary
-- [x] Deployment health check: Added `/health` endpoint for Kubernetes probes (was returning 404)
-- [x] Removed duplicate root endpoint to prevent conflicts
-- [x] Login resilience: Added default values for UserResponse fields and safe user_data building to prevent 500 errors when DB fields are missing
+### Session 2 (Current - March 2026)
+- [x] Deployment fix: MongoDB createIndex permission error (try/except)
+- [x] Health endpoint: Added /health for Kubernetes probes
+- [x] Custom Report modal: Added missing modal JSX
+- [x] Manual Absence bug: Fixed salary field name mismatch
+- [x] Login resilience: Default values for missing user fields
+- [x] Notification UX: Session-based dismissal (sessionStorage)
+- [x] Notification console fix: Handle API response format {notifications:[...]}
+- [x] **MAJOR REFACTORING**: Extracted AttendanceManagement (1254 lines) from App.js
+- [x] **MAJOR REFACTORING**: Extracted AuthContext and LanguageContext to separate files
+- [x] **NEW FEATURE**: Admin Config page (/admin/config) with 3 tabs
+- [x] **NEW FEATURE**: Live Monitoring dashboard (/admin/live) with metrics
 
-## Pending/Upcoming Tasks
-### P0 (Critical)
-- [ ] Refactor AttendanceManagement component out of App.js (600+ lines)
-
-### P1 (Important)
-- [ ] Fix E2E test failures: Advance Request flow, Payroll Report Download flow
-- [ ] Fix notification acknowledge errors for some notification types
-
+## Pending Tasks
 ### P2 (Backlog)
-- [ ] Build Mini Admin UI at /admin/config for Exceptions and Import Mappings
 - [ ] Sample PDF salary letters
 - [ ] October calibration mode auto-disabling proof
-- [ ] Live monitoring dashboard at /admin/live
+- [ ] Further refactoring of App.js (still 6350 lines)
 
-## Architecture
-- Backend: /app/backend/server.py (14000+ lines - needs refactoring)
-- Frontend: /app/frontend/src/App.js (7800+ lines - needs refactoring)
-- Key modules: attendance_engine.py, payroll_integration_engine.py, advances_model.py
+## Key API Endpoints (New)
+- `GET/PUT /api/admin/config/system` - System configuration
+- `GET/POST/DELETE /api/admin/config/exceptions` - Attendance exceptions
+- `GET/PUT /api/admin/config/import-mappings` - Import column mappings
+- `GET /api/live/metrics` - Real-time server metrics
+- `GET /api/live/logs` - Recent server logs
+- `GET /health` - Kubernetes health probe
