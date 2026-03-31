@@ -5,7 +5,7 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 
 ## Tech Stack
 - **Backend**: FastAPI, MongoDB (Motor), APScheduler
-- **Frontend**: React.js, Tailwind CSS, Heroicons
+- **Frontend**: React.js (PWA), Tailwind CSS, Heroicons
 - **PDF**: ReportLab (English-only output)
 - **Email**: Microsoft 365 SMTP with fallback
 
@@ -14,7 +14,7 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 /app/
 ├── backend/
 │   ├── server.py                 # Core API + startup events
-│   ├── time_utils.py             # Robust time parsing utilities (NEW)
+│   ├── time_utils.py             # Robust time parsing utilities
 │   ├── email_service.py          # SMTP with fallback (English)
 │   ├── pdf_generator.py          # English PDF generation
 │   ├── advanced_deductions_system.py # Monthly deductions
@@ -22,9 +22,16 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 │   ├── work_reports_mongo.py     # Work reports DB layer
 │   └── requirements.txt
 ├── frontend/
+│   ├── public/
+│   │   ├── index.html            # PWA meta tags + manifest link
+│   │   ├── manifest.json         # PWA manifest (NEW)
+│   │   ├── sw.js                 # Service Worker (NEW)
+│   │   ├── icon-192.png          # PWA icon 192px (NEW)
+│   │   └── icon-512.png          # PWA icon 512px (NEW)
 │   ├── src/
 │   │   ├── App.js                # LEAN: 349 lines (routing only)
 │   │   ├── config.js             # BACKEND_URL, API exports
+│   │   ├── index.js              # SW registration (UPDATED)
 │   │   ├── contexts/
 │   │   │   ├── AuthContext.js
 │   │   │   └── LanguageContext.js
@@ -52,16 +59,11 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 
 ## What's Been Implemented
 
-### Session 9 (2026-03-31): Critical Deployment Fix - Time Parsing
-- [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility handling all DB formats: `"09:00:00"`, `"2025-10-01 09:00:00"`, `"2025-10-01T09:00:00"`, `"09:00"`
-- [x] **Fixed `advanced_deductions_system.py`**: Replaced rigid `strptime("%H:%M:%S")` with `safe_parse_time()`
-- [x] **Fixed `server.py` (4 locations)**: Lines 8477, 8599, 11311, 12888 - all check_in/check_out parsing now robust
-- [x] **Fixed `fix_historical_attendance_data.py`**: Uses `safe_parse_time()` instead of format loop
-- [x] **Fixed `forensic_data_fixes.py`**: Same robust parsing applied
-- [x] **Fixed `import_october_real_data.py`**: Same robust parsing applied
-- [x] **Verified Custom Report feature**: POST `/api/attendance/custom-report` works correctly (backend returns base64 file, frontend decodes and downloads)
-- [x] **Verified Edit/Delete buttons**: 163 edit + 163 delete buttons visible for super_admin on Attendance Management page
-- [x] **Testing: 100% pass rate** - 10/10 backend tests, all frontend features verified
+### Session 9 (2026-03-31): Critical Deployment Fix + PWA
+- [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility
+- [x] **Fixed time parsing in 6 files**: server.py (4 locations), advanced_deductions_system.py, fix_historical_attendance_data.py, forensic_data_fixes.py, import_october_real_data.py
+- [x] **Verified Custom Report & Edit/Delete buttons**: All working (100% test pass)
+- [x] **PWA Conversion**: manifest.json, service worker, app icons, iOS/Android meta tags. App installable on all devices.
 
 ### Session 8 (2026-03-31): Major Refactoring + English-Only Reports
 - [x] App.js refactored: 6386 → 349 lines (95% reduction)
@@ -69,10 +71,9 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [x] All PDFs, reports, and emails converted to 100% English
 - [x] October Calibration Proof added to System Health
 - [x] Live Monitoring metrics fixed
-- [x] Salary Letter Endpoint re-enabled (English HTML template)
 
 ### Session 7 (2026-03-31): Deployment Fix (MongoDB)
-- [x] Wrapped all `create_index` calls with try-except for MongoDB Atlas OperationFailure
+- [x] Wrapped all create_index calls with try-except for MongoDB Atlas
 
 ### Earlier Sessions (Completed)
 - [x] Tarek's check-in issue fixed
@@ -88,9 +89,9 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 ## Pending Tasks
 
 ### P1 (Important)
-- [ ] Refactor `backend/server.py` (15,000+ lines) into modular route files
+- [ ] Refactor backend/server.py (15,000+ lines) into modular route files
 
 ### P2 (Backlog)
-- [ ] Build Mini Admin UI at `/admin/config` for managing Exceptions and Import Mappings
-- [ ] Live monitoring dashboard enhancements at `/admin/live`
+- [ ] Build Mini Admin UI at /admin/config for managing Exceptions and Import Mappings
+- [ ] Live monitoring dashboard enhancements at /admin/live
 - [ ] Sample PDF salary letters
