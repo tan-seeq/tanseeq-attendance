@@ -460,12 +460,12 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
-    position: str
-    monthly_salary: float
-    daily_rate: float
-    working_hours_start: str
-    working_hours_end: str
-    phone: str
+    position: str = ""
+    monthly_salary: float = 0.0
+    daily_rate: float = 0.0
+    working_hours_start: str = "09:00"
+    working_hours_end: str = "18:00"
+    phone: str = ""
     hire_date: Optional[datetime] = None
     is_active: bool = True
     has_custom_schedule: bool = False
@@ -1192,7 +1192,30 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is inactive")
 
     access_token = create_access_token(data={"sub": user["id"]})
-    user_response = UserResponse(**user)
+    
+    # Build user response safely with defaults for missing fields
+    user_data = {
+        "id": user.get("id", ""),
+        "name": user.get("name", ""),
+        "email": user.get("email", ""),
+        "role": user.get("role", "user"),
+        "position": user.get("position", ""),
+        "monthly_salary": user.get("monthly_salary", 0.0),
+        "daily_rate": user.get("daily_rate", 0.0),
+        "working_hours_start": user.get("working_hours_start", "09:00"),
+        "working_hours_end": user.get("working_hours_end", "18:00"),
+        "phone": user.get("phone", ""),
+        "hire_date": user.get("hire_date"),
+        "is_active": user.get("is_active", True),
+        "has_custom_schedule": user.get("has_custom_schedule", False),
+        "has_flexible_schedule": user.get("has_flexible_schedule", False),
+        "flexible_hours_per_day": user.get("flexible_hours_per_day", 8.0),
+        "flexible_start_range": user.get("flexible_start_range", "07:00-10:00"),
+        "flexible_end_range": user.get("flexible_end_range", "16:00-19:00"),
+        "flexible_core_hours": user.get("flexible_core_hours", "10:00-15:00"),
+        "flexible_days_per_week": user.get("flexible_days_per_week", 5),
+    }
+    user_response = UserResponse(**user_data)
 
     await log_activity(user["id"], "login", f"User {user['email']} logged in")
 

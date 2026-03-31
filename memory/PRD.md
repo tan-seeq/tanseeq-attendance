@@ -56,6 +56,7 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 - [x] Manual Absence bug: Fixed field name mismatch (salary -> monthly_salary), allow absence without salary
 - [x] Deployment health check: Added `/health` endpoint for Kubernetes probes (was returning 404)
 - [x] Removed duplicate root endpoint to prevent conflicts
+- [x] Login resilience: Added default values for UserResponse fields and safe user_data building to prevent 500 errors when DB fields are missing
 
 ## Pending/Upcoming Tasks
 ### P0 (Critical)
