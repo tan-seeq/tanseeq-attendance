@@ -11,11 +11,15 @@ import logging
 
 logger = logging.getLogger("email_service")
 
-SMTP_HOST = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtpout.secureserver.net'))
+SMTP_HOST = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtp.office365.com'))
 SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
-SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
+SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '').lower().strip()
 SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
 SMTP_FROM_NAME = os.environ.get('SMTP_FROM_NAME', 'Al Tanseeq HR System')
+
+# Override old GoDaddy server if still present in env
+if 'secureserver' in SMTP_HOST:
+    SMTP_HOST = 'smtp.office365.com'
 
 
 def send_email(to_email: str, subject: str, html_body: str, attachments: list = None) -> dict:

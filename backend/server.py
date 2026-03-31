@@ -15220,7 +15220,11 @@ async def system_health_check(current_user: User = Depends(get_super_admin_user)
     try:
         import smtplib
         t0 = _time.time()
-        smtp_host = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtpout.secureserver.net'))
+        smtp_host = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtp.office365.com'))
+        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+        # Override old GoDaddy server if still in env
+        if 'secureserver' in smtp_host:
+            smtp_host = 'smtp.office365.com'
         smtp_port = int(os.environ.get('SMTP_PORT', '587'))
         with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as srv:
             srv.ehlo()
