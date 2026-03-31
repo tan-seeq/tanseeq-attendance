@@ -52,6 +52,11 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 - [x] **Safe error handling**: All frontend alert() calls now handle object/array `detail` fields from FastAPI
 - [x] **email_service.py**: Specific exception handling for SMTPAuthenticationError, SMTPConnectError, SMTPRecipientsRefused
 
+### Session 7: Deployment Fix (2026-03-31)
+- [x] Wrapped all `create_index` calls in `server.py` and `work_reports_mongo.py` with robust `try-except` to handle MongoDB Atlas `OperationFailure` (no `createIndex` permission)
+- [x] Removed unused PostgreSQL env variables from `backend/.env` (flagged as deployment blocker)
+- [x] Verified healthz/readyz endpoints, login, and clean startup logs
+
 ## Pending Tasks
 ### P2 (Backlog)
 - [ ] Further refactoring of App.js (~6380 lines)
