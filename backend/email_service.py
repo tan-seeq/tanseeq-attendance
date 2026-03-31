@@ -42,7 +42,7 @@ def send_email(to_email: str, subject: str, html_body: str, attachments: list = 
     """Send email via SMTP with automatic server fallback"""
     try:
         if not SMTP_EMAIL or not SMTP_PASSWORD:
-            return {"success": False, "error": "لم يتم تكوين بيانات اعتماد SMTP"}
+            return {"success": False, "error": "SMTP credentials not configured"}
 
         msg = MIMEMultipart()
         msg['From'] = f"{SMTP_FROM_NAME} <{SMTP_EMAIL}>"
@@ -64,7 +64,7 @@ def send_email(to_email: str, subject: str, html_body: str, attachments: list = 
             try:
                 used_host = _try_send_via_server(server_host, to_email, msg)
                 logger.info(f"Email sent to {to_email} via {used_host}")
-                return {"success": True, "message": f"تم إرسال البريد إلى {to_email}", "server": used_host}
+                return {"success": True, "message": f"Email sent to {to_email}", "server": used_host}
             except smtplib.SMTPAuthenticationError as e:
                 last_error = e
                 logger.warning(f"Auth failed on {server_host}, trying next...")
@@ -80,34 +80,34 @@ def send_email(to_email: str, subject: str, html_body: str, attachments: list = 
 
         # All servers failed
         if isinstance(last_error, smtplib.SMTPAuthenticationError):
-            return {"success": False, "error": "فشل في المصادقة مع خادم البريد. تحقق من اسم المستخدم وكلمة المرور"}
+            return {"success": False, "error": "SMTP authentication failed. Please check username and password"}
         elif isinstance(last_error, smtplib.SMTPConnectError):
-            return {"success": False, "error": "فشل الاتصال بخادم البريد. تحقق من عنوان الخادم والمنفذ"}
+            return {"success": False, "error": "Failed to connect to mail server. Please check server address and port"}
         else:
-            return {"success": False, "error": f"فشل إرسال البريد عبر جميع الخوادم المتاحة"}
+            return {"success": False, "error": "Failed to send email via all available servers"}
 
     except Exception as e:
         logger.error(f"Email failed to {to_email}: {e}")
-        return {"success": False, "error": "حدث خطأ في إرسال البريد الإلكتروني"}
+        return {"success": False, "error": "An error occurred while sending the email"}
 
 
 def send_salary_slip_email(to_email: str, employee_name: str, cycle_month: str, pdf_data: bytes) -> dict:
     """Send salary slip PDF via email"""
-    subject = f"كشف الراتب - {cycle_month} | التنسيق للاستشارات الضريبية"
+    subject = f"Salary Slip - {cycle_month} | TANSEEQ Tax Consultancy"
     html_body = f"""
-    <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #2b6cb0, #1a365d); color: white; padding: 25px; text-align: center; border-radius: 12px 12px 0 0;">
-            <h2 style="margin: 0;">التنسيق للاستشارات الضريبية</h2>
-            <p style="margin: 5px 0 0; opacity: 0.9;">كشف الراتب الشهري</p>
+            <h2 style="margin: 0;">TANSEEQ Tax Consultancy</h2>
+            <p style="margin: 5px 0 0; opacity: 0.9;">Monthly Salary Slip</p>
         </div>
         <div style="padding: 25px; background: #f7fafc; border: 1px solid #e2e8f0;">
-            <p>الموظف/ة العزيز/ة <strong>{employee_name}</strong>،</p>
-            <p>مرفق كشف الراتب الخاص بك لفترة <strong>{cycle_month}</strong>.</p>
-            <p>يرجى الاطلاع على المرفق للتفاصيل الكاملة.</p>
-            <p style="color: #718096; font-size: 12px; margin-top: 20px;">هذا بريد آلي من نظام الموارد البشرية - التنسيق</p>
+            <p>Dear <strong>{employee_name}</strong>,</p>
+            <p>Please find attached your salary slip for the period <strong>{cycle_month}</strong>.</p>
+            <p>Kindly review the attachment for full details.</p>
+            <p style="color: #718096; font-size: 12px; margin-top: 20px;">This is an automated email from the HR System - TANSEEQ</p>
         </div>
         <div style="background: #2d3748; color: #a0aec0; padding: 15px; text-align: center; font-size: 11px; border-radius: 0 0 12px 12px;">
-            <p style="margin: 0;">نظام الموارد البشرية - التنسيق للاستشارات الضريبية</p>
+            <p style="margin: 0;">HR System - TANSEEQ Tax Consultancy</p>
         </div>
     </div>
     """
@@ -115,83 +115,83 @@ def send_salary_slip_email(to_email: str, employee_name: str, cycle_month: str, 
 
 
 def send_notification_email(to_email: str, employee_name: str, notification_type: str, details: dict) -> dict:
-    """Send notification email for lateness/absence with Arabic templates"""
+    """Send notification email for lateness/absence"""
 
     templates = {
         'lateness': {
-            'subject': f'تنبيه تأخير - {details.get("date", "")} | التنسيق',
+            'subject': f'Lateness Alert - {details.get("date", "")} | TANSEEQ',
             'color': '#dd6b20',
-            'title': 'تنبيه تأخير',
+            'title': 'Lateness Alert',
             'body': f"""
-                <p>الموظف/ة العزيز/ة <strong>{employee_name}</strong>،</p>
-                <p>نود إبلاغكم بأنه تم تسجيل <strong>تأخير</strong> في الحضور:</p>
-                <div style="background: #fffaf0; border-right: 4px solid #dd6b20; padding: 12px; margin: 10px 0; border-radius: 4px;">
-                    <p><strong>التاريخ:</strong> {details.get('date', '-')}</p>
-                    <p><strong>الوقت المتوقع:</strong> {details.get('expected_time', '09:15')}</p>
-                    <p><strong>وقت الحضور:</strong> {details.get('actual_time', '-')}</p>
-                    <p><strong>مدة التأخير:</strong> {details.get('late_minutes', 0)} دقيقة</p>
+                <p>Dear <strong>{employee_name}</strong>,</p>
+                <p>Please be informed that a <strong>late arrival</strong> has been recorded:</p>
+                <div style="background: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px; margin: 10px 0; border-radius: 4px;">
+                    <p><strong>Date:</strong> {details.get('date', '-')}</p>
+                    <p><strong>Expected Time:</strong> {details.get('expected_time', '09:15')}</p>
+                    <p><strong>Actual Arrival:</strong> {details.get('actual_time', '-')}</p>
+                    <p><strong>Late Duration:</strong> {details.get('late_minutes', 0)} minutes</p>
                 </div>
-                <p style="color: #718096; font-size: 13px;">يرجى الالتزام بمواعيد العمل الرسمية.</p>
+                <p style="color: #718096; font-size: 13px;">Please adhere to the official working hours.</p>
             """
         },
         'absence': {
-            'subject': f'تنبيه غياب - {details.get("date", "")} | التنسيق',
+            'subject': f'Absence Alert - {details.get("date", "")} | TANSEEQ',
             'color': '#c53030',
-            'title': 'تنبيه غياب',
+            'title': 'Absence Alert',
             'body': f"""
-                <p>الموظف/ة العزيز/ة <strong>{employee_name}</strong>،</p>
-                <p>نود إبلاغكم بأنه تم تسجيل <strong>غياب</strong>:</p>
-                <div style="background: #fff5f5; border-right: 4px solid #c53030; padding: 12px; margin: 10px 0; border-radius: 4px;">
-                    <p><strong>التاريخ:</strong> {details.get('date', '-')}</p>
-                    <p><strong>نوع الغياب:</strong> {details.get('absence_type', 'يوم كامل')}</p>
-                    <p><strong>السبب:</strong> {details.get('reason', 'غير محدد')}</p>
+                <p>Dear <strong>{employee_name}</strong>,</p>
+                <p>Please be informed that an <strong>absence</strong> has been recorded:</p>
+                <div style="background: #fff5f5; border-left: 4px solid #c53030; padding: 12px; margin: 10px 0; border-radius: 4px;">
+                    <p><strong>Date:</strong> {details.get('date', '-')}</p>
+                    <p><strong>Absence Type:</strong> {details.get('absence_type', 'Full Day')}</p>
+                    <p><strong>Reason:</strong> {details.get('reason', 'Not specified')}</p>
                 </div>
             """
         },
         'lateness_admin': {
-            'subject': f'تنبيه: تأخير الموظف {employee_name} - {details.get("date", "")}',
+            'subject': f'Alert: Employee {employee_name} Late - {details.get("date", "")}',
             'color': '#dd6b20',
-            'title': 'تنبيه تأخير موظف',
+            'title': 'Employee Lateness Alert',
             'body': f"""
-                <p>تم تسجيل تأخير للموظف <strong>{employee_name}</strong>:</p>
-                <div style="background: #fffaf0; border-right: 4px solid #dd6b20; padding: 12px; margin: 10px 0; border-radius: 4px;">
-                    <p><strong>الموظف:</strong> {employee_name}</p>
-                    <p><strong>التاريخ:</strong> {details.get('date', '-')}</p>
-                    <p><strong>وقت الحضور:</strong> {details.get('actual_time', '-')}</p>
-                    <p><strong>مدة التأخير:</strong> {details.get('late_minutes', 0)} دقيقة</p>
+                <p>A late arrival has been recorded for employee <strong>{employee_name}</strong>:</p>
+                <div style="background: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px; margin: 10px 0; border-radius: 4px;">
+                    <p><strong>Employee:</strong> {employee_name}</p>
+                    <p><strong>Date:</strong> {details.get('date', '-')}</p>
+                    <p><strong>Arrival Time:</strong> {details.get('actual_time', '-')}</p>
+                    <p><strong>Late Duration:</strong> {details.get('late_minutes', 0)} minutes</p>
                 </div>
             """
         },
         'absence_admin': {
-            'subject': f'تنبيه: غياب الموظف {employee_name} - {details.get("date", "")}',
+            'subject': f'Alert: Employee {employee_name} Absent - {details.get("date", "")}',
             'color': '#c53030',
-            'title': 'تنبيه غياب موظف',
+            'title': 'Employee Absence Alert',
             'body': f"""
-                <p>تم تسجيل غياب للموظف <strong>{employee_name}</strong>:</p>
-                <div style="background: #fff5f5; border-right: 4px solid #c53030; padding: 12px; margin: 10px 0; border-radius: 4px;">
-                    <p><strong>الموظف:</strong> {employee_name}</p>
-                    <p><strong>التاريخ:</strong> {details.get('date', '-')}</p>
-                    <p><strong>نوع الغياب:</strong> {details.get('absence_type', 'يوم كامل')}</p>
-                    <p><strong>عدد الأيام:</strong> {details.get('days_count', 1)}</p>
+                <p>An absence has been recorded for employee <strong>{employee_name}</strong>:</p>
+                <div style="background: #fff5f5; border-left: 4px solid #c53030; padding: 12px; margin: 10px 0; border-radius: 4px;">
+                    <p><strong>Employee:</strong> {employee_name}</p>
+                    <p><strong>Date:</strong> {details.get('date', '-')}</p>
+                    <p><strong>Absence Type:</strong> {details.get('absence_type', 'Full Day')}</p>
+                    <p><strong>Days Count:</strong> {details.get('days_count', 1)}</p>
                 </div>
             """
         },
     }
 
-    template = templates.get(notification_type, templates.get('lateness', {'subject': 'تنبيه', 'color': '#2b6cb0', 'title': 'تنبيه', 'body': f'<p>{employee_name}</p>'}))
+    template = templates.get(notification_type, templates.get('lateness', {'subject': 'Alert', 'color': '#2b6cb0', 'title': 'Alert', 'body': f'<p>{employee_name}</p>'}))
 
     html_body = f"""
-    <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, {template['color']}, #2d3748); color: white; padding: 25px; text-align: center; border-radius: 12px 12px 0 0;">
-            <h2 style="margin: 0;">التنسيق للاستشارات الضريبية</h2>
+            <h2 style="margin: 0;">TANSEEQ Tax Consultancy</h2>
             <p style="margin: 5px 0 0; opacity: 0.9;">{template['title']}</p>
         </div>
         <div style="padding: 25px; background: #f7fafc; border: 1px solid #e2e8f0;">
             {template['body']}
-            <p style="color: #718096; font-size: 12px; margin-top: 20px;">هذا بريد آلي من نظام الموارد البشرية - التنسيق</p>
+            <p style="color: #718096; font-size: 12px; margin-top: 20px;">This is an automated email from the HR System - TANSEEQ</p>
         </div>
         <div style="background: #2d3748; color: #a0aec0; padding: 15px; text-align: center; font-size: 11px; border-radius: 0 0 12px 12px;">
-            <p style="margin: 0;">نظام الموارد البشرية - التنسيق للاستشارات الضريبية</p>
+            <p style="margin: 0;">HR System - TANSEEQ Tax Consultancy</p>
         </div>
     </div>
     """
