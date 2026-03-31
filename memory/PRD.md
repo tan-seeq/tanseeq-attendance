@@ -64,14 +64,11 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [x] Wrapped all `create_index` calls with try-except for MongoDB Atlas OperationFailure
 - [x] Removed unused PostgreSQL env variables from backend/.env
 
-### Session 8 (2026-03-31): Major Refactoring
+### Session 8 (2026-03-31): Major Refactoring + Time Format Fix
 - [x] **App.js refactored**: 6386 lines → 349 lines (95% reduction)
-- [x] Extracted 15 components into dedicated files:
-  - Login, Layout, Dashboard, Attendance, Employees, FieldExits
-  - Payroll, LeaveManagement, FieldExitManagement, ReportsPage
-  - Leaves, AdminRequestCreation, AttachmentViewer, BackupManagement, OvertimeReport
-- [x] All routes verified working (100% test pass rate)
+- [x] Extracted 15 components into dedicated files
 - [x] Fixed missing Cog6ToothIcon import in Dashboard.js
+- [x] **Fixed time-only format parsing**: Production Atlas DB stores check_in/check_out as `"09:00:00"` (time-only). Parser now handles: time-only (`HH:MM:SS`), full datetime (`YYYY-MM-DD HH:MM:SS`), and ISO format (`YYYY-MM-DDTHH:MM:SS`)
 
 ### Earlier Sessions (Completed)
 - [x] Tarek's check-in issue fixed
