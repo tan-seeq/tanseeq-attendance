@@ -9,81 +9,49 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Arabic-first (
 - **Email**: GoDaddy SMTP (smtpout.secureserver.net:587) via smtplib
 - **Fonts**: Amiri Arabic (RTL PDF support)
 - **Scheduler**: APScheduler (AsyncIOScheduler + CronTrigger)
-- **Language**: Arabic (RTL) primary
-
-## User Roles
-- **Super Admin**: Full system access, config, health monitoring, auto-reports
-- **Admin**: Management access
-- **User (Employee)**: Self-service attendance, leave requests
 
 ## Key Credentials
 - Super Admin: admin@tanseeq.com / ADMIN
-- Employee: hatem@tan-seeq.co / hatem123
 - SMTP: Taxagent@tan-seeq.co via smtpout.secureserver.net:587
 
 ## Architecture
 ```
 /app/
 ├── backend/
-│   ├── server.py              # Core backend (~15280 lines)
+│   ├── server.py              # Core backend (~15300 lines)
 │   ├── pdf_generator.py       # Arabic PDF salary slip generation
-│   ├── email_service.py       # Arabic SMTP email service with templates
-│   ├── attendance_engine.py   # Attendance logic
-│   ├── fonts/                 # Amiri Arabic font files
+│   ├── email_service.py       # Arabic SMTP with friendly error messages
+│   ├── attendance_engine.py
+│   ├── fonts/Amiri-Regular.ttf, Amiri-Bold.ttf
 │   └── requirements.txt
 ├── frontend/
-│   ├── src/
-│   │   ├── App.js
-│   │   ├── contexts/AuthContext.js, LanguageContext.js
-│   │   └── components/
-│   │       ├── Admin/
-│   │       │   ├── SalarySlips.js     # 4 tabs: slips, auto-report, email settings, logs
-│   │       │   ├── SystemHealth.js    # Service health monitoring
-│   │       │   ├── AdminConfig.js
-│   │       │   └── LiveMonitoring.js
-│   │       ├── Dashboard/HRDashboard.js
-│   │       └── ...
-│   └── .env
+│   └── src/components/
+│       ├── Admin/SalarySlips.js  # 4 tabs: slips, auto-report, email, logs
+│       ├── Admin/SystemHealth.js
+│       ├── Dashboard/HRDashboard.js
+│       └── ...
 ```
 
-## Completed Work
+## Completed Work (All Sessions)
 
-### Session 1-2 - Core Features + Refactoring
-- All HR modules (attendance, payroll, advances, notifications, etc.)
-- Admin Config, Live Monitoring, PDF Salary Slips, Email Integration
+### Session 1-2: Core Features + Refactoring
+- All HR modules, Admin Config, Live Monitoring, PDF Slips, Email Integration
 
-### Session 3 - Production Stability (2026-03-31)
+### Session 3: Production Stability (2026-03-31)
 - HRDashboard crash fix, date overflow bug, backend defensive coding
 
-### Session 4 - New Features (2026-03-31)
-- [x] Auto email notifications for lateness/absence
-- [x] Arabic PDF support (Amiri font + RTL)
-- [x] System Health page (/system-health)
+### Session 4: New Features (2026-03-31)
+- Auto email notifications lateness/absence, Arabic PDF, System Health page
 
-### Session 5 - Auto Monthly Report (2026-03-31)
-- [x] **Monthly report auto-send**: APScheduler cron job (day 28, 8:00 AM) sends all employees email + PDF
-- [x] **Manual trigger**: POST /api/payroll/send-monthly-reports runs in background (asyncio.create_task)
-- [x] **Auto-report config**: Enable/disable + day selector (1-28) saved to DB
-- [x] **Report history**: Full run history with sent/failed/total per run
-- [x] **UI**: New "التقرير التلقائي" tab in SalarySlips page with toggle, day picker, send now, history
+### Session 5: Auto Monthly Report (2026-03-31)
+- APScheduler cron job (day 28), manual trigger, config UI, run history
 
-## Key API Endpoints
-
-### Auto Monthly Reports
-- `POST /api/payroll/send-monthly-reports` - Manual trigger (background task)
-- `GET/PUT /api/payroll/auto-report-config` - Auto-scheduler config
-- `GET /api/payroll/auto-report-history` - Run history
-
-### System Health
-- `GET /api/system/health-check` - Comprehensive service health
-
-### PDF & Email
-- `GET /api/salary-slip/{employee_id}/{cycle_month}` - Generate Arabic PDF
-- `POST /api/email/test` - Test SMTP
-- `POST /api/email/send-salary-slip` - Individual salary slip
+### Session 6: Post-Deployment Bug Fixes (2026-03-31)
+- [x] **SMTP error messages**: Raw Python errors replaced with Arabic messages (فشل في المصادقة, فشل الاتصال, etc.)
+- [x] **React Error #31**: Fixed all places where Pydantic validation objects were rendered in JSX
+- [x] **Safe error handling**: All frontend alert() calls now handle object/array `detail` fields from FastAPI
+- [x] **email_service.py**: Specific exception handling for SMTPAuthenticationError, SMTPConnectError, SMTPRecipientsRefused
 
 ## Pending Tasks
-
 ### P2 (Backlog)
-- [ ] Further refactoring of App.js (still ~6380 lines)
-- [ ] Dashboard and Employees component extraction
+- [ ] Further refactoring of App.js (~6380 lines)

@@ -88,10 +88,11 @@ const SalarySlips = () => {
         alert('تم إرسال قسيمة الراتب بالبريد بنجاح');
         fetchData();
       } else {
-        alert(res.data.error || 'خطأ في الإرسال');
+        alert(res.data.error || 'فشل إرسال البريد الإلكتروني');
       }
     } catch (error) {
-      alert(error.response?.data?.detail || 'خطأ في إرسال البريد');
+      const d = error.response?.data?.detail;
+      alert(typeof d === 'string' ? d : 'حدث خطأ في إرسال البريد الإلكتروني');
     } finally {
       setEmailing(prev => ({...prev, [employeeId]: false}));
     }
@@ -118,9 +119,9 @@ const SalarySlips = () => {
     setTestingEmail(true);
     try {
       const res = await axios.post(`${API}/email/test`);
-      alert(res.data.success ? 'تم اختبار البريد بنجاح!' : `فشل: ${res.data.error}`);
+      alert(res.data.success ? 'تم اختبار البريد بنجاح!' : (res.data.error || 'فشل اختبار الاتصال بخادم البريد'));
     } catch (error) {
-      alert('فشل اختبار البريد');
+      alert('فشل اختبار الاتصال بخادم البريد');
     } finally {
       setTestingEmail(false);
     }

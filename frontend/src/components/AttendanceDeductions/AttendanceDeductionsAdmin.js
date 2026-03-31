@@ -160,7 +160,8 @@ const AttendanceDeductionsAdmin = () => {
         fetchDeductions();
       } else {
         const err = await response.json();
-        alert(`خطأ: ${err.detail}`);
+        const errMsg = typeof err.detail === 'string' ? err.detail : 'حدث خطأ في تحديث الخصم';
+        alert(`خطأ: ${errMsg}`);
       }
     } catch (error) {
       console.error('Error updating deduction:', error);
@@ -191,7 +192,8 @@ const AttendanceDeductionsAdmin = () => {
         fetchDeductions();
       } else {
         const err = await response.json();
-        alert(`خطأ: ${err.detail}`);
+        const errMsg = typeof err.detail === 'string' ? err.detail : 'حدث خطأ في إلغاء الخصم';
+        alert(`خطأ: ${errMsg}`);
       }
     } catch (error) {
       console.error('Error voiding deduction:', error);

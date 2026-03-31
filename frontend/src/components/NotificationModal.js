@@ -110,7 +110,7 @@ const NotificationModal = ({ isOpen, onClose }) => {
         response: error.response?.data,
         status: error.response?.status
       });
-      alert(`حدث خطأ في تأكيد الإشعار: ${error.response?.data?.detail || error.message}`);
+      alert(`حدث خطأ في تأكيد الإشعار`);
     } finally {
       setAcknowledging(false);
     }

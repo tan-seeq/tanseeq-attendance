@@ -805,7 +805,8 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error calculating penalties:', error);
-      const errorMsg = error.response?.data?.detail || error.message || 'حدث خطأ في حساب الخصومات';
+      const rawDetail = error.response?.data?.detail;
+      const errorMsg = typeof rawDetail === 'string' ? rawDetail : (Array.isArray(rawDetail) ? rawDetail.map(e => e?.msg || '').join(', ') : error.message || 'حدث خطأ في حساب الخصومات');
       alert('حدث خطأ في حساب الخصومات: ' + errorMsg);
     } finally {
       setPenaltyLoading(false);
@@ -843,7 +844,8 @@ const Dashboard = () => {
       calculateLatePenalties(); // Refresh data
     } catch (error) {
       console.error('Error applying penalties:', error);
-      const errorMsg = error.response?.data?.detail || error.message || 'حدث خطأ في تطبيق الخصومات';
+      const rawDetail = error.response?.data?.detail;
+      const errorMsg = typeof rawDetail === 'string' ? rawDetail : (Array.isArray(rawDetail) ? rawDetail.map(e => e?.msg || '').join(', ') : error.message || 'حدث خطأ في تطبيق الخصومات');
       alert('حدث خطأ في تطبيق الخصومات: ' + errorMsg);
     }
   };
@@ -1568,7 +1570,7 @@ const Dashboard = () => {
                                       <h5 className="font-semibold text-gray-700 mb-2">الملخص:</h5>
                                       <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
                                         {penalty.details.map((detail, idx) => (
-                                          <li key={idx}>{detail}</li>
+                                          <li key={idx}>{typeof detail === 'string' ? detail : (detail?.msg || detail?.message || JSON.stringify(detail))}</li>
                                         ))}
                                       </ul>
                                     </div>
@@ -2834,7 +2836,8 @@ const FieldExits = () => {
     } catch (error) {
       console.error('Error submitting report:', error);
       if (error.response?.data?.detail) {
-        alert(error.response.data.detail);
+        const d = error.response.data.detail;
+        alert(typeof d === 'string' ? d : 'حدث خطأ في إرسال التقرير');
       } else {
         alert('حدث خطأ في إرسال التقرير');
       }
@@ -2857,7 +2860,8 @@ const FieldExits = () => {
     } catch (error) {
       console.error('Error recording return time:', error);
       if (error.response?.data?.detail) {
-        alert(error.response.data.detail);
+        const d = error.response.data.detail;
+        alert(typeof d === 'string' ? d : 'حدث خطأ في تسجيل وقت العودة');
       } else {
         alert('حدث خطأ في تسجيل وقت العودة');
       }

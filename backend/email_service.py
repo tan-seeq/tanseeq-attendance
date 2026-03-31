@@ -45,9 +45,18 @@ def send_email(to_email: str, subject: str, html_body: str, attachments: list = 
 
         logger.info(f"Email sent successfully to {to_email}")
         return {"success": True, "message": f"Email sent to {to_email}"}
+    except smtplib.SMTPAuthenticationError:
+        logger.error(f"SMTP Authentication failed for {SMTP_EMAIL}")
+        return {"success": False, "error": "فشل في المصادقة مع خادم البريد. تحقق من اسم المستخدم وكلمة المرور"}
+    except smtplib.SMTPConnectError:
+        logger.error(f"SMTP Connection failed to {SMTP_HOST}")
+        return {"success": False, "error": "فشل الاتصال بخادم البريد. تحقق من عنوان الخادم والمنفذ"}
+    except smtplib.SMTPRecipientsRefused:
+        logger.error(f"SMTP Recipient refused: {to_email}")
+        return {"success": False, "error": f"عنوان البريد {to_email} مرفوض من الخادم"}
     except Exception as e:
         logger.error(f"Email failed to {to_email}: {e}")
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": "حدث خطأ في إرسال البريد. تحقق من إعدادات SMTP"}
 
 
 def send_salary_slip_email(to_email: str, employee_name: str, cycle_month: str, pdf_data: bytes) -> dict:
