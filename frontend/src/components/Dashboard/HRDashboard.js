@@ -14,8 +14,16 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const DEFAULT_KPIS = {
+  totalEmployees: 0, activeEmployees: 0,
+  totalSalaries: 0, avgSalary: 0,
+  totalAdvances: 0, pendingAdvances: 0, approvedAdvances: 0, totalAdvancesAmount: 0,
+  totalAttendance: 0, presentCount: 0, lateCount: 0, absentCount: 0, attendanceRate: 0,
+  totalDeductions: 0, employeesWithDeductions: 0, month: ''
+};
+
 const HRDashboard = () => {
-  const [kpis, setKpis] = useState(null);
+  const [kpis, setKpis] = useState(DEFAULT_KPIS);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
 
@@ -27,54 +35,46 @@ const HRDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch multiple data sources
-      const [employeesRes, advancesRes, attendanceRes, deductionsRes] = await Promise.all([
+      // Fetch each source independently to avoid one failure breaking all
+      let employees = [];
+      let advances = [];
+      let attendance = [];
+      let deductions = {};
+
+      const results = await Promise.allSettled([
         axios.get(`${API}/employees/list`),
         axios.get(`${API}/advances/admin/all-transactions`),
         axios.get(`${API}/attendance/with-absences?month=${selectedMonth}`),
         axios.post(`${API}/deductions/calculate-monthly?month=${selectedMonth}`, {})
       ]);
 
-      const employees = employeesRes.data.employees || [];
-      const advances = advancesRes.data.transactions?.filter(t => t.transaction_type === 'advance') || [];
-      const attendance = attendanceRes.data.attendance || [];
-      const deductions = deductionsRes.data;
+      if (results[0].status === 'fulfilled') employees = results[0].value?.data?.employees || [];
+      if (results[1].status === 'fulfilled') advances = results[1].value?.data?.transactions?.filter(t => t.transaction_type === 'advance') || [];
+      if (results[2].status === 'fulfilled') attendance = results[2].value?.data?.attendance || [];
+      if (results[3].status === 'fulfilled') deductions = results[3].value?.data || {};
 
-      // Calculate KPIs
-      const kpis = {
-        // Employee KPIs
+      setKpis({
         totalEmployees: employees.length,
         activeEmployees: employees.filter(e => e.is_active).length,
-        
-        // Payroll KPIs
         totalSalaries: employees.reduce((sum, e) => sum + (e.monthly_salary || 0), 0),
         avgSalary: employees.length > 0 ? employees.reduce((sum, e) => sum + (e.monthly_salary || 0), 0) / employees.length : 0,
-        
-        // Advances KPIs
         totalAdvances: advances.length,
         pendingAdvances: advances.filter(a => a.status === 'pending').length,
         approvedAdvances: advances.filter(a => a.status === 'approved').length,
         totalAdvancesAmount: advances.filter(a => a.status === 'approved').reduce((sum, a) => sum + (a.amount || 0), 0),
-        
-        // Attendance KPIs
         totalAttendance: attendance.length,
         presentCount: attendance.filter(r => r.status === 'present').length,
         lateCount: attendance.filter(r => r.status === 'late').length,
         absentCount: attendance.filter(r => r.status === 'absent').length,
         attendanceRate: attendance.length > 0 ? 
           ((attendance.filter(r => r.status === 'present' || r.status === 'late').length / attendance.length) * 100).toFixed(1) : 0,
-        
-        // Deductions KPIs
         totalDeductions: deductions.total_deductions || 0,
         employeesWithDeductions: deductions.employee_count || 0,
-        
-        // Month
         month: selectedMonth
-      };
-
-      setKpis(kpis);
+      });
     } catch (err) {
       console.error('Error fetching KPIs:', err);
+      setKpis({...DEFAULT_KPIS, month: selectedMonth});
     } finally {
       setLoading(false);
     }
@@ -155,7 +155,7 @@ const HRDashboard = () => {
               <div>
                 <p className="text-sm text-purple-700 font-medium">إجمالي الرواتب</p>
                 <p className="text-3xl font-bold text-purple-900">
-                  {kpis.totalSalaries.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  {(kpis.totalSalaries || 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                 </p>
                 <p className="text-xs text-purple-600 mt-1">درهم شهرياً</p>
               </div>
@@ -168,7 +168,7 @@ const HRDashboard = () => {
               <div>
                 <p className="text-sm text-indigo-700 font-medium">متوسط الراتب</p>
                 <p className="text-3xl font-bold text-indigo-900">
-                  {kpis.avgSalary.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  {(kpis.avgSalary || 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                 </p>
                 <p className="text-xs text-indigo-600 mt-1">درهم</p>
               </div>
@@ -181,7 +181,7 @@ const HRDashboard = () => {
               <div>
                 <p className="text-sm text-red-700 font-medium">إجمالي الخصومات</p>
                 <p className="text-3xl font-bold text-red-900">
-                  {kpis.totalDeductions.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  {(kpis.totalDeductions || 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                 </p>
                 <p className="text-xs text-red-600 mt-1">درهم ({kpis.month})</p>
               </div>
@@ -213,7 +213,7 @@ const HRDashboard = () => {
           <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500">
             <p className="text-sm text-gray-600 font-medium">إجمالي المبالغ</p>
             <p className="text-2xl font-bold text-purple-600">
-              {kpis.totalAdvancesAmount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              {(kpis.totalAdvancesAmount || 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             </p>
             <p className="text-xs text-gray-500">درهم</p>
           </div>

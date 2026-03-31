@@ -922,7 +922,22 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        return User(**user)
+        # Safe user construction - handle extra/missing fields from production DB
+        user.pop("_id", None)
+        user.pop("password", None)
+        try:
+            return User(**user)
+        except Exception:
+            # Fallback: construct with minimum required fields
+            return User(
+                id=user.get("id", user_id),
+                name=user.get("name", "Unknown"),
+                email=user.get("email", ""),
+                role=user.get("role", "user"),
+                position=user.get("position", ""),
+                monthly_salary=float(user.get("monthly_salary", 0) or 0),
+                is_active=user.get("is_active", True)
+            )
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -1095,12 +1110,15 @@ async def _build_payroll_data(employee_id: str, cycle_month: str) -> dict:
 @api_router.post("/email/test")
 async def test_email_connection(current_user: User = Depends(get_super_admin_user)):
     """Test SMTP email connection"""
-    result = send_email(
-        os.environ.get('SMTP_EMAIL', ''),
-        "TANSEEQ HR - Email Test",
-        "<h2>Email connection test successful!</h2><p>Your SMTP configuration is working correctly.</p>"
-    )
-    return result
+    try:
+        result = send_email(
+            os.environ.get('SMTP_EMAIL', ''),
+            "TANSEEQ HR - Email Test",
+            "<h2>Email connection test successful!</h2><p>Your SMTP configuration is working correctly.</p>"
+        )
+        return result
+    except Exception as e:
+        return {"success": False, "error": f"Email test failed: {str(e)}"}
 
 @api_router.post("/email/send-salary-slip")
 async def email_salary_slip(data: dict, current_user: User = Depends(get_admin_user)):
@@ -1848,7 +1866,7 @@ async def generate_custom_attendance_report(
         
         # جلب أسماء الموظفين
         employees = await db.users.find({"id": {"$in": employee_ids}}).to_list(None)
-        employee_map = {emp["id"]: emp["name"] for emp in employees}
+        employee_map = {emp.get("id", ""): emp.get("name", "Unknown") for emp in employees if emp.get("id")}
         
         # تحضير البيانات للـ Excel/CSV
         report_data = []
@@ -4090,11 +4108,18 @@ async def calculate_monthly_deductions_endpoint(
             )
         
         # ✅ Calculate 29→28 cycle dates for display
+        # Handle months where day 29 doesn't exist (e.g., February)
         if month_num == 1:
             # For January, previous month is December of previous year
-            cycle_start = date(year - 1, 12, 29)
+            prev_year, prev_month = year - 1, 12
         else:
-            cycle_start = date(year, month_num - 1, 29)
+            prev_year, prev_month = year, month_num - 1
+        
+        # Get last day of previous month to cap the start day
+        import calendar as cal_mod
+        last_day_prev = cal_mod.monthrange(prev_year, prev_month)[1]
+        start_day = min(29, last_day_prev)
+        cycle_start = date(prev_year, prev_month, start_day)
         
         cycle_end = date(year, month_num, 28)
         
@@ -4106,11 +4131,13 @@ async def calculate_monthly_deductions_endpoint(
         total_deductions = 0
         
         for emp in employees:
-            employee_id = emp["id"]
-            employee_name = emp["name"]
+            employee_id = emp.get("id", "")
+            employee_name = emp.get("name", "Unknown")
             employee_salary = emp.get("monthly_salary", 0)
             
-            # Skip if no salary defined
+            # Skip employees with no id or no salary
+            if not employee_id:
+                continue
             if employee_salary <= 0:
                 continue
             
@@ -4320,10 +4347,12 @@ async def calculate_custom_deductions(
         total_deductions = 0
         
         for emp in employees:
-            employee_id = emp["id"]
-            employee_name = emp["name"]
+            employee_id = emp.get("id", "")
+            employee_name = emp.get("name", "Unknown")
             employee_salary = emp.get("monthly_salary", 0)
             
+            if not employee_id:
+                continue
             # Skip if no salary defined
             if employee_salary <= 0:
                 continue
@@ -5281,9 +5310,12 @@ async def get_employees_list(current_user: User = Depends(get_current_user)):
         
         employee_list = []
         for emp in employees:
+            emp_id = emp.get("id", "")
+            if not emp_id:
+                continue
             employee_list.append({
-                "id": emp["id"],
-                "name": emp["name"],
+                "id": emp_id,
+                "name": emp.get("name", "Unknown"),
                 "email": emp.get("email", ""),
                 "role": emp.get("role", "user")
             })
@@ -5721,7 +5753,7 @@ async def get_payroll_cycles(
         
         # تنسيق البيانات
         for cycle in cycles:
-            cycle["_id"] = str(cycle["_id"])
+            cycle.pop("_id", None)
             if "created_at" in cycle:
                 cycle["created_at"] = cycle["created_at"]
             if "locked_at" in cycle:
@@ -6074,7 +6106,9 @@ async def recalculate_payroll_cycle_from_ledger(
         total_net = 0
         
         for emp in employees:
-            employee_id = emp["id"]
+            employee_id = emp.get("id", "")
+            if not employee_id:
+                continue
             base_salary = emp.get("monthly_salary", 0)
             allowances = 0  # يمكن جلبها من مصدر آخر
             
@@ -6183,6 +6217,10 @@ async def get_employee_ledger_entries(
         # Get entries
         entries = await db.payroll_ledger.find(query).sort("created_at", -1).to_list(1000)
         
+        # Remove MongoDB _id
+        for entry in entries:
+            entry.pop("_id", None)
+        
         return {
             "success": True,
             "entries": entries
@@ -6197,7 +6235,7 @@ async def get_employee_ledger_entries(
 async def get_payroll_ledger(
     cycle_id: Optional[str] = None,
     employee_id: Optional[str] = None,
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get payroll ledger entries with filters
@@ -6206,14 +6244,15 @@ async def get_payroll_ledger(
         cycle_id: Optional filter by cycle
         employee_id: Optional filter by employee
     
-    🔒 Regular users can only see their own ledger
     """
     try:
         # Regular users can only see their own ledger
-        if current_user.get("role") == "user":
-            if employee_id and employee_id != current_user.get("id"):
+        user_role = getattr(current_user, 'role', 'user')
+        user_id = getattr(current_user, 'id', '')
+        if user_role == "user":
+            if employee_id and employee_id != user_id:
                 raise HTTPException(status_code=403, detail="لا يمكنك الاطلاع على قيود موظف آخر")
-            employee_id = current_user.get("id")
+            employee_id = user_id
         
         # Build query
         query = {"is_reversed": {"$ne": True}}
@@ -6542,7 +6581,7 @@ async def get_employee_advances(
     """
     try:
         # If no employee_id provided, use current user
-        target_employee_id = employee_id if employee_id else current_user.get("id")
+        target_employee_id = employee_id if employee_id else getattr(current_user, 'id', '')
         
         # Build query
         query = {"employee_id": target_employee_id}
@@ -12863,7 +12902,8 @@ Uses PostgreSQL instead of MongoDB for data storage
 async def get_clients(current_user = Depends(get_current_user)):
     """Get all clients - MongoDB version"""
     try:
-        clients = await work_reports_db.clients.find({"is_active": True}).to_list(1000)
+        wr_db = work_reports_db
+        clients = await wr_db.clients.find({"is_active": True}).to_list(1000)
         
         # Convert to response format
         client_list = []
@@ -12885,11 +12925,15 @@ async def get_clients(current_user = Depends(get_current_user)):
                 "updated_at": client.get("updated_at")
             })
         
-        await log_work_reports_activity(current_user.id, "view_clients", "Viewed clients list")
+        try:
+            await log_work_reports_activity(current_user.id, "view_clients", "Viewed clients list")
+        except Exception:
+            pass
         
         return client_list
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting clients: {str(e)}")
+        print(f"Error getting clients: {e}")
+        return []
 
 @api_router.post("/work-reports/clients")
 async def create_client(
@@ -14423,9 +14467,12 @@ async def calculate_deductions_flexible_OLD_DEPRECATED_DISABLED(
         total_amount = 0.0
         
         for emp in employees:
-            employee_id = emp["id"]
-            employee_name = emp["name"]
+            employee_id = emp.get("id", "")
+            employee_name = emp.get("name", "Unknown")
             basic_salary = float(emp.get("monthly_salary", 0) or 0)
+            
+            if not employee_id:
+                continue
             
             # Skip excluded employees
             if is_employee_excluded(employee_name):

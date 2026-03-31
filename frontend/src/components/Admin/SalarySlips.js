@@ -25,19 +25,20 @@ const SalarySlips = () => {
 
   const fetchData = async () => {
     try {
-      const [empRes, cyclesRes, logsRes, prefsRes] = await Promise.all([
+      const results = await Promise.allSettled([
         axios.get(`${API}/users`),
         axios.get(`${API}/payroll/cycles`),
         axios.get(`${API}/email/logs`),
         axios.get(`${API}/email/preferences`)
       ]);
-      setEmployees(Array.isArray(empRes.data) ? empRes.data : []);
-      setCycles(Array.isArray(cyclesRes.data) ? cyclesRes.data : []);
-      setEmailLogs(logsRes.data.logs || []);
-      setEmailPrefs(prefsRes.data.preferences || []);
-      if (cyclesRes.data?.length > 0) {
-        setSelectedCycle(cyclesRes.data[0].month);
+      if (results[0].status === 'fulfilled') setEmployees(Array.isArray(results[0].value?.data) ? results[0].value.data : []);
+      if (results[1].status === 'fulfilled') {
+        const cyclesData = Array.isArray(results[1].value?.data) ? results[1].value.data : [];
+        setCycles(cyclesData);
+        if (cyclesData.length > 0) setSelectedCycle(cyclesData[0].month);
       }
+      if (results[2].status === 'fulfilled') setEmailLogs(results[2].value?.data?.logs || []);
+      if (results[3].status === 'fulfilled') setEmailPrefs(results[3].value?.data?.preferences || []);
     } catch (error) {
       console.error('Error:', error);
     } finally {
