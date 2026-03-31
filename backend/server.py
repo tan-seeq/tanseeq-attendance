@@ -1151,43 +1151,43 @@ async def _send_monthly_reports_for_cycle(cycle_month: str, triggered_by: str = 
             late = payroll_data.get("late_days", 0)
             working = payroll_data.get("working_days", 0)
             
-            subject = f"التقرير الشهري - {cycle_month} | التنسيق للاستشارات الضريبية"
+            subject = f"Monthly Salary Report - {cycle_month} | TANSEEQ Tax Consultancy"
             html_body = f"""
-            <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <div style="background: linear-gradient(135deg, #2b6cb0, #1a365d); color: white; padding: 25px; text-align: center; border-radius: 12px 12px 0 0;">
-                    <h2 style="margin: 0;">التنسيق للاستشارات الضريبية</h2>
-                    <p style="margin: 5px 0 0; opacity: 0.9;">التقرير الشهري - {cycle_month}</p>
+                    <h2 style="margin: 0;">TANSEEQ Tax Consultancy</h2>
+                    <p style="margin: 5px 0 0; opacity: 0.9;">Monthly Salary Report - {cycle_month}</p>
                 </div>
                 <div style="padding: 25px; background: #f7fafc; border: 1px solid #e2e8f0;">
-                    <p>الموظف/ة العزيز/ة <strong>{emp_name}</strong>،</p>
-                    <p>مرفق تقريرك الشهري لفترة <strong>{cycle_month}</strong>. إليك الملخص:</p>
+                    <p>Dear <strong>{emp_name}</strong>,</p>
+                    <p>Please find attached your monthly salary report for <strong>{cycle_month}</strong>. Here is the summary:</p>
                     
                     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 15px 0;">
                         <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                             <tr style="border-bottom: 1px solid #eee;">
-                                <td style="padding: 8px; color: #4a5568;">الراتب الأساسي</td>
-                                <td style="padding: 8px; text-align: left; font-weight: bold; color: #2b6cb0;">{basic:,.2f} درهم</td>
+                                <td style="padding: 8px; color: #4a5568;">Basic Salary</td>
+                                <td style="padding: 8px; text-align: right; font-weight: bold; color: #2b6cb0;">AED {basic:,.2f}</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
-                                <td style="padding: 8px; color: #4a5568;">إجمالي الخصومات</td>
-                                <td style="padding: 8px; text-align: left; font-weight: bold; color: #c53030;">{total_ded:,.2f} درهم</td>
+                                <td style="padding: 8px; color: #4a5568;">Total Deductions</td>
+                                <td style="padding: 8px; text-align: right; font-weight: bold; color: #c53030;">AED {total_ded:,.2f}</td>
                             </tr>
                             <tr style="background: #f0fff4;">
-                                <td style="padding: 8px; font-weight: bold; color: #276749;">صافي الراتب</td>
-                                <td style="padding: 8px; text-align: left; font-weight: bold; font-size: 16px; color: #276749;">{net:,.2f} درهم</td>
+                                <td style="padding: 8px; font-weight: bold; color: #276749;">Net Salary</td>
+                                <td style="padding: 8px; text-align: right; font-weight: bold; font-size: 16px; color: #276749;">AED {net:,.2f}</td>
                             </tr>
                         </table>
                     </div>
                     
                     <div style="background: #edf2f7; border-radius: 8px; padding: 12px; margin: 15px 0;">
-                        <p style="font-weight: bold; margin: 0 0 8px; color: #2d3748;">ملخص الحضور:</p>
-                        <p style="margin: 4px 0; font-size: 13px; color: #4a5568;">أيام العمل: <strong>{working}</strong> | الحضور: <strong>{present}</strong> | الغياب: <strong style="color:#c53030">{absent}</strong> | التأخير: <strong style="color:#dd6b20">{late}</strong></p>
+                        <p style="font-weight: bold; margin: 0 0 8px; color: #2d3748;">Attendance Summary:</p>
+                        <p style="margin: 4px 0; font-size: 13px; color: #4a5568;">Working Days: <strong>{working}</strong> | Present: <strong>{present}</strong> | Absent: <strong style="color:#c53030">{absent}</strong> | Late: <strong style="color:#dd6b20">{late}</strong></p>
                     </div>
                     
-                    <p style="font-size: 12px; color: #a0aec0;">كشف الراتب المفصل مرفق كملف PDF.</p>
+                    <p style="font-size: 12px; color: #a0aec0;">Detailed salary slip is attached as PDF.</p>
                 </div>
                 <div style="background: #2d3748; color: #a0aec0; padding: 15px; text-align: center; font-size: 11px; border-radius: 0 0 12px 12px;">
-                    <p style="margin: 0;">نظام الموارد البشرية - التنسيق للاستشارات الضريبية</p>
+                    <p style="margin: 0;">HR System - TANSEEQ Tax Consultancy</p>
                 </div>
             </div>
             """
@@ -2147,36 +2147,35 @@ async def generate_custom_attendance_report(
         employees = await db.users.find({"id": {"$in": employee_ids}}).to_list(None)
         employee_map = {emp.get("id", ""): emp.get("name", "Unknown") for emp in employees if emp.get("id")}
         
-        # تحضير البيانات للـ Excel/CSV
+        # Prepare data for Excel/CSV
         report_data = []
         for record in attendance_records:
             report_data.append({
-                "اسم الموظف": employee_map.get(record["user_id"], "غير معروف"),
-                "التاريخ": record.get("date", ""),
-                "اليوم": record.get("day_name", ""),
-                "الحضور": record.get("check_in", "لم يسجل"),
-                "الانصراف": record.get("check_out", "لم يسجل"),
-                "الحالة": "حاضر" if record.get("status") == "present" else 
-                         "متأخر" if record.get("status") == "late" else 
-                         "غائب" if record.get("status") == "absent" else 
-                         record.get("status", "غير محدد"),
-                "ساعات العمل": record.get("working_hours", 0),
-                "دقائق التأخير": record.get("late_minutes", 0),
-                "خروج مبكر (دقائق)": record.get("early_departure_minutes", 0),
-                "ملاحظات": "إدخال يدوي" if record.get("manual_entry") else ""
+                "Employee Name": employee_map.get(record["user_id"], "Unknown"),
+                "Date": record.get("date", ""),
+                "Day": record.get("day_name", ""),
+                "Check In": record.get("check_in", "Not Recorded"),
+                "Check Out": record.get("check_out", "Not Recorded"),
+                "Status": "Present" if record.get("status") == "present" else 
+                         "Late" if record.get("status") == "late" else 
+                         "Absent" if record.get("status") == "absent" else 
+                         record.get("status", "Unknown"),
+                "Working Hours": record.get("working_hours", 0),
+                "Late Minutes": record.get("late_minutes", 0),
+                "Early Departure (min)": record.get("early_departure_minutes", 0),
+                "Notes": "Manual Entry" if record.get("manual_entry") else ""
             })
         
         # إنشاء DataFrame
         df = pd.DataFrame(report_data)
         
         if export_format == "excel":
-            # إنشاء Excel file
+            # Create Excel file
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name='تقرير الحضور')
+                df.to_excel(writer, index=False, sheet_name='Attendance Report')
                 
-                # تنسيق الأعمدة
-                worksheet = writer.sheets['تقرير الحضور']
+                worksheet = writer.sheets['Attendance Report']
                 for column in worksheet.columns:
                     max_length = 0
                     column_letter = column[0].column_letter
@@ -3451,7 +3450,7 @@ async def settle_advance_with_salary(
         employee_name=employee["name"],
         transaction_type=TransactionType.ADVANCE_SETTLEMENT,
         amount=settlement_amount,
-        description=f"تسوية سلفة مع راتب شهر {salary_month}",
+        description=f"Advance settlement with salary for {salary_month}",
         status=TransactionStatus.APPROVED,
         approved_by=current_user.id,
         approved_at=datetime.now(timezone.utc),
@@ -4542,7 +4541,7 @@ async def calculate_monthly_deductions_endpoint(
             
             deduction_details = []
             if late_count > 0:
-                deduction_details.append(f"تأخير {late_count} مرات - إجمالي {total_late_minutes} دقيقة")
+                deduction_details.append(f"Late {late_count} times - total {total_late_minutes} minutes")
             
             absence_count = len([d for d in daily_breakdown if d["status"] == "absent"])
             if absence_count > 0:
@@ -4746,7 +4745,7 @@ async def calculate_custom_deductions(
             if total_employee_deduction > 0 or len(daily_breakdown) > 0:
                 deduction_details = []
                 if late_count > 0:
-                    deduction_details.append(f"تأخير {late_count} مرات - إجمالي {total_late_minutes} دقيقة")
+                    deduction_details.append(f"Late {late_count} times - total {total_late_minutes} minutes")
                 if absence_count > 0:
                     deduction_details.append(f"غياب {absence_count} يوم")
                 
@@ -4988,7 +4987,7 @@ async def apply_monthly_deductions(
             if advance_deduction > 0:
                 notification_message += f"• أقساط سلف: {advance_deduction:.2f} درهم\n"
             
-            notification_message += f"\nإجمالي الخصومات: {(late_deduction + absence_deduction + advance_deduction):.2f} درهم"
+            notification_message += f"\nTotal deductions: {(late_deduction + absence_deduction + advance_deduction):.2f} AED"
             
             if deduction_details:
                 notification_message += "\n\nالتفاصيل:\n" + "\n".join(f"• {detail}" for detail in deduction_details)
@@ -5026,7 +5025,7 @@ async def apply_monthly_deductions(
         
         return {
             "success": True,
-            "message": f"تم تطبيق الخصومات بنجاح على {applied_count} موظف",
+            "message": f"Deductions applied successfully to {applied_count} employees",
             "cycle_id": cycle_id,
             "applied_count": applied_count,
             "notifications_sent": notifications_sent
@@ -7298,9 +7297,9 @@ async def generate_salary_letter(
                 <div class='advance-details-box'>
                     <p style='margin:0;'><strong>📊 تفاصيل السُلفة:</strong></p>
                     <ul style='margin:10px 0;'>
-                        <li>إجمالي السُلفة: <strong>{advance_details['total_amount']:.2f} درهم</strong></li>
+                        <li>Total Advance: <strong>{advance_details['total_amount']:.2f} AED</strong></li>
                         <li>عدد الأقساط: <strong>{advance_details['installments_count']}</strong></li>
-                        <li>القسط الحالي: <strong>{advance_details['current_installment_amount']:.2f} درهم</strong> (استحقاق: {advance_details['current_installment_date'][:10]})</li>
+                        <li>القسط الحالي: <strong>{advance_details['current_installment_amount']:.2f} AED</strong> (استحقاق: {advance_details['current_installment_date'][:10]})</li>
                         <li>الأقساط المتبقية: <strong>{advance_details['remaining_installments']}</strong></li>
                     </ul>
                 </div>
@@ -7319,7 +7318,7 @@ async def generate_salary_letter(
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>رسالة راتب</title>
+    <title>Salary Letter</title>
     <style>
         body {{ font-family: Arial, sans-serif; padding: 20px; direction: rtl; }}
         .letter {{ background: white; padding: 30px; }}
@@ -7330,13 +7329,13 @@ async def generate_salary_letter(
 </head>
 <body>
     <div class="letter">
-        <div class="header"><h2>شركة التنسيق</h2></div>
+        <div class="header"><h2>TANSEEQ Tax Consultancy</h2></div>
         <p>الموظف: {employee_name}</p>
         <p>التاريخ: {statement_date}</p>
         <table>
-            <tr><td>الراتب الأساسي</td><td>{base_salary}</td></tr>
-            <tr><td>الخصومات</td><td>{total_deductions}</td></tr>
-            <tr><td>الصافي</td><td>{net_pay}</td></tr>
+            <tr><td>Basic Salary</td><td>{base_salary}</td></tr>
+            <tr><td>Deductions</td><td>{total_deductions}</td></tr>
+            <tr><td>Net Pay</td><td>{net_pay}</td></tr>
         </table>
         {deductions_rows}
     </div>
@@ -7429,19 +7428,17 @@ async def export_payroll_pdf(
         )
         
         
-        title = Paragraph(f"كشف الرواتب - {cycle.get('display_name', 'غير محدد')}", title_style)
+        title = Paragraph(f"Payroll Report - {cycle.get('display_name', cycle.get('month', 'N/A'))}", title_style)
         elements.append(title)
         elements.append(Spacer(1, 0.5*cm))
         
-        # معلومات الدورة
-        info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=10, alignment=TA_RIGHT)
-        info_text = f"تاريخ الإصدار: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=10, alignment=TA_CENTER)
+        info_text = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         elements.append(Paragraph(info_text, info_style))
         elements.append(Spacer(1, 0.5*cm))
         
-        # إنشاء جدول البيانات
         data = [
-            ['صافي الراتب', 'إجمالي الخصومات', 'خصم سلف', 'خصم حضور', 'خصم يدوي', 'إجمالي الراتب', 'البدلات', 'الراتب الأساسي', 'اسم الموظف']
+            ['Employee Name', 'Basic Salary', 'Allowances', 'Gross Salary', 'Manual Ded.', 'Attendance Ded.', 'Advance Ded.', 'Total Deductions', 'Net Salary']
         ]
         
         total_gross = 0
@@ -7458,28 +7455,28 @@ async def export_payroll_pdf(
             total_net += net
             
             data.append([
-                f"{net:.2f}",
-                f"{deductions:.2f}",
-                f"{summary.get('advance_deductions', 0):.2f}",
-                f"{summary.get('attendance_deductions', 0):.2f}",
-                f"{summary.get('manual_deductions', 0):.2f}",
-                f"{gross:.2f}",
-                f"{summary.get('total_allowances', 0):.2f}",
+                summary.get('employee_name', 'Unknown'),
                 f"{summary.get('base_salary', 0):.2f}",
-                summary.get('employee_name', 'غير محدد')
+                f"{summary.get('total_allowances', 0):.2f}",
+                f"{gross:.2f}",
+                f"{summary.get('manual_deductions', 0):.2f}",
+                f"{summary.get('attendance_deductions', 0):.2f}",
+                f"{summary.get('advance_deductions', 0):.2f}",
+                f"{deductions:.2f}",
+                f"{net:.2f}",
             ])
         
         # إضافة صف الإجماليات
         data.append([
-            f"{total_net:.2f}",
-            f"{total_deductions:.2f}",
-            '',
+            'TOTAL',
             '',
             '',
             f"{total_gross:.2f}",
             '',
             '',
-            'الإجمالي'
+            '',
+            f"{total_deductions:.2f}",
+            f"{total_net:.2f}",
         ])
         
         # تنسيق الجدول
@@ -7540,7 +7537,7 @@ async def export_payroll_excel(
     cycle_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """تصدير كشف الراتب كـ Excel باستخدام openpyxl"""
+    """Export payroll report as Excel using openpyxl"""
     try:
         from fastapi.responses import Response
         from openpyxl import Workbook
@@ -7563,7 +7560,7 @@ async def export_payroll_excel(
         # إنشاء Workbook
         wb = Workbook()
         ws = wb.active
-        ws.title = "كشف الرواتب"
+        ws.title = "Payroll Report"
         
         # تنسيقات
         header_fill = PatternFill(start_color="1E40AF", end_color="1E40AF", fill_type="solid")
@@ -7581,7 +7578,7 @@ async def export_payroll_excel(
         # العنوان
         ws.merge_cells('A1:I1')
         title_cell = ws['A1']
-        title_cell.value = f"كشف الرواتب - {cycle.get('display_name', 'غير محدد')}"
+        title_cell.value = f"Payroll Report - {cycle.get('display_name', cycle.get('month', 'N/A'))}"
         title_cell.font = Font(bold=True, size=16, color="1E40AF")
         title_cell.alignment = Alignment(horizontal='center', vertical='center')
         
@@ -9765,7 +9762,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         headers = ["Employee", "Date", "Check In", "Check Out", "Working Hours", "Status", "Late", "Absence Reason"]
         headers_ar = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة", "متأخر", "سبب الغياب"]
         report_title = "Attendance Report"
-        report_title_ar = "تقرير الحضور"
+        report_title_ar = "Attendance Report"
         
     elif report_type == "leaves":
         records = await db.leaves.find({
@@ -9790,7 +9787,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         headers = ["Employee", "Start Date", "End Date", "Days Count", "Reason", "Status"]
         headers_ar = ["الموظف", "تاريخ البداية", "تاريخ النهاية", "عدد الأيام", "السبب", "الحالة"]
         report_title = "Leave Report"
-        report_title_ar = "تقرير الإجازات"
+        report_title_ar = "Leave Report"
         
     elif report_type == "field-exits":
         records = await db.field_exits.find({
@@ -9800,11 +9797,11 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         report_data = []
         for record in records:
             visit_types = {
-                "client_visit": "زيارة عميل",
-                "collection": "تحصيل",
-                "bank_visit": "زيارة بنك",
-                "personal": "شخصي",
-                "admin_errand": "مهمة إدارية"
+                "client_visit": "Client Visit",
+                "collection": "Collection",
+                "bank_visit": "Bank Visit",
+                "personal": "Personal",
+                "admin_errand": "Admin Errand"
             }
             report_data.append({
                 "user_name": record.get("user_name", ""),
@@ -9819,7 +9816,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         headers = ["Employee", "Date", "Visit Type", "Client", "Start Time", "End Time", "Status"]
         headers_ar = ["الموظف", "التاريخ", "نوع الزيارة", "العميل", "وقت البداية", "وقت النهاية", "الحالة"]
         report_title = "Field Exit Report"
-        report_title_ar = "تقرير الزيارات الخارجية"
+        report_title_ar = "Field Exit Report"
     
     else:
         raise HTTPException(status_code=400, detail="Invalid report type")
@@ -9847,7 +9844,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Logo area (simulated with styling)
         ws.merge_cells('A2:G2')
         logo_cell = ws['A2']
-        logo_cell.value = "مكتب استشارات ضريبية متخصص"
+        logo_cell.value = "Specialized Tax Consultancy Office"
         logo_cell.font = Font(name="Arial", size=12, color="4472C4", italic=True)
         logo_cell.fill = PatternFill(start_color="E6EFFF", end_color="E6EFFF", fill_type="solid")
         logo_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -9856,7 +9853,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Report title with enhanced styling
         ws.merge_cells('A3:G3')
         title_cell = ws['A3']
-        title_cell.value = f"{report_title} - {report_title_ar}"
+        title_cell.value = report_title
         title_cell.font = Font(name="Arial", size=16, bold=True, color="1F4E79")
         title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
         title_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -9865,7 +9862,7 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         # Enhanced period info
         ws.merge_cells('A4:G4')
         period_cell = ws['A4']
-        period_cell.value = f"الفترة: {start_date} إلى {end_date} | عدد السجلات: {len(report_data)} | تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        period_cell.value = f"Period: {start_date} to {end_date} | Records: {len(report_data)} | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         period_cell.font = Font(name="Arial", size=10, color="555555")
         period_cell.fill = PatternFill(start_color="F8F9FA", end_color="F8F9FA", fill_type="solid")
         period_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -9881,9 +9878,9 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         
         # Headers with enhanced styling
         header_row = 6
-        for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
+        for col, header_en in enumerate(headers, 1):
             cell = ws.cell(row=header_row, column=col)
-            cell.value = f"{header_en}\n{header_ar}"
+            cell.value = header_en
             cell.font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
             cell.fill = PatternFill(start_color="2B5797", end_color="2B5797", fill_type="solid")
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -10035,16 +10032,14 @@ async def export_report(report_type: str, start_date: str, end_date: str, format
         story.append(company_header)
         
         # Logo subtitle
-        logo_subtitle = Paragraph("مكتب استشارات ضريبية متخصص - نظام إدارة الموارد البشرية المتطور", logo_style)
+        logo_subtitle = Paragraph("Specialized Tax Consultancy - HR Management System", logo_style)
         story.append(logo_subtitle)
         story.append(Spacer(1, 20))
         
-        # Report title with enhanced styling
-        report_title_text = Paragraph(f"{report_title}<br/>{report_title_ar}", title_style)
+        report_title_text = Paragraph(report_title, title_style)
         story.append(report_title_text)
         
-        # Period info with icons
-        period_info = Paragraph(f"الفترة: {start_date} إلى {end_date}<br/>عدد السجلات: {len(report_data)}<br/>تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
+        period_info = Paragraph(f"Period: {start_date} to {end_date}<br/>Records: {len(report_data)}<br/>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
         story.append(period_info)
         story.append(Spacer(1, 30))
         
@@ -10230,7 +10225,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         headers = ["Employee", "Date", "Check In", "Check Out", "Working Hours", "Status", "Late", "Absence Reason"]
         headers_ar = ["الموظف", "التاريخ", "الحضور", "الانصراف", "ساعات العمل", "الحالة", "متأخر", "سبب الغياب"]
         report_title = "Attendance Report"
-        report_title_ar = "تقرير الحضور"
+        report_title_ar = "Attendance Report"
         
     elif report_type == "leaves":
         records = await db.leaves.find({
@@ -10254,7 +10249,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         headers = ["Employee", "Start Date", "End Date", "Days Count", "Reason", "Status"]
         headers_ar = ["الموظف", "تاريخ البداية", "تاريخ النهاية", "عدد الأيام", "السبب", "الحالة"]
         report_title = "Leave Report"
-        report_title_ar = "تقرير الإجازات"
+        report_title_ar = "Leave Report"
         
     elif report_type == "field-exits":
         records = await db.field_exits.find({
@@ -10264,11 +10259,11 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         report_data = []
         for record in records:
             visit_types = {
-                "client_visit": "زيارة عميل",
-                "collection": "تحصيل",
-                "bank_visit": "زيارة بنك",
-                "personal": "شخصي",
-                "admin_errand": "مهمة إدارية"
+                "client_visit": "Client Visit",
+                "collection": "Collection",
+                "bank_visit": "Bank Visit",
+                "personal": "Personal",
+                "admin_errand": "Admin Errand"
             }
             report_data.append({
                 "user_name": record.get("user_name", ""),
@@ -10283,7 +10278,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         headers = ["Employee", "Date", "Visit Type", "Client", "Start Time", "End Time", "Status"]
         headers_ar = ["الموظف", "التاريخ", "نوع الزيارة", "العميل", "وقت البداية", "وقت النهاية", "الحالة"]
         report_title = "Field Exit Report"
-        report_title_ar = "تقرير الزيارات الخارجية"
+        report_title_ar = "Field Exit Report"
     
     else:
         raise HTTPException(status_code=400, detail="Invalid report type")
@@ -10311,7 +10306,7 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         # Report title
         ws.merge_cells('A2:G2')
         title_cell = ws['A2']
-        title_cell.value = f"{report_title} - {report_title_ar}"
+        title_cell.value = report_title
         title_cell.font = Font(name="Arial", size=14, bold=True, color="1F4E79")
         title_cell.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[2].height = 25
@@ -10329,9 +10324,9 @@ async def export_report(report_type: str, month: str, format: str = "excel", cur
         
         # Headers
         header_row = 5
-        for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
+        for col, header_en in enumerate(headers, 1):
             cell = ws.cell(row=header_row, column=col)
-            cell.value = f"{header_en}\n{header_ar}"
+            cell.value = header_en
             cell.font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
             cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -10819,7 +10814,7 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         # Report title with enhanced styling
         ws.merge_cells('A3:J3')
         title_cell = ws['A3']
-        title_cell.value = f"Enhanced Payroll Report with Automatic Deductions - تقرير الرواتب المحسن مع الخصومات التلقائية - {month}"
+        title_cell.value = f"Enhanced Payroll Report with Automatic Deductions - {month}"
         title_cell.font = Font(name="Arial", size=14, bold=True, color="1F4E79")
         title_cell.fill = PatternFill(start_color="F0F8FF", end_color="F0F8FF", fill_type="solid")
         title_cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -10954,9 +10949,9 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         ]
         
         header_row = 6
-        for col, (header_en, header_ar) in enumerate(zip(headers, headers_ar), 1):
+        for col, header_en in enumerate(headers, 1):
             cell = ws.cell(row=header_row, column=col)
-            cell.value = f"{header_en}\n{header_ar}"
+            cell.value = header_en
             cell.font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
             cell.fill = PatternFill(start_color="2B5797", end_color="2B5797", fill_type="solid")
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -11096,16 +11091,16 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         story.append(company_header)
         
         # Logo subtitle
-        logo_subtitle = Paragraph("مكتب استشارات ضريبية متخصص - نظام إدارة الموارد البشرية المتطور", logo_style)
+        logo_subtitle = Paragraph("Specialized Tax Consultancy - HR Management System", logo_style)
         story.append(logo_subtitle)
         story.append(Spacer(1, 20))
         
         # Report title with enhanced styling
-        report_title_text = Paragraph("Enhanced Payroll Report with Deductions<br/>تقرير الرواتب المحسن مع الخصومات التفصيلية", title_style)
+        report_title_text = Paragraph("Enhanced Payroll Report with Deductions", title_style)
         story.append(report_title_text)
         
         # Period info
-        period_info = Paragraph(f"الشهر: {month}<br/>عدد الموظفين: {len(payroll_data)}<br/>تاريخ الإنشاء: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
+        period_info = Paragraph(f"Month: {month}<br/>Employees: {len(payroll_data)}<br/>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}", info_style)
         story.append(period_info)
         story.append(Spacer(1, 30))
         
@@ -11176,9 +11171,9 @@ async def export_payroll(month: str, format: str = "excel", current_user: User =
         summary_text = f"""
         <b>Summary | الملخص</b><br/>
         Total Employees: {len(payroll_data)} | إجمالي الموظفين<br/>
-        Total Monthly Salaries: AED {total_monthly_salary:.2f} | إجمالي الرواتب الشهرية<br/>
+        Total Monthly Salaries: AED {total_monthly_salary:.2f} | Total Monthly Salaries<br/>
         Total Deductions: AED {total_deductions:.2f} | إجمالي الخصومات<br/>
-        Total Final Salaries: AED {total_final_salary:.2f} | إجمالي الرواتب النهائية
+        Total Final Salaries: AED {total_final_salary:.2f} | Total Final Salaries
         """
         
         summary_paragraph = Paragraph(summary_text, summary_style)
@@ -13744,7 +13739,7 @@ async def import_clients_from_excel(
     current_user = Depends(get_admin_user),
     db = Depends(get_work_reports_db)
 ):
-    """Import clients from Excel file (عملاء.xlsx)"""
+    """Import clients from Excel file"""
     try:
         # Download the Excel file from the provided URL
         excel_url = "https://customer-assets.emergentagent.com/job_hr-dashboard-20/artifacts/warpb19o_%D8%B9%D9%85%D9%84%D8%A7%D8%A1.xlsx"
@@ -13834,7 +13829,7 @@ async def import_clients_from_excel(
                     address=row_data.get("Address") or row_data.get("العنوان", ""),
                     tax_number=row_data.get("Tax Number") or row_data.get("TRN") or row_data.get("الرقم الضريبي", ""),
                     commercial_registration=row_data.get("CR Number") or row_data.get("الرخصة التجارية", ""),
-                    notes=f"تم الاستيراد من Excel في {datetime.now().strftime('%Y-%m-%d')}",
+                    notes=f"Imported from Excel on {datetime.now().strftime('%Y-%m-%d')}",
                     created_by=current_user.name
                 )
         
