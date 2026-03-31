@@ -1368,14 +1368,35 @@ async def _run_auto_monthly_report():
 async def test_email_connection(current_user: User = Depends(get_super_admin_user)):
     """Test SMTP email connection"""
     try:
+        # Log which settings are being used for debugging
+        from email_service import SMTP_HOST as svc_host, SMTP_EMAIL as svc_email
+        print(f"Email test using: host={svc_host}, email={svc_email}")
+        
         result = send_email(
-            os.environ.get('SMTP_EMAIL', ''),
+            svc_email or os.environ.get('SMTP_EMAIL', ''),
             "TANSEEQ HR - Email Test",
-            "<h2>Email connection test successful!</h2><p>Your SMTP configuration is working correctly.</p>"
+            "<div dir='rtl'><h2>اختبار اتصال البريد الإلكتروني</h2><p>تم التأكد من إعدادات SMTP بنجاح.</p></div>"
         )
         return result
     except Exception as e:
-        return {"success": False, "error": f"Email test failed: {str(e)}"}
+        return {"success": False, "error": f"خطأ في اختبار البريد: {str(e)[:80]}"}
+
+
+@api_router.get("/email/smtp-info")
+async def get_smtp_info(current_user: User = Depends(get_super_admin_user)):
+    """Get current SMTP configuration (without password) for debugging"""
+    from email_service import SMTP_HOST, SMTP_PORT, SMTP_EMAIL, SMTP_FROM_NAME
+    return {
+        "host": SMTP_HOST,
+        "port": SMTP_PORT,
+        "email": SMTP_EMAIL,
+        "from_name": SMTP_FROM_NAME,
+        "env_smtp_server": os.environ.get('SMTP_SERVER', '[not set]'),
+        "env_smtp_host": os.environ.get('SMTP_HOST', '[not set]'),
+        "env_smtp_email": os.environ.get('SMTP_EMAIL', '[not set]'),
+        "password_set": bool(os.environ.get('SMTP_PASSWORD', ''))
+    }
+
 
 @api_router.post("/email/send-salary-slip")
 async def email_salary_slip(data: dict, current_user: User = Depends(get_admin_user)):
@@ -15225,19 +15246,22 @@ async def system_health_check(current_user: User = Depends(get_super_admin_user)
         # Override old GoDaddy server if still in env
         if 'secureserver' in smtp_host:
             smtp_host = 'smtp.office365.com'
-        smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+        smtp_email = os.environ.get('SMTP_EMAIL', '').lower().strip()
+        smtp_pass = os.environ.get('SMTP_PASSWORD', '')
         with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as srv:
             srv.ehlo()
             srv.starttls()
             srv.ehlo()
-            smtp_email = os.environ.get('SMTP_EMAIL', '')
-            smtp_pass = os.environ.get('SMTP_PASSWORD', '')
             if smtp_email and smtp_pass:
                 srv.login(smtp_email, smtp_pass)
         rt = int((_time.time() - t0) * 1000)
-        services["smtp"] = {"status": "up", "name": "خدمة البريد SMTP", "response_time": rt, "details": f"متصل بـ {smtp_host}"}
+        services["smtp"] = {"status": "up", "name": "خدمة البريد SMTP", "response_time": rt, "details": f"متصل بـ {smtp_host} ({smtp_email})"}
+    except smtplib.SMTPAuthenticationError:
+        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"فشل المصادقة - {smtp_host} ({smtp_email})"}
+    except smtplib.SMTPConnectError:
+        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"فشل الاتصال بـ {smtp_host}"}
     except Exception as e:
-        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": str(e)[:80]}
+        services["smtp"] = {"status": "down", "name": "خدمة البريد SMTP", "details": f"خطأ: {str(e)[:50]} ({smtp_host})"}
 
     # 3. API self-check
     try:

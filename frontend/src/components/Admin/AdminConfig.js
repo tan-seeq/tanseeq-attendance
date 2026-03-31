@@ -25,16 +25,16 @@ const AdminConfig = () => {
 
   const fetchData = async () => {
     try {
-      const [configRes, exceptionsRes, mappingsRes, employeesRes] = await Promise.all([
+      const results = await Promise.allSettled([
         axios.get(`${API}/admin/config/system`),
         axios.get(`${API}/admin/config/exceptions`),
         axios.get(`${API}/admin/config/import-mappings`),
         axios.get(`${API}/users`)
       ]);
-      setConfig(configRes.data.config);
-      setExceptions(exceptionsRes.data.exceptions);
-      setMappings(mappingsRes.data.mappings);
-      setEmployees(Array.isArray(employeesRes.data) ? employeesRes.data : []);
+      if (results[0].status === 'fulfilled') setConfig(results[0].value.data.config);
+      if (results[1].status === 'fulfilled') setExceptions(results[1].value.data.exceptions);
+      if (results[2].status === 'fulfilled') setMappings(results[2].value.data.mappings);
+      if (results[3].status === 'fulfilled') setEmployees(Array.isArray(results[3].value.data) ? results[3].value.data : []);
     } catch (error) {
       console.error('Error fetching config:', error);
     } finally {
