@@ -52,6 +52,10 @@ import { API } from './config';
 // Import Attendance Management (refactored)
 import AttendanceManagement from './components/Attendance/AttendanceManagement';
 
+// Import Admin Pages
+import AdminConfig from './components/Admin/AdminConfig';
+import LiveMonitoring from './components/Admin/LiveMonitoring';
+
 // Import Work Reports Components
 import WorkReportsDashboard from './WorkReports/WorkReportsDashboard';
 import ClientManagement from './WorkReports/ClientManagement';
@@ -256,6 +260,8 @@ const Layout = ({ children }) => {
     ...(user?.role === 'super_admin' ? [
       { name: 'نظام الإشعارات', href: '/notifications', icon: BellIcon },
       { name: 'إدارة النسخ الاحتياطية', href: '/backup-management', icon: ServerIcon },
+      { name: 'إعدادات النظام', href: '/admin/config', icon: Cog6ToothIcon },
+      { name: 'المراقبة المباشرة', href: '/admin/live', icon: ChartBarIcon },
     ] : []),
   ];
 
@@ -476,7 +482,8 @@ const Dashboard = () => {
       ]);
       
       // Convert notifications to message format for unified display
-      const notifications = notificationsRes.data.map(notification => ({
+      const notifArray = Array.isArray(notificationsRes.data) ? notificationsRes.data : (notificationsRes.data.notifications || []);
+      const notifications = notifArray.map(notification => ({
         id: `notification_${notification.id}`,
         title: notification.subject,
         content: notification.message,
@@ -513,7 +520,8 @@ const Dashboard = () => {
         axios.get(`${API}/notifications/my`).catch(() => ({ data: [] }))
       ]);
       
-      const unreadNotifications = notificationsRes.data.filter(n => !n.is_read).length;
+      const notifData = Array.isArray(notificationsRes.data) ? notificationsRes.data : (notificationsRes.data.notifications || []);
+      const unreadNotifications = notifData.filter(n => !n.is_read).length;
       const totalUnread = messagesRes.data.unread_count + unreadNotifications;
       
       setUnreadCount(totalUnread);
@@ -3361,6 +3369,20 @@ const AppWithNotifications = () => {
               <ProtectedRoute requiredRole="admin">
                 <Layout>
                   <BackupManagement />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/config" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <AdminConfig />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/live" element={
+              <ProtectedRoute requiredRole="super_admin">
+                <Layout>
+                  <LiveMonitoring />
                 </Layout>
               </ProtectedRoute>
             } />

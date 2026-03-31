@@ -950,6 +950,107 @@ async def get_super_admin_user(current_user: User = Depends(get_current_user)):
 # LIVE MONITORING ENDPOINTS
 # ========================================
 
+# ========================================
+# ADMIN CONFIG ENDPOINTS
+# ========================================
+
+@api_router.get("/admin/config/system")
+async def get_system_config(current_user: User = Depends(get_super_admin_user)):
+    """Get system configuration"""
+    config = await db.system_config.find_one({"type": "general"}, {"_id": 0})
+    if not config:
+        config = {
+            "type": "general",
+            "working_hours_start": "09:00",
+            "working_hours_end": "18:00",
+            "grace_period_minutes": 15,
+            "weekend_days": ["friday", "saturday"],
+            "overtime_enabled": True,
+            "auto_deduction_enabled": True,
+            "company_name": "TANSEEQ Tax Consultancy",
+            "timezone": "Asia/Dubai"
+        }
+    return {"success": True, "config": config}
+
+@api_router.put("/admin/config/system")
+async def update_system_config(data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Update system configuration"""
+    data["type"] = "general"
+    await db.system_config.update_one(
+        {"type": "general"},
+        {"$set": data},
+        upsert=True
+    )
+    return {"success": True, "message": "تم تحديث الإعدادات بنجاح"}
+
+@api_router.get("/admin/config/exceptions")
+async def get_attendance_exceptions(current_user: User = Depends(get_super_admin_user)):
+    """Get attendance exception employees"""
+    exceptions = await db.attendance_exceptions.find({}, {"_id": 0}).to_list(None)
+    return {"success": True, "exceptions": exceptions}
+
+@api_router.post("/admin/config/exceptions")
+async def add_attendance_exception(data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Add attendance exception for an employee"""
+    employee_id = data.get("employee_id")
+    if not employee_id:
+        raise HTTPException(status_code=400, detail="employee_id مطلوب")
+    
+    employee = await db.users.find_one({"id": employee_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="الموظف غير موجود")
+    
+    existing = await db.attendance_exceptions.find_one({"employee_id": employee_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="الموظف لديه استثناء بالفعل")
+    
+    exception = {
+        "employee_id": employee_id,
+        "employee_name": employee.get("name", ""),
+        "custom_start": data.get("custom_start", "09:00"),
+        "custom_end": data.get("custom_end", "18:00"),
+        "grace_period": data.get("grace_period", 15),
+        "exempt_from_deductions": data.get("exempt_from_deductions", False),
+        "reason": data.get("reason", ""),
+        "created_at": datetime.now().isoformat(),
+        "created_by": current_user.id
+    }
+    await db.attendance_exceptions.insert_one(exception)
+    exception.pop("_id", None)
+    return {"success": True, "exception": exception}
+
+@api_router.delete("/admin/config/exceptions/{employee_id}")
+async def delete_attendance_exception(employee_id: str, current_user: User = Depends(get_super_admin_user)):
+    """Delete attendance exception"""
+    result = await db.attendance_exceptions.delete_one({"employee_id": employee_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="الاستثناء غير موجود")
+    return {"success": True, "message": "تم حذف الاستثناء بنجاح"}
+
+@api_router.get("/admin/config/import-mappings")
+async def get_import_mappings(current_user: User = Depends(get_super_admin_user)):
+    """Get import column mappings"""
+    mappings = await db.import_mappings.find({}, {"_id": 0}).to_list(None)
+    if not mappings:
+        mappings = [
+            {"source_column": "Name", "target_field": "name", "type": "attendance"},
+            {"source_column": "Date", "target_field": "date", "type": "attendance"},
+            {"source_column": "Check In", "target_field": "check_in", "type": "attendance"},
+            {"source_column": "Check Out", "target_field": "check_out", "type": "attendance"}
+        ]
+    return {"success": True, "mappings": mappings}
+
+@api_router.put("/admin/config/import-mappings")
+async def update_import_mappings(data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Update import column mappings"""
+    mappings = data.get("mappings", [])
+    await db.import_mappings.delete_many({})
+    if mappings:
+        await db.import_mappings.insert_many(mappings)
+    return {"success": True, "message": "تم تحديث خرائط الاستيراد بنجاح"}
+
+
+
 @api_router.get("/live/metrics")
 async def get_live_metrics(current_user: User = Depends(get_super_admin_user)):
     """Get live metrics - Super Admin only"""
