@@ -15220,9 +15220,9 @@ async def system_health_check(current_user: User = Depends(get_super_admin_user)
     try:
         import smtplib
         t0 = _time.time()
-        smtp_host = os.environ.get('SMTP_HOST', 'smtpout.secureserver.net')
+        smtp_host = os.environ.get('SMTP_SERVER', os.environ.get('SMTP_HOST', 'smtpout.secureserver.net'))
         smtp_port = int(os.environ.get('SMTP_PORT', '587'))
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=5) as srv:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as srv:
             srv.ehlo()
             srv.starttls()
             srv.ehlo()
