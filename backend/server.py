@@ -162,6 +162,13 @@ import calendar
 from pdf_generator import generate_salary_slip
 from email_service import send_email, send_salary_slip_email, send_notification_email
 
+# Scheduler for auto monthly reports
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+
+_scheduler = AsyncIOScheduler()
+_scheduler_started = False
+
 
 # Import Work Reports Database Module - MongoDB version (now lazy)
 from work_reports_mongo import (
@@ -349,6 +356,21 @@ async def ensure_test_super_admin():
             print("✅ Verified test Super Admin user exists")
     except Exception as e:
         print(f"⚠️ Failed to ensure test Super Admin user: {e}")
+
+@app.on_event("startup")
+async def init_auto_report_scheduler():
+    """Initialize the auto monthly report scheduler from saved config"""
+    try:
+        _db = _ensure_db()
+        config = await _db.system_config.find_one({"type": "auto_report"})
+        if config and config.get("enabled", False):
+            day = config.get("day_of_month", 28)
+            _reschedule_auto_report(True, day)
+            print(f"Auto monthly report scheduler initialized (day {day})")
+        else:
+            print("Auto monthly report is disabled")
+    except Exception as e:
+        print(f"⚠️ Auto report scheduler init warning: {e}")
 
 # Create uploads directory
 uploads_dir = ROOT_DIR / "uploads"
@@ -1102,6 +1124,241 @@ async def _build_payroll_data(employee_id: str, cycle_month: str) -> dict:
         "loans_balance": round(loans_balance, 2),
         "company_name": "TANSEEQ Tax Consultancy"
     }
+
+
+# ============================================================
+# MONTHLY AUTO REPORT - SCHEDULED + MANUAL TRIGGER
+# ============================================================
+
+async def _send_monthly_reports_for_cycle(cycle_month: str, triggered_by: str = "auto") -> dict:
+    """Core logic: generate PDF + send email with summary for all active employees"""
+    employees = await db.users.find({"is_active": True}, {"_id": 0}).to_list(None)
+    
+    sent = 0
+    failed = 0
+    details = []
+    
+    for emp in employees:
+        emp_id = emp.get("id", "")
+        emp_name = emp.get("name", "Unknown")
+        emp_email = emp.get("email", "")
+        
+        if not emp_id or not emp_email:
+            failed += 1
+            details.append({"employee": emp_name, "status": "skipped", "reason": "no email"})
+            continue
+        
+        try:
+            payroll_data = await _build_payroll_data(emp_id, cycle_month)
+            
+            # Generate PDF
+            pdf_bytes = generate_salary_slip(emp, payroll_data, cycle_month)
+            
+            # Build Arabic summary
+            basic = payroll_data.get("basic_salary", 0)
+            total_ded = (payroll_data.get("lateness_deductions", 0) +
+                         payroll_data.get("absence_deductions", 0) +
+                         payroll_data.get("advance_deductions", 0) +
+                         payroll_data.get("loan_installments", 0) +
+                         payroll_data.get("other_deductions", 0))
+            net = basic - total_ded
+            present = payroll_data.get("present_days", 0)
+            absent = payroll_data.get("absent_days", 0)
+            late = payroll_data.get("late_days", 0)
+            working = payroll_data.get("working_days", 0)
+            
+            subject = f"التقرير الشهري - {cycle_month} | التنسيق للاستشارات الضريبية"
+            html_body = f"""
+            <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #2b6cb0, #1a365d); color: white; padding: 25px; text-align: center; border-radius: 12px 12px 0 0;">
+                    <h2 style="margin: 0;">التنسيق للاستشارات الضريبية</h2>
+                    <p style="margin: 5px 0 0; opacity: 0.9;">التقرير الشهري - {cycle_month}</p>
+                </div>
+                <div style="padding: 25px; background: #f7fafc; border: 1px solid #e2e8f0;">
+                    <p>الموظف/ة العزيز/ة <strong>{emp_name}</strong>،</p>
+                    <p>مرفق تقريرك الشهري لفترة <strong>{cycle_month}</strong>. إليك الملخص:</p>
+                    
+                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px; color: #4a5568;">الراتب الأساسي</td>
+                                <td style="padding: 8px; text-align: left; font-weight: bold; color: #2b6cb0;">{basic:,.2f} درهم</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px; color: #4a5568;">إجمالي الخصومات</td>
+                                <td style="padding: 8px; text-align: left; font-weight: bold; color: #c53030;">{total_ded:,.2f} درهم</td>
+                            </tr>
+                            <tr style="background: #f0fff4;">
+                                <td style="padding: 8px; font-weight: bold; color: #276749;">صافي الراتب</td>
+                                <td style="padding: 8px; text-align: left; font-weight: bold; font-size: 16px; color: #276749;">{net:,.2f} درهم</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background: #edf2f7; border-radius: 8px; padding: 12px; margin: 15px 0;">
+                        <p style="font-weight: bold; margin: 0 0 8px; color: #2d3748;">ملخص الحضور:</p>
+                        <p style="margin: 4px 0; font-size: 13px; color: #4a5568;">أيام العمل: <strong>{working}</strong> | الحضور: <strong>{present}</strong> | الغياب: <strong style="color:#c53030">{absent}</strong> | التأخير: <strong style="color:#dd6b20">{late}</strong></p>
+                    </div>
+                    
+                    <p style="font-size: 12px; color: #a0aec0;">كشف الراتب المفصل مرفق كملف PDF.</p>
+                </div>
+                <div style="background: #2d3748; color: #a0aec0; padding: 15px; text-align: center; font-size: 11px; border-radius: 0 0 12px 12px;">
+                    <p style="margin: 0;">نظام الموارد البشرية - التنسيق للاستشارات الضريبية</p>
+                </div>
+            </div>
+            """
+            
+            result = send_email(
+                emp_email,
+                subject,
+                html_body,
+                [{"filename": f"salary_slip_{cycle_month}_{emp_name.replace(' ','_')}.pdf", "data": pdf_bytes}]
+            )
+            
+            if result.get("success"):
+                sent += 1
+                details.append({"employee": emp_name, "email": emp_email, "status": "sent"})
+                # Log the email
+                await db.email_logs.insert_one({
+                    "employee_id": emp_id,
+                    "employee_name": emp_name,
+                    "email": emp_email,
+                    "type": "monthly_report",
+                    "cycle_month": cycle_month,
+                    "sent_at": datetime.now(timezone.utc).isoformat(),
+                    "triggered_by": triggered_by
+                })
+            else:
+                failed += 1
+                details.append({"employee": emp_name, "status": "failed", "reason": result.get("error", "")[:60]})
+        except Exception as e:
+            failed += 1
+            details.append({"employee": emp_name, "status": "error", "reason": str(e)[:60]})
+    
+    # Save run history
+    await db.auto_report_runs.insert_one({
+        "cycle_month": cycle_month,
+        "triggered_by": triggered_by,
+        "sent": sent,
+        "failed": failed,
+        "total": len(employees),
+        "details": details,
+        "run_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"sent": sent, "failed": failed, "total": len(employees), "details": details}
+
+
+@app.post("/api/payroll/send-monthly-reports")
+async def send_monthly_reports_manual(data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Manually trigger sending monthly reports to all employees (runs in background)"""
+    cycle_month = data.get("cycle_month", "")
+    if not cycle_month:
+        now = get_uae_time()
+        cycle_month = now.strftime("%Y-%m")
+    
+    # Run in background to avoid timeout
+    import asyncio
+    asyncio.create_task(_send_monthly_reports_background(cycle_month, f"manual:{current_user.name}"))
+    
+    return {"success": True, "cycle_month": cycle_month, "message": "جاري إرسال التقارير في الخلفية. تابع التقدم من سجل الإرسال."}
+
+
+async def _send_monthly_reports_background(cycle_month: str, triggered_by: str):
+    """Background wrapper for sending monthly reports"""
+    try:
+        result = await _send_monthly_reports_for_cycle(cycle_month, triggered_by=triggered_by)
+        print(f"Monthly reports done: sent={result['sent']}, failed={result['failed']}")
+    except Exception as e:
+        print(f"Monthly reports error: {e}")
+
+
+@app.get("/api/payroll/auto-report-config")
+async def get_auto_report_config(current_user: User = Depends(get_super_admin_user)):
+    """Get auto-report scheduler configuration"""
+    config = await db.system_config.find_one({"type": "auto_report"}, {"_id": 0})
+    if not config:
+        config = {"type": "auto_report", "enabled": False, "day_of_month": 28}
+    
+    # Get last run info
+    last_run = await db.auto_report_runs.find_one({}, {"_id": 0}, sort=[("run_at", -1)])
+    
+    return {
+        "enabled": config.get("enabled", False),
+        "day_of_month": config.get("day_of_month", 28),
+        "last_run": last_run
+    }
+
+
+@app.put("/api/payroll/auto-report-config")
+async def update_auto_report_config(data: dict, current_user: User = Depends(get_super_admin_user)):
+    """Update auto-report scheduler configuration"""
+    enabled = data.get("enabled", False)
+    day = min(max(int(data.get("day_of_month", 28)), 1), 28)
+    
+    await db.system_config.update_one(
+        {"type": "auto_report"},
+        {"$set": {"type": "auto_report", "enabled": enabled, "day_of_month": day, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    # Reschedule if needed
+    _reschedule_auto_report(enabled, day)
+    
+    return {"success": True, "enabled": enabled, "day_of_month": day}
+
+
+@app.get("/api/payroll/auto-report-history")
+async def get_auto_report_history(current_user: User = Depends(get_super_admin_user)):
+    """Get history of auto-report runs"""
+    runs = await db.auto_report_runs.find({}, {"_id": 0}).sort("run_at", -1).to_list(20)
+    return {"runs": runs}
+
+
+def _reschedule_auto_report(enabled: bool, day: int):
+    """Reschedule or remove the auto monthly report cron job"""
+    global _scheduler, _scheduler_started
+    job_id = "auto_monthly_report"
+    
+    try:
+        existing = _scheduler.get_job(job_id)
+        if existing:
+            _scheduler.remove_job(job_id)
+        
+        if enabled:
+            _scheduler.add_job(
+                _run_auto_monthly_report,
+                CronTrigger(day=day, hour=8, minute=0),
+                id=job_id,
+                replace_existing=True
+            )
+            print(f"Auto monthly report scheduled for day {day} at 08:00 UAE time")
+        else:
+            print("Auto monthly report disabled")
+        
+        if not _scheduler_started:
+            _scheduler.start()
+            _scheduler_started = True
+    except Exception as e:
+        print(f"Scheduler error: {e}")
+
+
+async def _run_auto_monthly_report():
+    """Cron job handler: sends monthly reports for current month"""
+    try:
+        # Check if auto-report is still enabled
+        config = await db.system_config.find_one({"type": "auto_report"})
+        if not config or not config.get("enabled", False):
+            return
+        
+        now = get_uae_time()
+        cycle_month = now.strftime("%Y-%m")
+        print(f"Running auto monthly report for {cycle_month}")
+        result = await _send_monthly_reports_for_cycle(cycle_month, triggered_by="auto_scheduler")
+        print(f"Auto report done: sent={result['sent']}, failed={result['failed']}")
+    except Exception as e:
+        print(f"Auto monthly report error: {e}")
+
 
 # ========================================
 # EMAIL ENDPOINTS

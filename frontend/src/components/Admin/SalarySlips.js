@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { DocumentArrowDownIcon, EnvelopeIcon, UserGroupIcon, CheckCircleIcon, XCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { DocumentArrowDownIcon, EnvelopeIcon, ArrowPathIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -18,9 +18,15 @@ const SalarySlips = () => {
   const [emailPrefs, setEmailPrefs] = useState([]);
   const [testingEmail, setTestingEmail] = useState(false);
   const [slipsData, setSlipsData] = useState([]);
+  // Auto Report state
+  const [autoConfig, setAutoConfig] = useState({ enabled: false, day_of_month: 28, last_run: null });
+  const [autoHistory, setAutoHistory] = useState([]);
+  const [sendingReports, setSendingReports] = useState(false);
+  const [savingConfig, setSavingConfig] = useState(false);
 
   useEffect(() => {
     fetchData();
+    fetchAutoConfig();
   }, []);
 
   const fetchData = async () => {
@@ -143,6 +149,43 @@ const SalarySlips = () => {
     }
   };
 
+  // ===== Auto Report Functions =====
+  const fetchAutoConfig = async () => {
+    try {
+      const [configRes, historyRes] = await Promise.allSettled([
+        axios.get(`${API}/payroll/auto-report-config`),
+        axios.get(`${API}/payroll/auto-report-history`)
+      ]);
+      if (configRes.status === 'fulfilled') setAutoConfig(configRes.value.data);
+      if (historyRes.status === 'fulfilled') setAutoHistory(historyRes.value.data.runs || []);
+    } catch (e) { console.error(e); }
+  };
+
+  const handleSaveAutoConfig = async () => {
+    setSavingConfig(true);
+    try {
+      await axios.put(`${API}/payroll/auto-report-config`, {
+        enabled: autoConfig.enabled,
+        day_of_month: autoConfig.day_of_month
+      });
+      alert(autoConfig.enabled ? `تم تفعيل الإرسال التلقائي في يوم ${autoConfig.day_of_month} من كل شهر` : 'تم إيقاف الإرسال التلقائي');
+      fetchAutoConfig();
+    } catch (e) { alert('خطأ في حفظ الإعدادات'); }
+    finally { setSavingConfig(false); }
+  };
+
+  const handleSendReportsNow = async () => {
+    if (!selectedCycle) return alert('اختر دورة الرواتب أولاً');
+    if (!window.confirm(`سيتم إرسال التقرير الشهري (ملخص + PDF) لجميع الموظفين عن شهر ${selectedCycle}. متابعة؟`)) return;
+    setSendingReports(true);
+    try {
+      const res = await axios.post(`${API}/payroll/send-monthly-reports`, { cycle_month: selectedCycle });
+      alert(`تم الإرسال: ${res.data.sent} ناجح | ${res.data.failed} فاشل من أصل ${res.data.total}`);
+      fetchAutoConfig();
+    } catch (e) { alert('خطأ في إرسال التقارير'); }
+    finally { setSendingReports(false); }
+  };
+
   if (loading) return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
   return (
@@ -161,6 +204,7 @@ const SalarySlips = () => {
       <div className="flex space-x-1 space-x-reverse mb-6 bg-gray-100 rounded-lg p-1">
         {[
           { id: 'slips', label: 'قسائم الرواتب', icon: DocumentArrowDownIcon },
+          { id: 'auto', label: 'التقرير التلقائي', icon: ClockIcon },
           { id: 'email', label: 'إعدادات البريد', icon: EnvelopeIcon },
           { id: 'logs', label: 'سجل الإرسال', icon: ArrowPathIcon }
         ].map(tab => (
@@ -227,6 +271,121 @@ const SalarySlips = () => {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {activeTab === 'auto' && (
+        <div className="space-y-5" data-testid="auto-report-section">
+          {/* Manual trigger card */}
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">إرسال التقارير الشهرية الآن</h3>
+                <p className="text-sm text-gray-500 mt-1">إرسال ملخص الحضور + كشف الراتب PDF لجميع الموظفين</p>
+              </div>
+              <button
+                data-testid="send-reports-now-btn"
+                onClick={handleSendReportsNow}
+                disabled={sendingReports || !selectedCycle}
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all font-medium"
+              >
+                {sendingReports ? (
+                  <><ArrowPathIcon className="h-5 w-5 animate-spin" /> جاري الإرسال...</>
+                ) : (
+                  <><EnvelopeIcon className="h-5 w-5" /> إرسال التقارير</>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400">الدورة المحددة: <strong>{selectedCycle || 'لم يتم التحديد'}</strong></p>
+          </div>
+
+          {/* Auto scheduler config */}
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h3 className="font-bold text-lg text-gray-800 mb-4">
+              <ClockIcon className="h-5 w-5 inline ml-2 text-blue-600" />
+              الإرسال التلقائي الشهري
+            </h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gray-50 rounded-lg">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className="relative">
+                  <input
+                    data-testid="auto-report-toggle"
+                    type="checkbox"
+                    checked={autoConfig.enabled}
+                    onChange={e => setAutoConfig({ ...autoConfig, enabled: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </div>
+                <span className="font-medium text-gray-700">{autoConfig.enabled ? 'مفعّل' : 'معطّل'}</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">يوم الإرسال:</span>
+                <select
+                  data-testid="auto-report-day"
+                  value={autoConfig.day_of_month}
+                  onChange={e => setAutoConfig({ ...autoConfig, day_of_month: parseInt(e.target.value) })}
+                  className="px-3 py-1.5 border rounded-lg text-sm"
+                >
+                  {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={d}>يوم {d}</option>
+                  ))}
+                </select>
+                <span className="text-sm text-gray-500">من كل شهر</span>
+              </div>
+              <button
+                data-testid="save-auto-config-btn"
+                onClick={handleSaveAutoConfig}
+                disabled={savingConfig}
+                className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium disabled:opacity-50 transition-all"
+              >
+                {savingConfig ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
+              </button>
+            </div>
+            {autoConfig.enabled && (
+              <p className="text-sm text-green-700 mt-3 bg-green-50 px-3 py-2 rounded-lg">
+                سيتم إرسال التقارير تلقائياً في يوم <strong>{autoConfig.day_of_month}</strong> من كل شهر الساعة 8:00 صباحاً
+              </p>
+            )}
+          </div>
+
+          {/* Run history */}
+          <div className="bg-white rounded-xl shadow-sm border">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="font-bold text-gray-800">سجل الإرسال التلقائي</h3>
+              <button onClick={fetchAutoConfig} className="text-blue-600 text-sm hover:underline">تحديث</button>
+            </div>
+            {autoHistory.length === 0 ? (
+              <div className="p-8 text-center text-gray-400">لا يوجد سجل إرسال بعد</div>
+            ) : (
+              <div className="divide-y">
+                {autoHistory.map((run, i) => (
+                  <div key={i} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                    <div>
+                      <p className="font-medium text-sm">
+                        الشهر: <strong>{run.cycle_month}</strong>
+                        <span className="text-gray-400 text-xs mr-3">({run.triggered_by})</span>
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(run.run_at).toLocaleString('ar-EG')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-1 rounded">
+                        <CheckCircleIcon className="h-4 w-4" /> {run.sent} ناجح
+                      </span>
+                      {run.failed > 0 && (
+                        <span className="flex items-center gap-1 text-red-700 bg-red-50 px-2 py-1 rounded">
+                          <XCircleIcon className="h-4 w-4" /> {run.failed} فاشل
+                        </span>
+                      )}
+                      <span className="text-gray-500">{run.total} موظف</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
