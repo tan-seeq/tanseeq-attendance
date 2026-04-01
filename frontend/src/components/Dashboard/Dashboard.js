@@ -452,12 +452,16 @@ const Dashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const [employeesRes, attendanceRes, leavesRes, fieldExitsRes] = await Promise.all([
-        axios.get(`${API}/users`),
+      const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+      
+      const requests = [
+        isAdmin ? axios.get(`${API}/users`).catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
         axios.get(`${API}/attendance`),
         axios.get(`${API}/leaves`),
         axios.get(`${API}/field-exits`)
-      ]);
+      ];
+      
+      const [employeesRes, attendanceRes, leavesRes, fieldExitsRes] = await Promise.all(requests);
 
       const todayDate = new Date().toISOString().slice(0, 10);
       const todayAttendance = attendanceRes.data.filter(record => record.date === todayDate);

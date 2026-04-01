@@ -64,6 +64,7 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 - [x] **Fixed time parsing in 6 files**: server.py (4 locations), advanced_deductions_system.py, fix_historical_attendance_data.py, forensic_data_fixes.py, import_october_real_data.py
 - [x] **Verified Custom Report & Edit/Delete buttons**: All working (100% test pass)
 - [x] **PWA Conversion**: manifest.json, service worker, app icons, iOS/Android meta tags. App installable on all devices.
+- [x] **Fixed Dashboard 403 for non-admin users**: `/api/users` call now conditional on admin role, prevents `Promise.all` failure for regular employees
 
 ### Session 8 (2026-03-31): Major Refactoring + English-Only Reports
 - [x] App.js refactored: 6386 → 349 lines (95% reduction)
