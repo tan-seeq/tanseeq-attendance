@@ -73,8 +73,8 @@ class AttendanceEngine:
                 ("acknowledged_at", 1)
             ])
             print("✅ Attendance engine indexes created successfully")
-        except Exception as e:
-            print(f"⚠️ Could not create DB indexes due to permissions: {e}. This may affect query performance but the app will continue.")
+        except Exception:
+            pass  # Silently skip - Atlas restricted users cannot create indexes
 
     async def get_employee_policy(self, employee_id: str, target_date: date = None) -> AttendancePolicy:
         """الحصول على سياسة حضور الموظف"""

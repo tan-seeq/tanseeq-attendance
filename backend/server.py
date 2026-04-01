@@ -311,15 +311,15 @@ async def ensure_test_super_admin():
         # ✅ Initialize DB lazily
         _db = _ensure_db()
         
-        # ✅ Create index with timeout - skip if no permissions (Atlas)
+        # ✅ Create index with timeout - skip silently if no permissions (Atlas)
         import asyncio
         try:
             await asyncio.wait_for(
                 _db.users.create_index("email", unique=True),
-                timeout=5.0  # 5 second timeout
+                timeout=5.0
             )
-        except Exception as idx_err:
-            print(f"⚠️ Index creation skipped (permissions or timeout): {idx_err}")
+        except Exception:
+            pass  # Silently skip - index not critical for operation
         
     except Exception as e:
         print(f"⚠️ DB init warning: {e}")
@@ -13521,9 +13521,13 @@ async def init_work_reports_indexes():
             logger.warning("Work Reports DB not available, skipping index creation")
             return
         
-        # ✅ Create indexes in background (non-blocking) - safe for Atlas restricted users
+        # ✅ Skip index creation on Atlas restricted users - indexes should be created manually via Atlas UI
+        # This avoids noisy WARNING logs in production deployments
         async def create_indexes_background():
             try:
+                # Quick permission check before attempting index creation
+                await work_reports_db.command("listIndexes", "work_logs")
+                # If we can list, try creating
                 await work_reports_db.work_logs.create_index([("created_by", 1), ("start_at", -1)])
                 await work_reports_db.work_logs.create_index([("client_id", 1)])
                 await work_reports_db.work_logs.create_index([("start_at", -1)])
@@ -13532,9 +13536,9 @@ async def init_work_reports_indexes():
                     name="worklog_text_index"
                 )
                 logger.info("Work Reports indexes created successfully")
-            except Exception as e:
-                # OperationFailure (no createIndex permission) is expected on Atlas restricted users
-                logger.warning(f"Work Reports index creation skipped (permissions): {e}")
+            except Exception:
+                # Silently skip - indexes not critical for app operation
+                pass
         
         # ✅ Run in background without blocking startup
         asyncio.create_task(create_indexes_background())

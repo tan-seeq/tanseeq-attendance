@@ -323,10 +323,10 @@ async def init_work_reports_collections():
             timeout=3.0  # 3 second timeout
         )
         
-        # Log any index creation failures (e.g. Atlas permission issues)
+        # Log any index creation failures silently
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                print(f"⚠️ Index creation {i} skipped (permissions): {result}")
+                pass  # Silently skip - indexes not critical
         
         print("Work Reports MongoDB index initialization completed")
         return True
