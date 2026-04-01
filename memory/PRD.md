@@ -59,6 +59,15 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 
 ## What's Been Implemented
 
+### Session 10 (2026-04-01): Leave Types + Manual Entry Notes
+- [x] **Added 5 absence types**: full_day, half_day, annual_leave (no deduction), sick_leave_paid (no deduction), sick_leave_unpaid (with deduction)
+- [x] **Backend deduction logic**: Annual leave and paid sick leave skip payroll deductions entirely
+- [x] **Notes column**: Added "ملاحظات" column to attendance table showing "إدخال يدوي" badge for manual entries
+- [x] **Enhanced custom report**: Added Leave Type, Deduction columns and expanded Notes to include manual absence details
+- [x] **Silenced createIndex warnings**: All MongoDB index creation warnings removed for clean production logs
+- [x] **Dashboard 403 fix**: /api/users call now conditional on admin role
+- [x] **Testing: 100% pass rate** - 8/8 backend tests, full frontend verification
+
 ### Session 9 (2026-03-31): Critical Deployment Fix + PWA
 - [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility
 - [x] **Fixed time parsing in 6 files**: server.py (4 locations), advanced_deductions_system.py, fix_historical_attendance_data.py, forensic_data_fixes.py, import_october_real_data.py
