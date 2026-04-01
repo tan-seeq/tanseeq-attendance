@@ -1,16 +1,16 @@
 {
-  "total_requests": 273,
-  "success_count": 273,
+  "total_requests": 275,
+  "success_count": 275,
   "error_count": 0,
   "success_rate": 100.0,
   "error_rate": 0.0,
-  "avg_response_ms": 1850.34,
-  "avg_latency_ms": 1850.34,
-  "requests_total": 273,
+  "avg_response_ms": 1837.78,
+  "avg_latency_ms": 1837.78,
+  "requests_total": 275,
   "endpoints": {
     "/api/auth/login": {
-      "count": 24,
-      "avg_ms": 235.61
+      "count": 25,
+      "avg_ms": 235.55
     },
     "/api/users": {
       "count": 42,
@@ -29,8 +29,8 @@
       "avg_ms": 17.28
     },
     "/api/attendance": {
-      "count": 36,
-      "avg_ms": 20.35
+      "count": 37,
+      "avg_ms": 20.18
     },
     "/api/field-exits": {
       "count": 16,
@@ -106,20 +106,6 @@
     }
   },
   "recent": [
-    {
-      "ts": "2026-04-01T06:52:52.690850",
-      "method": "GET",
-      "path": "/api/attendance/with-absences",
-      "status": 200,
-      "duration_ms": 17.58
-    },
-    {
-      "ts": "2026-04-01T06:53:40.429873",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 235.84
-    },
     {
       "ts": "2026-04-01T06:53:40.493447",
       "method": "GET",
@@ -525,6 +511,20 @@
       "path": "/api/attendance/with-absences",
       "status": 200,
       "duration_ms": 14.88
+    },
+    {
+      "ts": "2026-04-01T07:00:20.434183",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "duration_ms": 234.12
+    },
+    {
+      "ts": "2026-04-01T07:00:20.732782",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 14.31
     }
   ]
 }

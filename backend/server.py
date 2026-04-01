@@ -2419,22 +2419,8 @@ async def bulk_add_manual_absence(
             f"أضاف {added_count} سجل ({absence_label}) للموظف {employee['name']} {deduction_text}"
         )
         
-        # Auto-send absence email notifications
-        if added_count > 0:
-            try:
-                await send_auto_email_notifications(
-                    "absence",
-                    employee.get("name", "Unknown"),
-                    employee.get("email", ""),
-                    {
-                        "date": ", ".join(missing_days[:3]) + ("..." if len(missing_days) > 3 else ""),
-                        "absence_type": absence_label,
-                        "reason": reason or "غير محدد",
-                        "days_count": added_count
-                    }
-                )
-            except Exception:
-                pass  # Don't fail the operation if email fails
+        # Manual absence = admin action, no auto-email needed
+        # (emails only for automatic absence detection, not admin manual entries)
         
         return {
             "success": True,
