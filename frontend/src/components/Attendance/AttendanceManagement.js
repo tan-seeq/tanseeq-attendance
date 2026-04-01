@@ -403,7 +403,21 @@ const AttendanceManagement = () => {
         reason: manualAbsenceForm.reason || 'غياب يدوي'
       });
 
-      alert(`✅ ${response.data.message}\nالخصم الكلي: ${response.data.total_deduction} درهم\nدورة الرواتب: ${response.data.cycle_month}`);
+      const noDeduction = ['annual_leave', 'sick_leave_paid'].includes(manualAbsenceForm.absence_type);
+      const typeLabels = {
+        'full_day': 'غياب يوم كامل',
+        'half_day': 'غياب نصف يوم',
+        'annual_leave': 'إجازة سنوية',
+        'sick_leave_paid': 'إجازة مرضية (بدون خصم)',
+        'sick_leave_unpaid': 'إجازة مرضية (مع خصم)'
+      };
+      const typeLabel = typeLabels[manualAbsenceForm.absence_type] || manualAbsenceForm.absence_type;
+      
+      if (noDeduction) {
+        alert(`${response.data.message}\nالنوع: ${typeLabel}\nبدون خصم من الراتب`);
+      } else {
+        alert(`${response.data.message}\nالنوع: ${typeLabel}\nالخصم الكلي: ${response.data.total_deduction} درهم\nدورة الرواتب: ${response.data.cycle_month}`);
+      }
       
       // Reset and close
       setShowManualAbsenceModal(false);
@@ -510,6 +524,9 @@ const AttendanceManagement = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   نوع الإجازة
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ملاحظات
                 </th>
                 {(user?.role === 'super_admin' || user?.name === "Hatem Mohamed Ahmed") && (
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -626,6 +643,13 @@ const AttendanceManagement = () => {
                          record.status === 'Absent' || record.status === 'absent' ? '--' : ''}
                       </span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {(record.manual_entry || record.manual_absence || record.is_manual_entry) ? (
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
+                        إدخال يدوي
+                      </span>
+                    ) : '--'}
                   </td>
                   {(user?.role === 'super_admin' || user?.name === "Hatem Mohamed Ahmed") && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1089,9 +1113,19 @@ const AttendanceManagement = () => {
                       value={manualAbsenceForm.absence_type}
                       onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, absence_type: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      data-testid="absence-type-select"
                     >
-                      <option value="full_day">يوم كامل (خصم كامل)</option>
-                      <option value="half_day">نصف يوم (خصم نصف)</option>
+                      <optgroup label="غياب مع خصم">
+                        <option value="full_day">غياب - يوم كامل (خصم كامل)</option>
+                        <option value="half_day">غياب - نصف يوم (خصم نصف)</option>
+                      </optgroup>
+                      <optgroup label="إجازات بدون خصم">
+                        <option value="annual_leave">إجازة سنوية (مدفوعة - بدون خصم)</option>
+                        <option value="sick_leave_paid">إجازة مرضية (بدون خصم)</option>
+                      </optgroup>
+                      <optgroup label="إجازات مع خصم">
+                        <option value="sick_leave_unpaid">إجازة مرضية (مع خصم)</option>
+                      </optgroup>
                     </select>
                   </div>
                   <div>
@@ -1102,15 +1136,28 @@ const AttendanceManagement = () => {
                       onChange={(e) => setManualAbsenceForm({...manualAbsenceForm, reason: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       placeholder="مثال: مرضي، شخصي، ..."
+                      data-testid="absence-reason-input"
                     />
                   </div>
                 </div>
                 
                 {/* Deduction Preview */}
-                <div className="mt-3 bg-white border border-orange-300 rounded p-3">
-                  <p className="text-sm text-orange-900">
-                    💰 <strong>ملاحظة:</strong> سيتم احتساب خصم الغياب تلقائياً وإضافته إلى دورة الرواتب الحالية/القادمة
-                  </p>
+                <div className={`mt-3 border rounded p-3 ${
+                  ['annual_leave', 'sick_leave_paid'].includes(manualAbsenceForm.absence_type)
+                    ? 'bg-green-50 border-green-300'
+                    : 'bg-orange-50 border-orange-300'
+                }`}>
+                  {['annual_leave', 'sick_leave_paid'].includes(manualAbsenceForm.absence_type) ? (
+                    <p className="text-sm text-green-900">
+                      <strong>بدون خصم</strong> - {manualAbsenceForm.absence_type === 'annual_leave' 
+                        ? 'الإجازة السنوية مدفوعة الأجر بالكامل' 
+                        : 'الإجازة المرضية بدون خصم بقرار الإدارة'}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-orange-900">
+                      <strong>مع خصم</strong> - سيتم احتساب {manualAbsenceForm.absence_type === 'half_day' ? 'نصف' : 'كامل'} خصم اليوم وإضافته إلى دورة الرواتب
+                    </p>
+                  )}
                 </div>
               </div>
             )}

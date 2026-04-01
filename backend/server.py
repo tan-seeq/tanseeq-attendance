@@ -2173,11 +2173,19 @@ async def generate_custom_attendance_report(
                 "Status": "Present" if record.get("status") == "present" else 
                          "Late" if record.get("status") == "late" else 
                          "Absent" if record.get("status") == "absent" else 
+                         "On Leave" if record.get("status") == "leave" else
                          record.get("status", "Unknown"),
+                "Leave Type": "Annual Leave" if record.get("absence_type") == "annual_leave" else
+                             "Sick Leave" if record.get("absence_type") in ("sick_leave_paid", "sick_leave_unpaid") else
+                             "",
                 "Working Hours": record.get("working_hours", 0),
                 "Late Minutes": record.get("late_minutes", 0),
                 "Early Departure (min)": record.get("early_departure_minutes", 0),
-                "Notes": "Manual Entry" if record.get("manual_entry") else ""
+                "Deduction": "No Deduction" if record.get("no_deduction") else
+                            f"{record.get('absence_deduction', 0)} AED" if record.get("absence_deduction") else "",
+                "Notes": ("Manual Entry" if record.get("manual_entry") else "") +
+                        (" - Manual Absence" if record.get("manual_absence") else "") +
+                        (f" ({record.get('absence_reason', '')})" if record.get("absence_reason") else "")
             })
         
         # إنشاء DataFrame
@@ -2245,7 +2253,7 @@ async def bulk_add_manual_absence(
     {
         "employee_id": "uuid",
         "missing_days": ["2025-01-01", "2025-01-02", ...],
-        "absence_type": "full_day" | "half_day",
+        "absence_type": "full_day" | "half_day" | "annual_leave" | "sick_leave_paid" | "sick_leave_unpaid",
         "reason": "سبب الغياب (اختياري)"
     }
     """
@@ -2256,6 +2264,27 @@ async def bulk_add_manual_absence(
         missing_days = request.get("missing_days", [])
         absence_type = request.get("absence_type", "full_day")
         reason = request.get("reason", "غياب يدوي")
+        
+        # Determine deduction behavior based on absence type
+        NO_DEDUCTION_TYPES = ("annual_leave", "sick_leave_paid")
+        is_no_deduction = absence_type in NO_DEDUCTION_TYPES
+        
+        # Map absence_type to leave_type for display
+        LEAVE_TYPE_MAP = {
+            "annual_leave": "annual",
+            "sick_leave_paid": "sick",
+            "sick_leave_unpaid": "sick",
+        }
+        leave_type = LEAVE_TYPE_MAP.get(absence_type, None)
+        
+        # Map absence_type to display label
+        ABSENCE_LABELS = {
+            "full_day": "غياب يوم كامل",
+            "half_day": "غياب نصف يوم",
+            "annual_leave": "إجازة سنوية",
+            "sick_leave_paid": "إجازة مرضية (بدون خصم)",
+            "sick_leave_unpaid": "إجازة مرضية (مع خصم)",
+        }
         
         if not employee_id or not missing_days:
             raise HTTPException(status_code=400, detail="معرف الموظف والأيام مطلوبة")
@@ -2289,9 +2318,19 @@ async def bulk_add_manual_absence(
                     failed_dates.append(f"{date_str} (موجود مسبقاً)")
                     continue
                 
-                # احتساب الخصم
-                deduction_amount = daily_deduction if absence_type == "full_day" else half_day_deduction
+                # احتساب الخصم (بدون خصم للإجازات المدفوعة)
+                if is_no_deduction:
+                    deduction_amount = 0
+                elif absence_type == "half_day":
+                    deduction_amount = half_day_deduction
+                else:
+                    deduction_amount = daily_deduction
                 total_deduction += deduction_amount
+                
+                # تحديد الحالة المناسبة
+                record_status = "absent"
+                if absence_type in ("annual_leave", "sick_leave_paid", "sick_leave_unpaid"):
+                    record_status = "leave"
                 
                 # إنشاء سجل الغياب
                 attendance_data = {
@@ -2301,17 +2340,19 @@ async def bulk_add_manual_absence(
                     "date": date_str,
                     "check_in": None,
                     "check_out": None,
-                    "status": "absent",
-                    "absence_type": absence_type,  # full_day or half_day
+                    "status": record_status,
+                    "absence_type": absence_type,
+                    "leave_type": leave_type,
                     "absence_reason": reason,
                     "is_late": False,
                     "working_hours": 0,
                     "late_minutes": 0,
                     "early_departure_minutes": 0,
                     "deducted_hours": 0.0,
-                    "absence_deduction": deduction_amount,  # ✅ خصم الغياب
+                    "absence_deduction": deduction_amount,
+                    "no_deduction": is_no_deduction,
                     "manual_entry": True,
-                    "manual_absence": True,  # ✅ تمييز الغياب اليدوي
+                    "manual_absence": True,
                     "added_by": current_user.id,
                     "added_by_name": current_user.name,
                     "created_at": datetime.now(timezone.utc).isoformat()
@@ -2323,35 +2364,34 @@ async def bulk_add_manual_absence(
             except Exception as e:
                 failed_dates.append(f"{date_str} ({str(e)})")
         
-        # ✅ ربط الخصومات بدورة الرواتب الحالية
+        # ✅ ربط الخصومات بدورة الرواتب الحالية (فقط إذا كان هناك خصم)
         # الحصول على الشهر الحالي أو إنشاء دورة رواتب جديدة
         from datetime import datetime
         first_date = min(missing_days)
         year_month = first_date[:7]  # "2025-01"
         
-        # البحث عن دورة رواتب موجودة لهذا الشهر
-        payroll_cycle = await db.payroll_cycles.find_one({
-            "cycle_month": year_month,
-            "status": {"$in": ["draft", "pending"]}  # فقط الدورات غير المكتملة
-        })
-        
         payroll_cycle_id = None
-        if payroll_cycle:
-            payroll_cycle_id = payroll_cycle["id"]
-        else:
-            # إنشاء دورة رواتب جديدة
-            payroll_cycle_id = str(uuid.uuid4())
-            new_cycle = {
-                "id": payroll_cycle_id,
-                "cycle_month": year_month,
-                "status": "draft",
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "created_by": current_user.id
-            }
-            await db.payroll_cycles.insert_one(new_cycle)
         
-        # ✅ إضافة سجل الخصم في دورة الرواتب
         if added_count > 0 and total_deduction > 0:
+            # البحث عن دورة رواتب موجودة لهذا الشهر
+            payroll_cycle = await db.payroll_cycles.find_one({
+                "cycle_month": year_month,
+                "status": {"$in": ["draft", "pending"]}
+            })
+            
+            if payroll_cycle:
+                payroll_cycle_id = payroll_cycle["id"]
+            else:
+                payroll_cycle_id = str(uuid.uuid4())
+                new_cycle = {
+                    "id": payroll_cycle_id,
+                    "cycle_month": year_month,
+                    "status": "draft",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_by": current_user.id
+                }
+                await db.payroll_cycles.insert_one(new_cycle)
+            
             deduction_record = {
                 "id": str(uuid.uuid4()),
                 "payroll_cycle_id": payroll_cycle_id,
@@ -2363,19 +2403,20 @@ async def bulk_add_manual_absence(
                 "absence_days": added_count,
                 "absence_type": absence_type,
                 "reason": reason,
-                "dates": missing_days[:added_count],  # الأيام الفعلية
+                "dates": missing_days[:added_count],
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "created_by": current_user.id,
                 "created_by_name": current_user.name
             }
-            
             await db.payroll_deductions.insert_one(deduction_record)
         
         # تسجيل النشاط
+        absence_label = ABSENCE_LABELS.get(absence_type, absence_type)
+        deduction_text = f"بخصم {total_deduction:.2f} درهم" if total_deduction > 0 else "بدون خصم"
         await log_activity(
             current_user.id,
             "bulk_absence_added",
-            f"أضاف {added_count} سجل غياب يدوي للموظف {employee['name']} بخصم {total_deduction:.2f} درهم"
+            f"أضاف {added_count} سجل ({absence_label}) للموظف {employee['name']} {deduction_text}"
         )
         
         # Auto-send absence email notifications
@@ -2387,7 +2428,7 @@ async def bulk_add_manual_absence(
                     employee.get("email", ""),
                     {
                         "date": ", ".join(missing_days[:3]) + ("..." if len(missing_days) > 3 else ""),
-                        "absence_type": "يوم كامل" if absence_type == "full_day" else "نصف يوم",
+                        "absence_type": absence_label,
                         "reason": reason or "غير محدد",
                         "days_count": added_count
                     }
@@ -2397,11 +2438,12 @@ async def bulk_add_manual_absence(
         
         return {
             "success": True,
-            "message": f"تم إضافة {added_count} سجل غياب بنجاح",
+            "message": f"تم إضافة {added_count} سجل ({absence_label}) بنجاح",
             "added_count": added_count,
             "failed_dates": failed_dates,
             "employee_name": employee["name"],
             "total_deduction": round(total_deduction, 2),
+            "no_deduction": is_no_deduction,
             "payroll_cycle_id": payroll_cycle_id,
             "cycle_month": year_month
         }
