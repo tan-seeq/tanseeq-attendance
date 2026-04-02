@@ -75,8 +75,10 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
   - Background polling every 5s for /start commands
   - Auto-notification on late check-in (employee + admin)
   - Admin dashboard: linked employees list, stats
+  - Telegram salary slip PDF delivery to linked employees
   - Test message functionality
-- [x] **Testing: 100% pass rate** - 30/30 total tests across iterations 10, 11 & 12
+- [x] **Salary Slips via Telegram**: When sending salary slips (single/bulk), PDF is automatically sent via Telegram to linked employees
+- [x] **Testing: 100% pass rate** - 37/37 total tests across iterations 10-13
 
 ### Session 9 (2026-03-31): Critical Deployment Fix + PWA
 - [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility
