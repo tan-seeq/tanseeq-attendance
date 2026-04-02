@@ -1,143 +1,309 @@
 {
-  "total_requests": 15,
-  "success_count": 15,
+  "total_requests": 33,
+  "success_count": 33,
   "error_count": 0,
   "success_rate": 100.0,
   "error_rate": 0.0,
-  "avg_response_ms": 4227.81,
-  "avg_latency_ms": 4227.81,
-  "requests_total": 15,
+  "avg_response_ms": 50.65,
+  "avg_latency_ms": 50.65,
+  "requests_total": 33,
   "endpoints": {
     "/api/auth/login": {
-      "count": 3,
-      "avg_ms": 235.88
+      "count": 2,
+      "avg_ms": 238.46
     },
-    "/api/email/send-salary-slip": {
-      "count": 4,
-      "avg_ms": 7164.85
+    "/api/telegram/broadcast-attendance": {
+      "count": 1,
+      "avg_ms": 6.38
+    },
+    "/api/auth/me": {
+      "count": 1,
+      "avg_ms": 2.71
+    },
+    "/api/users": {
+      "count": 2,
+      "avg_ms": 16.73
+    },
+    "/api/leaves": {
+      "count": 2,
+      "avg_ms": 8.69
+    },
+    "/api/attendance": {
+      "count": 2,
+      "avg_ms": 25.65
+    },
+    "/api/messages": {
+      "count": 2,
+      "avg_ms": 20.34
+    },
+    "/api/field-exits": {
+      "count": 2,
+      "avg_ms": 31.46
+    },
+    "/api/messages/unread-count": {
+      "count": 2,
+      "avg_ms": 15.48
+    },
+    "/api/notifications/my": {
+      "count": 5,
+      "avg_ms": 16.2
+    },
+    "/api/notifications/count": {
+      "count": 2,
+      "avg_ms": 3.28
+    },
+    "/api/telegram/status": {
+      "count": 2,
+      "avg_ms": 4.43
     },
     "/api/telegram/bot-info": {
       "count": 2,
-      "avg_ms": 387.51
+      "avg_ms": 400.15
     },
-    "/api/email/send-bulk-salary-slips": {
-      "count": 3,
-      "avg_ms": 11089.49
-    },
-    "/api/telegram/test": {
+    "/api/push/settings": {
       "count": 2,
-      "avg_ms": 3.17
+      "avg_ms": 6.52
     },
-    "/api/healthz": {
-      "count": 1,
-      "avg_ms": 0.37
+    "/api/telegram/linked-employees": {
+      "count": 2,
+      "avg_ms": 8.54
+    },
+    "/api/push/stats": {
+      "count": 2,
+      "avg_ms": 10.95
     }
   },
   "recent": [
     {
-      "ts": "2026-04-02T09:47:44.811060",
+      "ts": "2026-04-02T10:00:02.121915",
       "method": "POST",
       "path": "/api/auth/login",
       "status": 200,
-      "duration_ms": 238.93
+      "duration_ms": 241.92
     },
     {
-      "ts": "2026-04-02T09:47:52.335785",
+      "ts": "2026-04-02T10:00:02.315037",
       "method": "POST",
-      "path": "/api/email/send-salary-slip",
+      "path": "/api/telegram/broadcast-attendance",
       "status": 200,
-      "duration_ms": 7396.94
+      "duration_ms": 6.38
     },
     {
-      "ts": "2026-04-02T09:48:58.718741",
+      "ts": "2026-04-02T10:00:21.505871",
       "method": "POST",
       "path": "/api/auth/login",
       "status": 200,
-      "duration_ms": 233.86
+      "duration_ms": 235.01
     },
     {
-      "ts": "2026-04-02T09:48:59.193564",
+      "ts": "2026-04-02T10:00:21.609343",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.71
+    },
+    {
+      "ts": "2026-04-02T10:00:21.657704",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 22.73
+    },
+    {
+      "ts": "2026-04-02T10:00:21.665853",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 11.91
+    },
+    {
+      "ts": "2026-04-02T10:00:21.689034",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 35.03
+    },
+    {
+      "ts": "2026-04-02T10:00:21.705524",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 32.96
+    },
+    {
+      "ts": "2026-04-02T10:00:21.706645",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 39.07
+    },
+    {
+      "ts": "2026-04-02T10:00:21.708744",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 21.64
+    },
+    {
+      "ts": "2026-04-02T10:00:21.710540",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 40.77
+    },
+    {
+      "ts": "2026-04-02T10:00:21.717313",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 5.47
+    },
+    {
+      "ts": "2026-04-02T10:00:21.718903",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 10.73
+    },
+    {
+      "ts": "2026-04-02T10:00:21.758655",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 16.27
+    },
+    {
+      "ts": "2026-04-02T10:00:21.766699",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 7.73
+    },
+    {
+      "ts": "2026-04-02T10:00:21.771963",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 9.32
+    },
+    {
+      "ts": "2026-04-02T10:00:21.790782",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 23.64
+    },
+    {
+      "ts": "2026-04-02T10:00:21.791061",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 23.85
+    },
+    {
+      "ts": "2026-04-02T10:00:21.842355",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.44
+    },
+    {
+      "ts": "2026-04-02T10:00:21.897956",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.87
+    },
+    {
+      "ts": "2026-04-02T10:00:22.570136",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.29
+    },
+    {
+      "ts": "2026-04-02T10:00:22.633675",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.29
+    },
+    {
+      "ts": "2026-04-02T10:00:22.687667",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.27
+    },
+    {
+      "ts": "2026-04-02T10:00:25.401645",
+      "method": "GET",
+      "path": "/api/telegram/status",
+      "status": 200,
+      "duration_ms": 5.84
+    },
+    {
+      "ts": "2026-04-02T10:00:25.452690",
+      "method": "GET",
+      "path": "/api/telegram/status",
+      "status": 200,
+      "duration_ms": 3.02
+    },
+    {
+      "ts": "2026-04-02T10:00:25.749811",
       "method": "GET",
       "path": "/api/telegram/bot-info",
       "status": 200,
-      "duration_ms": 385.74
+      "duration_ms": 388.0
     },
     {
-      "ts": "2026-04-02T09:49:06.742918",
-      "method": "POST",
-      "path": "/api/email/send-salary-slip",
-      "status": 200,
-      "duration_ms": 7454.4
-    },
-    {
-      "ts": "2026-04-02T09:49:13.399756",
-      "method": "POST",
-      "path": "/api/email/send-salary-slip",
-      "status": 200,
-      "duration_ms": 6554.7
-    },
-    {
-      "ts": "2026-04-02T09:49:21.207156",
-      "method": "POST",
-      "path": "/api/email/send-bulk-salary-slips",
-      "status": 200,
-      "duration_ms": 7688.52
-    },
-    {
-      "ts": "2026-04-02T09:49:28.809223",
-      "method": "POST",
-      "path": "/api/email/send-bulk-salary-slips",
-      "status": 200,
-      "duration_ms": 7497.02
-    },
-    {
-      "ts": "2026-04-02T09:49:28.938197",
-      "method": "POST",
-      "path": "/api/telegram/test",
-      "status": 200,
-      "duration_ms": 3.24
-    },
-    {
-      "ts": "2026-04-02T09:49:29.037508",
+      "ts": "2026-04-02T10:00:25.837014",
       "method": "GET",
-      "path": "/api/healthz",
+      "path": "/api/push/settings",
       "status": 200,
-      "duration_ms": 0.37
+      "duration_ms": 8.28
     },
     {
-      "ts": "2026-04-02T09:49:41.373679",
-      "method": "POST",
-      "path": "/api/auth/login",
+      "ts": "2026-04-02T10:00:25.838739",
+      "method": "GET",
+      "path": "/api/telegram/linked-employees",
       "status": 200,
-      "duration_ms": 234.85
+      "duration_ms": 9.89
     },
     {
-      "ts": "2026-04-02T09:49:41.888202",
+      "ts": "2026-04-02T10:00:25.839789",
+      "method": "GET",
+      "path": "/api/push/stats",
+      "status": 200,
+      "duration_ms": 10.99
+    },
+    {
+      "ts": "2026-04-02T10:00:26.207271",
       "method": "GET",
       "path": "/api/telegram/bot-info",
       "status": 200,
-      "duration_ms": 389.28
+      "duration_ms": 412.3
     },
     {
-      "ts": "2026-04-02T09:49:49.216853",
-      "method": "POST",
-      "path": "/api/email/send-salary-slip",
+      "ts": "2026-04-02T10:00:26.263215",
+      "method": "GET",
+      "path": "/api/push/settings",
       "status": 200,
-      "duration_ms": 7253.35
+      "duration_ms": 4.76
     },
     {
-      "ts": "2026-04-02T09:50:07.399773",
-      "method": "POST",
-      "path": "/api/email/send-bulk-salary-slips",
+      "ts": "2026-04-02T10:00:26.263481",
+      "method": "GET",
+      "path": "/api/telegram/linked-employees",
       "status": 200,
-      "duration_ms": 18082.94
+      "duration_ms": 7.19
     },
     {
-      "ts": "2026-04-02T09:50:07.644916",
-      "method": "POST",
-      "path": "/api/telegram/test",
+      "ts": "2026-04-02T10:00:26.264575",
+      "method": "GET",
+      "path": "/api/push/stats",
       "status": 200,
-      "duration_ms": 3.09
+      "duration_ms": 10.9
     }
   ]
 }

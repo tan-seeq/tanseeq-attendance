@@ -76,8 +76,10 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
   - Auto-notification on late check-in (employee + admin)
   - Admin dashboard: linked employees list, stats
   - Telegram salary slip PDF delivery to linked employees
+  - Broadcast attendance to all employees via Telegram (super admin button)
   - Test message functionality
 - [x] **Salary Slips via Telegram**: When sending salary slips (single/bulk), PDF is automatically sent via Telegram to linked employees
+- [x] **Broadcast Attendance Button**: Super admin can send today's attendance status to ALL linked Telegram employees with one click
 - [x] **Testing: 100% pass rate** - 37/37 total tests across iterations 10-13
 
 ### Session 9 (2026-03-31): Critical Deployment Fix + PWA

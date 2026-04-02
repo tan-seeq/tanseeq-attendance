@@ -36,6 +36,8 @@ const PushNotifications = () => {
   const [tgLinkedEmployees, setTgLinkedEmployees] = useState([]);
   const [tgLinking, setTgLinking] = useState(false);
   const [tgTestSending, setTgTestSending] = useState(false);
+  const [broadcasting, setBroadcasting] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState(null);
 
   const checkSubscription = useCallback(async () => {
     try {
@@ -171,6 +173,21 @@ const PushNotifications = () => {
       alert('فشل إرسال الرسالة التجريبية');
     } finally {
       setTgTestSending(false);
+    }
+  };
+
+  const broadcastAttendance = async () => {
+    if (!window.confirm('هل تريد إرسال إشعارات الحضور لجميع الموظفين عبر Telegram؟')) return;
+    setBroadcasting(true);
+    setBroadcastResult(null);
+    try {
+      const res = await axios.post(`${API}/telegram/broadcast-attendance`);
+      setBroadcastResult(res.data);
+      alert(res.data.message);
+    } catch (e) {
+      alert('فشل إرسال الإشعارات');
+    } finally {
+      setBroadcasting(false);
     }
   };
 
@@ -467,6 +484,46 @@ const PushNotifications = () => {
           )}
         </div>
       </div>
+
+      {/* Admin: Broadcast Attendance via Telegram */}
+      {isAdmin && tgBot.connected && (
+        <div className="bg-white rounded-xl shadow-sm border p-6" data-testid="telegram-broadcast-section">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">إرسال إشعارات الحضور للجميع</h3>
+              <p className="text-sm text-gray-500">إرسال حالة الحضور اليومية لكل موظف مربوط بـ Telegram</p>
+            </div>
+            <button
+              onClick={broadcastAttendance}
+              disabled={broadcasting}
+              data-testid="broadcast-attendance-btn"
+              className="px-6 py-3 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium disabled:opacity-50 flex items-center gap-2"
+            >
+              <PaperAirplaneIcon className="h-5 w-5" />
+              {broadcasting ? 'جاري الإرسال...' : 'إرسال الحضور عبر Telegram'}
+            </button>
+          </div>
+          
+          {broadcastResult && (
+            <div className="mt-3 bg-sky-50 border border-sky-200 rounded-lg p-4">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="text-xl font-bold text-green-600">{broadcastResult.sent}</p>
+                  <p className="text-xs text-gray-600">تم الإرسال</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-red-500">{broadcastResult.failed}</p>
+                  <p className="text-xs text-gray-600">فشل</p>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-400">{broadcastResult.not_linked}</p>
+                  <p className="text-xs text-gray-600">غير مربوط</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Admin: Linked Employees */}
       {isAdmin && tgLinkedEmployees.length > 0 && (

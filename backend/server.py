@@ -14943,6 +14943,119 @@ async def telegram_test_message(current_user: User = Depends(get_current_user)):
         return {"message": "تم إرسال رسالة تجريبية على Telegram بنجاح!"}
     return {"message": "فشل الإرسال. تحقق من ربط الحساب."}
 
+@api_router.post("/telegram/broadcast-attendance")
+async def telegram_broadcast_attendance(current_user: User = Depends(get_super_admin_user)):
+    """Broadcast today's attendance summary to all linked Telegram employees"""
+    from datetime import datetime
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Get today's attendance records
+    records = await db.attendance.find(
+        {"date": today},
+        {"_id": 0, "user_id": 1, "user_name": 1, "check_in": 1, "check_out": 1, "status": 1, "is_late": 1, "late_minutes": 1}
+    ).to_list(200)
+    
+    # Get all active employees
+    employees = await db.users.find(
+        {"is_active": True},
+        {"_id": 0, "id": 1, "name": 1}
+    ).to_list(200)
+    
+    # Get all linked Telegram accounts
+    links = await db.telegram_links.find({}, {"_id": 0}).to_list(200)
+    link_map = {l["employee_id"]: l["chat_id"] for l in links}
+    
+    # Build attendance map
+    attendance_map = {}
+    for r in records:
+        attendance_map[r.get("user_id")] = r
+    
+    sent_count = 0
+    failed_count = 0
+    not_linked = 0
+    
+    for emp in employees:
+        emp_id = emp["id"]
+        chat_id = link_map.get(emp_id)
+        
+        if not chat_id:
+            not_linked += 1
+            continue
+        
+        record = attendance_map.get(emp_id)
+        
+        if record:
+            status = record.get("status", "present")
+            check_in = record.get("check_in", "--")
+            check_out = record.get("check_out", "--")
+            late_min = record.get("late_minutes", 0)
+            
+            if status == "late":
+                status_text = f"Late ({late_min} min)"
+                status_icon = "🟡"
+            elif status in ("present",):
+                status_text = "Present - On Time"
+                status_icon = "🟢"
+            elif status in ("absent",):
+                status_text = "Absent"
+                status_icon = "🔴"
+            elif status in ("leave",):
+                status_text = "On Leave"
+                status_icon = "🔵"
+            else:
+                status_text = status
+                status_icon = "⚪"
+            
+            msg = (
+                f"{status_icon} <b>Attendance Update - {today}</b>\n\n"
+                f"Employee: <b>{emp['name']}</b>\n"
+                f"Status: {status_text}\n"
+                f"Check-in: {check_in or '--'}\n"
+                f"Check-out: {check_out or '--'}"
+            )
+        else:
+            msg = (
+                f"🔴 <b>Attendance Update - {today}</b>\n\n"
+                f"Employee: <b>{emp['name']}</b>\n"
+                f"Status: No attendance record"
+            )
+        
+        result = await tg_send_message(chat_id, msg)
+        if result:
+            sent_count += 1
+        else:
+            failed_count += 1
+    
+    # Also send summary to admins
+    present = len([r for r in records if r.get("status") in ("present", "late")])
+    late = len([r for r in records if r.get("status") == "late"])
+    absent = len(employees) - present
+    
+    admin_summary = (
+        f"<b>Attendance Summary - {today}</b>\n\n"
+        f"🟢 Present: {present - late}\n"
+        f"🟡 Late: {late}\n"
+        f"🔴 Absent/No Record: {absent}\n"
+        f"👥 Total Employees: {len(employees)}\n\n"
+        f"📨 Sent to: {sent_count} employees\n"
+        f"❌ Failed: {failed_count}\n"
+        f"🔗 Not linked: {not_linked}"
+    )
+    
+    for admin in await db.users.find({"role": "super_admin"}, {"_id": 0, "id": 1}).to_list(10):
+        admin_chat = link_map.get(admin["id"])
+        if admin_chat:
+            await tg_send_message(admin_chat, admin_summary)
+    
+    return {
+        "success": True,
+        "sent": sent_count,
+        "failed": failed_count,
+        "not_linked": not_linked,
+        "total_employees": len(employees),
+        "message": f"تم إرسال إشعارات الحضور لـ {sent_count} موظف عبر Telegram"
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
