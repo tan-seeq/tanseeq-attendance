@@ -56,15 +56,11 @@ async def send_push_notification(db, user_id: str, title: str, body: str, url: s
                 vapid_claims=get_vapid_claims(),
             )
             sent += 1
-        except WebPushException as e:
-            err_str = str(e)
-            # 404/410 = subscription expired or unsubscribed - clean up silently
-            if "410" in err_str or "404" in err_str or "Gone" in err_str:
-                failed_ids.append(sub.get("id"))
-            else:
-                logger.warning(f"Push failed for user {user_id}: {err_str[:100]}")
+        except WebPushException:
+            # Any push failure = subscription is invalid, clean it up
+            failed_ids.append(sub.get("id"))
         except Exception:
-            pass  # Non-critical, skip silently
+            failed_ids.append(sub.get("id"))
 
     # Clean up expired subscriptions
     if failed_ids:
