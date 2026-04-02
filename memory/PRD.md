@@ -59,14 +59,18 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 
 ## What's Been Implemented
 
-### Session 10 (2026-04-01): Leave Types + Manual Entry Notes
+### Session 10 (2026-04-01): Leave Types + Manual Entry Notes + Push Notifications
 - [x] **Added 5 absence types**: full_day, half_day, annual_leave (no deduction), sick_leave_paid (no deduction), sick_leave_unpaid (with deduction)
 - [x] **Backend deduction logic**: Annual leave and paid sick leave skip payroll deductions entirely
 - [x] **Notes column**: Added "ملاحظات" column to attendance table showing "إدخال يدوي" badge for manual entries
-- [x] **Enhanced custom report**: Added Leave Type, Deduction columns and expanded Notes to include manual absence details
-- [x] **Silenced createIndex warnings**: All MongoDB index creation warnings removed for clean production logs
-- [x] **Dashboard 403 fix**: /api/users call now conditional on admin role
-- [x] **Testing: 100% pass rate** - 8/8 backend tests, full frontend verification
+- [x] **Fixed auto-email on manual absence**: Removed unnecessary email alerts for admin-created absences
+- [x] **PWA Push Notifications**: New sidebar section "إشعارات الهاتف" for ALL users
+  - Subscribe/unsubscribe push notifications on mobile
+  - Admin settings: toggle late/absence notifications, employee/admin recipients
+  - Push notifications on late check-in (integrated with check-in endpoint)
+  - Service worker handles push events with click-to-open
+  - VAPID authentication with pywebpush
+- [x] **Testing: 100% pass rate** - 18/18 total tests across iterations 10 & 11
 
 ### Session 9 (2026-03-31): Critical Deployment Fix + PWA
 - [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility
