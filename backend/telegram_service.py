@@ -25,11 +25,13 @@ async def _call_api(method: str, data: dict = None):
             resp = await client.post(f"{BOT_API}/{method}", json=data or {})
             result = resp.json()
             if not result.get("ok"):
-                logger.warning(f"Telegram API error: {result.get('description')}")
+                if method != "getUpdates":  # Don't spam logs for polling
+                    logger.warning(f"Telegram API error: {result.get('description')}")
                 return None
             return result.get("result")
     except Exception as e:
-        logger.error(f"Telegram API call failed: {e}")
+        if method != "getUpdates":
+            logger.error(f"Telegram API call failed: {e}")
         return None
 
 

@@ -401,6 +401,8 @@ async def init_telegram_polling():
             print(f"Telegram bot connected: @{bot_info.get('username', '?')}")
             
             async def _telegram_poll_loop():
+                # Silence httpx logging for polling requests
+                logging.getLogger("httpx").setLevel(logging.WARNING)
                 while True:
                     try:
                         await poll_updates(_db)
