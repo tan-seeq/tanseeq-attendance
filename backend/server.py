@@ -1458,6 +1458,14 @@ async def email_salary_slip(data: dict, current_user: User = Depends(get_admin_u
             "sent_by": current_user.id
         })
     
+    # Send via Telegram independently (even if email fails)
+    try:
+        from telegram_service import send_salary_slip_telegram
+        tg_result = await send_salary_slip_telegram(db, employee_id, employee.get("name", ""), cycle_month, pdf_bytes)
+        result["telegram_sent"] = tg_result.get("sent", False)
+    except Exception:
+        result["telegram_sent"] = False
+    
     return result
 
 @api_router.post("/email/send-bulk-salary-slips")
@@ -1500,10 +1508,19 @@ async def email_bulk_salary_slips(data: dict, current_user: User = Depends(get_a
         else:
             results["failed"] += 1
         
+        # Send via Telegram independently
+        try:
+            from telegram_service import send_salary_slip_telegram
+            tg_result = await send_salary_slip_telegram(db, emp_id, employee.get("name", ""), cycle_month, pdf_bytes)
+            telegram_sent = tg_result.get("sent", False)
+        except Exception:
+            telegram_sent = False
+        
         results["details"].append({
             "employee_id": emp_id,
             "employee_name": employee.get("name", ""),
             "status": "sent" if result["success"] else "failed",
+            "telegram_sent": telegram_sent,
             "error": result.get("error")
         })
     

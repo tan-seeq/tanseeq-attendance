@@ -44,6 +44,46 @@ async def send_message(chat_id: int, text: str):
     })
 
 
+async def send_document(chat_id: int, file_bytes: bytes, filename: str, caption: str = ""):
+    """Send a document (PDF, etc.) to a Telegram user."""
+    if not BOT_TOKEN:
+        return None
+    try:
+        import io
+        async with httpx.AsyncClient(timeout=30) as client:
+            files = {"document": (filename, io.BytesIO(file_bytes), "application/pdf")}
+            data = {"chat_id": str(chat_id), "caption": caption, "parse_mode": "HTML"}
+            resp = await client.post(f"{BOT_API}/sendDocument", data=data, files=files)
+            result = resp.json()
+            if not result.get("ok"):
+                logger.warning(f"Telegram sendDocument error: {result.get('description')}")
+                return None
+            return result.get("result")
+    except Exception as e:
+        logger.error(f"Telegram sendDocument failed: {e}")
+        return None
+
+
+async def send_salary_slip_telegram(db, employee_id: str, employee_name: str, cycle_month: str, pdf_bytes: bytes):
+    """Send salary slip PDF via Telegram to a specific employee."""
+    link = await db.telegram_links.find_one(
+        {"employee_id": employee_id}, {"_id": 0}
+    )
+    if not link:
+        return {"sent": False, "reason": "not_linked"}
+
+    filename = f"salary_slip_{cycle_month}_{employee_name.replace(' ', '_')}.pdf"
+    caption = (
+        f"<b>Salary Slip - {cycle_month}</b>\n\n"
+        f"Employee: {employee_name}\n"
+        f"This is your confidential salary slip."
+    )
+    result = await send_document(link["chat_id"], pdf_bytes, filename, caption)
+    if result:
+        return {"sent": True}
+    return {"sent": False, "reason": "send_failed"}
+
+
 async def get_bot_info():
     """Get bot information."""
     return await _call_api("getMe")
