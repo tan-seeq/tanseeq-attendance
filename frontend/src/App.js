@@ -43,6 +43,7 @@ import ReportsDashboard from './WorkReports/ReportsDashboard';
 import PermissionsManager from './WorkReports/PermissionsManager';
 import NotificationSystem from './components/NotificationSystem';
 import MarketingVisits from './components/MarketingVisits';
+import PushNotifications from './components/PushNotifications/PushNotifications';
 
 // Import Advances & Loans Components
 import AdvancesDashboard from './components/AdvancesLoans/AdvancesDashboard';
@@ -244,6 +245,11 @@ const AppWithNotifications = () => {
             <Route path="/notifications" element={
               <ProtectedRoute requiredRole="super_admin">
                 <Layout><NotificationSystem /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/push-notifications" element={
+              <ProtectedRoute>
+                <Layout><PushNotifications /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/marketing-visits" element={

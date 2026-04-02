@@ -8,7 +8,8 @@ import {
   Bars3Icon as MenuIcon, XMarkIcon as XIcon,
   UserGroupIcon, ExclamationTriangleIcon, BellIcon,
   Cog6ToothIcon, ServerIcon, ShieldCheckIcon,
-  CalculatorIcon, BuildingOfficeIcon, BanknotesIcon
+  CalculatorIcon, BuildingOfficeIcon, BanknotesIcon,
+  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -32,6 +33,7 @@ const Layout = ({ children }) => {
     { name: 'الزيارات التسويقية', href: '/marketing-visits', icon: BuildingOfficeIcon },
     { name: 'السُلف والعُهد', href: '/advances', icon: BanknotesIcon }, // NEW: للموظفين
     { name: 'خصوماتي', href: '/my-deductions', icon: CalculatorIcon },
+    { name: 'إشعارات الهاتف', href: '/push-notifications', icon: DevicePhoneMobileIcon },
     
     // قسم الإدارة - للمديرين والسوبر أدمن
     ...(user?.role === 'admin' || user?.role === 'super_admin' ? [

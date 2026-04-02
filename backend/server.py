@@ -1751,6 +1751,15 @@ async def check_in(current_user: User = Depends(get_current_user)):
             )
         except Exception:
             pass  # Don't fail check-in if email fails
+        
+        # Push notification for late check-in
+        try:
+            push_settings = await db.system_config.find_one({"type": "push_settings"}, {"_id": 0})
+            if not push_settings or push_settings.get("late_notifications", True):
+                from push_service import notify_late_checkin
+                await notify_late_checkin(db, current_user.name, current_user.id, late_minutes, today)
+        except Exception:
+            pass
     
     return {
         "message": "تم تسجيل الحضور بنجاح ✅",
@@ -14663,6 +14672,111 @@ async def export_work_logs_excel(
 from salary_letter_router import build_salary_letter_router
 salary_router = build_salary_letter_router(get_current_user)
 app.include_router(salary_router)
+
+# ============================================================
+# PUSH NOTIFICATIONS ENDPOINTS
+# ============================================================
+from push_service import send_push_notification, send_push_to_admins
+
+@api_router.get("/push/vapid-key")
+async def get_vapid_public_key():
+    """Return VAPID public key for client subscription"""
+    return {"public_key": os.environ.get("VAPID_PUBLIC_KEY", "")}
+
+@api_router.post("/push/subscribe")
+async def push_subscribe(request: dict, current_user: User = Depends(get_current_user)):
+    """Subscribe a device for push notifications"""
+    subscription = request.get("subscription")
+    if not subscription or not subscription.get("endpoint"):
+        raise HTTPException(status_code=400, detail="Invalid subscription")
+    
+    # Check if already subscribed
+    existing = await db.push_subscriptions.find_one({
+        "user_id": current_user.id,
+        "subscription.endpoint": subscription["endpoint"]
+    })
+    if existing:
+        return {"status": "already_subscribed"}
+    
+    await db.push_subscriptions.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": current_user.id,
+        "user_name": current_user.name,
+        "subscription": subscription,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    return {"status": "subscribed"}
+
+@api_router.post("/push/unsubscribe")
+async def push_unsubscribe(request: dict, current_user: User = Depends(get_current_user)):
+    """Unsubscribe a device"""
+    endpoint = request.get("endpoint")
+    if endpoint:
+        await db.push_subscriptions.delete_many({
+            "user_id": current_user.id,
+            "subscription.endpoint": endpoint
+        })
+    return {"status": "unsubscribed"}
+
+@api_router.get("/push/settings")
+async def get_push_settings(current_user: User = Depends(get_current_user)):
+    """Get push notification settings"""
+    settings = await db.system_config.find_one(
+        {"type": "push_settings"},
+        {"_id": 0}
+    )
+    if settings:
+        return {k: v for k, v in settings.items() if k not in ("type",)}
+    return {
+        "late_notifications": True,
+        "absence_notifications": True,
+        "notify_employee": True,
+        "notify_admin": True,
+    }
+
+@api_router.post("/push/settings")
+async def save_push_settings(request: dict, current_user: User = Depends(get_super_admin_user)):
+    """Save push notification settings (admin only)"""
+    await db.system_config.update_one(
+        {"type": "push_settings"},
+        {"$set": {
+            "type": "push_settings",
+            "late_notifications": request.get("late_notifications", True),
+            "absence_notifications": request.get("absence_notifications", True),
+            "notify_employee": request.get("notify_employee", True),
+            "notify_admin": request.get("notify_admin", True),
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    return {"status": "saved"}
+
+@api_router.get("/push/stats")
+async def get_push_stats(current_user: User = Depends(get_current_user)):
+    """Get push notification statistics"""
+    total = await db.push_subscriptions.count_documents({})
+    pipeline = [
+        {"$group": {"_id": "$user_id"}},
+        {"$count": "active_users"}
+    ]
+    result = await db.push_subscriptions.aggregate(pipeline).to_list(1)
+    active = result[0]["active_users"] if result else 0
+    return {"total_subscriptions": total, "active_users": active}
+
+@api_router.post("/push/test")
+async def send_test_push(current_user: User = Depends(get_current_user)):
+    """Send a test push notification to the current user"""
+    sent = await send_push_notification(
+        db, current_user.id,
+        "TANSEEQ HR - Test",
+        "This is a test notification. Push notifications are working!",
+        "/push-notifications",
+        "test"
+    )
+    if sent > 0:
+        return {"message": f"تم إرسال إشعار تجريبي بنجاح ({sent} جهاز)"}
+    return {"message": "لا يوجد أجهزة مسجّلة. تأكد من تفعيل الإشعارات أولاً."}
 
 # Include the router in the main app
 app.include_router(api_router)
