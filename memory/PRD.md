@@ -59,7 +59,7 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
 
 ## What's Been Implemented
 
-### Session 10 (2026-04-01): Leave Types + Manual Entry Notes + Push Notifications
+### Session 10 (2026-04-01): Leave Types + Manual Entry Notes + Push Notifications + Telegram Bot
 - [x] **Added 5 absence types**: full_day, half_day, annual_leave (no deduction), sick_leave_paid (no deduction), sick_leave_unpaid (with deduction)
 - [x] **Backend deduction logic**: Annual leave and paid sick leave skip payroll deductions entirely
 - [x] **Notes column**: Added "ملاحظات" column to attendance table showing "إدخال يدوي" badge for manual entries
@@ -70,7 +70,13 @@ Full-stack HR management application for TANSEEQ Tax Consultancy. Features: atte
   - Push notifications on late check-in (integrated with check-in endpoint)
   - Service worker handles push events with click-to-open
   - VAPID authentication with pywebpush
-- [x] **Testing: 100% pass rate** - 18/18 total tests across iterations 10 & 11
+- [x] **Telegram Bot @tanseeq_hr_bot**: Free Telegram notifications
+  - Employee self-linking via deep link + /start CODE
+  - Background polling every 5s for /start commands
+  - Auto-notification on late check-in (employee + admin)
+  - Admin dashboard: linked employees list, stats
+  - Test message functionality
+- [x] **Testing: 100% pass rate** - 30/30 total tests across iterations 10, 11 & 12
 
 ### Session 9 (2026-03-31): Critical Deployment Fix + PWA
 - [x] **Created `/app/backend/time_utils.py`**: Shared robust time parsing utility
