@@ -10,6 +10,8 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   XCircleIcon,
+  LinkIcon,
+  PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
 
 const PushNotifications = () => {
@@ -27,25 +29,42 @@ const PushNotifications = () => {
   const [stats, setStats] = useState({ total_subscriptions: 0, active_users: 0 });
   const isAdmin = user?.role === 'super_admin' || user?.role === 'admin';
 
+  // Telegram State
+  const [tgBot, setTgBot] = useState({ connected: false, bot_username: '' });
+  const [tgStatus, setTgStatus] = useState({ linked: false, telegram_name: '' });
+  const [tgLink, setTgLink] = useState(null);
+  const [tgLinkedEmployees, setTgLinkedEmployees] = useState([]);
+  const [tgLinking, setTgLinking] = useState(false);
+  const [tgTestSending, setTgTestSending] = useState(false);
+
   const checkSubscription = useCallback(async () => {
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         setLoading(false);
-        return;
+      } else {
+        setPermission(Notification.permission);
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        setIsSubscribed(!!sub);
       }
-      setPermission(Notification.permission);
 
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
-      setIsSubscribed(!!sub);
+      // Load Telegram status
+      const [tgBotRes, tgStatusRes] = await Promise.all([
+        axios.get(`${API}/telegram/bot-info`).catch(() => ({ data: { connected: false } })),
+        axios.get(`${API}/telegram/status`).catch(() => ({ data: { linked: false } })),
+      ]);
+      setTgBot(tgBotRes.data);
+      setTgStatus(tgStatusRes.data);
 
       if (isAdmin) {
-        const [settingsRes, statsRes] = await Promise.all([
+        const [settingsRes, statsRes, linkedRes] = await Promise.all([
           axios.get(`${API}/push/settings`).catch(() => ({ data: {} })),
           axios.get(`${API}/push/stats`).catch(() => ({ data: { total_subscriptions: 0, active_users: 0 } })),
+          axios.get(`${API}/telegram/linked-employees`).catch(() => ({ data: [] })),
         ]);
         if (settingsRes.data) setSettings(s => ({ ...s, ...settingsRes.data }));
         if (statsRes.data) setStats(statsRes.data);
+        setTgLinkedEmployees(linkedRes.data || []);
       }
     } catch (e) {
       console.error('Check subscription error:', e);
@@ -116,6 +135,42 @@ const PushNotifications = () => {
       alert('فشل إرسال الإشعار التجريبي');
     } finally {
       setTestSending(false);
+    }
+  };
+
+  const generateTelegramLink = async () => {
+    setTgLinking(true);
+    try {
+      const res = await axios.post(`${API}/telegram/generate-link`, {
+        employee_id: user?.id,
+      });
+      setTgLink(res.data);
+    } catch (e) {
+      console.error('Generate link error:', e);
+    } finally {
+      setTgLinking(false);
+    }
+  };
+
+  const unlinkTelegram = async () => {
+    try {
+      await axios.post(`${API}/telegram/unlink`);
+      setTgStatus({ linked: false });
+      setTgLink(null);
+    } catch (e) {
+      console.error('Unlink error:', e);
+    }
+  };
+
+  const sendTelegramTest = async () => {
+    setTgTestSending(true);
+    try {
+      const res = await axios.post(`${API}/telegram/test`);
+      alert(res.data.message);
+    } catch (e) {
+      alert('فشل إرسال الرسالة التجريبية');
+    } finally {
+      setTgTestSending(false);
     }
   };
 
@@ -317,6 +372,119 @@ const PushNotifications = () => {
           <li>اضغط "تفعيل الإشعارات" وقبل الإذن</li>
         </ol>
       </div>
+
+      {/* ========== TELEGRAM SECTION ========== */}
+      <div className="bg-white rounded-xl shadow-sm border p-6" data-testid="telegram-section">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-sky-100 rounded-lg">
+            <PaperAirplaneIcon className="h-6 w-6 text-sky-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Telegram Bot</h2>
+            <p className="text-sm text-gray-500">إشعارات فورية عبر Telegram - مجاني بالكامل</p>
+          </div>
+          {tgBot.connected && (
+            <span className="mr-auto px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+              @{tgBot.bot_username}
+            </span>
+          )}
+        </div>
+
+        {/* Link Status */}
+        <div className={`rounded-xl border-2 p-5 transition-all ${
+          tgStatus.linked ? 'bg-green-50 border-green-300' : 'bg-gray-50 border-gray-200'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-full ${tgStatus.linked ? 'bg-green-200' : 'bg-gray-200'}`}>
+                <LinkIcon className={`h-6 w-6 ${tgStatus.linked ? 'text-green-700' : 'text-gray-500'}`} />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {tgStatus.linked ? `مربوط بـ ${tgStatus.telegram_name}` : 'غير مربوط بـ Telegram'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {tgStatus.linked
+                    ? 'ستصلك إشعارات الحضور والتأخير على Telegram'
+                    : 'اربط حسابك لتستلم إشعارات على Telegram'}
+                </p>
+              </div>
+            </div>
+            
+            {tgStatus.linked ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={sendTelegramTest}
+                  disabled={tgTestSending}
+                  data-testid="telegram-test-btn"
+                  className="px-4 py-2 bg-sky-100 text-sky-800 rounded-lg hover:bg-sky-200 text-sm font-medium disabled:opacity-50"
+                >
+                  {tgTestSending ? 'جاري...' : 'رسالة تجريبية'}
+                </button>
+                <button
+                  onClick={unlinkTelegram}
+                  data-testid="telegram-unlink-btn"
+                  className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium"
+                >
+                  إلغاء الربط
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={generateTelegramLink}
+                disabled={tgLinking}
+                data-testid="telegram-link-btn"
+                className="px-5 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium disabled:opacity-50"
+              >
+                {tgLinking ? 'جاري...' : 'ربط Telegram'}
+              </button>
+            )}
+          </div>
+
+          {/* Generated Link */}
+          {tgLink && !tgStatus.linked && (
+            <div className="mt-4 pt-4 border-t border-gray-200" data-testid="telegram-link-instructions">
+              <h4 className="font-semibold text-gray-900 mb-3">خطوات الربط:</h4>
+              <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 mb-4">
+                <li>اضغط على الرابط أدناه لفتح البوت على Telegram</li>
+                <li>اضغط <strong>START</strong> في البوت</li>
+                <li>ارجع هنا وحدّث الصفحة</li>
+              </ol>
+              <a
+                href={tgLink.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="telegram-deep-link"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium text-base"
+              >
+                <PaperAirplaneIcon className="h-5 w-5" />
+                فتح @{tgLink.bot_username} على Telegram
+              </a>
+              <p className="mt-2 text-xs text-gray-500">
+                الكود: <code className="bg-gray-200 px-2 py-0.5 rounded">{tgLink.code}</code>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Admin: Linked Employees */}
+      {isAdmin && tgLinkedEmployees.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border p-6" data-testid="telegram-linked-list">
+          <h3 className="font-semibold text-gray-900 mb-3">الموظفون المربوطون بـ Telegram ({tgLinkedEmployees.length})</h3>
+          <div className="space-y-2">
+            {tgLinkedEmployees.map((emp, i) => (
+              <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">{emp.employee_name}</p>
+                  <p className="text-sm text-gray-500">Telegram: {emp.telegram_name}</p>
+                </div>
+                <CheckCircleIcon className="h-5 w-5 text-green-500" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

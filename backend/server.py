@@ -384,7 +384,35 @@ async def init_auto_report_scheduler():
         else:
             print("Auto monthly report is disabled")
     except Exception as e:
-        print(f"⚠️ Auto report scheduler init warning: {e}")
+        print(f"Auto report scheduler init warning: {e}")
+
+@app.on_event("startup")
+async def init_telegram_polling():
+    """Start Telegram bot polling for /start link commands"""
+    import os
+    if not os.environ.get("TELEGRAM_BOT_TOKEN"):
+        print("Telegram bot token not configured, skipping")
+        return
+    try:
+        from telegram_service import poll_updates, get_bot_info
+        _db = _ensure_db()
+        bot_info = await get_bot_info()
+        if bot_info:
+            print(f"Telegram bot connected: @{bot_info.get('username', '?')}")
+            
+            async def _telegram_poll_loop():
+                while True:
+                    try:
+                        await poll_updates(_db)
+                    except Exception as e:
+                        logger.error(f"Telegram poll error: {e}")
+                    await asyncio.sleep(5)
+            
+            asyncio.create_task(_telegram_poll_loop())
+        else:
+            print("Telegram bot connection failed")
+    except Exception as e:
+        print(f"Telegram init warning: {e}")
 
 # Create uploads directory
 uploads_dir = ROOT_DIR / "uploads"
@@ -1758,6 +1786,13 @@ async def check_in(current_user: User = Depends(get_current_user)):
             if not push_settings or push_settings.get("late_notifications", True):
                 from push_service import notify_late_checkin
                 await notify_late_checkin(db, current_user.name, current_user.id, late_minutes, today)
+        except Exception:
+            pass
+        
+        # Telegram notification for late check-in
+        try:
+            from telegram_service import notify_late_telegram
+            await notify_late_telegram(db, current_user.name, current_user.id, late_minutes, today)
         except Exception:
             pass
     
@@ -14777,6 +14812,117 @@ async def send_test_push(current_user: User = Depends(get_current_user)):
     if sent > 0:
         return {"message": f"تم إرسال إشعار تجريبي بنجاح ({sent} جهاز)"}
     return {"message": "لا يوجد أجهزة مسجّلة. تأكد من تفعيل الإشعارات أولاً."}
+
+# ============================================================
+# TELEGRAM BOT ENDPOINTS
+# ============================================================
+from telegram_service import (
+    send_message as tg_send_message,
+    get_bot_info as tg_get_bot_info,
+    poll_updates as tg_poll_updates,
+    notify_late_telegram,
+)
+import secrets
+
+@api_router.get("/telegram/bot-info")
+async def telegram_bot_info():
+    """Get Telegram bot information"""
+    info = await tg_get_bot_info()
+    if info:
+        return {
+            "connected": True,
+            "bot_name": info.get("first_name", ""),
+            "bot_username": info.get("username", ""),
+        }
+    return {"connected": False, "bot_name": "", "bot_username": ""}
+
+@api_router.post("/telegram/generate-link")
+async def telegram_generate_link(request: dict, current_user: User = Depends(get_current_user)):
+    """Generate a Telegram link code for an employee"""
+    employee_id = request.get("employee_id", current_user.id)
+    
+    # Only admin can generate for others
+    if employee_id != current_user.id and current_user.role not in ("admin", "super_admin"):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Get employee info
+    employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Generate unique code
+    code = f"TQ{secrets.token_hex(6).upper()}"
+    
+    # Invalidate old codes
+    await db.telegram_pending_links.update_many(
+        {"employee_id": employee_id, "used": False},
+        {"$set": {"used": True}}
+    )
+    
+    # Create new pending link
+    await db.telegram_pending_links.insert_one({
+        "code": code,
+        "employee_id": employee_id,
+        "employee_name": employee.get("name", ""),
+        "used": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_user.id
+    })
+    
+    # Get bot username
+    bot_info = await tg_get_bot_info()
+    bot_username = bot_info.get("username", "tanseeq_hr_bot") if bot_info else "tanseeq_hr_bot"
+    
+    return {
+        "code": code,
+        "link": f"https://t.me/{bot_username}?start={code}",
+        "bot_username": bot_username,
+        "employee_name": employee.get("name", ""),
+    }
+
+@api_router.get("/telegram/status")
+async def telegram_link_status(current_user: User = Depends(get_current_user)):
+    """Check if current user has linked Telegram"""
+    link = await db.telegram_links.find_one(
+        {"employee_id": current_user.id},
+        {"_id": 0}
+    )
+    if link:
+        return {
+            "linked": True,
+            "telegram_name": link.get("telegram_name", ""),
+            "linked_at": link.get("created_at", link.get("updated_at", "")),
+        }
+    return {"linked": False}
+
+@api_router.post("/telegram/unlink")
+async def telegram_unlink(current_user: User = Depends(get_current_user)):
+    """Unlink Telegram from current user"""
+    await db.telegram_links.delete_many({"employee_id": current_user.id})
+    return {"status": "unlinked"}
+
+@api_router.get("/telegram/linked-employees")
+async def telegram_linked_employees(current_user: User = Depends(get_super_admin_user)):
+    """Get list of employees with linked Telegram (admin only)"""
+    links = await db.telegram_links.find({}, {"_id": 0}).to_list(100)
+    return links
+
+@api_router.post("/telegram/test")
+async def telegram_test_message(current_user: User = Depends(get_current_user)):
+    """Send a test message via Telegram"""
+    link = await db.telegram_links.find_one(
+        {"employee_id": current_user.id},
+        {"_id": 0}
+    )
+    if not link:
+        return {"message": "حسابك غير مربوط بـ Telegram. اربط حسابك أولاً."}
+    
+    result = await tg_send_message(link["chat_id"],
+        f"<b>TANSEEQ HR - Test</b>\n\nThis is a test message. Telegram notifications are working!"
+    )
+    if result:
+        return {"message": "تم إرسال رسالة تجريبية على Telegram بنجاح!"}
+    return {"message": "فشل الإرسال. تحقق من ربط الحساب."}
 
 # Include the router in the main app
 app.include_router(api_router)

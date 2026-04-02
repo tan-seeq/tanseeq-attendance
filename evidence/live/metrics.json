@@ -1,502 +1,510 @@
 {
-  "total_requests": 96,
-  "success_count": 95,
-  "error_count": 1,
-  "success_rate": 98.96,
-  "error_rate": 1.04,
-  "avg_response_ms": 39.83,
-  "avg_latency_ms": 39.83,
-  "requests_total": 96,
+  "total_requests": 129,
+  "success_count": 124,
+  "error_count": 5,
+  "success_rate": 96.12,
+  "error_rate": 3.88,
+  "avg_response_ms": 72.1,
+  "avg_latency_ms": 72.1,
+  "requests_total": 129,
   "endpoints": {
     "/api/auth/login": {
-      "count": 12,
-      "avg_ms": 236.38
-    },
-    "/api/push/vapid-key": {
-      "count": 2,
-      "avg_ms": 1.02
-    },
-    "/api/push/settings": {
-      "count": 8,
-      "avg_ms": 7.44
-    },
-    "/api/push/stats": {
       "count": 6,
-      "avg_ms": 12.23
+      "avg_ms": 239.23
+    },
+    "/api/telegram/bot-info": {
+      "count": 9,
+      "avg_ms": 395.17
+    },
+    "/api/telegram/status": {
+      "count": 11,
+      "avg_ms": 7.88
+    },
+    "/api/telegram/generate-link": {
+      "count": 7,
+      "avg_ms": 345.0
     },
     "/api/auth/me": {
-      "count": 5,
-      "avg_ms": 4.43
+      "count": 7,
+      "avg_ms": 2.83
     },
     "/api/users": {
       "count": 6,
-      "avg_ms": 11.31
-    },
-    "/api/leaves": {
-      "count": 6,
-      "avg_ms": 11.41
+      "avg_ms": 42.21
     },
     "/api/attendance": {
       "count": 6,
-      "avg_ms": 21.9
+      "avg_ms": 53.39
     },
-    "/api/field-exits": {
+    "/api/leaves": {
       "count": 6,
-      "avg_ms": 27.14
+      "avg_ms": 18.4
     },
     "/api/messages/unread-count": {
       "count": 6,
-      "avg_ms": 10.57
+      "avg_ms": 20.64
     },
     "/api/messages": {
       "count": 6,
-      "avg_ms": 13.5
+      "avg_ms": 38.33
+    },
+    "/api/field-exits": {
+      "count": 6,
+      "avg_ms": 34.12
     },
     "/api/notifications/my": {
       "count": 15,
-      "avg_ms": 13.2
+      "avg_ms": 17.62
     },
     "/api/notifications/count": {
       "count": 6,
-      "avg_ms": 3.85
+      "avg_ms": 3.87
+    },
+    "/api/push/settings": {
+      "count": 6,
+      "avg_ms": 13.74
+    },
+    "/api/telegram/linked-employees": {
+      "count": 10,
+      "avg_ms": 9.06
+    },
+    "/api/push/stats": {
+      "count": 6,
+      "avg_ms": 9.76
     },
     "/api/healthz": {
-      "count": 1,
-      "avg_ms": 0.39
-    },
-    "/api/push/subscribe": {
       "count": 2,
-      "avg_ms": 10.01
+      "avg_ms": 0.34
     },
-    "/api/push/unsubscribe": {
-      "count": 2,
-      "avg_ms": 3.59
+    "/api/telegram/unlink": {
+      "count": 4,
+      "avg_ms": 2.46
     },
-    "/api/push/test": {
-      "count": 1,
-      "avg_ms": 6.4
+    "/api/telegram/test": {
+      "count": 4,
+      "avg_ms": 3.71
     }
   },
   "recent": [
     {
-      "ts": "2026-04-02T08:14:48.388487",
-      "method": "POST",
-      "path": "/api/push/unsubscribe",
-      "status": 200,
-      "duration_ms": 3.57
-    },
-    {
-      "ts": "2026-04-02T08:14:48.707814",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 234.69
-    },
-    {
-      "ts": "2026-04-02T08:14:48.792251",
-      "method": "GET",
-      "path": "/api/push/settings",
-      "status": 200,
-      "duration_ms": 3.54
-    },
-    {
-      "ts": "2026-04-02T08:14:49.112131",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 234.68
-    },
-    {
-      "ts": "2026-04-02T08:14:49.200671",
-      "method": "POST",
-      "path": "/api/push/settings",
-      "status": 200,
-      "duration_ms": 6.67
-    },
-    {
-      "ts": "2026-04-02T08:14:49.282374",
-      "method": "GET",
-      "path": "/api/push/settings",
-      "status": 200,
-      "duration_ms": 3.53
-    },
-    {
-      "ts": "2026-04-02T08:14:49.604354",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 234.66
-    },
-    {
-      "ts": "2026-04-02T08:14:49.687490",
-      "method": "GET",
-      "path": "/api/push/stats",
-      "status": 200,
-      "duration_ms": 4.51
-    },
-    {
-      "ts": "2026-04-02T08:14:50.003686",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 234.2
-    },
-    {
-      "ts": "2026-04-02T08:14:50.094043",
-      "method": "POST",
-      "path": "/api/push/test",
-      "status": 200,
-      "duration_ms": 6.4
-    },
-    {
-      "ts": "2026-04-02T08:14:50.408049",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 234.77
-    },
-    {
-      "ts": "2026-04-02T08:14:50.491892",
-      "method": "POST",
-      "path": "/api/push/unsubscribe",
-      "status": 200,
-      "duration_ms": 3.61
-    },
-    {
-      "ts": "2026-04-02T08:15:15.291245",
-      "method": "POST",
-      "path": "/api/auth/login",
-      "status": 200,
-      "duration_ms": 235.07
-    },
-    {
-      "ts": "2026-04-02T08:15:15.352446",
-      "method": "GET",
-      "path": "/api/auth/me",
-      "status": 200,
-      "duration_ms": 2.73
-    },
-    {
-      "ts": "2026-04-02T08:15:15.389846",
+      "ts": "2026-04-02T09:09:06.333651",
       "method": "GET",
       "path": "/api/leaves",
       "status": 200,
-      "duration_ms": 8.51
+      "duration_ms": 13.22
     },
     {
-      "ts": "2026-04-02T08:15:15.403077",
+      "ts": "2026-04-02T09:09:06.345389",
       "method": "GET",
-      "path": "/api/attendance",
+      "path": "/api/field-exits",
       "status": 200,
-      "duration_ms": 18.42
+      "duration_ms": 25.08
     },
     {
-      "ts": "2026-04-02T08:15:15.405194",
+      "ts": "2026-04-02T09:09:06.519309",
+      "method": "GET",
+      "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 147.68
+    },
+    {
+      "ts": "2026-04-02T09:09:06.531037",
       "method": "GET",
       "path": "/api/users",
       "status": 200,
-      "duration_ms": 16.22
+      "duration_ms": 156.25
     },
     {
-      "ts": "2026-04-02T08:15:15.432419",
+      "ts": "2026-04-02T09:09:06.532917",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 159.75
+    },
+    {
+      "ts": "2026-04-02T09:09:06.534127",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 26.62
+    },
+    {
+      "ts": "2026-04-02T09:09:06.538623",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 22.13
+    },
+    {
+      "ts": "2026-04-02T09:09:06.539698",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 29.14
+    },
+    {
+      "ts": "2026-04-02T09:09:06.550686",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 34.1
+    },
+    {
+      "ts": "2026-04-02T09:09:06.601607",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 7.85
+    },
+    {
+      "ts": "2026-04-02T09:09:06.651209",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.51
+    },
+    {
+      "ts": "2026-04-02T09:09:07.247116",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 3.36
+    },
+    {
+      "ts": "2026-04-02T09:09:07.309180",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 5.21
+    },
+    {
+      "ts": "2026-04-02T09:09:07.316627",
+      "method": "GET",
+      "path": "/api/notifications/count",
+      "status": 200,
+      "duration_ms": 2.7
+    },
+    {
+      "ts": "2026-04-02T09:09:10.062611",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.07
+    },
+    {
+      "ts": "2026-04-02T09:09:10.107543",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.23
+    },
+    {
+      "ts": "2026-04-02T09:09:10.212899",
+      "method": "GET",
+      "path": "/api/telegram/status",
+      "status": 200,
+      "duration_ms": 3.28
+    },
+    {
+      "ts": "2026-04-02T09:09:10.260880",
+      "method": "GET",
+      "path": "/api/telegram/status",
+      "status": 200,
+      "duration_ms": 3.02
+    },
+    {
+      "ts": "2026-04-02T09:09:10.560895",
+      "method": "GET",
+      "path": "/api/telegram/bot-info",
+      "status": 200,
+      "duration_ms": 386.07
+    },
+    {
+      "ts": "2026-04-02T09:09:10.652911",
+      "method": "GET",
+      "path": "/api/push/settings",
+      "status": 200,
+      "duration_ms": 42.38
+    },
+    {
+      "ts": "2026-04-02T09:09:10.654047",
+      "method": "GET",
+      "path": "/api/telegram/linked-employees",
+      "status": 200,
+      "duration_ms": 42.02
+    },
+    {
+      "ts": "2026-04-02T09:09:10.655475",
+      "method": "GET",
+      "path": "/api/push/stats",
+      "status": 200,
+      "duration_ms": 8.48
+    },
+    {
+      "ts": "2026-04-02T09:09:11.006286",
+      "method": "GET",
+      "path": "/api/telegram/bot-info",
+      "status": 200,
+      "duration_ms": 392.63
+    },
+    {
+      "ts": "2026-04-02T09:09:11.057908",
+      "method": "GET",
+      "path": "/api/push/settings",
+      "status": 200,
+      "duration_ms": 4.79
+    },
+    {
+      "ts": "2026-04-02T09:09:11.062482",
+      "method": "GET",
+      "path": "/api/push/stats",
+      "status": 200,
+      "duration_ms": 7.41
+    },
+    {
+      "ts": "2026-04-02T09:09:11.063490",
+      "method": "GET",
+      "path": "/api/telegram/linked-employees",
+      "status": 200,
+      "duration_ms": 3.38
+    },
+    {
+      "ts": "2026-04-02T09:09:50.337465",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "duration_ms": 235.28
+    },
+    {
+      "ts": "2026-04-02T09:09:50.399033",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.66
+    },
+    {
+      "ts": "2026-04-02T09:09:50.464105",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 36.93
+    },
+    {
+      "ts": "2026-04-02T09:09:50.480940",
+      "method": "GET",
+      "path": "/api/leaves",
+      "status": 200,
+      "duration_ms": 37.03
+    },
+    {
+      "ts": "2026-04-02T09:09:50.504534",
       "method": "GET",
       "path": "/api/messages",
+      "status": 200,
+      "duration_ms": 40.99
+    },
+    {
+      "ts": "2026-04-02T09:09:50.506146",
+      "method": "GET",
+      "path": "/api/attendance",
+      "status": 200,
+      "duration_ms": 65.75
+    },
+    {
+      "ts": "2026-04-02T09:09:50.524855",
+      "method": "GET",
+      "path": "/api/messages/unread-count",
+      "status": 200,
+      "duration_ms": 60.83
+    },
+    {
+      "ts": "2026-04-02T09:09:50.527631",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 72.24
+    },
+    {
+      "ts": "2026-04-02T09:09:50.530855",
+      "method": "GET",
+      "path": "/api/notifications/my",
+      "status": 200,
+      "duration_ms": 66.91
+    },
+    {
+      "ts": "2026-04-02T09:09:50.555367",
+      "method": "GET",
+      "path": "/api/users",
+      "status": 200,
+      "duration_ms": 11.09
+    },
+    {
+      "ts": "2026-04-02T09:09:50.561584",
+      "method": "GET",
+      "path": "/api/leaves",
       "status": 200,
       "duration_ms": 14.01
     },
     {
-      "ts": "2026-04-02T08:15:15.442251",
-      "method": "GET",
-      "path": "/api/notifications/my",
-      "status": 200,
-      "duration_ms": 27.02
-    },
-    {
-      "ts": "2026-04-02T08:15:15.443869",
-      "method": "GET",
-      "path": "/api/field-exits",
-      "status": 200,
-      "duration_ms": 25.39
-    },
-    {
-      "ts": "2026-04-02T08:15:15.446426",
-      "method": "GET",
-      "path": "/api/messages/unread-count",
-      "status": 200,
-      "duration_ms": 22.47
-    },
-    {
-      "ts": "2026-04-02T08:15:15.450517",
-      "method": "GET",
-      "path": "/api/leaves",
-      "status": 200,
-      "duration_ms": 6.14
-    },
-    {
-      "ts": "2026-04-02T08:15:15.456286",
-      "method": "GET",
-      "path": "/api/users",
-      "status": 200,
-      "duration_ms": 5.47
-    },
-    {
-      "ts": "2026-04-02T08:15:15.466701",
-      "method": "GET",
-      "path": "/api/attendance",
-      "status": 200,
-      "duration_ms": 15.94
-    },
-    {
-      "ts": "2026-04-02T08:15:15.505657",
+      "ts": "2026-04-02T09:09:50.568661",
       "method": "GET",
       "path": "/api/messages",
       "status": 200,
-      "duration_ms": 7.38
+      "duration_ms": 9.86
     },
     {
-      "ts": "2026-04-02T08:15:15.524331",
+      "ts": "2026-04-02T09:09:50.585797",
       "method": "GET",
-      "path": "/api/field-exits",
+      "path": "/api/attendance",
       "status": 200,
-      "duration_ms": 18.36
+      "duration_ms": 16.65
     },
     {
-      "ts": "2026-04-02T08:15:15.730967",
+      "ts": "2026-04-02T09:09:50.599493",
       "method": "GET",
       "path": "/api/messages/unread-count",
       "status": 200,
-      "duration_ms": 5.82
+      "duration_ms": 7.67
     },
     {
-      "ts": "2026-04-02T08:15:15.734219",
+      "ts": "2026-04-02T09:09:50.611468",
+      "method": "GET",
+      "path": "/api/field-exits",
+      "status": 200,
+      "duration_ms": 21.49
+    },
+    {
+      "ts": "2026-04-02T09:09:50.614907",
       "method": "GET",
       "path": "/api/notifications/my",
       "status": 200,
-      "duration_ms": 6.08
+      "duration_ms": 21.79
     },
     {
-      "ts": "2026-04-02T08:15:15.782157",
+      "ts": "2026-04-02T09:09:50.673195",
       "method": "GET",
       "path": "/api/notifications/my",
       "status": 200,
-      "duration_ms": 5.37
+      "duration_ms": 10.79
     },
     {
-      "ts": "2026-04-02T08:15:15.829290",
+      "ts": "2026-04-02T09:09:50.732730",
       "method": "GET",
       "path": "/api/notifications/my",
       "status": 200,
-      "duration_ms": 5.61
+      "duration_ms": 5.67
     },
     {
-      "ts": "2026-04-02T08:15:16.342026",
+      "ts": "2026-04-02T09:09:51.389005",
       "method": "GET",
       "path": "/api/notifications/count",
       "status": 200,
-      "duration_ms": 4.51
+      "duration_ms": 3.45
     },
     {
-      "ts": "2026-04-02T08:15:16.407207",
+      "ts": "2026-04-02T09:09:51.457219",
       "method": "GET",
       "path": "/api/notifications/my",
       "status": 200,
-      "duration_ms": 5.14
+      "duration_ms": 7.87
     },
     {
-      "ts": "2026-04-02T08:15:16.411122",
+      "ts": "2026-04-02T09:09:51.584092",
       "method": "GET",
       "path": "/api/notifications/count",
       "status": 200,
-      "duration_ms": 2.81
+      "duration_ms": 5.26
     },
     {
-      "ts": "2026-04-02T08:15:47.525279",
+      "ts": "2026-04-02T09:09:54.192837",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.18
+    },
+    {
+      "ts": "2026-04-02T09:09:54.238856",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 200,
+      "duration_ms": 2.2
+    },
+    {
+      "ts": "2026-04-02T09:09:54.346943",
+      "method": "GET",
+      "path": "/api/telegram/status",
+      "status": 200,
+      "duration_ms": 3.82
+    },
+    {
+      "ts": "2026-04-02T09:09:54.397498",
+      "method": "GET",
+      "path": "/api/telegram/status",
+      "status": 200,
+      "duration_ms": 3.54
+    },
+    {
+      "ts": "2026-04-02T09:09:54.697113",
+      "method": "GET",
+      "path": "/api/telegram/bot-info",
+      "status": 200,
+      "duration_ms": 392.21
+    },
+    {
+      "ts": "2026-04-02T09:09:54.786351",
+      "method": "GET",
+      "path": "/api/push/settings",
+      "status": 200,
+      "duration_ms": 11.1
+    },
+    {
+      "ts": "2026-04-02T09:09:54.787478",
+      "method": "GET",
+      "path": "/api/telegram/linked-employees",
+      "status": 200,
+      "duration_ms": 12.34
+    },
+    {
+      "ts": "2026-04-02T09:09:54.789752",
+      "method": "GET",
+      "path": "/api/push/stats",
+      "status": 200,
+      "duration_ms": 8.92
+    },
+    {
+      "ts": "2026-04-02T09:09:55.129239",
+      "method": "GET",
+      "path": "/api/telegram/bot-info",
+      "status": 200,
+      "duration_ms": 388.22
+    },
+    {
+      "ts": "2026-04-02T09:09:55.184388",
+      "method": "GET",
+      "path": "/api/push/settings",
+      "status": 200,
+      "duration_ms": 7.4
+    },
+    {
+      "ts": "2026-04-02T09:09:55.186132",
+      "method": "GET",
+      "path": "/api/telegram/linked-employees",
+      "status": 200,
+      "duration_ms": 5.66
+    },
+    {
+      "ts": "2026-04-02T09:09:55.186900",
+      "method": "GET",
+      "path": "/api/push/stats",
+      "status": 200,
+      "duration_ms": 7.84
+    },
+    {
+      "ts": "2026-04-02T09:09:59.303355",
       "method": "POST",
-      "path": "/api/auth/login",
+      "path": "/api/telegram/generate-link",
       "status": 200,
-      "duration_ms": 235.1
-    },
-    {
-      "ts": "2026-04-02T08:15:47.596569",
-      "method": "GET",
-      "path": "/api/auth/me",
-      "status": 200,
-      "duration_ms": 6.73
-    },
-    {
-      "ts": "2026-04-02T08:15:47.625217",
-      "method": "GET",
-      "path": "/api/users",
-      "status": 200,
-      "duration_ms": 5.06
-    },
-    {
-      "ts": "2026-04-02T08:15:47.642121",
-      "method": "GET",
-      "path": "/api/messages",
-      "status": 200,
-      "duration_ms": 7.21
-    },
-    {
-      "ts": "2026-04-02T08:15:47.653195",
-      "method": "GET",
-      "path": "/api/attendance",
-      "status": 200,
-      "duration_ms": 20.24
-    },
-    {
-      "ts": "2026-04-02T08:15:47.669137",
-      "method": "GET",
-      "path": "/api/leaves",
-      "status": 200,
-      "duration_ms": 9.18
-    },
-    {
-      "ts": "2026-04-02T08:15:47.677268",
-      "method": "GET",
-      "path": "/api/messages/unread-count",
-      "status": 200,
-      "duration_ms": 9.31
-    },
-    {
-      "ts": "2026-04-02T08:15:47.692446",
-      "method": "GET",
-      "path": "/api/notifications/my",
-      "status": 200,
-      "duration_ms": 30.68
-    },
-    {
-      "ts": "2026-04-02T08:15:47.693757",
-      "method": "GET",
-      "path": "/api/field-exits",
-      "status": 200,
-      "duration_ms": 29.94
-    },
-    {
-      "ts": "2026-04-02T08:15:47.694569",
-      "method": "GET",
-      "path": "/api/users",
-      "status": 200,
-      "duration_ms": 20.11
-    },
-    {
-      "ts": "2026-04-02T08:15:47.702366",
-      "method": "GET",
-      "path": "/api/messages",
-      "status": 200,
-      "duration_ms": 6.0
-    },
-    {
-      "ts": "2026-04-02T08:15:47.718239",
-      "method": "GET",
-      "path": "/api/attendance",
-      "status": 200,
-      "duration_ms": 15.6
-    },
-    {
-      "ts": "2026-04-02T08:15:47.726187",
-      "method": "GET",
-      "path": "/api/leaves",
-      "status": 200,
-      "duration_ms": 7.64
-    },
-    {
-      "ts": "2026-04-02T08:15:47.728478",
-      "method": "GET",
-      "path": "/api/messages/unread-count",
-      "status": 200,
-      "duration_ms": 5.77
-    },
-    {
-      "ts": "2026-04-02T08:15:47.772671",
-      "method": "GET",
-      "path": "/api/field-exits",
-      "status": 200,
-      "duration_ms": 20.62
-    },
-    {
-      "ts": "2026-04-02T08:15:47.772950",
-      "method": "GET",
-      "path": "/api/notifications/my",
-      "status": 200,
-      "duration_ms": 23.12
-    },
-    {
-      "ts": "2026-04-02T08:15:47.848497",
-      "method": "GET",
-      "path": "/api/notifications/my",
-      "status": 200,
-      "duration_ms": 5.4
-    },
-    {
-      "ts": "2026-04-02T08:15:47.903603",
-      "method": "GET",
-      "path": "/api/notifications/my",
-      "status": 200,
-      "duration_ms": 5.17
-    },
-    {
-      "ts": "2026-04-02T08:15:48.585870",
-      "method": "GET",
-      "path": "/api/notifications/count",
-      "status": 200,
-      "duration_ms": 3.4
-    },
-    {
-      "ts": "2026-04-02T08:15:48.656557",
-      "method": "GET",
-      "path": "/api/notifications/count",
-      "status": 200,
-      "duration_ms": 5.92
-    },
-    {
-      "ts": "2026-04-02T08:15:48.658157",
-      "method": "GET",
-      "path": "/api/notifications/my",
-      "status": 200,
-      "duration_ms": 6.17
-    },
-    {
-      "ts": "2026-04-02T08:15:51.881308",
-      "method": "GET",
-      "path": "/api/auth/me",
-      "status": 200,
-      "duration_ms": 2.06
-    },
-    {
-      "ts": "2026-04-02T08:15:51.927623",
-      "method": "GET",
-      "path": "/api/auth/me",
-      "status": 200,
-      "duration_ms": 2.56
-    },
-    {
-      "ts": "2026-04-02T08:15:51.970655",
-      "method": "GET",
-      "path": "/api/push/settings",
-      "status": 200,
-      "duration_ms": 6.85
-    },
-    {
-      "ts": "2026-04-02T08:15:51.971999",
-      "method": "GET",
-      "path": "/api/push/stats",
-      "status": 200,
-      "duration_ms": 12.39
-    },
-    {
-      "ts": "2026-04-02T08:15:52.030029",
-      "method": "GET",
-      "path": "/api/push/settings",
-      "status": 200,
-      "duration_ms": 8.8
-    },
-    {
-      "ts": "2026-04-02T08:15:52.032110",
-      "method": "GET",
-      "path": "/api/push/stats",
-      "status": 200,
-      "duration_ms": 10.8
+      "duration_ms": 389.79
     }
   ]
 }
